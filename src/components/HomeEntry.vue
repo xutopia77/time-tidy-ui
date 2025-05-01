@@ -38,7 +38,6 @@ import HeaderPanel from '@/components/HeaderPanel.vue';
     flex: 1;
     /* 占据剩余空间 */
     display: flex;
-    /* 水平布局 */
 }
 
 .file-explorer-section {
@@ -48,10 +47,9 @@ import HeaderPanel from '@/components/HeaderPanel.vue';
 
 .work-panel-section {
     flex: 0 0 20%;
-    /* 初始宽度为 20% */
-    max-width: 100px;
-    /* 最大宽度为 100px */
+    max-width: 400px;
+    min-width: 200px;
+    width: 20%;
     border-left: 1px solid #ddd;
-    /* 添加左侧边框 */
 }
 </style>

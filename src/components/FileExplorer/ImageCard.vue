@@ -1,5 +1,5 @@
 <template>
-    <div class="file-card common-card">
+    <div class="file-card common-card" :style="{ backgroundColor: isChecked ? '#e0f7fa' : 'transparent' }">
         <!-- 左上角的 checkbox -->
         <div class="checkbox-container">
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" />
@@ -24,7 +24,6 @@ const props = defineProps<{
     checked?: boolean;
 }>();
 
-
 // 记录 checkbox 的状态
 const isChecked = ref(props.checked || false);
 
@@ -43,6 +42,8 @@ const handleClick = () => {
     text-align: center;
     position: relative;
     /* 为 checkbox 定位做准备 */
+    transition: background-color 0.3s;
+    /* 添加过渡效果 */
 }
 
 .file-card:hover {

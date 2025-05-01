@@ -13,39 +13,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed } from 'vue';
 import FileNavHeader from '@/components/FileExplorer/FileNavHeader.vue';
 import ImageCard from '@/components/FileExplorer/ImageCard.vue';
 import FolderCard from '@/components/FileExplorer/FolderCard.vue';
 import FileFooter from '@/components/FileExplorer/FileFooter.vue';
-import * as DatType from '@/utils/dataTypedef';
 
-const folderIcon = 'src/assets/icons/folders.svg';
-const fileIcon = 'src/assets/icons/file-image.svg';
-// 模拟文件和文件夹数据
-const items = ref<DatType.FileItem[]>([
-    { name: 'Documents', type: 'folder', path: '/Documents', icon: folderIcon },
-    { name: 'Downloads', type: 'folder', path: '/Downloads', icon: folderIcon },
-    { name: 'Pictures', type: 'folder', path: '/Pictures', icon: folderIcon },
-    { name: 'report.pdf', type: 'file', path: '/Documents/report.pdf', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-    { name: 'photo.jpg', type: 'file', path: '/Pictures/photo.jpg', icon: fileIcon },
-]);
+import { useAppStore } from '@/stores/AppStore';
+const appStore = useAppStore()
+
+const items = computed(() => {
+    return appStore.curFiles;
+});
 
 // 处理点击事件
 const handleItemClick = (item: { type: string; path: string }) => {
