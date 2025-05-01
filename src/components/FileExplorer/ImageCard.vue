@@ -1,46 +1,69 @@
 <template>
-    <div class="file-card" @click="handleClick">
-        <div class="file-icon">
-            <!-- 根据类型显示不同图标 -->
-            <img :src="item.type === 'folder' ? folderIcon : fileIcon" alt="icon" />
+    <div class="file-card common-card">
+        <!-- 左上角的 checkbox -->
+        <div class="checkbox-container">
+            <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" />
         </div>
-        <div class="file-name">{{ item.name }}</div>
+        <div class="file-content" @click="handleClick">
+            <div class="file-icon">
+                <img :src="item.icon" alt="icon" />
+            </div>
+            <div class="file-name">{{ item.name }}</div>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, ref } from 'vue';
+import * as DatType from '@/utils/dataTypedef';
+import '@/assets/common.css'
 
 const props = defineProps<{
-    item: { name: string; type: string; path: string };
-    folderIcon: string;
-    fileIcon: string;
+    item: DatType.FileItem;
+    // 新增：接收是否选中的初始状态
+    checked?: boolean;
 }>();
 
-const emit = defineEmits(['click']);
 
+// 记录 checkbox 的状态
+const isChecked = ref(props.checked || false);
+
+// 处理 checkbox 状态变化
+const handleCheckboxChange = () => {
+};
+
+// 处理卡片点击事件
 const handleClick = () => {
-    emit('click', props.item);
+    console.log('click', props.item);
 };
 </script>
 
 <style scoped>
 .file-card {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
     text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    position: relative;
+    /* 为 checkbox 定位做准备 */
 }
 
 .file-card:hover {
     background-color: #f0f0f0;
 }
 
+.checkbox-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    /* 确保 checkbox 在图片上方 */
+}
+
+.file-content {
+    cursor: pointer;
+}
+
 .file-icon img {
-    width: 64px;
-    height: 64px;
+    width: 160px;
+    height: 160px;
     margin-bottom: 10px;
 }
 
