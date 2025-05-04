@@ -1,14 +1,18 @@
 <template>
     <div class="file-explorer">
-        <FileNavHeader />
+        <FileNavHeader class="file-nav-header" />
         <div class="file-grid">
             <!-- 循环渲染文件和文件夹 -->
             <template v-for="item in items" :key="item.path">
-                <ImageCard v-if="item.type === 'file'" :item="item" @click="handleItemClick" />
-                <FolderCard v-else-if="item.type === 'folder'" :item="item" @click="handleItemClick" />
+                <ImageCard v-if="item.type === 'file'" :item="item" />
+                <FolderCard v-else-if="item.type === 'folder'" :item="item" />
+            </template>
+            <template v-for="item in dirs" :key="item.path">
+                <ImageCard v-if="item.type === 'file'" :item="item" />
+                <FolderCard v-else-if="item.type === 'folder'" :item="item" />
             </template>
         </div>
-        <FileFooter />
+        <FileFooter class="file-footer" />
     </div>
 </template>
 
@@ -25,27 +29,42 @@ const appStore = useAppStore()
 const items = computed(() => {
     return appStore.curFiles;
 });
-
-// 处理点击事件
-const handleItemClick = (item: { type: string; path: string }) => {
-    if (item.type === 'folder') {
-        console.log(`Entering folder: ${item.path}`);
-    } else {
-        // 处理文件点击逻辑，比如打开文件
-        console.log(`Opening file: ${item.path}`);
-    }
-};
+const dirs = computed(() => {
+    return appStore.curDirs;
+});
 </script>
 
 <style scoped>
 .file-explorer {
     padding: 0px;
     margin: 0px;
+    width: 100%;
+    height: 100%;
+    /* background-color: aqua; */
+}
+
+.file-footer {
+    padding: 0px;
+    margin: 0px;
+    width: 100%;
+    height: 25px;
+}
+
+.file-nav-header {
+    padding: 0px;
+    margin: 0px;
+    width: 100%;
+    height: 25px;
+    /* background-color: aquamarine; */
 }
 
 .file-grid {
     display: flex;
     flex-wrap: wrap;
+    height: calc(100% - 50px);
+    /* background-color: bisque; */
+    overflow: auto;
+    /* 添加 overflow 属性，内容超出时自动显示滚动条 */
 }
 
 /* 假设 ImageCard 和 FolderCard 有共同的类名 .file-card，这里设置其基础样式 */

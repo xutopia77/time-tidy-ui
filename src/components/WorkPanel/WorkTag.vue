@@ -1,51 +1,74 @@
 <template>
     <div>
-        <!-- 标签输入框 -->
         <input v-model="newTag" @keyup.enter="addTag" placeholder="输入新标签并按回车键添加" class="tag-input" />
-        <!-- 循环渲染标签列表 -->
-        <div v-for="(tag, index) in tags" :key="index" class="tag">
+        <div v-for="(tag, index) in fileTags" :key="index" class="tag">
             {{ tag }}
-            <!-- 删除标签按钮 -->
-            <button @click="removeTag(index)" class="delete-btn">×</button>
+            <button @click="removeTag(tag)" class="delete-btn">x</button>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useAppStore } from '@/stores/AppStore';
+const appStore = useAppStore()
+import * as DatType from '@/utils/dataTypedef';
+import Utils from '@/utils/utils';
 
-// 定义标签列表
-const tags = ref(['标签1', '标签2', '标签3', '标签4', '标签5']);
 // 新标签输入值
 const newTag = ref('');
 
+const fileTags = computed(() => {
+    if (appStore.curSltFile == null) return []
+    return appStore.curSltFile.tags
+});
+
 // 添加标签方法
 const addTag = () => {
+    const req: DatType.FilesTagSetReq = {
+        fileIds: [],
+        tagName: ''
+    };
     if (newTag.value.trim()) {
-        tags.value.push(newTag.value.trim());
+        req.tagName = newTag.value.trim()
         newTag.value = '';
     }
-};
+    for (const item of appStore.curFiles) {
+        if (item.checked)
+            req.fileIds.push(item.id)
+    }
+    if (req.fileIds.length > 0) {
+        Utils.files_tag_set(req)
+        return
+    }
+    if (appStore.curSltFile == null) return;
+    req.fileIds.push(appStore.curSltFile.id)
+    Utils.files_tag_set(req)
+}
 
-// 删除标签方法
-const removeTag = (index: number) => {
-    tags.value.splice(index, 1);
+const removeTag = (tagName: string) => {
+    if (appStore.curSltFile?.id == null) return
+    const req: DatType.FilesTagSetReq = {
+        fileIds: [appStore.curSltFile.id],
+        tagName: tagName
+    };
+    Utils.files_tag_delete(req)
 };
 </script>
 
 <style scoped>
 .tag-input {
-    padding: 4px 8px;
+    padding: 2px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    width: 200px;
+    width: 160px;
 }
 
 .tag {
     display: inline-block;
-    margin: 4px;
-    padding: 4px 8px;
+    margin: 2px;
+    /* padding: 2px; */
     border: 1px solid #ccc;
     border-radius: 4px;
     background-color: #f5f5f5;
@@ -53,8 +76,8 @@ const removeTag = (index: number) => {
 }
 
 .delete-btn {
-    margin-left: 8px;
-    padding: 0 4px;
+    margin-left: 0px;
+    padding: 0px;
     border: none;
     background: none;
     cursor: pointer;

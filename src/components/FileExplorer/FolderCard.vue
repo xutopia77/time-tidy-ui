@@ -4,7 +4,7 @@
         <div class="checkbox-container">
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" />
         </div>
-        <div class="file-content" @click="handleClick">
+        <div class="file-content" @click="btnclk_dir">
             <div class="file-icon">
                 <img :src="item.icon" alt="icon" />
             </div>
@@ -33,10 +33,10 @@ const isChecked = ref(props.checked || false);
 const handleCheckboxChange = () => {
 };
 
-// 处理卡片点击事件
-const handleClick = () => {
+function btnclk_dir() {
     appStore.curPath = props.item.path;
-    Utils.folder_get(appStore.curPath)
+    console.log('click', props.item);
+    Utils.files_get(null)
 };
 </script>
 

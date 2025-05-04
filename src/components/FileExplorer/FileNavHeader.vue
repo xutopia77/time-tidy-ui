@@ -12,34 +12,51 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { ComputedRef } from 'vue';
 import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
+
+class PathPart {
+    name: string = '';
+    path: string = '';
+}
 
 const currentPath = computed(() => {
     return appStore.curPath
 });
 
 // 解析路径为可点击的部分
-const pathParts = computed(() => {
-    const parts = currentPath.value.split('/');
-    return parts.map((part, index) => {
-        const path = parts.slice(0, index + 1).join('/');
-        return { name: part, path };
+const pathParts: ComputedRef<PathPart[]> = computed(() => {
+    // 处理空路径和首尾 /，过滤空元素
+    const parts = currentPath.value.split('/').filter(part => part !== '');
+    const re = parts.map((part, index) => {
+        const pathElements = parts.slice(0, index + 1);
+        const path = '/' + pathElements.join('/'); // 确保路径以 / 开头
+        const pathPart = new PathPart();
+        pathPart.name = part;
+        pathPart.path = path;
+        return pathPart;
     });
+    // 在 re 的前面加一个 root
+    const rootPart = new PathPart();
+    rootPart.name = 'root';
+    rootPart.path = '/';
+    re.unshift(rootPart);
+    return re;
 });
 
 // 导航到指定路径
 const navigateToPath = (path: string) => {
-    // 这里可以添加重新加载对应路径下文件列表的逻辑
-    console.log(`导航到路径: ${path}`);
-    Utils.folder_get(path)
+    console.log(`to path: ${path}`);
+    appStore.curPath = path;
+    Utils.files_get(null)
 };
 </script>
 
 <style scoped>
 .file-explorer {
-    padding: 20px;
+    padding: 0px;
 }
 
 /* 路径显示样式 */
@@ -50,7 +67,7 @@ const navigateToPath = (path: string) => {
 
 .path-part {
     cursor: pointer;
-    color: #007bff;
+    color: #030c14;
     text-decoration: underline;
 }
 

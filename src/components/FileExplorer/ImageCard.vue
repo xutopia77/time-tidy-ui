@@ -15,25 +15,31 @@
 
 <script setup lang="ts">
 import { defineProps, ref } from 'vue';
+import { useAppStore } from '@/stores/AppStore';
+const appStore = useAppStore()
 import * as DatType from '@/utils/dataTypedef';
 import '@/assets/common.css'
 
 const props = defineProps<{
     item: DatType.FileItem;
-    // 新增：接收是否选中的初始状态
-    checked?: boolean;
 }>();
 
-// 记录 checkbox 的状态
-const isChecked = ref(props.checked || false);
+const isChecked = ref(false);
 
 // 处理 checkbox 状态变化
 const handleCheckboxChange = () => {
+    //  
+    appStore.curFiles.forEach((file) => {
+        if (file.id == props.item.id) {
+            file.checked = isChecked.value;
+        }
+    })
 };
 
 // 处理卡片点击事件
 const handleClick = () => {
     console.log('click', props.item);
+    appStore.curSltFile = props.item;
 };
 </script>
 
@@ -52,8 +58,8 @@ const handleClick = () => {
 
 .checkbox-container {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: 0px;
+    left: 0px;
     z-index: 1;
     /* 确保 checkbox 在图片上方 */
 }
@@ -63,13 +69,12 @@ const handleClick = () => {
 }
 
 .file-icon img {
-    width: 160px;
-    height: 160px;
-    margin-bottom: 10px;
+    width: 260px;
+    height: 260px;
+    margin: 2px;
 }
 
 .file-name {
-    font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

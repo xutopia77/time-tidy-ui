@@ -19,8 +19,8 @@ import HeaderPanel from '@/components/HeaderPanel.vue';
     display: flex;
     flex-direction: column;
     /* 垂直布局 */
-    height: 100vh;
-    /* 占满视口高度 */
+    height: 100%;
+    width: 100%;
 }
 
 .header-panel-section {
@@ -28,24 +28,11 @@ import HeaderPanel from '@/components/HeaderPanel.vue';
     flex: 0 0 auto;
     border-bottom: 1px solid #ddd;
     /* 添加底部边框 */
+    height: 25px;
+    width: 100%;
 }
 
-.bottom-container {
+.page-view {
     flex: 1;
-    /* 占据剩余空间 */
-    display: flex;
-}
-
-.file-explorer-section {
-    flex: 1;
-    /* 占据剩余空间 */
-}
-
-.work-panel-section {
-    flex: 0 0 20%;
-    max-width: 400px;
-    min-width: 200px;
-    width: 20%;
-    border-left: 1px solid #ddd;
 }
 </style>
