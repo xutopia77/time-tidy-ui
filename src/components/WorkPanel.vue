@@ -4,13 +4,10 @@
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('basicInfo')">
                 文件基础信息
-                <span class="arrow">{{ isPanelOpen('basicInfo') ? '▼' : '▶' }}</span>
+                <span>{{ isPanelOpen('basicInfo') ? '▼' : '▶' }}</span>
             </div>
             <div v-if="isPanelOpen('basicInfo')" class="panel-content">
-                <!-- 这里添加文件基础信息内容 -->
-                <p>文件名称: example.txt</p>
-                <p>文件大小: 1024 KB</p>
-                <p>创建时间: 2025-05-01</p>
+                <WorkInfo />
             </div>
         </div>
 
@@ -18,26 +15,20 @@
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('tagInfo')">
                 文件标签信息
-                <span class="arrow">{{ isPanelOpen('tagInfo') ? '▼' : '▶' }}</span>
+                <span>{{ isPanelOpen('tagInfo') ? '▼' : '▶' }}</span>
             </div>
             <div v-if="isPanelOpen('tagInfo')" class="panel-content">
-                <!-- 这里添加文件标签信息内容 -->
-                <p>标签 1: 重要</p>
-                <p>标签 2: 文档</p>
+                <WorkTag />
             </div>
         </div>
-
         <!-- 文件操作区域折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('operation')">
                 文件操作区域
-                <span class="arrow">{{ isPanelOpen('operation') ? '▼' : '▶' }}</span>
+                <span>{{ isPanelOpen('operation') ? '▼' : '▶' }}</span>
             </div>
             <div v-if="isPanelOpen('operation')" class="panel-content">
-                <!-- 这里添加文件操作区域内容 -->
-                <button>重命名</button>
-                <button>删除</button>
-                <button>分享</button>
+                <WorkOperate />
             </div>
         </div>
     </div>
@@ -45,6 +36,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import WorkTag from '@/components/WorkPanel/WorkTag.vue';
+import WorkOperate from '@/components/WorkPanel/WorkOperate.vue';
+import WorkInfo from '@/components/WorkPanel/WorkInfo.vue';
 
 // 管理每个折叠面板的展开状态
 const panelStates = ref({
@@ -52,21 +46,22 @@ const panelStates = ref({
     tagInfo: false,
     operation: false
 });
+type PanelName = keyof typeof panelStates.value;
 
 // 切换面板展开状态
-const togglePanel = (panelName: string) => {
+const togglePanel = (panelName: PanelName) => {
     panelStates.value[panelName] = !panelStates.value[panelName];
 };
 
 // 判断面板是否展开
-const isPanelOpen = (panelName: string) => {
+const isPanelOpen = (panelName: PanelName) => {
     return panelStates.value[panelName];
 };
 </script>
 
 <style scoped>
 .work-panel {
-    padding: 10px;
+    padding: 2px;
 }
 
 .collapse-panel {
@@ -76,7 +71,7 @@ const isPanelOpen = (panelName: string) => {
 }
 
 .panel-header {
-    padding: 10px;
+    padding: 2px;
     background-color: #f5f5f5;
     cursor: pointer;
     display: flex;
@@ -86,10 +81,6 @@ const isPanelOpen = (panelName: string) => {
 
 .panel-header:hover {
     background-color: #e0e0e0;
-}
-
-.arrow {
-    font-size: 12px;
 }
 
 .panel-content {

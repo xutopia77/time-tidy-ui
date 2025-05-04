@@ -3,16 +3,12 @@
         <!-- HeaderPanel 区域 -->
         <HeaderPanel class="header-panel-section" />
         <!-- 下方容器，包含 FileExplorer 和 WorkPanel -->
-        <div class="bottom-container">
-            <FileExplorer class="file-explorer-section" />
-            <WorkPanel class="work-panel-section" />
-        </div>
+        <!-- <FileMain /> -->
+        <router-view class="page-view" />
     </div>
 </template>
 
 <script setup lang="ts">
-import FileExplorer from '@/components/FileExplorer.vue';
-import WorkPanel from '@/components/WorkPanel.vue';
 import HeaderPanel from '@/components/HeaderPanel.vue';
 </script>
 

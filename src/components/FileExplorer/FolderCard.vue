@@ -17,13 +17,14 @@
 import { defineProps, ref } from 'vue';
 import * as DatType from '@/utils/dataTypedef';
 import '@/assets/common.css'
-
+import { useAppStore } from '@/stores/AppStore';
+import Utils from '@/utils/utils';
+const appStore = useAppStore()
 const props = defineProps<{
     item: DatType.FileItem;
     // 新增：接收是否选中的初始状态
     checked?: boolean;
 }>();
-
 
 // 记录 checkbox 的状态
 const isChecked = ref(props.checked || false);
@@ -34,7 +35,8 @@ const handleCheckboxChange = () => {
 
 // 处理卡片点击事件
 const handleClick = () => {
-    console.log('click', props.item);
+    appStore.curPath = props.item.path;
+    Utils.folder_get(appStore.curPath)
 };
 </script>
 

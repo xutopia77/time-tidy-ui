@@ -11,24 +11,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
+import Utils from '@/utils/utils';
+import { useAppStore } from '@/stores/AppStore';
+const appStore = useAppStore()
 
-// 当前路径
-const currentPath = ref('06_666666666666\\新建文件夹');
+const currentPath = computed(() => {
+    return appStore.curPath
+});
 
 // 解析路径为可点击的部分
 const pathParts = computed(() => {
-    const parts = currentPath.value.split('\\');
+    const parts = currentPath.value.split('/');
     return parts.map((part, index) => {
-        const path = parts.slice(0, index + 1).join('\\');
+        const path = parts.slice(0, index + 1).join('/');
         return { name: part, path };
     });
 });
 
 // 导航到指定路径
 const navigateToPath = (path: string) => {
-    currentPath.value = path;
     // 这里可以添加重新加载对应路径下文件列表的逻辑
+    console.log(`导航到路径: ${path}`);
+    Utils.folder_get(path)
 };
 </script>
 
