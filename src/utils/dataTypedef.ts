@@ -37,6 +37,9 @@ export class FilesTagSetReq {
     tagName: string = "";
 }
 
+export class ProjectSetReq {
+    basePath: string = "";
+}
 
 export interface Resp<T = string> {
     code: number;

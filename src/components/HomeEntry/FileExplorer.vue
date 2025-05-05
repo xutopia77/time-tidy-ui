@@ -18,10 +18,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import FileNavHeader from '@/components/FileExplorer/FileNavHeader.vue';
-import ImageCard from '@/components/FileExplorer/ImageCard.vue';
-import FolderCard from '@/components/FileExplorer/FolderCard.vue';
-import FileFooter from '@/components/FileExplorer/FileFooter.vue';
+import FileNavHeader from '@/components/HomeEntry/FileExplorer/FileNavHeader.vue';
+import ImageCard from '@/components/HomeEntry/FileExplorer/ImageCard.vue';
+import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
+import FileFooter from '@/components/HomeEntry/FileExplorer/FileFooter.vue';
 
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()

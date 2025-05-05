@@ -1,8 +1,8 @@
 <template>
-  <HomeEntry />
+  <AppEntry />
 </template>
 <script setup lang="ts">
-import HomeEntry from '@/components/HomeEntry.vue';
+import AppEntry from '@/components/AppEntry.vue';
 import { onBeforeMount } from 'vue';
 import axios from 'axios';
 import { useAppStore } from '@/stores/AppStore';

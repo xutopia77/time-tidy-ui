@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router';
 import SetEntry from '@/components/SetEntry.vue'
-import FileMain from '@/components/FileMain.vue';
+import HomeEntry from '@/components/HomeEntry.vue';
 
 // 定义路由配置数组，使用 RouteRecordRaw 类型进行类型注解
 const routes: RouteRecordRaw[] = [
-    { path: '/', component: FileMain },
+    { path: '/', component: HomeEntry },
     // {
     //   path: '/board',
     //   component: FileBoard

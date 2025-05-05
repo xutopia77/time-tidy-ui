@@ -36,9 +36,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import WorkTag from '@/components/WorkPanel/WorkTag.vue';
-import WorkOperate from '@/components/WorkPanel/WorkOperate.vue';
-import WorkInfo from '@/components/WorkPanel/WorkInfo.vue';
+import WorkTag from '@/components/HomeEntry/WorkPanel/WorkTag.vue';
+import WorkOperate from '@/components/HomeEntry/WorkPanel/WorkOperate.vue';
+import WorkInfo from '@/components/HomeEntry/WorkPanel/WorkInfo.vue';
 
 // 管理每个折叠面板的展开状态
 const panelStates = ref({
