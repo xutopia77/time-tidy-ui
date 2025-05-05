@@ -65,6 +65,29 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
         update_after_get_files()
     }
     if (jData.data.dirs != null) {
+        {
+            const dirs: DatTypes.DirItem[] = []
+            const jRecords = jData.data.dirs.records;
+            for (const jRecord of jRecords) {
+                if (jRecord.Type == 0) {
+                    continue; // skip the root path
+                }
+                const itemPath = "/" + jRecord.Path;
+                const dirItem = new DatTypes.DirItem();
+                dirItem.id = jRecord.ID;
+                dirItem.rootPathId = jRecord.RootPathId;
+                dirItem.name = jRecord.Path;
+                dirItem.icon = 'src/assets/icons/folders.svg'
+                dirItem.type = 'folder';
+
+                dirItem.path = itemPath;
+                if (jRecord.Tags != null) {
+                    dirItem.tags = jRecord.Tags
+                }
+                dirs.push(dirItem);
+            }
+            appStore.curAllDirs = dirs;
+        }
         const dirs: DatTypes.DirItem[] = []
         const jRecords = jData.data.dirs.records;
         console.log("cur path:", appStore.curPath);
@@ -83,7 +106,7 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
                 }
                 const dirItem = new DatTypes.DirItem();
                 dirItem.id = jRecord.ID;
-                dirItem.rootPathId = jRecord.RootPathID;
+                dirItem.rootPathId = jRecord.RootPathId;
                 dirItem.name = jRecord.Path;
                 dirItem.icon = 'src/assets/icons/folders.svg'
                 dirItem.type = 'folder';
@@ -194,12 +217,58 @@ function files_tag_delete(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
     return resp;
 }
 
+function files_path_chg(_req: DatTypes.FilePathChgReq): DatTypes.Resp {
+    const resp: DatTypes.Resp = {
+        code: 0,
+        status: "",
+    }
+    _req.distPath = _req.distPath.substring(1);
+
+    axios.post(`${appStore.srvPrefix}/api/v1/files_path_chg`, JSON.stringify(_req))
+        .then((response) => {
+            console.log('file info:', response.data);
+            resp.code = response.data.code;
+            resp.status = response.data.status;
+            Utils.files_get(null);
+        })
+        .catch((error) => {
+            console.error('Error fetching project info:', error);
+            resp.code = -1;
+            resp.status = error.message;
+        })
+    return resp;
+}
+
+function message_notify(_req: DatTypes.MessageReq): DatTypes.Resp {
+    const resp: DatTypes.Resp = {
+        code: 0,
+        status: "",
+    }
+    const msg: DatTypes.Message = new DatTypes.Message();
+    msg.content = _req.content;
+    msg.durationMs = _req.duration ? _req.duration : 2000;
+    msg.type = _req.type ? _req.type : "info";
+    msg.startTime = Date.now();
+    appStore.messageNotify.push(msg);
+    //删除超过duration的消息
+    const now = Date.now();
+    for (let i = 0; i < appStore.messageNotify.length; i++) {
+        if (now - appStore.messageNotify[i].startTime > appStore.messageNotify[i].durationMs * 1000) {
+            appStore.messageNotify.splice(i, 1);
+            i--;
+        }
+    }
+    return resp;
+}
+
 class Utils {
     constructor() { }
     static convert_to_file_item = convert_to_file_item;
     static files_get = files_get;
     static files_tag_set = files_tag_set;
     static files_tag_delete = files_tag_delete;
+    static files_path_chg = files_path_chg;
+    static message_notify = message_notify;
     static folder_get(folder: string) {
         const reqDat = {
             folder: folder

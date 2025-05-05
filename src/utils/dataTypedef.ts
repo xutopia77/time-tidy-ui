@@ -23,6 +23,21 @@ export class DirItem {
     checked: boolean = false;
 }
 
+
+export class MessageReq {
+    content: string = "";
+    duration?: number = 0;
+    type?: string = "";//success, error, info, warning
+}
+
+export class Message {
+    content: string = "";
+    durationMs: number = 0;
+    type: string = "";//success, error, info, warning
+    startTime: number = 0;
+}
+
+
 export class FilesGetReq {
     id: number | null = null;
     bFilterModel: boolean | null = null;
@@ -39,6 +54,14 @@ export class FilesTagSetReq {
 
 export class ProjectSetReq {
     basePath: string = "";
+}
+
+export class FilePathChgReq {
+    fileIds: number[] = [];
+    distPath: string = "";
+    type: string = "";//move, copy
+    distRootPathId: number = 0;
+    srcRootPathId: number = 0;
 }
 
 export interface Resp<T = string> {
