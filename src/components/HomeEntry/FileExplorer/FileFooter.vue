@@ -28,38 +28,38 @@ const totalItems = computed(() => {
 
 const pageSize = computed({
     get: () => {
-        return appStore.pageSize;
+        return appStore.searchCon.pageSize;
     },
     set: (newValue) => {
-        appStore.pageSize = Number(newValue);
+        appStore.searchCon.pageSize = Number(newValue);
     }
 });
 
 const currentPage = computed(() => {
-    return appStore.curPage
+    return appStore.searchCon.page
 });
 
 const totalPages = computed(() => {
-    const re = Math.ceil(appStore.curFileTotal / appStore.pageSize)
+    const re = Math.ceil(appStore.curFileTotal / appStore.searchCon.pageSize)
     return re === 0 ? 1 : re;
 });
 
 const btnclk_prevPage = () => {
-    if (appStore.curPage > 1) {
-        appStore.curPage--;
+    if (appStore.searchCon.page > 1) {
+        appStore.searchCon.page--;
     }
     Utils.files_get(null)
 };
 
 const btnclk_nextPage = () => {
-    if (appStore.curPage < totalPages.value) {
-        appStore.curPage++;
+    if (appStore.searchCon.page < totalPages.value) {
+        appStore.searchCon.page++;
     }
     Utils.files_get(null)
 };
 
 function btnclk_chgePageSize() {
-    appStore.curPage = 1;
+    appStore.searchCon.page = 1;
     Utils.files_get(null)
 }
 

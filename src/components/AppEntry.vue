@@ -1,24 +1,24 @@
 <template>
     <div class="app-entry">
-        <div class="home-entry" v-show="!appStore.bShowSetting">
+        <div class="home-entry" v-show="pageCtrl.home.bShow" :style="{ zIndex: pageCtrl.home.idx }">
             <HeaderPanel class="header-panel-section" />
             <router-view class="page-view" />
         </div>
-        <div class="settings-panel" v-if="appStore.bShowSetting">
+        <div class="settings-panel" v-show="pageCtrl.set.bShow" :style="{ zIndex: pageCtrl.set.idx }">
             <OperateEntry />
         </div>
-        <div class='image-view' v-if="appStore.bShowImageView">
+        <div class='image-view' v-show="pageCtrl.imageView.bShow" :style="{ zIndex: pageCtrl.imageView.idx }">
             <ImageViewer />
         </div>
         <!-- 消息显示区域 -->
-        <div class="message-show">
+        <div class="message-show" v-show="pageCtrl.message.bShow" :style="{ zIndex: pageCtrl.message.idx }">
             <MessageNotify />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount } from 'vue';
+import { computed, onBeforeMount, onMounted } from 'vue';
 import axios from 'axios';
 import Utils from '@/utils/utils'
 import HeaderPanel from '@/components/HeaderPanel.vue';
@@ -28,14 +28,9 @@ import ImageViewer from '@/components/HomeEntry/FileExplorer/ImageViewer.vue'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 
-const pageZindex = {
-    message: 47,
-    imageView: 48,
-    set: 49,
-    home: 50
-}
-
-
+const pageCtrl = computed(() => {
+    return appStore.pageCtrl
+})
 
 function get_prj_info() {
     axios.post(`${appStore.srvPrefix}/api/v1/project`)
@@ -53,6 +48,11 @@ onBeforeMount(() => {
     Utils.appstore_set(appStore)
     get_prj_info()
 })
+
+onMounted(() => {
+    Utils.page_show({ page: 'message', bShow: true })
+})
+
 </script>
 
 <style scoped>
@@ -61,12 +61,12 @@ onBeforeMount(() => {
     margin: 0;
     height: 100%;
     width: 100%;
-    /* position: relative; */
-    position: flex;
+    position: relative;
+    /* position: flex; */
     /* 为子元素的绝对定位提供参考 */
 }
 
-/* .home-entry,
+.home-entry,
 .settings-panel,
 .image-view,
 .message-show {
@@ -75,7 +75,11 @@ onBeforeMount(() => {
     left: 0;
     width: 100%;
     height: 100%;
-} */
+}
+
+.message-show {
+    pointer-events: none;
+}
 
 .home-entry {
     padding: 0;

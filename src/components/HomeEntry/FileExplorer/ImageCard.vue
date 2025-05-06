@@ -4,20 +4,21 @@
         <div class="checkbox-container">
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" />
         </div>
-        <div class="file-content" @click="handleClick">
-            <div class="file-icon">
+        <div class="file-content">
+            <div class="file-icon" @click="btnclk_handleClickImage">
                 <img :src="item.icon" alt="icon" />
             </div>
-            <div class="file-name">{{ item.name }}</div>
+            <div class="file-name" @click="btnclk_handleClickItemMsg">{{ item.name }}</div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { defineProps, ref } from 'vue';
+import * as DatType from '@/utils/dataTypedef';
+import Utils from '@/utils/utils'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-import * as DatType from '@/utils/dataTypedef';
 import '@/assets/common.css'
 
 const props = defineProps<{ item: DatType.FileItem; }>();
@@ -31,9 +32,14 @@ const handleCheckboxChange = () => {
     })
 };
 
-const handleClick = () => {
+const btnclk_handleClickImage = () => {
     appStore.curSltFile = props.item;
-    appStore.bShowImageView = true;
+    Utils.page_show({ page: 'imageView', bShow: true })
+    console.log('click', props.item);
+};
+
+const btnclk_handleClickItemMsg = () => {
+    appStore.curSltFile = props.item;
     console.log('click', props.item);
 };
 </script>

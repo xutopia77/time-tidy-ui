@@ -17,6 +17,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAppStore } from '@/stores/AppStore'
+import Utils from '@/utils/utils'
 
 const appStore = useAppStore()
 
@@ -43,7 +44,7 @@ const open = () => {
 // 关闭图片预览
 const close = () => {
     isVisible.value = false
-    appStore.bShowImageView = false
+    Utils.page_show({ page: 'imageView', bShow: false })
 }
 
 // 切换到上一张图片

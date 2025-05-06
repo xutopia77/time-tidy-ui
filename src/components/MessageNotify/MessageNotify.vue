@@ -1,7 +1,10 @@
 <template>
-    <div class="message-show">
-        <div v-for="(message, index) in messages" :key="index" class="message-item">
-            {{ message.content }}
+    <!-- 假设父组件有合适的类名，这里用 parent-container 举例 -->
+    <div class="parent-container">
+        <div class="message-show">
+            <div v-for="(message, index) in messages" :key="index" class="message-item">
+                {{ message.content }}
+            </div>
         </div>
     </div>
 </template>
@@ -45,13 +48,21 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.parent-container {
+    position: relative;
+    /* 为子元素的绝对定位提供参考 */
+    width: 100%;
+    height: 100%;
+}
+
 .message-show {
-    position: fixed;
-    /* 固定定位，显示在所有内容之上 */
+    position: absolute;
+    /* 相对于父组件定位 */
     top: 10px;
+    /* 距离父组件顶部 10px */
     right: 10px;
+    /* 距离父组件右侧 10px */
     z-index: 9999;
-    /* 设置较高的 z-index 值 */
     max-width: 300px;
 }
 

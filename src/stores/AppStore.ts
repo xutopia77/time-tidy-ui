@@ -7,14 +7,32 @@ export class PrjInfo {
     basePath: string = '';
 }
 
+const pageCtrlInit: DataTypes.AppPageCtrl = {
+    imageView: { idx: 48, bShow: false },
+    set: { idx: 49, bShow: false },
+    home: { idx: 50, bShow: true },
+    message: { idx: 51, bShow: false },
+};
+
+const fileSearchConditionInit: DataTypes.FileSearchCondition = {
+    sortBy: '', // '', name, size, time, type
+    sortOrder: 'asc', // asc, desc
+    page: 1,
+    pageSize: 10,
+    tags: [], // tags
+};
+
+
 export type AppStore = {
     prj: PrjInfo | null, // 当前项目信息
     srvPrefix: string, // 服务器前缀
-    bShowSetting: boolean, // 是否显示设置窗口
-    bShowImageView: boolean, // 是否显示图片预览窗口
+
     messageNotify: DataTypes.Message[], // 消息通知
     // 
     setOperateType: string, // 当前操作类型
+    bShowSetting: boolean, // 是否显示设置窗口
+    pageCtrl: DataTypes.AppPageCtrl,
+    pageCtrlInit: DataTypes.AppPageCtrl,
     // 
     curFiles: DataTypes.FileItem[], // 当前展示的文件列表
     curSltFile: DataTypes.FileItem | null, // 当前选中的文件
@@ -22,8 +40,7 @@ export type AppStore = {
     curSltDir: DataTypes.DirItem | null, // 当前选中的文件夹
     curAllDirs: DataTypes.DirItem[], // 当前工程中所有文件夹列表
     curFileTotal: number, // 当前文件列表的总数
-    curPage: number, // 当前页码
-    pageSize: number, // 每页显示的文件数
+    searchCon: DataTypes.FileSearchCondition, // 文件搜索条件
     curPath: string, // 当前路径
 }
 
@@ -31,10 +48,11 @@ export const useAppStore = defineStore('app', {
     state: (): AppStore => ({
         srvPrefix: 'http://127.0.0.1:38080',
         bShowSetting: false,
-        bShowImageView: false,
         prj: null,
         messageNotify: [], // 消息通知
         // 
+        pageCtrl: pageCtrlInit,
+        pageCtrlInit: pageCtrlInit,
         setOperateType: '', // 当前操作类型 files_cpy, files_mv
         // 
         curFiles: [],
@@ -43,8 +61,7 @@ export const useAppStore = defineStore('app', {
         curSltDir: null,
         curAllDirs: [],
         curFileTotal: 0,
-        curPage: 1,
-        pageSize: 10,
+        searchCon: fileSearchConditionInit,
         curPath: '/'
     }),
     actions: {

@@ -133,36 +133,29 @@ function files_get(_req: DatTypes.FilesGetReq | null) {
     const req: DatTypes.FilesGetReq = {
         id: 0,
         bFilterModel: false,
-        pageSize: appStore.pageSize,
-        page: appStore.curPage - 1,
+        pageSize: appStore.searchCon.pageSize,
+        page: appStore.searchCon.page - 1,
         dirs: [appStore.curPath.substring(1)],
         origins: [],
+        sortOrder: appStore.searchCon.sortOrder,
+        sortBy: appStore.searchCon.sortBy,
+        tags: appStore.searchCon.tags,
     }
 
     if (_req != null) {
-        if (_req.id != null) {
-            req.id = _req.id;
-        }
-        if (_req.bFilterModel != null) {
-            req.bFilterModel = _req.bFilterModel;
-        }
-        if (_req.pageSize != null) {
-            req.pageSize = _req.pageSize;
-        }
-        if (_req.page != null) {
-            req.page = _req.page;
-        }
-        if (_req.dirs != null) {
-            req.dirs = _req.dirs;
-        }
-        if (_req.origins != null) {
-            req.origins = _req.origins;
-        }
+        if (_req.id != null) { req.id = _req.id; }
+        if (_req.bFilterModel != null) { req.bFilterModel = _req.bFilterModel; }
+        if (_req.pageSize != null) { req.pageSize = _req.pageSize; }
+        if (_req.page != null) { req.page = _req.page; }
+        if (_req.dirs != null) { req.dirs = _req.dirs; }
+        if (_req.origins != null) { req.origins = _req.origins; }
+        if (_req.sortOrder != null) { req.sortOrder = _req.sortOrder; }
+        if (_req.sortBy != null) { req.sortBy = _req.sortBy; }
+        if (_req.tags != null) { req.tags = _req.tags; }
     }
 
     axios.post(`${appStore.srvPrefix}/api/v1/files_get`, JSON.stringify(req))
         .then((response) => {
-            // appStore.curFiles = response.data;
             console.log('file info:', response.data);
             const resp: DatTypes.Resp = Utils.convert_to_file_item(JSON.stringify(response.data))
             if (resp.code === 0) {
@@ -286,6 +279,29 @@ function message_notify(_req: DatTypes.MessageReq): DatTypes.Resp {
     return resp;
 }
 
+function page_show(_req: DatTypes.AppPageCtrlReq): DatTypes.Resp {
+    const resp: DatTypes.Resp = {
+        code: 0,
+        status: "",
+    }
+    const validPages = ['home', 'set', 'imageView', 'message'];
+
+    if (validPages.includes(_req.page)) {
+        const pageItemInit = appStore.pageCtrlInit[_req.page as keyof typeof appStore.pageCtrl];
+        appStore.pageCtrl[_req.page as keyof typeof appStore.pageCtrl] = pageItemInit;
+        const pageItem = appStore.pageCtrl[_req.page as keyof typeof appStore.pageCtrl];
+        const wasVisible = pageItem.bShow;
+        pageItem.bShow = _req.bShow;
+        if (!wasVisible && pageItem.bShow) {
+            pageItem.idx += 1000;
+        }
+    } else {
+        resp.code = -1;
+        resp.status = `unknown page: ${_req.page}`;
+    }
+    return resp;
+}
+
 class Utils {
     constructor() { }
     static convert_to_file_item = convert_to_file_item;
@@ -294,6 +310,7 @@ class Utils {
     static files_tag_delete = files_tag_delete;
     static files_path_chg = files_path_chg;
     static files_delete = files_delete;
+    static page_show = page_show;
     static message_notify = message_notify;
     static folder_get(folder: string) {
         const reqDat = {
