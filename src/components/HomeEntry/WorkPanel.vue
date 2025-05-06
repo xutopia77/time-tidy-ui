@@ -31,6 +31,16 @@
                 <WorkOperate />
             </div>
         </div>
+        <!-- 文件搜索区域折叠面板 -->
+        <div class="collapse-panel">
+            <div class="panel-header" @click="togglePanel('search')">
+                文件搜索
+                <span>{{ isPanelOpen('search') ? '▼' : '▶' }}</span>
+            </div>
+            <div v-if="isPanelOpen('search')" class="panel-content">
+                <WorkSearch />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -38,13 +48,15 @@
 import { ref } from 'vue';
 import WorkTag from '@/components/HomeEntry/WorkPanel/WorkTag.vue';
 import WorkOperate from '@/components/HomeEntry/WorkPanel/WorkOperate.vue';
+import WorkSearch from '@/components/HomeEntry/WorkPanel/WorkSearch.vue';
 import WorkInfo from '@/components/HomeEntry/WorkPanel/WorkInfo.vue';
 
 // 管理每个折叠面板的展开状态
 const panelStates = ref({
     basicInfo: false,
-    tagInfo: false,
-    operation: false
+    tagInfo: true,
+    operation: false,
+    search: false
 });
 type PanelName = keyof typeof panelStates.value;
 

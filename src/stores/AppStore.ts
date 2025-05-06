@@ -22,7 +22,6 @@ const fileSearchConditionInit: DataTypes.FileSearchCondition = {
     tags: [], // tags
 };
 
-
 export type AppStore = {
     prj: PrjInfo | null, // 当前项目信息
     srvPrefix: string, // 服务器前缀
@@ -30,7 +29,6 @@ export type AppStore = {
     messageNotify: DataTypes.Message[], // 消息通知
     // 
     setOperateType: string, // 当前操作类型
-    bShowSetting: boolean, // 是否显示设置窗口
     pageCtrl: DataTypes.AppPageCtrl,
     pageCtrlInit: DataTypes.AppPageCtrl,
     // 
@@ -47,7 +45,6 @@ export type AppStore = {
 export const useAppStore = defineStore('app', {
     state: (): AppStore => ({
         srvPrefix: 'http://127.0.0.1:38080',
-        bShowSetting: false,
         prj: null,
         messageNotify: [], // 消息通知
         // 

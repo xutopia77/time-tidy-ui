@@ -5,7 +5,7 @@
             <button class="nav-btn prev" @click="prevImage" :disabled="currentIndex === 0">
                 &lt;
             </button>
-            <img :src="currentImage.icon" alt="preview" class="preview-image" />
+            <img :src="currentImageUrl" alt="preview" class="preview-image" />
             <button class="nav-btn next" @click="nextImage" :disabled="currentIndex === imageList.length - 1">
                 &gt;
             </button>
@@ -36,10 +36,11 @@ const currentIndex = computed(() => {
 // 获取当前图片
 const currentImage = computed(() => imageList.value[currentIndex.value])
 
-// 打开图片预览
-const open = () => {
-    isVisible.value = true
-}
+const currentImageUrl = computed(() => {
+    const img = imageList.value[currentIndex.value]
+    const filePath = img.path + "/" + img.name;
+    return `${appStore.srvPrefix}/static_file/${filePath}?rootPathId=${img.rootPathId}&fileId=${img.id}`
+})
 
 // 关闭图片预览
 const close = () => {
@@ -61,8 +62,6 @@ const nextImage = () => {
     }
 }
 
-// 暴露 open 方法给父组件调用
-defineExpose({ open })
 </script>
 
 <style scoped>

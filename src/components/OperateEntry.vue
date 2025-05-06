@@ -9,13 +9,13 @@
     </div>
 </template>
 <script setup lang="ts">
-import { useAppStore } from '@/stores/AppStore';
 import MoveFile from '@/components/OperateEntry/MoveFile.vue'
-const appStore = useAppStore()
+import Utils from '@/utils/utils'
+// import { useAppStore } from '@/stores/AppStore';
+// const appStore = useAppStore()
 function btnclk_move_file() {
-    appStore.bShowSetting = !appStore.bShowSetting
+    Utils.page_show({ page: 'set', bShow: false })
 }
-
 </script>
 
 <style scoped>
@@ -24,6 +24,7 @@ function btnclk_move_file() {
     margin: 0;
     height: 100%;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .header-container {
@@ -32,12 +33,13 @@ function btnclk_move_file() {
     height: 25px;
     width: 100%;
     border-bottom: 1px solid #ddd;
+    box-sizing: border-box;
 }
 
 .main-container {
-    padding: 0;
-    margin: 0;
-    height: calc(100% - 25px);
+    padding: 0px;
+    margin: 0px;
+    height: calc(100% - 30px);
     width: 100%;
 }
 </style>

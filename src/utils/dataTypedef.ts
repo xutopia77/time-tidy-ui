@@ -8,6 +8,7 @@ export class FileItem {
     icon: string = "";
     tags: string[] = [];
     size?: number;
+    time?: string = "";
     checked: boolean = false;
 }
 

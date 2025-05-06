@@ -35,12 +35,10 @@ const handleCheckboxChange = () => {
 const btnclk_handleClickImage = () => {
     appStore.curSltFile = props.item;
     Utils.page_show({ page: 'imageView', bShow: true })
-    console.log('click', props.item);
 };
 
 const btnclk_handleClickItemMsg = () => {
     appStore.curSltFile = props.item;
-    console.log('click', props.item);
 };
 </script>
 

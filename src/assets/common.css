@@ -1,5 +1,8 @@
+:root {
+    --common-background-color: #ffffff;
+}
 
-.common-card{
+.common-card {
     width: 300px;
     height: 300px;
     max-width: 300px;
@@ -10,4 +13,3 @@
     border: 1px solid #ddd;
     border-radius: 8px;
 }
-

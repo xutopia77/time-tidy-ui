@@ -90,14 +90,16 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
         }
         const dirs: DatTypes.DirItem[] = []
         const jRecords = jData.data.dirs.records;
-        console.log("cur path:", appStore.curPath);
         if (jRecords != null) {
             for (const jRecord of jRecords) {
                 if (jRecord.Type == 0) {
                     continue; // skip the root path
                 }
                 const itemPath = "/" + jRecord.Path;
-                const subPath = itemPath.substring(appStore.curPath.length);
+                let subPath = itemPath.substring(appStore.curPath.length);
+                if (subPath.startsWith('/')) {
+                    subPath = subPath.substring(1);
+                }
                 if (subPath.includes('/')) {
                     continue;
                 }

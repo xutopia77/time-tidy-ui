@@ -1,0 +1,131 @@
+<template>
+    <div>
+        <label>
+            排序依据:
+            <select v-model="sortBy">
+                <option value="">默认</option>
+                <option value="name">名称</option>
+                <option value="size">大小</option>
+                <option value="time">时间</option>
+                <option value="type">类型</option>
+            </select>
+        </label>
+        <label>
+            排序顺序:
+            <select v-model="sortOrder">
+                <option value="asc">升序</option>
+                <option value="desc">降序</option>
+            </select>
+        </label>
+        <div class="tags-panel">
+            <label> 文件标签: </label>
+            <!-- 动态绑定 selected 类 -->
+            <div v-for="(tag, index) in fileTags" :key="index" class="tag" :class="{ selected: isTagSelected(tag) }"
+                @click="btnclk_tag(tag)">
+                {{ tag }}
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup lang="ts">
+import Utils from '@/utils/utils';
+import { useAppStore } from '@/stores/AppStore';
+import { computed } from 'vue';
+const appStore = useAppStore()
+
+const fileTags = computed(() => {
+    // 初始化一个 Set 用于存储不重复的标签
+    const uniqueTags = new Set<string>();
+    // 遍历 appStore.curFiles
+    for (const item of appStore.curFiles) {
+        if (item.tags && Array.isArray(item.tags)) {
+            // 遍历每个文件的 tags 数组
+            for (const tag of item.tags) {
+                if (typeof tag === 'string') {
+                    // 将标签添加到 Set 中，Set 会自动去重
+                    uniqueTags.add(tag);
+                }
+            }
+        }
+    }
+    // 将 Set 转换为数组并返回
+    return Array.from(uniqueTags);
+});
+
+// 双向绑定 sortBy
+const sortBy = computed({
+    get: () => appStore.searchCon.sortBy,
+    set: (newValue) => {
+        appStore.searchCon.sortBy = newValue;
+        // 触发文件重新获取以应用新的排序规则
+        Utils.files_get(null);
+    }
+});
+
+// 双向绑定 sortOrder
+const sortOrder = computed({
+    get: () => appStore.searchCon.sortOrder,
+    set: (newValue) => {
+        appStore.searchCon.sortOrder = newValue;
+        // 触发文件重新获取以应用新的排序规则
+        Utils.files_get(null);
+    }
+});
+
+// 判断标签是否被选中
+const isTagSelected = (tag: string) => {
+    return appStore.searchCon.tags.includes(tag);
+};
+
+// 点击标签处理方法
+function btnclk_tag(tag: string) {
+    const tags = appStore.searchCon.tags;
+    const tagIndex = tags.indexOf(tag);
+    if (tagIndex === -1) {
+        // 标签不存在则添加
+        appStore.searchCon.tags.push(tag);
+    } else {
+        // 标签已存在则移除
+        appStore.searchCon.tags.splice(tagIndex, 1);
+    }
+    // 触发文件重新获取以应用新的标签过滤条件
+    Utils.files_get(null);
+}
+</script>
+
+<style scoped>
+/* 可以添加一些样式来美化选择框 */
+label {
+    margin-left: 2px;
+}
+
+select {
+    margin-left: 2px;
+}
+
+.tags-panel {
+    display: flex;
+}
+
+.tag {
+    display: inline-block;
+    margin: 2px;
+    /* padding: 2px; */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.tag:hover {
+    background-color: #e0e0e0;
+}
+
+/* 选中状态样式 */
+.tag.selected {
+    background-color: #2196F3;
+    color: white;
+}
+</style>

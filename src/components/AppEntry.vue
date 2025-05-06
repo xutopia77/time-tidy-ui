@@ -20,11 +20,13 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onMounted } from 'vue';
 import axios from 'axios';
-import Utils from '@/utils/utils'
+
 import HeaderPanel from '@/components/HeaderPanel.vue';
 import OperateEntry from '@/components/OperateEntry.vue';
 import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
 import ImageViewer from '@/components/HomeEntry/FileExplorer/ImageViewer.vue'
+import '@/assets/common.css'
+import Utils from '@/utils/utils'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 
@@ -97,6 +99,8 @@ onMounted(() => {
     margin: 0;
     height: 100%;
     width: 100%;
+    opacity: 1;
+    background-color: var(--common-background-color);
 }
 
 .image-view {
