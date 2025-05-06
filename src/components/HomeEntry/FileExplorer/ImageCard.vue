@@ -20,15 +20,10 @@ const appStore = useAppStore()
 import * as DatType from '@/utils/dataTypedef';
 import '@/assets/common.css'
 
-const props = defineProps<{
-    item: DatType.FileItem;
-}>();
+const props = defineProps<{ item: DatType.FileItem; }>();
 
 const isChecked = ref(false);
-
-// 处理 checkbox 状态变化
 const handleCheckboxChange = () => {
-    //  
     appStore.curFiles.forEach((file) => {
         if (file.id == props.item.id) {
             file.checked = isChecked.value;
@@ -36,10 +31,10 @@ const handleCheckboxChange = () => {
     })
 };
 
-// 处理卡片点击事件
 const handleClick = () => {
-    console.log('click', props.item);
     appStore.curSltFile = props.item;
+    appStore.bShowImageView = true;
+    console.log('click', props.item);
 };
 </script>
 

@@ -4,8 +4,11 @@
             <HeaderPanel class="header-panel-section" />
             <router-view class="page-view" />
         </div>
-        <div class="settings-panel" v-show="appStore.bShowSetting">
+        <div class="settings-panel" v-if="appStore.bShowSetting">
             <OperateEntry />
+        </div>
+        <div class='image-view' v-if="appStore.bShowImageView">
+            <ImageViewer />
         </div>
         <!-- 消息显示区域 -->
         <div class="message-show">
@@ -21,8 +24,18 @@ import Utils from '@/utils/utils'
 import HeaderPanel from '@/components/HeaderPanel.vue';
 import OperateEntry from '@/components/OperateEntry.vue';
 import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
+import ImageViewer from '@/components/HomeEntry/FileExplorer/ImageViewer.vue'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
+
+const pageZindex = {
+    message: 47,
+    imageView: 48,
+    set: 49,
+    home: 50
+}
+
+
 
 function get_prj_info() {
     axios.post(`${appStore.srvPrefix}/api/v1/project`)
@@ -48,7 +61,21 @@ onBeforeMount(() => {
     margin: 0;
     height: 100%;
     width: 100%;
+    /* position: relative; */
+    position: flex;
+    /* 为子元素的绝对定位提供参考 */
 }
+
+/* .home-entry,
+.settings-panel,
+.image-view,
+.message-show {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+} */
 
 .home-entry {
     padding: 0;
@@ -58,9 +85,17 @@ onBeforeMount(() => {
     /* 垂直布局 */
     height: 100%;
     width: 100%;
+    z-index: 10;
 }
 
 .settings-panel {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.image-view {
     padding: 0;
     margin: 0;
     height: 100%;

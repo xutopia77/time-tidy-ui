@@ -230,11 +230,36 @@ function files_path_chg(_req: DatTypes.FilePathChgReq): DatTypes.Resp {
             resp.code = response.data.code;
             resp.status = response.data.status;
             Utils.files_get(null);
+            Utils.message_notify({ content: `文件操作成功` })
         })
         .catch((error) => {
             console.error('Error fetching project info:', error);
             resp.code = -1;
             resp.status = error.message;
+            Utils.message_notify({ content: ` 文件删除失败\n${error.message}` })
+        })
+    return resp;
+}
+
+function files_delete(_req: DatTypes.FileDeleteReq): DatTypes.Resp {
+    const resp: DatTypes.Resp = {
+        code: 0,
+        status: "",
+    }
+
+    axios.post(`${appStore.srvPrefix}/api/v1/files_delete`, JSON.stringify(_req))
+        .then((response) => {
+            console.log('file info:', response.data);
+            resp.code = response.data.code;
+            resp.status = response.data.status;
+            Utils.files_get(null);
+            Utils.message_notify({ content: `文件操作成功` })
+        })
+        .catch((error) => {
+            console.error('Error fetching project info:', error);
+            resp.code = -1;
+            resp.status = error.message;
+            Utils.message_notify({ content: ` 文件删除失败\n${error.message}` })
         })
     return resp;
 }
@@ -268,6 +293,7 @@ class Utils {
     static files_tag_set = files_tag_set;
     static files_tag_delete = files_tag_delete;
     static files_path_chg = files_path_chg;
+    static files_delete = files_delete;
     static message_notify = message_notify;
     static folder_get(folder: string) {
         const reqDat = {

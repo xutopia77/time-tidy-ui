@@ -64,6 +64,11 @@ export class FilePathChgReq {
     srcRootPathId: number = 0;
 }
 
+export class FileDeleteReq {
+    fileIds: number[] = [];
+    bRemoveToDtrash: boolean = true;
+}
+
 export interface Resp<T = string> {
     code: number;
     status: string;

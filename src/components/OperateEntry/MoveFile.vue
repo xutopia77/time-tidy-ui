@@ -20,7 +20,7 @@
             <p>已选中路径: {{ selectedPathItem.path }}</p>
         </div>
         <button class="confirm-btn" @click="confirmMove" :disabled="!selectedPathItem">
-            确认移动
+            确认
         </button>
     </div>
 </template>
@@ -60,7 +60,22 @@ const confirmMove = async () => {
             req.srcRootPathId = item.rootPathId
         }
     }
-    if (req.fileIds.length == 0) return;
+    if (req.fileIds.length == 0) {
+        Utils.message_notify({ content: '请选择要操作的文件' })
+        return;
+    }
+    if (appStore.setOperateType == 'files_move') {
+        req.type = 'move'
+        appStore.setOperateType = ''
+    }
+    else if (appStore.setOperateType == 'files_cpy') {
+        req.type = 'copy'
+        appStore.setOperateType = ''
+    }
+    else {
+        Utils.message_notify({ content: '请选择操作类型' })
+        return;
+    }
     Utils.files_path_chg(req)
 };
 </script>

@@ -3,7 +3,7 @@
         <!-- 文件基础信息折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('basicInfo')">
-                文件基础信息
+                文件信息
                 <span>{{ isPanelOpen('basicInfo') ? '▼' : '▶' }}</span>
             </div>
             <div v-if="isPanelOpen('basicInfo')" class="panel-content">
@@ -14,7 +14,7 @@
         <!-- 文件标签信息折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('tagInfo')">
-                文件标签信息
+                文件标签
                 <span>{{ isPanelOpen('tagInfo') ? '▼' : '▶' }}</span>
             </div>
             <div v-if="isPanelOpen('tagInfo')" class="panel-content">
@@ -24,7 +24,7 @@
         <!-- 文件操作区域折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('operation')">
-                文件操作区域
+                文件操作
                 <span>{{ isPanelOpen('operation') ? '▼' : '▶' }}</span>
             </div>
             <div v-if="isPanelOpen('operation')" class="panel-content">
