@@ -6,7 +6,8 @@
         </div>
         <div class="file-content" @click="btnclk_dir">
             <div class="file-icon">
-                <img :src="item.icon" alt="icon" />
+                <img src="/assets/images/folders.svg" alt="icon" />
+                <!-- <img :src="item.icon" alt="icon" /> -->
             </div>
             <div class="file-name">{{ item.name }}</div>
         </div>
@@ -21,7 +22,7 @@ import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 const appStore = useAppStore()
 const props = defineProps<{
-    item: DatType.FileItem;
+    item: DatType.DirItem;
     // 新增：接收是否选中的初始状态
     checked?: boolean;
 }>();

@@ -8,7 +8,7 @@
             <OperateEntry />
         </div>
         <div class='image-view' v-show="pageCtrl.imageView.bShow" :style="{ zIndex: pageCtrl.imageView.idx }">
-            <ImageViewer />
+            <FileViewer />
         </div>
         <!-- 消息显示区域 -->
         <div class="message-show" v-show="pageCtrl.message.bShow" :style="{ zIndex: pageCtrl.message.idx }">
@@ -23,17 +23,25 @@ import { computed, onBeforeMount, onMounted, onUnmounted } from 'vue';
 import HeaderPanel from '@/components/HeaderPanel.vue';
 import OperateEntry from '@/components/OperateEntry.vue';
 import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
-import ImageViewer from '@/components/HomeEntry/FileExplorer/ImageViewer.vue'
+import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
 import '@/assets/common.css'
 import Utils from '@/utils/utils'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-
+import * as DatTypes from '@/utils/dataTypedef'
 const pageCtrl = computed(() => {
     return appStore.pageCtrl
 })
 
 onBeforeMount(() => {
+    if (navigator.userAgent.includes('time_capsule')) {
+        console.log('当前在Electron中运行');
+        appStore.platform = DatTypes.PlatformType.electron;
+    }
+    else {
+        console.log('当前在浏览器中运行');
+        appStore.platform = DatTypes.PlatformType.browser;
+    }
     Utils.appstore_set(appStore)
     Utils.prj_info_get()
 })

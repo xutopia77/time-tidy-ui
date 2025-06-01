@@ -4,12 +4,10 @@
         <div class="file-grid">
             <!-- 循环渲染文件和文件夹 -->
             <template v-for="item in items" :key="item.id">
-                <ImageCard v-if="item.type === 'file'" :item="item" />
-                <FolderCard v-else-if="item.type === 'folder'" :item="item" />
+                <ImageCard :item="item" />
             </template>
             <template v-for="item in dirs" :key="item.id">
-                <ImageCard v-if="item.type === 'file'" :item="item" />
-                <FolderCard v-else-if="item.type === 'folder'" :item="item" />
+                <FolderCard :item="item" />
             </template>
         </div>
         <FileFooter class="file-footer" />

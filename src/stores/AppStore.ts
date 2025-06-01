@@ -24,6 +24,8 @@ const fileSearchConditionInit: DataTypes.FileSearchCondition = {
 };
 
 export type AppStore = {
+    platform: DataTypes.PlatformType,
+    // 
     prj: PrjInfo | null, // 当前项目信息
     srvPrefix: string, // 服务器前缀
 
@@ -46,7 +48,9 @@ export type AppStore = {
 
 export const useAppStore = defineStore('app', {
     state: (): AppStore => ({
-        srvPrefix: 'http://127.0.0.1:38080', // debug
+        platform: DataTypes.PlatformType.browser,
+        // 
+        srvPrefix: 'http://127.0.0.1:38080', // debug，electron
         // srvPrefix: '', // release
         prj: null,
         messageNotify: [], // 消息通知

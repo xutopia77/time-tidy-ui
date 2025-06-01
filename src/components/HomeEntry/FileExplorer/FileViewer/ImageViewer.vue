@@ -28,14 +28,29 @@
 import { ref, computed } from 'vue'
 import { useAppStore } from '@/stores/AppStore'
 import Utils from '@/utils/utils'
-
+import * as DatType from '@/utils/dataTypedef';
 const appStore = useAppStore()
 
 // 控制 ImageViewer 是否显示
 const isVisible = ref(false)
 
 // 获取当前图片列表
-const imageList = computed(() => appStore.curFiles.filter(file => file.type === 'file'))
+// const imageList = computed(() => appStore.curFiles)
+// const imageList = computed(() => appStore.curFiles.filter(file => file.type === 'file'))
+
+const imageList = computed(() => appStore.curFiles.filter(file => {
+    let bfile = false;
+    switch (file.type) {
+        case DatType.FileType.image:
+        case DatType.FileType.video:
+            bfile = true;
+            break;
+        default:
+            bfile = false;
+            break;
+    }
+    return bfile;
+}))
 
 // 获取当前选中图片的索引
 const currentIndex = computed(() => {

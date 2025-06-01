@@ -33,6 +33,15 @@ const handleCheckboxChange = () => {
 };
 
 const btnclk_handleClickImage = () => {
+
+
+    // if (appStore.platform != DatType.PlatformType.electron) {
+    //     if (props.item.type != DatType.FileType.image) {
+    //         Utils.message_notify({ content: ` 当前文件不是图片类型，无法查看` })
+    //         return;
+    //     }
+    // }
+    console.log('click image', props.item);
     appStore.curSltFile = props.item;
     Utils.page_show({ page: 'imageView', bShow: true })
 };

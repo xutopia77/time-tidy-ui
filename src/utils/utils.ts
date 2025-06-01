@@ -37,14 +37,20 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
         const jRecords = jData.data.files.records;
         if (jRecords != null) {
             for (const jRecord of jRecords) {
+                const fileType = DatTypes.stringToFileType(jRecord.Type);
+                if (fileType == null) {
+                    console.warn(`Unknown file type: ${jRecord.Type}, skipping file ${jRecord.FileName}`);
+                    continue;
+                }
                 const fileItem = new DatTypes.FileItem();
                 fileItem.id = jRecord.ID;
                 fileItem.rootPathId = jRecord.RootPathID;
                 fileItem.name = jRecord.FileName;
                 fileItem.path = jRecord.Path;
+                fileItem.fullpath = jRecord.fullPath;
                 fileItem.size = jRecord.Size;
                 fileItem.time = jRecord.CreateTime
-                fileItem.type = 'file';
+                fileItem.type = fileType;
                 fileItem.icon = appStore.srvPrefix + "/static_thumb/" + fileItem.id + "_thumbnail.jpg";
                 if (jRecord.Tags != null) {
                     fileItem.tags = jRecord.Tags
@@ -80,7 +86,7 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
                 dirItem.rootPathId = jRecord.RootPathId;
                 dirItem.name = jRecord.Path;
                 dirItem.icon = '/assets/images/folders.svg'
-                dirItem.type = 'folder';
+                dirItem.type = DatTypes.FileType.folder;
 
                 dirItem.path = itemPath;
                 if (jRecord.Tags != null) {
@@ -113,7 +119,7 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
                 dirItem.rootPathId = jRecord.RootPathId;
                 dirItem.name = jRecord.Path;
                 dirItem.icon = '/assets/images/folders.svg'
-                dirItem.type = 'folder';
+                dirItem.type = DatTypes.FileType.folder;
                 dirItem.path = itemPath;
                 if (jRecord.Tags != null) {
                     dirItem.tags = jRecord.Tags
@@ -336,7 +342,7 @@ function heartbeat() {
             }
             else {
                 appStore.heartbeat.status = resp.data.status;
-                console.log('heart beat:', appStore.heartbeat);
+                // console.log('heart beat:', appStore.heartbeat);
             }
         })
         .catch((error) => {

@@ -1,10 +1,38 @@
 
+export enum PlatformType {
+    browser = "browser",
+    electron = "electron",
+}
+
+export enum FileType {
+    image = "image",
+    video = "video",
+    audio = "audio",
+    document = "document",
+    folder = "folder",
+}
+
+// 字符串转 FileType 枚举
+export function stringToFileType(str: string): FileType | null {
+    for (const key in FileType) {
+        if (FileType[key as keyof typeof FileType] === str) {
+            return FileType[key as keyof typeof FileType];
+        }
+    }
+    return null;
+}
+// FileType 枚举转字符串
+export function fileTypeToString(fileType: FileType): string {
+    return fileType;
+}
+
 export class FileItem {
     id: number = 0;
     rootPathId: number = 0;
     name: string = "";
-    type: string = "file";
+    type: FileType = FileType.image;
     path: string = "";
+    fullpath = "";
     icon: string = "";
     tags: string[] = [];
     size?: number;
@@ -16,7 +44,7 @@ export class DirItem {
     id: number = 0;
     rootPathId: number = 0;
     name: string = "";
-    type: string = "folder";
+    type: FileType = FileType.folder;
     path: string = "";
     icon: string = "";
     size?: number;
