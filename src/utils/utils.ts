@@ -42,6 +42,8 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
                 fileItem.rootPathId = jRecord.RootPathID;
                 fileItem.name = jRecord.FileName;
                 fileItem.path = jRecord.Path;
+                fileItem.size = jRecord.Size;
+                fileItem.time = jRecord.CreateTime
                 fileItem.type = 'file';
                 fileItem.icon = appStore.srvPrefix + "/static_thumb/" + fileItem.id + "_thumbnail.jpg";
                 if (jRecord.Tags != null) {
@@ -77,7 +79,7 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
                 dirItem.id = jRecord.ID;
                 dirItem.rootPathId = jRecord.RootPathId;
                 dirItem.name = jRecord.Path;
-                dirItem.icon = 'src/assets/icons/folders.svg'
+                dirItem.icon = '/assets/images/folders.svg'
                 dirItem.type = 'folder';
 
                 dirItem.path = itemPath;
@@ -110,7 +112,7 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
                 dirItem.id = jRecord.ID;
                 dirItem.rootPathId = jRecord.RootPathId;
                 dirItem.name = jRecord.Path;
-                dirItem.icon = 'src/assets/icons/folders.svg'
+                dirItem.icon = '/assets/images/folders.svg'
                 dirItem.type = 'folder';
                 dirItem.path = itemPath;
                 if (jRecord.Tags != null) {
@@ -142,6 +144,9 @@ function files_get(_req: DatTypes.FilesGetReq | null) {
         sortOrder: appStore.searchCon.sortOrder,
         sortBy: appStore.searchCon.sortBy,
         tags: appStore.searchCon.tags,
+    }
+    if (appStore.searchCon.pathType == "allPath") {
+        req.dirs = [];
     }
 
     if (_req != null) {
@@ -304,6 +309,41 @@ function page_show(_req: DatTypes.AppPageCtrlReq): DatTypes.Resp {
     return resp;
 }
 
+function prj_info_get() {
+    axios.post(`${appStore.srvPrefix}/api/v1/project`)
+        .then((response) => {
+            const resp = response.data
+            if (resp.code != 0) {
+                console.log("project info get err ", resp.status)
+            }
+            else {
+                appStore.prj = resp.data;
+                console.log('Project info:', appStore.prj);
+                Utils.files_get(null)
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching project info:', error);
+        });
+}
+
+function heartbeat() {
+    axios.post(`${appStore.srvPrefix}/api/v1/heartbeat`)
+        .then((response) => {
+            const resp = response.data
+            if (resp.code != 0) {
+                console.log("heartbeat err ", resp.status)
+            }
+            else {
+                appStore.heartbeat.status = resp.data.status;
+                console.log('heart beat:', appStore.heartbeat);
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching project info:', error);
+        });
+}
+
 class Utils {
     constructor() { }
     static convert_to_file_item = convert_to_file_item;
@@ -314,6 +354,8 @@ class Utils {
     static files_delete = files_delete;
     static page_show = page_show;
     static message_notify = message_notify;
+    static prj_info_get = prj_info_get;
+    static heartbeat = heartbeat;
     static folder_get(folder: string) {
         const reqDat = {
             folder: folder

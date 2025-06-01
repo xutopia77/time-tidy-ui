@@ -3,7 +3,7 @@
         <!-- 文件基础信息折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('basicInfo')">
-                文件信息
+                <img src="/assets/images/info.svg" alt="Tag Icon" title="文件信息">
                 <span>{{ isPanelOpen('basicInfo') ? '▼' : '▶' }}</span>
             </div>
             <div v-if="isPanelOpen('basicInfo')" class="panel-content">
@@ -14,7 +14,7 @@
         <!-- 文件标签信息折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('tagInfo')">
-                文件标签
+                <img src="/assets/images/tag-one.svg" alt="Tag Icon" title="文件标签">
                 <span>{{ isPanelOpen('tagInfo') ? '▼' : '▶' }}</span>
             </div>
             <div v-if="isPanelOpen('tagInfo')" class="panel-content">
@@ -24,7 +24,7 @@
         <!-- 文件操作区域折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('operation')">
-                文件操作
+                <img src="/assets/images/file-settings.svg" alt="Tag Icon" title="文件操作">
                 <span>{{ isPanelOpen('operation') ? '▼' : '▶' }}</span>
             </div>
             <div v-if="isPanelOpen('operation')" class="panel-content">
@@ -34,7 +34,7 @@
         <!-- 文件搜索区域折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('search')">
-                文件搜索
+                <img src="/assets/images/search.svg" alt="Tag Icon" title="文件搜索">
                 <span>{{ isPanelOpen('search') ? '▼' : '▶' }}</span>
             </div>
             <div v-if="isPanelOpen('search')" class="panel-content">
@@ -88,7 +88,7 @@ const isPanelOpen = (panelName: PanelName) => {
     cursor: pointer;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    /* align-items: center; */
 }
 
 .panel-header:hover {

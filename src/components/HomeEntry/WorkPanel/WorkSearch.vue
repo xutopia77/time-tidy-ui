@@ -17,6 +17,13 @@
                 <option value="desc">降序</option>
             </select>
         </label>
+        <label>
+            文件夹:
+            <select v-model="pathType">
+                <option value="curPath">当前路径</option>
+                <option value="allPath">所有路径</option>
+            </select>
+        </label>
         <div class="tags-panel">
             <label> 文件标签: </label>
             <!-- 动态绑定 selected 类 -->
@@ -53,7 +60,7 @@ const fileTags = computed(() => {
     return Array.from(uniqueTags);
 });
 
-// 双向绑定 sortBy
+// 排序依据
 const sortBy = computed({
     get: () => appStore.searchCon.sortBy,
     set: (newValue) => {
@@ -63,12 +70,21 @@ const sortBy = computed({
     }
 });
 
-// 双向绑定 sortOrder
+// 搜索排序
 const sortOrder = computed({
     get: () => appStore.searchCon.sortOrder,
     set: (newValue) => {
         appStore.searchCon.sortOrder = newValue;
         // 触发文件重新获取以应用新的排序规则
+        Utils.files_get(null);
+    }
+});
+
+// 按照文件夹搜索
+const pathType = computed({
+    get: () => appStore.searchCon.pathType,
+    set: (newValue) => {
+        appStore.searchCon.pathType = newValue;
         Utils.files_get(null);
     }
 });

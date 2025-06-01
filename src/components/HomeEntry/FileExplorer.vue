@@ -66,14 +66,4 @@ const dirs = computed(() => {
     overflow: auto;
     /* 添加 overflow 属性，内容超出时自动显示滚动条 */
 }
-
-/* 假设 ImageCard 和 FolderCard 有共同的类名 .file-card，这里设置其基础样式 */
-.file-card {
-    flex: 1 0 calc(20% - 6px);
-    /* 每行最多 5 个项目，减去间距 */
-    min-width: 120px;
-    /* 最小宽度 */
-    box-sizing: border-box;
-    /* 包含内边距和边框 */
-}
 </style>

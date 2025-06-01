@@ -17,6 +17,7 @@ const pageCtrlInit: DataTypes.AppPageCtrl = {
 const fileSearchConditionInit: DataTypes.FileSearchCondition = {
     sortBy: '', // '', name, size, time, type
     sortOrder: 'asc', // asc, desc
+    pathType: 'curPath', // curPath, allPath
     page: 1,
     pageSize: 10,
     tags: [], // tags
@@ -40,11 +41,13 @@ export type AppStore = {
     curFileTotal: number, // 当前文件列表的总数
     searchCon: DataTypes.FileSearchCondition, // 文件搜索条件
     curPath: string, // 当前路径
+    heartbeat: DataTypes.HeartBeat,
 }
 
 export const useAppStore = defineStore('app', {
     state: (): AppStore => ({
-        srvPrefix: 'http://127.0.0.1:38080',
+        srvPrefix: 'http://127.0.0.1:38080', // debug
+        // srvPrefix: '', // release
         prj: null,
         messageNotify: [], // 消息通知
         // 
@@ -59,7 +62,8 @@ export const useAppStore = defineStore('app', {
         curAllDirs: [],
         curFileTotal: 0,
         searchCon: fileSearchConditionInit,
-        curPath: '/'
+        curPath: '/',
+        heartbeat: { status: "" }
     }),
     actions: {
         setData(key: string, value: string): void {

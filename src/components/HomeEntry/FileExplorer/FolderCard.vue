@@ -36,6 +36,7 @@ const handleCheckboxChange = () => {
 function btnclk_dir() {
     appStore.curPath = props.item.path;
     console.log('click', props.item);
+    appStore.searchCon.pathType = 'curPath';
     Utils.files_get(null)
 };
 </script>

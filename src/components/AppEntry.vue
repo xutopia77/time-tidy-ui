@@ -18,8 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeMount, onMounted } from 'vue';
-import axios from 'axios';
+import { computed, onBeforeMount, onMounted, onUnmounted } from 'vue';
 
 import HeaderPanel from '@/components/HeaderPanel.vue';
 import OperateEntry from '@/components/OperateEntry.vue';
@@ -34,26 +33,24 @@ const pageCtrl = computed(() => {
     return appStore.pageCtrl
 })
 
-function get_prj_info() {
-    axios.post(`${appStore.srvPrefix}/api/v1/project`)
-        .then((response) => {
-            appStore.prj = response.data;
-            console.log('Project info:', appStore.prj);
-            Utils.files_get(null)
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-        });
-}
-
 onBeforeMount(() => {
     Utils.appstore_set(appStore)
-    get_prj_info()
+    Utils.prj_info_get()
 })
+
+
+let timerId = 0
 
 onMounted(() => {
     Utils.page_show({ page: 'message', bShow: true })
+    timerId = window.setInterval(Utils.heartbeat, 1000);
 })
+
+onUnmounted(() => {
+    if (timerId) {
+        window.clearInterval(timerId);
+    }
+});
 
 </script>
 

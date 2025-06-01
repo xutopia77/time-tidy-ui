@@ -68,14 +68,17 @@ const btnclk_handleClickItemMsg = () => {
 }
 
 .file-icon img {
-    width: 260px;
-    height: 260px;
+    width: 360px;
+    height: 360px;
     margin: 2px;
+    object-fit: contain;
+    /* 可选 cover/none/scale-down */
 }
 
 .file-name {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: small;
 }
 </style>

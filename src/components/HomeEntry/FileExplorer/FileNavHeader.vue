@@ -50,6 +50,7 @@ const pathParts: ComputedRef<PathPart[]> = computed(() => {
 const navigateToPath = (path: string) => {
     console.log(`to path: ${path}`);
     appStore.curPath = path;
+    appStore.searchCon.pathType = 'curPath';
     Utils.files_get(null)
 };
 </script>

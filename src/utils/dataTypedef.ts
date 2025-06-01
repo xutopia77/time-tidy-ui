@@ -44,13 +44,13 @@ export class AppPageCtrlReq {
 export class FileSearchCondition {
     sortBy: string = "";// name, size, time, type
     sortOrder: string = "";// asc, desc
+    pathType: string = "";// curPath, allPath
     page: number = 0;
     pageSize: number = 10;
     tags: string[] = [];// tags
 }
 
-
-// ==============================================================
+// ============================================================== communicate with back server
 export class MessageReq {
     content: string = "";
     duration?: number = 0;
@@ -85,6 +85,10 @@ export class FilesTagSetReq {
 export class ProjectSetReq {
     basePath: string = "";
 }
+
+export class HeartBeat {
+    status: string = "";
+};
 
 export class FilePathChgReq {
     fileIds: number[] = [];

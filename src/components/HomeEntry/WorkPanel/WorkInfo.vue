@@ -3,6 +3,7 @@
         <p class="info-item">名称:{{ fileinfo.name }}</p>
         <p class="info-item">大小:{{ fileinfo.size }}</p>
         <p class="info-item">时间:{{ fileinfo.createTime }}</p>
+        <p class="info-item">路径:{{ fileinfo.path }}</p>
     </div>
 </template>
 <script setup lang="ts">
@@ -11,7 +12,7 @@ import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 
 const fileinfo = computed(() => {
-    const fileInfo = { name: '', size: '0KB', createTime: '' }
+    const fileInfo = { name: '', size: '0KB', createTime: '', path: '' }
     fileInfo.name = appStore.curSltFile?.name || ''
     if (appStore.curSltFile?.size) {
         const sizeKb = appStore.curSltFile.size / 1024;
@@ -27,6 +28,7 @@ const fileinfo = computed(() => {
         }
     }
     fileInfo.createTime = appStore.curSltFile?.time || ''
+    fileInfo.path = appStore.curSltFile?.path || ''
     return fileInfo
 })
 

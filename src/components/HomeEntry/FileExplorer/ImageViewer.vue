@@ -93,7 +93,6 @@ const prevImage = () => {
         resetImageState() // 重置图片状态
     }
 }
-
 // 切换到下一张图片
 const nextImage = () => {
     if (currentIndex.value < imageList.value.length - 1) {
