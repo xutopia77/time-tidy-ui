@@ -34,6 +34,12 @@ const pageCtrl = computed(() => {
 })
 
 onBeforeMount(() => {
+    // 判断当前是否为开发环境
+    const isDev = import.meta.env.MODE === 'development';
+    // 判断当前是否为生产环境
+    // const isProd = import.meta.env.MODE === 'production';
+
+    console.log(`env: navigator.userAgent: ${navigator.userAgent}; MODE : ${import.meta.env.MODE}; `);
     if (navigator.userAgent.includes('time_capsule')) {
         console.log('当前在Electron中运行');
         appStore.platform = DatTypes.PlatformType.electron;
@@ -41,6 +47,17 @@ onBeforeMount(() => {
     else {
         console.log('当前在浏览器中运行');
         appStore.platform = DatTypes.PlatformType.browser;
+    }
+    if (appStore.platform == DatTypes.PlatformType.electron) {
+        appStore.srvPrefix = 'http://127.0.0.1:38080'
+    }
+    else {
+        if (isDev) {
+            appStore.srvPrefix = 'http://127.0.0.1:38080'
+        }
+        else {
+            appStore.srvPrefix = ''
+        }
     }
     Utils.appstore_set(appStore)
     Utils.prj_info_get()

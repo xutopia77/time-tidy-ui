@@ -1,5 +1,9 @@
 <template>
-    <div class="file-card common-card" :style="{ backgroundColor: isChecked ? '#e0f7fa' : 'transparent' }">
+    <div class="file-card common-card" :style="{
+        backgroundColor: isChecked ? '#e0f7fa' : 'transparent',
+        width: `${cardWidth}px`,
+        height: `${cardHeight}px`
+    }">
         <!-- 左上角的 checkbox -->
         <div class="checkbox-container">
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" />
@@ -14,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from 'vue';
+import { computed, defineProps, ref } from 'vue';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils'
 import { useAppStore } from '@/stores/AppStore';
@@ -22,6 +26,14 @@ const appStore = useAppStore()
 import '@/assets/common.css'
 
 const props = defineProps<{ item: DatType.FileItem; }>();
+
+const cardWidth = computed(() => {
+    return appStore.cardWidth;
+});
+
+const cardHeight = computed(() => {
+    return appStore.cardWidth;
+});
 
 const isChecked = ref(false);
 const handleCheckboxChange = () => {
@@ -74,12 +86,23 @@ const btnclk_handleClickItemMsg = () => {
 
 .file-content {
     cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.file-icon {
+    width: calc(100% - 4px);
+    height: calc(100% - 24px);
+    padding: 2px;
+    margin: 0;
 }
 
 .file-icon img {
-    width: 360px;
-    height: 360px;
-    margin: 2px;
+    /* width: 360px;
+    height: 360px; */
+    width: 100%;
+    height: 100%;
+    margin: 0px;
     object-fit: contain;
     /* 可选 cover/none/scale-down */
 }
@@ -89,5 +112,7 @@ const btnclk_handleClickItemMsg = () => {
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: small;
+    height: 20px;
+    width: 100%;
 }
 </style>

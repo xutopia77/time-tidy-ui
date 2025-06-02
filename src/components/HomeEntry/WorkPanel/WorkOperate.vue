@@ -3,10 +3,16 @@
         <button @click="btnclk_operate_file('files_move')">移动</button>
         <button @click="btnclk_operate_file('files_cpy')">复制</button>
         <button @click="btnclk_delete_file">删除</button>
+        <br>
+        <label for="cardWidthSlider">卡片大小</label>
+        <input id="cardWidthSlider" type="range" v-model="cardWidth" min="100" max="800" step="10"
+            @input="handleWidthChange" />
+        <span>{{ cardWidth }}</span>
     </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 import { useAppStore } from '@/stores/AppStore';
@@ -33,6 +39,19 @@ function btnclk_delete_file() {
     }
     Utils.files_delete(req)
 }
+
+const cardWidth = computed({
+    get: () => appStore.cardWidth,
+    set: (value) => {
+        appStore.cardWidth = value;
+        handleWidthChange();
+    }
+});
+
+// 处理宽度变化的函数
+function handleWidthChange() {
+    console.log(`卡片宽度已更新为 ${cardWidth.value}px`);
+}
 </script>
 
 <style scoped>
@@ -44,5 +63,10 @@ label {
 
 select {
     margin-left: 2px;
+}
+
+input[type="range"] {
+    margin-left: 2px;
+    vertical-align: middle;
 }
 </style>

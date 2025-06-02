@@ -25,6 +25,8 @@ const fileSearchConditionInit: DataTypes.FileSearchCondition = {
 
 export type AppStore = {
     platform: DataTypes.PlatformType,
+    cardWidth: number, // 卡片宽度
+    cardHeight: number, // 卡片高度
     // 
     prj: PrjInfo | null, // 当前项目信息
     srvPrefix: string, // 服务器前缀
@@ -49,6 +51,8 @@ export type AppStore = {
 export const useAppStore = defineStore('app', {
     state: (): AppStore => ({
         platform: DataTypes.PlatformType.browser,
+        cardWidth: 390, // 卡片宽度
+        cardHeight: 390, // 卡片高度
         // 
         srvPrefix: 'http://127.0.0.1:38080', // debug，electron
         // srvPrefix: '', // release
