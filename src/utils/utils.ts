@@ -270,6 +270,28 @@ function files_delete(_req: DatTypes.FileDeleteReq): DatTypes.Resp {
     return resp;
 }
 
+function project_health(): DatTypes.Resp {
+    const resp: DatTypes.Resp = {
+        code: 0,
+        status: "",
+    }
+    Utils.log_info_append("------开始数据健康度检查\n");
+    axios.post(`${appStore.srvPrefix}/api/v1/project_health`, JSON.stringify({ type: 2 }))
+        .then((response) => {
+            resp.code = response.data.code;
+            resp.status = response.data.status;
+            Utils.files_get(null);
+            Utils.message_notify({ content: `数据健康度检查成功` })
+        })
+        .catch((error) => {
+            resp.code = -1;
+            resp.status = error.message;
+            Utils.message_notify({ content: ` 数据健康度检查失败\n${error.message}` })
+        })
+    return resp;
+}
+
+
 function message_notify(_req: DatTypes.MessageReq): DatTypes.Resp {
     const resp: DatTypes.Resp = {
         code: 0,
@@ -342,12 +364,17 @@ function heartbeat() {
             }
             else {
                 appStore.heartbeat.status = resp.data.status;
+                appStore.logInfo += resp.data.logInfo;
                 // console.log('heart beat:', appStore.heartbeat);
             }
         })
         .catch((error) => {
             console.error('Error fetching project info:', error);
         });
+}
+
+function log_info_append(cont: string) {
+    appStore.logInfo += cont
 }
 
 class Utils {
@@ -358,8 +385,10 @@ class Utils {
     static files_tag_delete = files_tag_delete;
     static files_path_chg = files_path_chg;
     static files_delete = files_delete;
+    static project_health = project_health;
     static page_show = page_show;
     static message_notify = message_notify;
+    static log_info_append = log_info_append
     static prj_info_get = prj_info_get;
     static heartbeat = heartbeat;
     static folder_get(folder: string) {

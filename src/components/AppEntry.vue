@@ -26,9 +26,9 @@ import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
 import '@/assets/common.css'
 import Utils from '@/utils/utils'
+import * as DatTypes from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-import * as DatTypes from '@/utils/dataTypedef'
 const pageCtrl = computed(() => {
     return appStore.pageCtrl
 })
@@ -143,5 +143,7 @@ onUnmounted(() => {
 
 .page-view {
     flex: 1;
+    width: 100%;
+    height: calc(100% - 25px);
 }
 </style>

@@ -4,7 +4,7 @@
         <button @click="btnclk_operate_file('files_cpy')">复制</button>
         <button @click="btnclk_delete_file">删除</button>
         <br>
-        <label for="cardWidthSlider">卡片大小</label>
+        <label for="cardWidthSlider" style="font-size: small;">卡片大小</label>
         <input id="cardWidthSlider" type="range" v-model="cardWidth" min="100" max="800" step="10"
             @input="handleWidthChange" />
         <span>{{ cardWidth }}</span>

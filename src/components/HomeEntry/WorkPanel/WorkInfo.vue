@@ -38,10 +38,14 @@ const fileinfo = computed(() => {
 .work-info {
     padding: 0px;
     margin: 0px;
+    width: 100%;
+    height: 100%;
 }
 
 .info-item {
     padding: 0px;
     margin: 0px;
+    font-size: small;
+    white-space: nowrap;
 }
 </style>

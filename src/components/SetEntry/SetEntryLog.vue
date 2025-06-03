@@ -1,10 +1,19 @@
 <template>
     <div class="main-container">
-
+        <textarea class="log-textarea" v-model="logContent" readonly placeholder="暂无日志内容"></textarea>
     </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+// import Utils from '@/utils/utils'
+// import * as DatTypes from '@/utils/dataTypedef'
+import { useAppStore } from '@/stores/AppStore';
+const appStore = useAppStore()
+const logContent = computed(() => {
+    return appStore.logInfo || '';
+});
+
 </script>
 
 <style scoped>
@@ -13,5 +22,18 @@
     height: 100%;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.log-textarea {
+    flex: 1;
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
 }
 </style>

@@ -30,6 +30,7 @@ export type AppStore = {
     // 
     prj: PrjInfo | null, // 当前项目信息
     srvPrefix: string, // 服务器前缀
+    logInfo: string, // 日志信息
 
     messageNotify: DataTypes.Message[], // 消息通知
     // 
@@ -56,6 +57,7 @@ export const useAppStore = defineStore('app', {
         // 
         srvPrefix: 'http://127.0.0.1:38080', // debug，electron
         // srvPrefix: '', // release
+        logInfo: '', // 日志信息
         prj: null,
         messageNotify: [], // 消息通知
         // 
