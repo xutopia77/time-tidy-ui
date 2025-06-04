@@ -7,6 +7,8 @@
         <label for="cardWidthSlider" style="font-size: small;">卡片大小</label>
         <input id="cardWidthSlider" type="range" v-model="cardWidth" min="100" max="800" step="10"
             @input="handleWidthChange" />
+        <button @click="adjustWidth(-2)">-</button>
+        <button @click="adjustWidth(2)">+</button>
         <span>{{ cardWidth }}</span>
     </div>
 </template>
@@ -52,6 +54,13 @@ const cardWidth = computed({
 function handleWidthChange() {
     console.log(`卡片宽度已更新为 ${cardWidth.value}px`);
 }
+function adjustWidth(step: number) {
+    const newValue = appStore.cardWidth + step;
+    if (newValue >= 100 && newValue <= 800) {
+        appStore.cardWidth = newValue;
+    }
+}
+
 </script>
 
 <style scoped>

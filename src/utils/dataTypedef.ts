@@ -4,6 +4,12 @@ export enum PlatformType {
     electron = "electron",
 }
 
+export enum EnvModeType {
+    dev = 'development',
+    pro = 'production'
+};
+
+
 export enum FileType {
     image = "image",
     video = "video",

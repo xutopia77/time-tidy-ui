@@ -25,6 +25,7 @@ const fileSearchConditionInit: DataTypes.FileSearchCondition = {
 
 export type AppStore = {
     platform: DataTypes.PlatformType,
+    envMode: DataTypes.EnvModeType,
     cardWidth: number, // 卡片宽度
     cardHeight: number, // 卡片高度
     // 
@@ -52,6 +53,7 @@ export type AppStore = {
 export const useAppStore = defineStore('app', {
     state: (): AppStore => ({
         platform: DataTypes.PlatformType.browser,
+        envMode: DataTypes.EnvModeType.pro,
         cardWidth: 390, // 卡片宽度
         cardHeight: 390, // 卡片高度
         // 

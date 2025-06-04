@@ -2,7 +2,7 @@
     --common-background-color: #ffffff;
 }
 
-.common-card {
+.xc-card {
     width: 390px;
     height: 390px;
     padding: 0px;
@@ -10,4 +10,53 @@
     transition: background-color 0.3s;
     border: 1px solid #ddd;
     border-radius: 8px;
+    text-align: center;
+    position: relative;
+    /* 为 checkbox 定位做准备 */
+    transition: background-color 0.3s;
+    /* 添加过渡效果 */
+}
+
+.xc-card:hover {
+    background-color: #f0f0f0;
+}
+
+.xc-card-checkbox-container {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 1;
+    /* 确保 checkbox 在图片上方 */
+}
+
+.xc-card-content {
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.xc-card-icon {
+    width: calc(100% - 4px);
+    height: calc(100% - 24px);
+    padding: 2px;
+    margin: 0;
+}
+
+.xc-card-icon img {
+    /* width: 360px;
+    height: 360px; */
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    object-fit: contain;
+    /* 可选 cover/none/scale-down */
+}
+
+.xc-card-desc {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: small;
+    height: 20px;
+    width: 100%;
 }

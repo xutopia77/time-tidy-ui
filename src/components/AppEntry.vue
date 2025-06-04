@@ -38,7 +38,7 @@ onBeforeMount(() => {
     const isDev = import.meta.env.MODE === 'development';
     // 判断当前是否为生产环境
     // const isProd = import.meta.env.MODE === 'production';
-
+    appStore.envMode = isDev ? DatTypes.EnvModeType.dev : DatTypes.EnvModeType.pro
     console.log(`env: navigator.userAgent: ${navigator.userAgent}; MODE : ${import.meta.env.MODE}; `);
     if (navigator.userAgent.includes('time_capsule')) {
         console.log('当前在Electron中运行');
