@@ -4,9 +4,8 @@
         <button @click="btnclk_operate_file('files_cpy')" class="xc-button op-button">复制</button>
         <button @click="btnclk_delete_file" class="xc-button op-button">删除</button>
         <br>
-        <div style="display: flex;">
-
-            <label for="cardWidthSlider" style="font-size: small;">卡片大小</label>
+        <div style="display: flex; flex-wrap: wrap;">
+            <label for="cardWidthSlider1" style="font-size: small;">卡片大小</label>
             <input id="cardWidthSlider" type="range" v-model="cardWidth" min="100" max="800" step="10"
                 @input="handleWidthChange" />
             <button @click="adjustWidth(-2)" class="xc-button op-button"
@@ -19,7 +18,6 @@
             </button>
             <span>{{ cardWidth }}</span>
         </div>
-
     </div>
 </template>
 

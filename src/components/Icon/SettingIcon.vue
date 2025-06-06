@@ -1,19 +1,10 @@
 <template>
     <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="24" cy="24" r="15" fill="#676b6e" stroke="#c5bfeb" stroke-width="4" stroke-linecap="round"
-            stroke-linejoin="round" />
-        <path d="M24 39V44" stroke="#c5bfeb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M39 23H44" stroke="#c5bfeb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M4 23H9" stroke="#c5bfeb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M24 4V9" stroke="#c5bfeb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M34.6064 34.6064L38.142 38.142" stroke="#c5bfeb" stroke-width="4" stroke-linecap="round"
-            stroke-linejoin="round" />
-        <path d="M33.8994 12.6865L37.4349 9.15099" stroke="#c5bfeb" stroke-width="4" stroke-linecap="round"
-            stroke-linejoin="round" />
-        <path d="M9.15088 37.4351L12.6864 33.8995" stroke="#c5bfeb" stroke-width="4" stroke-linecap="round"
-            stroke-linejoin="round" />
-        <path d="M9.85791 9.85791L13.3934 13.3934" stroke="#c5bfeb" stroke-width="4" stroke-linecap="round"
-            stroke-linejoin="round" />
+        <path d="M34.0003 41L44 24L34.0003 7H14.0002L4 24L14.0002 41H34.0003Z" fill="#676b6e" stroke="#c5bfeb"
+            stroke-width="4" stroke-linejoin="round" />
+        <path
+            d="M24 29C26.7614 29 29 26.7614 29 24C29 21.2386 26.7614 19 24 19C21.2386 19 19 21.2386 19 24C19 26.7614 21.2386 29 24 29Z"
+            fill="#43CCF8" stroke="#FFF" stroke-width="4" stroke-linejoin="round" />
     </svg>
 </template>
 

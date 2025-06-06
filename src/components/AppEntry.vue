@@ -19,7 +19,6 @@
 
 <script setup lang="ts">
 import { computed, onBeforeMount, onMounted, onUnmounted } from 'vue';
-
 import HeaderPanel from '@/components/HeaderPanel.vue';
 import OperateEntry from '@/components/OperateEntry.vue';
 import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
@@ -82,8 +81,8 @@ onUnmounted(() => {
 
 <style scoped>
 .app-entry {
-    padding: 0;
-    margin: 0;
+    padding: 0px;
+    margin: 0px;
     height: 100%;
     width: 100%;
     position: relative;
@@ -138,15 +137,21 @@ onUnmounted(() => {
     flex: 0 0 auto;
     border-bottom: var(--xc-border-hover);
     /* 添加底部边框 */
-    height: 25px;
+    box-sizing: border-box;
+    /* 将盒模型设置为 border-box */
+    height: 32px;
     width: 100%;
+    padding: 0px;
+    margin: 0px;
     background-color: var(--xc-background-color);
 }
 
 .page-view {
     flex: 1;
     width: 100%;
-    height: calc(100% - 25px);
+    margin: 0px;
+    padding: 0px;
+    height: calc(100% - 32px);
     background-color: var(--xc-background-color);
 }
 </style>

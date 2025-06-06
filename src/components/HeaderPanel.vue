@@ -3,12 +3,14 @@
         <div class="header-panel-operate">
             <span class="nav-button">
                 <router-link class="no-underline-link" to="/">
-                    <img src="/assets/images/home.svg" alt="Home Icon" style="width: 20px; height: 20px;">
+                    <!-- <img src="/assets/images/home.svg" alt="Home Icon" style="width: 20px; height: 20px;"> -->
+                    <HomeIcon />
                 </router-link>
             </span>
             <span>
                 <router-link class="no-underline-link" to="/set">
-                    <img src="/assets/images/settings.svg" alt="Home Icon" style="width: 20px; height: 20px;">
+                    <!-- <img src="/assets/images/settings.svg" alt="Home Icon" style="width: 20px; height: 20px;"> -->
+                    <SettingIcon />
                 </router-link>
             </span>
         </div>
@@ -17,7 +19,9 @@
         </div>
     </div>
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { HomeIcon, SettingIcon } from '@/components/Icon'
+</script>
 <style scoped>
 .no-underline-link {
     text-decoration: none;

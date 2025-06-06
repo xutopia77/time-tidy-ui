@@ -14,17 +14,27 @@ import '@/assets/common.css'
 .file-home {
     padding: 0;
     margin: 0;
+    width: 100%;
+    /* height: 100%; */
+    /* 不用再设置高度，在外面已经设置了 */
     display: flex;
     flex-direction: row;
     /* 水平布局 */
-    height: calc(100% - 30px);
-    width: 100%;
+}
+
+.file-explorer-section {
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
 }
 
 .work-panel-section {
     max-width: 400px;
     min-width: 200px;
     width: 20%;
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
     border-left: var(--xc-border);
 }
 </style>

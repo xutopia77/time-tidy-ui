@@ -6,6 +6,7 @@ import HomeIcon from '@/components/Icon/HomeIcon.vue';
 import MinusIcon from '@/components/Icon/MinusIcon.vue';
 import PlusIcon from '@/components/Icon/PlusIcon.vue';
 import HardDiskIcon from '@/components/Icon/HardDiskIcon.vue';
+import SettingIcon from '@/components/Icon/SettingIcon.vue';
 
 export {
     FileSettingIcon,
@@ -15,5 +16,6 @@ export {
     MinusIcon,
     PlusIcon,
     SearchIcon,
+    SettingIcon,
     TagOneIcon,
 };

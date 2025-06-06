@@ -41,25 +41,28 @@ const dirs = computed(() => {
     /* background-color: aqua; */
 }
 
-.file-footer {
-    padding: 0px;
-    margin: 0px;
-    width: 100%;
-    height: 25px;
-}
-
 .file-nav-header {
     padding: 0px;
     margin: 0px;
     width: 100%;
-    height: 25px;
+    height: 32px;
     /* background-color: aquamarine; */
 }
 
 .file-grid {
+    padding: 0px;
+    margin: 0px;
     display: flex;
     flex-wrap: wrap;
-    height: calc(100% - 50px);
+    height: calc(100% - 32px - 32px);
     /* background-color: bisque; */
+}
+
+
+.file-footer {
+    padding: 0px;
+    margin: 0px;
+    width: 100%;
+    height: 32px;
 }
 </style>
