@@ -1,12 +1,12 @@
 <template>
     <div class="xc-card" :style="{
-        backgroundColor: isChecked ? '#e0f7fa' : 'transparent',
+        backgroundColor: isChecked ? 'var(--xc-background-color-hover)' : 'transparent',
         width: `${cardWidth}px`,
         height: `${cardHeight}px`
     }">
         <!-- 左上角的 checkbox -->
         <div class="xc-card-checkbox-container">
-            <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" />
+            <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" class="xc-checkbox" />
         </div>
         <div class="xc-card-content">
             <div class="xc-card-icon" @click="btnclk_handleClickImage">

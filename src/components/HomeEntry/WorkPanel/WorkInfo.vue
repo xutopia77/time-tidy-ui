@@ -40,6 +40,8 @@ const fileinfo = computed(() => {
     margin: 0px;
     width: 100%;
     height: 100%;
+    background-color: var(--xc-background-color);
+    color: var(--xc-text-color);
 }
 
 .info-item {

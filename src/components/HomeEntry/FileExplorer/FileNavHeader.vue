@@ -2,8 +2,10 @@
     <div class="file-explorer">
         <!-- 路径显示区域 -->
         <div class="path-display">
+
             <span v-for="(part, index) in pathParts" :key="index" @click="navigateToPath(part.path)" class="path-part">
                 {{ part.name }}
+                <HardDiskIcon v-if="part.name == ''" />
                 <span v-if="index < pathParts.length - 1">/</span>
             </span>
         </div>
@@ -16,7 +18,8 @@ import type { ComputedRef } from 'vue';
 import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-
+import '@/assets/common.css'
+import { HardDiskIcon } from '@/components/Icon'
 class PathPart {
     name: string = '';
     path: string = '';
@@ -40,7 +43,7 @@ const pathParts: ComputedRef<PathPart[]> = computed(() => {
     });
     // 在 re 的前面加一个 root
     const rootPart = new PathPart();
-    rootPart.name = 'root';
+    rootPart.name = '';
     rootPart.path = '/';
     re.unshift(rootPart);
     return re;
@@ -64,47 +67,24 @@ const navigateToPath = (path: string) => {
 .path-display {
     margin-bottom: 20px;
     font-size: 16px;
+    background-color: var(--xc-background-color-hover);
+    color: var(--xc-text-color);
+    border-radius: 10px;
+    border: var(--xc-border);
+}
+
+.path-display:hover {
+    border: var(--xc-border-hover);
 }
 
 .path-part {
     cursor: pointer;
     color: #030c14;
     text-decoration: underline;
+    color: var(--xc-text-color);
 }
 
 .path-part:hover {
     color: #0056b3;
-}
-
-.file-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 20px;
-}
-
-.file-card {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.file-card:hover {
-    background-color: #f0f0f0;
-}
-
-.file-icon img {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 10px;
-}
-
-.file-name {
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 </style>

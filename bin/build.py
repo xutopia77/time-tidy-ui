@@ -109,7 +109,7 @@ def pack_electron():
     #2，构建 electron 应用
     time.sleep(1)
     build_electron()
-    
+    print('------------成果物路径：', os.path.join(etectron_path, 'dist'))
 
 args = parse_args()
 

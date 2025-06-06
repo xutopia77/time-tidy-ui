@@ -1,12 +1,12 @@
 <template>
     <div class="xc-card" :style="{
-        backgroundColor: isChecked ? '#e0f7fa' : 'transparent',
+        backgroundColor: isChecked ? 'var(--xc-background-color-hover)' : 'transparent',
         width: `${cardWidth}px`,
         height: `${cardHeight}px`
     }">
         <!-- 左上角的 checkbox -->
         <div class="xc-card-checkbox-container">
-            <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" />
+            <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" class="xc-checkbox" />
         </div>
         <div class="xc-card-content" @click="btnclk_dir">
             <div class="xc-card-icon">
@@ -21,10 +21,11 @@
 <script setup lang="ts">
 import { defineProps, ref, computed } from 'vue';
 import * as DatType from '@/utils/dataTypedef';
-import '@/assets/common.css'
 import { useAppStore } from '@/stores/AppStore';
-import Utils from '@/utils/utils';
 const appStore = useAppStore()
+import '@/assets/common.css'
+import Utils from '@/utils/utils';
+
 const props = defineProps<{
     item: DatType.DirItem;
     // 新增：接收是否选中的初始状态

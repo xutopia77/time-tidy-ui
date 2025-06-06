@@ -1,7 +1,7 @@
 <template>
     <div class="file-explorer">
         <FileNavHeader class="file-nav-header" />
-        <div class="file-grid">
+        <div class="file-grid xc-scrollbar">
             <!-- 循环渲染文件和文件夹 -->
             <template v-for="item in items" :key="item.id">
                 <ImageCard :item="item" />
@@ -23,7 +23,7 @@ import FileFooter from '@/components/HomeEntry/FileExplorer/FileFooter.vue';
 
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-
+import '@/assets/common.css'
 const items = computed(() => {
     return appStore.curFiles;
 });
@@ -61,7 +61,5 @@ const dirs = computed(() => {
     flex-wrap: wrap;
     height: calc(100% - 50px);
     /* background-color: bisque; */
-    overflow: auto;
-    /* 添加 overflow 属性，内容超出时自动显示滚动条 */
 }
 </style>

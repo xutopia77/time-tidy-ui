@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import FileExplorer from '@/components/HomeEntry/FileExplorer.vue';
 import WorkPanel from '@/components/HomeEntry/WorkPanel.vue';
+import '@/assets/common.css'
 </script>
 
 <style scoped>
@@ -24,6 +25,6 @@ import WorkPanel from '@/components/HomeEntry/WorkPanel.vue';
     max-width: 400px;
     min-width: 200px;
     width: 20%;
-    border-left: 1px solid #ddd;
+    border-left: var(--xc-border);
 }
 </style>

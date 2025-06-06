@@ -1,12 +1,13 @@
 <template>
     <div class="pagination">
-        <button @click="btnclk_prevPage" :disabled="currentPage === 1">上一页</button>
+        <button @click="btnclk_prevPage" :disabled="currentPage === 1" class="xc-button pagination-btn">上一页</button>
         <span>第 {{ currentPage }} 页 / 共 {{ totalPages }} 页</span>
-        <button @click="btnclk_nextPage" :disabled="currentPage === totalPages">下一页</button>
+        <button @click="btnclk_nextPage" :disabled="currentPage === totalPages"
+            class="xc-button pagination-btn">下一页</button>
         <span>总数: {{ totalItems }}</span>
         <label>
             每页数量:
-            <select v-model="pageSize" @change="btnclk_chgePageSize">
+            <select v-model="pageSize" @change="btnclk_chgePageSize" class="xc-select pagination-slt">
                 <option value="10">10</option>
                 <option value="20">20</option>
                 <option value="50">50</option>
@@ -18,9 +19,10 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
+import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-import Utils from '@/utils/utils';
+import '@/assets/common.css'
 
 const totalItems = computed(() => {
     return appStore.curFileTotal
@@ -72,26 +74,21 @@ function btnclk_chgePageSize() {
     flex-wrap: wrap;
     gap: 10px;
     padding: 0px;
-    background-color: #e0e0e0;
+    color: var(--xc-text-color);
+    background-color: var(--xc-background-color);
 }
 
-.pagination button {
+.pagination-btn {
+    margin: 0;
     padding: 0px;
-    cursor: pointer;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    height: 20px;
+    font-size: small;
 }
 
-.pagination button:disabled {
-    background-color: #e0e0e0;
-    color: #a0a0a0;
-    cursor: not-allowed;
-}
-
-.pagination select {
+.pagination-slt {
+    font-size: small;
     padding: 0px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    margin: 0px;
+    height: 20px;
 }
 </style>

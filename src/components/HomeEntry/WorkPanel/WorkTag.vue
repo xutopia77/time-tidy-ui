@@ -1,7 +1,7 @@
 <template>
     <div>
         <input v-model="newTag" @keyup.enter="addTag" placeholder="输入新标签并按回车键添加" class="tag-input" />
-        <div v-for="(tag, index) in fileTags" :key="index" class="tag">
+        <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag">
             {{ tag }}
             <button @click="removeTag(tag)" class="delete-btn">x</button>
         </div>
@@ -58,21 +58,21 @@ const removeTag = (tagName: string) => {
 
 <style scoped>
 .tag-input {
-    padding: 2px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
     width: 160px;
+    height: var(--xc-normal-height);
+    background-color: var(--xc-background-color);
+    color: var(--xc-text-color);
+    border: var(--xc-border);
+    border-radius: 4px;
+    outline: none;
+    padding: var(--xc-normal-padding);
+    margin: var(--xc-normal-margin);
 }
 
-.tag {
-    display: inline-block;
-    margin: 2px;
-    /* padding: 2px; */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f5f5f5;
-    transition: all 0.3s;
+.tag-input:hover {
+    background-color: var(--xc-background-color);
+    /* 设置鼠标悬停时的背景颜色 */
+    border: var(--xc-border-hover);
 }
 
 .delete-btn {

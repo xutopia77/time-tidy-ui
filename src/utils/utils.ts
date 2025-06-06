@@ -97,27 +97,45 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
             appStore.curAllDirs = dirs;
         }
         const dirs: DatTypes.DirItem[] = []
+        appStore.curDirs = [];
         const jRecords = jData.data.dirs.records;
+        console.log(`curpath:[${appStore.curPath}], dirs:${dirs}`);
         if (jRecords != null) {
             for (const jRecord of jRecords) {
                 if (jRecord.Type == 0) {
                     continue; // skip the root path
                 }
                 const itemPath = "/" + jRecord.Path;
-                let subPath = itemPath.substring(appStore.curPath.length);
-                if (subPath.startsWith('/')) {
-                    subPath = subPath.substring(1);
-                }
-                if (subPath.includes('/')) {
+                const iteamPaths = itemPath.split('/');
+                const curPaths = appStore.curPath === "/" ? [''] : appStore.curPath.split('/');
+                // console.log(`itemPath:${itemPath},------ iteamPaths:[${iteamPaths}],------ curPaths:[${curPaths}],${iteamPaths.length}, ${curPaths.length}`);
+                if (iteamPaths.length <= curPaths.length) {
+                    // console.log(`continue1, iteamPaths.length:${iteamPaths.length}, curPaths.length:${curPaths.length}`);
                     continue;
                 }
-                if (!itemPath.startsWith(appStore.curPath) || itemPath == appStore.curPath) {
+
+                let bNot = false
+                let i = 0
+                for (i = 0; i < curPaths.length; i++) {
+                    if (iteamPaths[i] != curPaths[i]) {
+                        // console.log(`continue2, iteamPaths[${i}]:${iteamPaths[i]}, curPaths[${i}]:${curPaths[i]}`);
+                        bNot = true
+                        break
+                    }
+                }
+                if (bNot) {
+                    continue
+                }
+                if (iteamPaths.length > curPaths.length + 1) {
+                    // console.log(`continue3, iteamPaths.length:${iteamPaths.length}, curPaths.length:${curPaths.length}`);
                     continue;
                 }
+                const curName = iteamPaths[i]
                 const dirItem = new DatTypes.DirItem();
                 dirItem.id = jRecord.ID;
                 dirItem.rootPathId = jRecord.RootPathId;
-                dirItem.name = jRecord.Path;
+                // dirItem.name = jRecord.Path;
+                dirItem.name = curName
                 dirItem.icon = '/assets/images/folders.svg'
                 dirItem.type = DatTypes.FileType.folder;
                 dirItem.path = itemPath;
@@ -242,7 +260,7 @@ function files_path_chg(_req: DatTypes.FilePathChgReq): DatTypes.Resp {
             console.error('Error fetching project info:', error);
             resp.code = -1;
             resp.status = error.message;
-            Utils.message_notify({ content: ` 文件删除失败\n${error.message}` })
+            Utils.message_notify({ content: `文件操作失败\n${error.message}` })
         })
     return resp;
 }
@@ -265,7 +283,7 @@ function files_delete(_req: DatTypes.FileDeleteReq): DatTypes.Resp {
             console.error('Error fetching project info:', error);
             resp.code = -1;
             resp.status = error.message;
-            Utils.message_notify({ content: ` 文件删除失败\n${error.message}` })
+            Utils.message_notify({ content: `文件操作失败\n${error.message}` })
         })
     return resp;
 }
@@ -286,7 +304,7 @@ function project_health(): DatTypes.Resp {
         .catch((error) => {
             resp.code = -1;
             resp.status = error.message;
-            Utils.message_notify({ content: ` 数据健康度检查失败\n${error.message}` })
+            Utils.message_notify({ content: `数据健康度检查失败\n${error.message}` })
         })
     return resp;
 }

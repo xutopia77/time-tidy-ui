@@ -1,27 +1,29 @@
 <template>
     <div class="move-file-container">
-        <p>选择目标路径</p>
-        <table class="path-table">
-            <thead>
-                <tr>
-                    <th class="index-col">序号</th>
-                    <th>路径</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item, index) in allDirs" :key="index"
-                    :class="{ 'selected': selectedPathItem?.path === item.path }" @click="selectPath(item)">
-                    <td class="index-col">{{ index + 1 }}</td>
-                    <td>{{ item.path }}</td>
-                </tr>
-            </tbody>
-        </table>
-        <div v-if="selectedPathItem != null" class="selected-path-info">
-            <p>已选中路径: {{ selectedPathItem.path }}</p>
+        <div class="table-content xc-scrollbar">
+            <table class="path-table">
+                <thead>
+                    <tr>
+                        <th class="index-col">序号</th>
+                        <th>路径</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in allDirs" :key="index"
+                        :class="{ 'selected': selectedPathItem?.path === item.path }" @click="selectPath(item)">
+                        <td class="index-col">{{ index + 1 }}</td>
+                        <td>{{ item.path }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <button class="confirm-btn" @click="confirmMove" :disabled="!selectedPathItem">
-            确认
-        </button>
+        <div class="operate-content">
+            <p class="info-content">选择目标路径:{{ selectedPathItem != null ? selectedPathItem.path : "" }}</p>
+            <button class="xc-button" @click="confirmMove" :disabled="!selectedPathItem">
+                确认
+            </button>
+        </div>
+
     </div>
 </template>
 
@@ -32,7 +34,7 @@ import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-
+import '@/assets/common.css'
 const allDirs = computed(() => {
     return appStore.curAllDirs
 })
@@ -82,22 +84,58 @@ const confirmMove = async () => {
 
 <style scoped>
 .move-file-container {
-    padding: 2px;
+    padding: 0px;
     margin: 0px;
     width: 100%;
+    height: 100%;
+    color: var(--xc-text-color);
+    background-color: var(--xc-background-color);
+}
+
+.operate-content {
+    width: 100%;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: flex-end;
+    background-color: var(--xc-background-color-hover);
+    border-radius: 14px;
+}
+
+.info-content {
+    margin: 0px;
+    padding: 0px;
+    padding-right: 16px;
+}
+
+.table-content {
+    width: 100%;
+    height: calc(100% - 40px);
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    text-align: center;
 }
 
 .path-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 2px;
+    /* margin-bottom: 2px; */
+    border: var(--xc-border);
+    color: var(--xc-text-color);
 }
 
 .path-table th,
 .path-table td {
-    border: 1px solid #ddd;
+    border: var(--xc-border);
+    /* 设置单元格边框 */
     padding: 2px;
     text-align: left;
+}
+
+.path-table thead th {
+    background-color: #232430;
 }
 
 /* 为序号列添加特定宽度 */
@@ -110,30 +148,13 @@ const confirmMove = async () => {
 }
 
 .path-table tr:hover {
-    background-color: #f5f5f5;
+    background-color: #232430;
+    /* 设置行悬停背景色 */
     cursor: pointer;
 }
 
 .path-table tr.selected {
-    background-color: #e0f7fa;
-}
-
-.selected-path-info {
-    margin-bottom: 2px;
-    color: #2196f3;
-}
-
-.confirm-btn {
-    padding: 2px;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.confirm-btn:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+    background-color: #232430;
+    /* 设置选中行背景色 */
 }
 </style>

@@ -1,33 +1,28 @@
 <template>
     <div>
-        <label>
-            排序依据:
-            <select v-model="sortBy">
-                <option value="">默认</option>
-                <option value="name">名称</option>
-                <option value="size">大小</option>
-                <option value="time">时间</option>
-                <option value="type">类型</option>
-            </select>
-        </label>
-        <label>
-            排序顺序:
-            <select v-model="sortOrder">
-                <option value="asc">升序</option>
-                <option value="desc">降序</option>
-            </select>
-        </label>
-        <label>
-            文件夹:
-            <select v-model="pathType">
-                <option value="curPath">当前路径</option>
-                <option value="allPath">所有路径</option>
-            </select>
-        </label>
+        <label> 排序依据: </label>
+        <select v-model="sortBy" class="xc-select">
+            <option value="">默认</option>
+            <option value="name">名称</option>
+            <option value="size">大小</option>
+            <option value="time">时间</option>
+            <option value="type">类型</option>
+        </select>
+        <label> 排序顺序: </label>
+        <select v-model="sortOrder" class="xc-select">
+            <option value="asc">升序</option>
+            <option value="desc">降序</option>
+        </select>
+        <br>
+        <label>文件夹:</label>
+        <select v-model="pathType" class="xc-select">
+            <option value="curPath">当前路径</option>
+            <option value="allPath">所有路径</option>
+        </select>
         <div class="tags-panel">
             <label> 文件标签: </label>
             <!-- 动态绑定 selected 类 -->
-            <div v-for="(tag, index) in fileTags" :key="index" class="tag" :class="{ selected: isTagSelected(tag) }"
+            <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag" :class="{ selected: isTagSelected(tag) }"
                 @click="btnclk_tag(tag)">
                 {{ tag }}
             </div>
@@ -37,9 +32,10 @@
 
 <script setup lang="ts">
 import Utils from '@/utils/utils';
-import { useAppStore } from '@/stores/AppStore';
 import { computed } from 'vue';
+import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
+import '@/assets/common.css'
 
 const fileTags = computed(() => {
     // 初始化一个 Set 用于存储不重复的标签
@@ -111,37 +107,13 @@ function btnclk_tag(tag: string) {
 </script>
 
 <style scoped>
-/* 可以添加一些样式来美化选择框 */
 label {
     margin-left: 2px;
-}
-
-select {
-    margin-left: 2px;
+    color: var(--xc-text-color);
+    font-size: small;
 }
 
 .tags-panel {
     display: flex;
-}
-
-.tag {
-    display: inline-block;
-    margin: 2px;
-    /* padding: 2px; */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #f5f5f5;
-    transition: all 0.3s;
-    cursor: pointer;
-}
-
-.tag:hover {
-    background-color: #e0e0e0;
-}
-
-/* 选中状态样式 */
-.tag.selected {
-    background-color: #2196F3;
-    color: white;
 }
 </style>

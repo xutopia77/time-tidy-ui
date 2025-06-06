@@ -30,10 +30,19 @@ const logContent = computed(() => {
     flex: 1;
     margin: 10px;
     padding: 10px;
-    border: 1px solid #ccc;
+    color: var(--xc-text-color);
+    background-color: var(--xc-background-color);
+    border: var(--xc-border);
+    outline: none;
     border-radius: 4px;
     resize: none;
     width: calc(100% - 40px);
     height: calc(100% - 40px);
+}
+
+.log-textarea:hover {
+    background-color: var(--xc-background-color);
+    /* 设置鼠标悬停时的背景颜色 */
+    border: var(--xc-border-hover);
 }
 </style>

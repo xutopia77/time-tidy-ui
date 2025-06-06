@@ -19,7 +19,7 @@ const fileSearchConditionInit: DataTypes.FileSearchCondition = {
     sortOrder: 'asc', // asc, desc
     pathType: 'curPath', // curPath, allPath
     page: 1,
-    pageSize: 10,
+    pageSize: 50,
     tags: [], // tags
 };
 
@@ -54,8 +54,8 @@ export const useAppStore = defineStore('app', {
     state: (): AppStore => ({
         platform: DataTypes.PlatformType.browser,
         envMode: DataTypes.EnvModeType.pro,
-        cardWidth: 390, // 卡片宽度
-        cardHeight: 390, // 卡片高度
+        cardWidth: 180, // 卡片宽度
+        cardHeight: 180, // 卡片高度
         // 
         srvPrefix: 'http://127.0.0.1:38080', // debug，electron
         // srvPrefix: '', // release

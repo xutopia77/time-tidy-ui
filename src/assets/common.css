@@ -1,14 +1,52 @@
 :root {
-    --common-background-color: #ffffff;
+    --xc-background-color: #13131a;
+    --xc-background-color-hover: #25262e;
+    --xc-border: 1px solid #2a2c3a;
+    --xc-border-hover: 1px solid #44465a;
+    --xc-text-color: #c2cad1;
+    --xc-normal-height: 28px;
+    --xc-normal-padding: 2px;
+    --xc-normal-margin: 2px;
 }
 
+.xc-button {
+    height: var(--xc-normal-height);
+    background-color: var(--xc-background-color);
+    /* 设置背景颜色 */
+    color: var(--xc-text-color);
+    /* 设置字体颜色 */
+    border: var(--xc-border);
+    /* 设置边框颜色和宽度 */
+    border-radius: 4px;
+    padding: var(--xc-normal-padding) 8px;
+    margin: 0;
+    /* 添加内边距让按钮更好看 */
+    cursor: pointer;
+    /* 鼠标悬停时显示指针 */
+    display: inline-block;
+    /* 确保按钮为行内块元素 */
+}
+
+.xc-button:hover {
+    outline: none;
+    border: var(--xc-border-hover);
+}
+
+.xc-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    color: black;
+}
+
+/* ==================================== card */
 .xc-card {
     width: 390px;
     height: 390px;
     padding: 0px;
     margin: 4px;
-    transition: background-color 0.3s;
-    border: 1px solid #ddd;
+    color: var(--xc-text-color);
+    /* border: var(--xc-border); */
+    border: none;
     border-radius: 8px;
     text-align: center;
     position: relative;
@@ -18,7 +56,8 @@
 }
 
 .xc-card:hover {
-    background-color: #f0f0f0;
+    background-color: var(--xc-background-color-hover);
+    border: var(--xc-border-hover);
 }
 
 .xc-card-checkbox-container {
@@ -59,4 +98,149 @@
     font-size: small;
     height: 20px;
     width: 100%;
+}
+
+/* ==================================== select */
+
+.xc-select {
+    margin-left: 2px;
+    color: var(--xc-text-color);
+    /* 文字颜色 */
+    background-color: #333;
+    /* 背景色 */
+    border: 1px solid #555;
+    /* 边框颜色和宽度 */
+    border-radius: 4px;
+    /* 边框圆角 */
+    padding: 4px 8px;
+    /* 内边距 */
+    outline: none;
+    /* 移除默认聚焦轮廓 */
+}
+
+.xc-select:hover {
+    border-color: #777;
+    /* 鼠标悬停时边框颜色 */
+}
+
+.xc-select:focus {
+    border-color: #4a90e2;
+    /* 获得焦点时边框颜色 */
+}
+
+/* 针对 option 标签设置样式 */
+.xc-select option {
+    background-color: #333;
+    color: var(--xc-text-color);
+}
+
+/* ==================================== checkbox */
+.xc-checkbox {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background-color: #333;
+    /* 背景色 */
+    border: 1px solid #555;
+    /* 边框颜色和宽度 */
+    border-radius: 3px;
+    /* 圆角 */
+    cursor: pointer;
+    position: relative;
+    outline: none;
+}
+
+.xc-checkbox:hover {
+    border-color: #777;
+    /* 鼠标悬停时边框颜色 */
+}
+
+.xc-checkbox:checked {
+    background-color: #4a90e2;
+    /* 选中时的背景色 */
+    border-color: #4a90e2;
+    /* 选中时的边框颜色 */
+}
+
+.xc-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.xc-checkbox:focus {
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+    /* 获得焦点时的阴影效果 */
+}
+
+/* ==================================== tag */
+.xc-tag {
+    display: inline-block;
+    margin: 2px;
+    padding: 0px;
+    padding-right: 6px;
+    border: var(--xc-border);
+    border-radius: 4px;
+    background-color: var(--xc-background-color);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.xc-tag:hover {
+    background-color: var(--xc-background-color-hover);
+    border: var(--xc-border-hover);
+}
+
+/* 选中状态样式 */
+.xc-tag.selected {
+    background-color: #2196F3;
+    color: white;
+}
+
+/* ==================================== scrollbar */
+.xc-scrollbar {
+    overflow: auto;
+    /* 添加 overflow 属性，内容超出时自动显示滚动条 */
+}
+
+/* 自定义滚动条整体样式 */
+.xc-scrollbar::-webkit-scrollbar {
+    width: 12px;
+    /* 垂直滚动条宽度 */
+    height: 12px;
+    /* 水平滚动条高度 */
+}
+
+/* 自定义滚动条轨道样式 */
+.xc-scrollbar::-webkit-scrollbar-track {
+    background: var(--xc-background-color);
+    /* 轨道背景颜色 */
+    border-radius: 6px;
+    /* 轨道圆角 */
+    border: none;
+    /* 轨道边框 */
+}
+
+/* 自定义滚动条滑块样式 */
+.xc-scrollbar::-webkit-scrollbar-thumb {
+    background: #2a2c3a;
+    /* 滑块颜色 */
+    border-radius: 6px;
+    /* 滑块圆角 */
+    border: none;
+    /* 滑块边框 */
+}
+
+/* 鼠标悬停在滑块上时的样式 */
+.xc-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    /* 悬停时滑块颜色 */
 }

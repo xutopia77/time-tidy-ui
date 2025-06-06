@@ -29,6 +29,7 @@ import Utils from '@/utils/utils'
 import * as DatTypes from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
+import '@/assets/common.css'
 const pageCtrl = computed(() => {
     return appStore.pageCtrl
 })
@@ -122,7 +123,7 @@ onUnmounted(() => {
     height: 100%;
     width: 100%;
     opacity: 1;
-    background-color: var(--common-background-color);
+    background-color: var(--xc-background-color);
 }
 
 .image-view {
@@ -135,15 +136,17 @@ onUnmounted(() => {
 .header-panel-section {
     /* 可根据需要调整 HeaderPanel 的高度 */
     flex: 0 0 auto;
-    border-bottom: 1px solid #ddd;
+    border-bottom: var(--xc-border-hover);
     /* 添加底部边框 */
     height: 25px;
     width: 100%;
+    background-color: var(--xc-background-color);
 }
 
 .page-view {
     flex: 1;
     width: 100%;
     height: calc(100% - 25px);
+    background-color: var(--xc-background-color);
 }
 </style>
