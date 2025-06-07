@@ -1,8 +1,10 @@
 <template>
     <div>
         <input v-model="newTag" @keyup.enter="addTag" placeholder="输入新标签并按回车键添加" class="tag-input" />
-        <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag">
-            {{ tag }}
+        <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag" :style="{
+            backgroundColor: tag.color
+        }">
+            {{ tag.name }}
             <button @click="removeTag(tag)" class="delete-btn">x</button>
         </div>
     </div>
@@ -46,11 +48,11 @@ const addTag = () => {
     Utils.files_tag_set(req)
 }
 
-const removeTag = (tagName: string) => {
+const removeTag = (tag: DatType.FileItemTag) => {
     if (appStore.curSltFile?.id == null) return
     const req: DatType.FilesTagSetReq = {
         fileIds: [appStore.curSltFile.id],
-        tagName: tagName
+        tagName: tag.name
     };
     Utils.files_tag_delete(req)
 };

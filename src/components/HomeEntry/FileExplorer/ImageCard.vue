@@ -1,18 +1,27 @@
 <template>
     <div class="xc-card" :style="{
         backgroundColor: isChecked ? 'var(--xc-background-color-hover)' : 'transparent',
-        width: `${cardWidth}px`,
-        height: `${cardHeight}px`
+        width: `${cardWidth}px`
+        // 移除 height 设置，让高度自适应
     }">
         <!-- 左上角的 checkbox -->
         <div class="xc-card-checkbox-container">
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" class="xc-checkbox" />
         </div>
         <div class="xc-card-content">
-            <div class="xc-card-icon" @click="btnclk_handleClickImage">
+            <div class="xc-card-icon" :style="{
+                height: `${cardHeight}px`
+            }" @click="btnclk_handleClickImage">
                 <img :src="item.icon" alt="icon" />
             </div>
-            <div class="xc-card-desc" @click="btnclk_handleClickItemMsg">{{ item.name }}</div>
+            <div class="xc-card-desc" @click="btnclk_handleClickItemMsg">
+                <p class="xc-card-name">{{ item.name }}</p>
+                <div class="xc-card-tags">
+                    <span v-for="(tag, index) in item.tags" :key="index" class="xc-tag" :style="{
+                        backgroundColor: tag.color
+                    }">{{ tag.name }}</span>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -30,7 +39,6 @@ const props = defineProps<{ item: DatType.FileItem; }>();
 const cardWidth = computed(() => {
     return appStore.cardWidth;
 });
-
 const cardHeight = computed(() => {
     return appStore.cardWidth;
 });
@@ -63,4 +71,27 @@ const btnclk_handleClickItemMsg = () => {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.xc-card {
+    /* 让高度自适应内容 */
+    height: auto;
+}
+
+.xc-card-content {
+    /* 让内容区域高度自适应 */
+    height: auto;
+}
+
+.xc-card-desc {
+    /* 让描述区域高度自适应 */
+    height: auto;
+}
+
+.xc-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    /* 允许标签换行 */
+    /* 让标签区域高度自适应 */
+    height: auto;
+}
+</style>

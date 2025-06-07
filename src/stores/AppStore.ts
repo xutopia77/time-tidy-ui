@@ -39,6 +39,7 @@ export type AppStore = {
     pageCtrl: DataTypes.AppPageCtrl,
     pageCtrlInit: DataTypes.AppPageCtrl,
     // 
+    allTags: DataTypes.TagItem[], // 所有标签列表
     curFiles: DataTypes.FileItem[], // 当前展示的文件列表
     curSltFile: DataTypes.FileItem | null, // 当前选中的文件
     curDirs: DataTypes.DirItem[], // 当前展示的文件夹列表
@@ -54,8 +55,8 @@ export const useAppStore = defineStore('app', {
     state: (): AppStore => ({
         platform: DataTypes.PlatformType.browser,
         envMode: DataTypes.EnvModeType.pro,
-        cardWidth: 180, // 卡片宽度
-        cardHeight: 180, // 卡片高度
+        cardWidth: 220, // 卡片宽度
+        cardHeight: 220, // 卡片高度
         // 
         srvPrefix: 'http://127.0.0.1:38080', // debug，electron
         // srvPrefix: '', // release
@@ -67,6 +68,7 @@ export const useAppStore = defineStore('app', {
         pageCtrlInit: pageCtrlInit,
         setOperateType: '', // 当前操作类型 files_cpy, files_mv
         // 
+        allTags: [], // 所有标签列表
         curFiles: [],
         curSltFile: null,
         curDirs: [],

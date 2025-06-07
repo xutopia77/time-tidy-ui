@@ -7,6 +7,8 @@
     --xc-normal-height: 28px;
     --xc-normal-padding: 2px;
     --xc-normal-margin: 2px;
+    /* ------ local */
+    --xc-card-desc-height: 60px;
 }
 
 .xc-button {
@@ -76,7 +78,7 @@
 
 .xc-card-icon {
     width: calc(100% - 4px);
-    height: calc(100% - 24px);
+    height: calc(100% - var(--xc-card-desc-height) - 4px);
     padding: 2px;
     margin: 0;
 }
@@ -96,8 +98,33 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: small;
+    height: var(--xc-card-desc-height);
+    width: 100%;
+}
+
+.xc-card-name {
+    padding: 0px;
+    margin: 0px;
+    font-size: small;
+}
+
+.xc-card-tags {
+    padding: 0px;
+    margin: 0px;
+    font-size: small;
     height: 20px;
     width: 100%;
+}
+
+.xc-card-tags span {
+    padding-left: 2px;
+    padding-right: 2px;
+    margin: 2px;
+    border-radius: 4px;
+    height: 20px;
+    cursor: pointer;
+    color: var(--xc-text-color);
+    background-color: var(--xc-background-color);
 }
 
 /* ==================================== select */

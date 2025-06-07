@@ -109,6 +109,8 @@ const confirmMove = async () => {
     padding-right: 16px;
 }
 
+/* ------ table */
+
 .table-content {
     width: 100%;
     height: calc(100% - 40px);

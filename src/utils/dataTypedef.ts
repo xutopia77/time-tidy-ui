@@ -32,6 +32,17 @@ export function fileTypeToString(fileType: FileType): string {
     return fileType;
 }
 
+export class TagItem {
+    name = "";
+    color = "#e6475e";
+    id = 0;
+}
+
+export class FileItemTag {
+    name: string = "";
+    color: string = "#e6475e";
+}
+
 export class FileItem {
     id: number = 0;
     rootPathId: number = 0;
@@ -40,7 +51,7 @@ export class FileItem {
     path: string = "";
     fullpath = "";
     icon: string = "";
-    tags: string[] = [];
+    tags: FileItemTag[] = [];
     size?: number;
     time?: string = "";
     checked: boolean = false;

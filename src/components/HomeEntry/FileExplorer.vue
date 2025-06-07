@@ -52,8 +52,13 @@ const dirs = computed(() => {
 .file-grid {
     padding: 0px;
     margin: 0px;
+    /* display: flex;
+    flex-wrap: wrap; */
+
     display: flex;
+    align-items: flex-start;
     flex-wrap: wrap;
+
     height: calc(100% - 32px - 32px);
     /* background-color: bisque; */
 }

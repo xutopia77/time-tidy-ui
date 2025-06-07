@@ -53,7 +53,14 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
                 fileItem.type = fileType;
                 fileItem.icon = appStore.srvPrefix + "/static_thumb/" + fileItem.id + "_thumbnail.jpg";
                 if (jRecord.Tags != null) {
-                    fileItem.tags = jRecord.Tags
+                    for (const x of jRecord.Tags) {
+                        const tag = new DatTypes.FileItemTag();
+                        tag.name = x.Name
+                        tag.color = x.Color == '' ? tag.color : x.Color
+                        fileItem.tags.push(tag)
+                    }
+
+
                 }
                 files.push(fileItem);
             }
@@ -198,6 +205,56 @@ function files_get(_req: DatTypes.FilesGetReq | null) {
             console.error('Error fetching project info:', error);
         });
 }
+
+function tags_get() {
+    appStore.allTags = [];
+    axios.post(`${appStore.srvPrefix}/api/v1/tags_get`)
+        .then((response) => {
+            console.log('tag info:', response.data);
+            const resp = response.data;
+            if (resp.code != 0) {
+                Utils.message_notify({ content: `获取标签失败:${resp.status}` })
+                return;
+            }
+            // const tagsColors = ["#6577bf", "#e8cb95", "#e4775e", "#c9cde7", "#34ce72", "#d3adf7", "#4ac0f2"]
+            // const idx = 0;
+            for (const item of resp.data) {
+                if (item.TagName == "") {
+                    continue;
+                }
+                const tagItem = new DatTypes.TagItem();
+                tagItem.name = item.TagName;
+
+                tagItem.color = item.Color == '' ? tagItem.color : item.Color;
+
+
+                tagItem.id = item.ID;
+                appStore.allTags.push(tagItem);
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching project info:', error);
+        });
+}
+
+function tags_set(tag: DatTypes.TagItem) {
+    appStore.allTags = [];
+    axios.post(`${appStore.srvPrefix}/api/v1/tags_set`, JSON.stringify(tag))
+        .then((response) => {
+            console.log('tag info:', response.data);
+            const resp = response.data;
+            if (resp.code != 0) {
+                Utils.message_notify({ content: `获取标签失败:${resp.status}` })
+                return;
+            }
+            Utils.tags_get()
+            Utils.message_notify({ content: `标签设置成功` })
+        })
+        .catch((error) => {
+            console.error('Error fetching project info:', error);
+        });
+}
+
 
 function files_tag_set(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
     const resp: DatTypes.Resp = {
@@ -399,6 +456,8 @@ class Utils {
     constructor() { }
     static convert_to_file_item = convert_to_file_item;
     static files_get = files_get;
+    static tags_get = tags_get;
+    static tags_set = tags_set;
     static files_tag_set = files_tag_set;
     static files_tag_delete = files_tag_delete;
     static files_path_chg = files_path_chg;

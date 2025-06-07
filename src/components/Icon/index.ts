@@ -7,6 +7,8 @@ import MinusIcon from '@/components/Icon/MinusIcon.vue';
 import PlusIcon from '@/components/Icon/PlusIcon.vue';
 import HardDiskIcon from '@/components/Icon/HardDiskIcon.vue';
 import SettingIcon from '@/components/Icon/SettingIcon.vue';
+import ApplicationIcon from '@/components/Icon/ApplicationIcon.vue';
+import BookIcon from '@/components/Icon/BookIcon.vue';
 
 export {
     FileSettingIcon,
@@ -18,4 +20,6 @@ export {
     SearchIcon,
     SettingIcon,
     TagOneIcon,
+    ApplicationIcon,
+    BookIcon,
 };

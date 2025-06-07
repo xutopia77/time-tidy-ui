@@ -23,14 +23,15 @@
             <label> 文件标签: </label>
             <!-- 动态绑定 selected 类 -->
             <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag" :class="{ selected: isTagSelected(tag) }"
-                @click="btnclk_tag(tag)">
-                {{ tag }}
+                :style="{ backgroundColor: tag.color }" @click="btnclk_tag(tag)">
+                {{ tag.name }}
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import { computed } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
@@ -38,22 +39,28 @@ const appStore = useAppStore()
 import '@/assets/common.css'
 
 const fileTags = computed(() => {
-    // 初始化一个 Set 用于存储不重复的标签
-    const uniqueTags = new Set<string>();
+    // 初始化一个 Set 用于存储不重复标签的唯一标识
+    const uniqueTagKeys = new Set<string>();
+    const uniqueTags: DatType.FileItemTag[] = [];
+
     // 遍历 appStore.curFiles
     for (const item of appStore.curFiles) {
         if (item.tags && Array.isArray(item.tags)) {
             // 遍历每个文件的 tags 数组
             for (const tag of item.tags) {
-                if (typeof tag === 'string') {
-                    // 将标签添加到 Set 中，Set 会自动去重
-                    uniqueTags.add(tag);
+                // 简单类型检查，确保 tag 符合 DatType.FileItemTag 基本结构
+                if (tag && typeof tag === 'object' && 'name' in tag && 'color' in tag) {
+                    // 生成标签的唯一标识
+                    const tagKey = `${tag.name}-${tag.color}`;
+                    if (!uniqueTagKeys.has(tagKey)) {
+                        uniqueTagKeys.add(tagKey);
+                        uniqueTags.push(tag as DatType.FileItemTag);
+                    }
                 }
             }
         }
     }
-    // 将 Set 转换为数组并返回
-    return Array.from(uniqueTags);
+    return uniqueTags;
 });
 
 // 排序依据
@@ -86,17 +93,17 @@ const pathType = computed({
 });
 
 // 判断标签是否被选中
-const isTagSelected = (tag: string) => {
-    return appStore.searchCon.tags.includes(tag);
+const isTagSelected = (tag: DatType.FileItemTag) => {
+    return appStore.searchCon.tags.includes(tag.name);
 };
 
 // 点击标签处理方法
-function btnclk_tag(tag: string) {
+function btnclk_tag(tag: DatType.FileItemTag) {
     const tags = appStore.searchCon.tags;
-    const tagIndex = tags.indexOf(tag);
+    const tagIndex = tags.indexOf(tag.name);
     if (tagIndex === -1) {
         // 标签不存在则添加
-        appStore.searchCon.tags.push(tag);
+        appStore.searchCon.tags.push(tag.name);
     } else {
         // 标签已存在则移除
         appStore.searchCon.tags.splice(tagIndex, 1);
@@ -115,5 +122,6 @@ label {
 
 .tags-panel {
     display: flex;
+    flex-wrap: wrap;
 }
 </style>
