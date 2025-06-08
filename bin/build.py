@@ -164,7 +164,14 @@ if args.type in ['app','app_dbg']:
         exit(1)
     #3，构建 electron
     if args.type == 'app':
+        pack_go()
         pack_electron()
+        exeSrcPath = 'D:/02_workspace/05_timeCapsule/time_capsule/appData'
+        exeDestPath = 'D:/02_workspace/05_timeCapsule/timeCapsule_ui/time_capsule_app_v2/time_capsule/dist/win-unpacked/resources/app.asar.unpacked/resources/time_capsule_exe/appData'
+        # 把exeSrcPath目录下的所有文件复制到exeDestPath目录下
+        shutil.copytree(exeSrcPath, exeDestPath, dirs_exist_ok=True)
+        # 查看exeDestPath目录下的所有文件
+        print(os.listdir(exeDestPath))
     print('------------app 打包完成')
 
     # 4, 打包go程序

@@ -17,9 +17,9 @@
             <div class="xc-card-desc" @click="btnclk_handleClickItemMsg">
                 <p class="xc-card-name">{{ item.name }}</p>
                 <div class="xc-card-tags">
-                    <span v-for="(tag, index) in item.tags" :key="index" class="xc-tag" :style="{
+                    <div v-for="(tag, index) in item.tags" :key="index" class="xc-tag" :style="{
                         backgroundColor: tag.color
-                    }">{{ tag.name }}</span>
+                    }">{{ tag.name }}</div>
                 </div>
             </div>
         </div>

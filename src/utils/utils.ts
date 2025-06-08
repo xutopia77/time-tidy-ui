@@ -55,8 +55,11 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
                 if (jRecord.Tags != null) {
                     for (const x of jRecord.Tags) {
                         const tag = new DatTypes.FileItemTag();
-                        tag.name = x.Name
-                        tag.color = x.Color == '' ? tag.color : x.Color
+                        tag.name = x.name
+                        tag.color = x.color == '' ? tag.color : x.color
+                        if (tag.name == '') {
+                            continue;
+                        }
                         fileItem.tags.push(tag)
                     }
 
