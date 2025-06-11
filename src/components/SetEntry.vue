@@ -20,7 +20,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-import axios from 'axios';
+// import axios from 'axios';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 
@@ -52,25 +52,7 @@ function btnclk_set() {
         // 判断并转换路径风格
         basePath: convertToLinuxPath(basePath.value)
     };
-    axios.post(`${appStore.srvPrefix}/api/v1/project_set`, JSON.stringify(req))
-        .then((response) => {
-            console.log('file info:', response.data);
-            const resp = response.data
-            if (resp.code != 0) {
-                Utils.message_notify({ content: resp.msg, type: "error" })
-            }
-            else {
-                if (resp.doing == true) {
-                    Utils.message_notify({ content: "设置中", type: "warning" })
-                }
-                else {
-                    Utils.message_notify({ content: "设置完成", type: "success" })
-                }
-            }
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-        });
+    Utils.project_set(req)
 }
 
 onMounted(() => {

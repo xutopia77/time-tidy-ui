@@ -40,11 +40,15 @@ const cardHeight = computed(() => {
     return appStore.cardWidth;
 });
 
-// 记录 checkbox 的状态
 const isChecked = ref(props.checked || false);
 
 // 处理 checkbox 状态变化
 const handleCheckboxChange = () => {
+    appStore.curDirs.forEach((folder) => {
+        if (folder.id == props.item.id) {
+            folder.checked = isChecked.value;
+        }
+    })
 };
 
 function btnclk_dir() {

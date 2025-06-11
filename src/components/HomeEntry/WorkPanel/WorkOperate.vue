@@ -38,6 +38,7 @@ function btnclk_operate_file(op: string) {
 function btnclk_delete_file() {
     const req: DatType.FileDeleteReq = {
         fileIds: [],
+        dirIds: [],
         bRemoveToDtrash: true,
     };
     for (const item of appStore.curFiles) {
@@ -45,7 +46,12 @@ function btnclk_delete_file() {
             req.fileIds.push(item.id)
         }
     }
-    if (req.fileIds.length == 0) {
+    for (const item of appStore.curDirs) {
+        if (item.checked) {
+            req.dirIds.push(item.id)
+        }
+    }
+    if (req.fileIds.length == 0 && req.dirIds.length == 0) {
         Utils.message_notify({ content: '请选择要操作的文件' })
         return;
     }

@@ -8,25 +8,14 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
+import Utils from '@/utils/utils'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 
 const fileinfo = computed(() => {
     const fileInfo = { name: '', size: '0KB', createTime: '', path: '' }
     fileInfo.name = appStore.curSltFile?.name || ''
-    if (appStore.curSltFile?.size) {
-        const sizeKb = appStore.curSltFile.size / 1024;
-        if (sizeKb < 1024) {
-            fileInfo.size = sizeKb.toFixed(2) + 'KB'
-        }
-        else if (sizeKb < 1024 * 1024) {
-            const sizeMb = sizeKb / 1024;
-            fileInfo.size = sizeMb.toFixed(2) + 'MB'
-        } else {
-            const sizeGb = sizeKb / (1024 * 1024);
-            fileInfo.size = sizeGb.toFixed(2) + 'GB'
-        }
-    }
+    fileInfo.size = Utils.gen_size_str(appStore.curSltFile?.size || 0)
     fileInfo.createTime = appStore.curSltFile?.time || ''
     fileInfo.path = appStore.curSltFile?.path || ''
     return fileInfo

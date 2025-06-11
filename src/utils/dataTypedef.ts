@@ -32,6 +32,17 @@ export function fileTypeToString(fileType: FileType): string {
     return fileType;
 }
 
+export class DirInfo {
+    count: number = 0;      // 文件数量
+    size: number = 0;       // 文件大小（字节）
+    dirCount: number = 0;   // 文件夹数量
+}
+
+export class FilePathChgResp {
+    dirInfos: DirInfo[] = [];
+    bNeedSure: boolean = false;
+}
+
 export class TagItem {
     name = "";
     color = "#e6475e";
@@ -52,7 +63,7 @@ export class FileItem {
     fullpath = "";
     icon: string = "";
     tags: FileItemTag[] = [];
-    size?: number;
+    size: number = 0;
     time?: string = "";
     checked: boolean = false;
 }
@@ -137,14 +148,17 @@ export class HeartBeat {
 
 export class FilePathChgReq {
     fileIds: number[] = [];
+    dirIds: number[] = [];
     distPath: string = "";
     type: string = "";//move, copy
     distRootPathId: number = 0;
     srcRootPathId: number = 0;
+    bNeedSure: boolean = true; // 如果请求中没有目录，这个参数不起作用
 }
 
 export class FileDeleteReq {
     fileIds: number[] = [];
+    dirIds: number[] = [];
     bRemoveToDtrash: boolean = true;
 }
 

@@ -56,6 +56,9 @@ const currentIndex = computed(() => {
 const currentImage = computed(() => imageList.value[currentIndex.value])
 
 const currentImageUrl = computed(() => {
+    if (appStore.pageCtrl.imageView.bShow == false) {
+        return '';
+    }
     const img = imageList.value[currentIndex.value]
     if (!img || !img.fullpath) {
         return '';

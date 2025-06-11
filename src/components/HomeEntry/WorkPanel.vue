@@ -76,10 +76,10 @@ const collapsedSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none
 
 // 管理每个折叠面板的展开状态
 const panelStates = ref({
-    basicInfo: false,
+    basicInfo: true,
     tagInfo: true,
-    operation: false,
-    search: false
+    operation: true,
+    search: true
 });
 type PanelName = keyof typeof panelStates.value;
 

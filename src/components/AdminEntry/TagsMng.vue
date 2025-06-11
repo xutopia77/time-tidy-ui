@@ -5,7 +5,7 @@
                 <thead>
                     <tr>
                         <th class="index-col">序号</th>
-                        <th>路径</th>
+                        <th>名称</th>
                         <th>颜色</th>
                         <th>操作</th>
                     </tr>

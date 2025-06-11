@@ -171,7 +171,7 @@ if args.type in ['app','app_dbg']:
         # 把exeSrcPath目录下的所有文件复制到exeDestPath目录下
         shutil.copytree(exeSrcPath, exeDestPath, dirs_exist_ok=True)
         # 查看exeDestPath目录下的所有文件
-        print(os.listdir(exeDestPath))
+        print("工程文件复制成功", os.listdir(exeDestPath))
     print('------------app 打包完成')
 
     # 4, 打包go程序

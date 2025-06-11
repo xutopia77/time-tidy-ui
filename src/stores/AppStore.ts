@@ -26,28 +26,27 @@ const fileSearchConditionInit: DataTypes.FileSearchCondition = {
 export type AppStore = {
     platform: DataTypes.PlatformType,
     envMode: DataTypes.EnvModeType,
-    cardWidth: number, // 卡片宽度
-    cardHeight: number, // 卡片高度
+    cardWidth: number,                          // 卡片宽度
+    cardHeight: number,                         // 卡片高度
     // 
-    prj: PrjInfo | null, // 当前项目信息
-    srvPrefix: string, // 服务器前缀
-    logInfo: string, // 日志信息
+    prj: PrjInfo | null,                        // 当前项目信息
+    srvPrefix: string,                          // 服务器前缀
+    logInfo: string,                            // 日志信息
 
-    messageNotify: DataTypes.Message[], // 消息通知
+    messageNotify: DataTypes.Message[],         // 消息通知
     // 
-    setOperateType: string, // 当前操作类型
+    setOperateType: string,                     // 当前操作类型
     pageCtrl: DataTypes.AppPageCtrl,
     pageCtrlInit: DataTypes.AppPageCtrl,
     // 
-    allTags: DataTypes.TagItem[], // 所有标签列表
-    curFiles: DataTypes.FileItem[], // 当前展示的文件列表
-    curSltFile: DataTypes.FileItem | null, // 当前选中的文件
-    curDirs: DataTypes.DirItem[], // 当前展示的文件夹列表
-    curSltDir: DataTypes.DirItem | null, // 当前选中的文件夹
-    curAllDirs: DataTypes.DirItem[], // 当前工程中所有文件夹列表
-    curFileTotal: number, // 当前文件列表的总数
-    searchCon: DataTypes.FileSearchCondition, // 文件搜索条件
-    curPath: string, // 当前路径
+    allTags: DataTypes.TagItem[],               // 所有标签列表
+    curFiles: DataTypes.FileItem[],             // 当前展示的文件列表
+    curSltFile: DataTypes.FileItem | null,      // 当前选中的文件
+    curDirs: DataTypes.DirItem[],               // 当前展示的文件夹列表
+    curAllDirs: DataTypes.DirItem[],            // 当前工程中所有文件夹列表
+    curFileTotal: number,                       // 当前文件列表的总数
+    searchCon: DataTypes.FileSearchCondition,   // 文件搜索条件
+    curPath: string,                            // 当前路径
     heartbeat: DataTypes.HeartBeat,
 }
 
@@ -72,7 +71,6 @@ export const useAppStore = defineStore('app', {
         curFiles: [],
         curSltFile: null,
         curDirs: [],
-        curSltDir: null,
         curAllDirs: [],
         curFileTotal: 0,
         searchCon: fileSearchConditionInit,

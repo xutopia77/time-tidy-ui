@@ -19,11 +19,18 @@
         </div>
         <div class="operate-content">
             <p class="info-content">选择目标路径:{{ selectedPathItem != null ? selectedPathItem.path : "" }}</p>
-            <button class="xc-button" @click="confirmMove" :disabled="!selectedPathItem">
+            <button class="xc-button" @click="btnclk_confirmMove" :disabled="!selectedPathItem">
                 确认
             </button>
         </div>
+        <div class="sure-dialog" v-if="isSureDialogVisible">
+            <div>
+                <p> {{ sureDialogContent }} </p>
+                <button @click="btnclk_sureDialog_confirm(true)" class="xc-button">确定</button>
+                <button @click="btnclk_sureDialog_confirm(false)" class="xc-button">取消</button>
+            </div>
 
+        </div>
     </div>
 </template>
 
@@ -44,16 +51,24 @@ const selectPath = (item: DatType.DirItem) => {
 };
 
 // 确认移动文件的方法
-const confirmMove = async () => {
+const confirmMove = async (bNeedSure: boolean) => {
+    if (selectedPathItem.value == null) {
+        Utils.message_notify({ content: '请选择目标路径' })
+        return;
+    }
     const selectedPath = selectedPathItem.value?.path;
-    if (selectedPathItem.value == null) return;
-    if (!selectedPath) return;
+    if (!selectedPath) {
+        Utils.message_notify({ content: '请选择目标路径' })
+        return;
+    }
     const req: DatType.FilePathChgReq = {
         fileIds: [],
+        dirIds: [],
         distPath: selectedPath,
         distRootPathId: selectedPathItem.value.rootPathId,
         srcRootPathId: 0,
         type: 'move',
+        bNeedSure: bNeedSure,
     };
 
     for (const item of appStore.curFiles) {
@@ -62,24 +77,82 @@ const confirmMove = async () => {
             req.srcRootPathId = item.rootPathId
         }
     }
-    if (req.fileIds.length == 0) {
+    for (const item of appStore.curDirs) {
+        if (item.checked) {
+            const srcDir = item.path;
+            const distDir = selectedPathItem.value?.path;
+            if (distDir.startsWith(srcDir)) {
+                Utils.message_notify({ content: '不能选择子目录' })
+                return;
+            }
+            req.dirIds.push(item.id)
+            req.srcRootPathId = item.rootPathId
+        }
+    }
+    if (req.fileIds.length == 0 && req.dirIds.length == 0) {
         Utils.message_notify({ content: '请选择要操作的文件' })
         return;
     }
     if (appStore.setOperateType == 'files_move') {
         req.type = 'move'
-        appStore.setOperateType = ''
     }
     else if (appStore.setOperateType == 'files_cpy') {
         req.type = 'copy'
-        appStore.setOperateType = ''
     }
     else {
         Utils.message_notify({ content: '请选择操作类型' })
         return;
     }
-    Utils.files_path_chg(req)
+    const resp = await Utils.files_path_chg(req)
+    console.log("files path change result:", resp)
+    if (resp.code == 0) {
+        if (resp.data?.bNeedSure == true) {
+            isSureDialogVisible.value = true;
+            const respDirInfo = new DatType.DirInfo();
+            for (const item of resp.data.dirInfos) {
+                respDirInfo.count += item.count;
+                respDirInfo.dirCount += item.dirCount;
+                respDirInfo.size += item.size;
+            }
+            let fileTotalSizeStr = `${respDirInfo.size} B`;
+            if (respDirInfo.size > 1024 * 1024 * 1024) {
+                // 转换为 GB 并保留两位小数
+                fileTotalSizeStr = `${(respDirInfo.size / (1024 * 1024 * 1024)).toFixed(2)} GB`
+            }
+            else if (respDirInfo.size > 1024 * 1024) {
+                // 转换为 MB 并保留两位小数
+                fileTotalSizeStr = `${(respDirInfo.size / (1024 * 1024)).toFixed(2)} MB`
+            }
+            else {
+                // 转换为 KB 并保留两位小数
+                fileTotalSizeStr = `${(respDirInfo.size / 1024).toFixed(2)} KB`
+            }
+            sureDialogContent.value = `file count: ${respDirInfo.count}, dir count: ${respDirInfo.dirCount}, file size: ${fileTotalSizeStr}`
+        }
+    }
 };
+
+// ------
+const isSureDialogVisible = ref(false);
+const sureDialogContent = ref<string>('');
+
+async function btnclk_sureDialog_confirm(bSure: boolean) {
+    console.log(`sure: ${bSure} `, typeof (bSure))
+    if (bSure) {
+        const resp = await confirmMove(false)
+        console.log(resp)
+    }
+    else {
+        // 取消操作，不执行任何操作
+        Utils.message_notify({ content: '操作已取消' })
+    }
+    isSureDialogVisible.value = false;
+}
+
+function btnclk_confirmMove() {
+    confirmMove(true)
+}
+
 </script>
 
 <style scoped>
@@ -158,5 +231,17 @@ const confirmMove = async () => {
 .path-table tr.selected {
     background-color: #232430;
     /* 设置选中行背景色 */
+}
+
+.sure-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 </style>

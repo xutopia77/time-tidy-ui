@@ -16,6 +16,10 @@
             </div>
             <div class="xc-card-desc" @click="btnclk_handleClickItemMsg">
                 <p class="xc-card-name">{{ item.name }}</p>
+                <p class="xc-card-name"><span style="color: #6c4d4d;">{{ Utils.gen_size_str(item.size) }}</span> <span
+                        style="color: #22586f;">{{ item.time }}</span>
+                </p>
+                <p class="xc-card-name"></p>
                 <div class="xc-card-tags">
                     <div v-for="(tag, index) in item.tags" :key="index" class="xc-tag" :style="{
                         backgroundColor: tag.color

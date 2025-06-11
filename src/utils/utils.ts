@@ -166,7 +166,7 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
     return resp;
 }
 
-function files_get(_req: DatTypes.FilesGetReq | null) {
+async function files_get(_req: DatTypes.FilesGetReq | null) {
 
     const req: DatTypes.FilesGetReq = {
         id: 0,
@@ -195,10 +195,10 @@ function files_get(_req: DatTypes.FilesGetReq | null) {
         if (_req.tags != null) { req.tags = _req.tags; }
     }
 
-    axios.post(`${appStore.srvPrefix}/api/v1/files_get`, JSON.stringify(req))
+    await axios.post(`${appStore.srvPrefix}/api/v1/files_get`, JSON.stringify(req))
         .then((response) => {
             console.log('file info:', response.data);
-            const resp: DatTypes.Resp = Utils.convert_to_file_item(JSON.stringify(response.data))
+            const resp: DatTypes.Resp = convert_to_file_item(JSON.stringify(response.data))
             if (resp.code === 0) {
             } else {
                 console.error('Error converting file items:', resp.status);
@@ -301,18 +301,45 @@ function files_tag_delete(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
     return resp;
 }
 
-function files_path_chg(_req: DatTypes.FilePathChgReq): DatTypes.Resp {
-    const resp: DatTypes.Resp = {
+async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.Resp<DatTypes.FilePathChgResp>> {
+    const resp: DatTypes.Resp<DatTypes.FilePathChgResp> = {
         code: 0,
         status: "",
+        data: new DatTypes.FilePathChgResp(),
+    }
+    if (resp.data == null || resp.data == undefined) {
+        resp.code = 1;
+        return resp;
     }
     _req.distPath = _req.distPath.substring(1);
 
-    axios.post(`${appStore.srvPrefix}/api/v1/files_path_chg`, JSON.stringify(_req))
+    await axios.post(`${appStore.srvPrefix}/api/v1/files_path_chg`, JSON.stringify(_req))
         .then((response) => {
+            if (resp.data == null || resp.data == undefined) {
+                console.log('resp.data is null or undefined');
+                resp.code = 1;
+                return resp;
+            }
             console.log('file info:', response.data);
             resp.code = response.data.code;
             resp.status = response.data.status;
+            const respDat = response.data.data
+            if (respDat != null) {
+                resp.data.bNeedSure = respDat.bNeedSure != null ? respDat.bNeedSure : false;
+                if (respDat.dirInfos != null) {
+                    for (const item of respDat.dirInfos) {
+                        const dirInfo = new DatTypes.DirInfo();
+                        dirInfo.count = item.count;
+                        dirInfo.size = item.size;
+                        dirInfo.dirCount = item.dirCount;
+                        resp.data?.dirInfos.push(dirInfo);
+                    }
+                }
+
+            }
+            if (resp.data.bNeedSure) {
+                return resp;
+            }
             Utils.files_get(null);
             Utils.message_notify({ content: `文件操作成功` })
         })
@@ -415,8 +442,8 @@ function page_show(_req: DatTypes.AppPageCtrlReq): DatTypes.Resp {
     return resp;
 }
 
-function prj_info_get() {
-    axios.post(`${appStore.srvPrefix}/api/v1/project`)
+async function prj_info_get() {
+    await axios.post(`${appStore.srvPrefix}/api/v1/project`)
         .then((response) => {
             const resp = response.data
             if (resp.code != 0) {
@@ -425,12 +452,14 @@ function prj_info_get() {
             else {
                 appStore.prj = resp.data;
                 console.log('Project info:', appStore.prj);
-                Utils.files_get(null)
+
             }
         })
         .catch((error) => {
             console.error('Error fetching project info:', error);
         });
+    await Utils.files_get(null)
+    await dictionary_get()
 }
 
 function heartbeat() {
@@ -455,9 +484,65 @@ function log_info_append(cont: string) {
     appStore.logInfo += cont
 }
 
+async function dictionary_get() {
+    await axios.post(`${appStore.srvPrefix}/api/v1/dictionary_get`)
+        .then((response) => {
+            const resp = response.data
+            if (resp.code != 0) {
+                console.log("dictionary get err ", resp.status)
+            }
+            else {
+                // appStore.prj = resp.data;
+                // console.log('Project info:', appStore.prj);
+                console.log('dictionary info:', resp.data);
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching project info:', error);
+        });
+}
+
+
+function project_set(req: DatTypes.ProjectSetReq) {
+    Utils.log_info_append("------开始设置项目\n");
+    axios.post(`${appStore.srvPrefix}/api/v1/project_set`, JSON.stringify(req))
+        .then((response) => {
+            console.log('file info:', response.data);
+            const resp = response.data
+            if (resp.code != 0) {
+                Utils.message_notify({ content: resp.status, type: "error" })
+            }
+            else {
+                if (resp.doing == true) {
+                    Utils.message_notify({ content: "设置中", type: "warning" })
+                }
+                else {
+                    Utils.message_notify({ content: "设置完成", type: "success" })
+                }
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching project info:', error);
+            Utils.message_notify({ content: `程序发生错误:${error}`, type: "error" })
+        });
+}
+
+function gen_size_str(size: number): string {
+    if (size < 1024 * 1024) {
+        return (size / 1024).toFixed(2) + "KB";
+    }
+    else if (size < 1024 * 1024 * 1024) {
+        return (size / (1024 * 1024)).toFixed(2) + "MB";
+    }
+    else {
+        return (size / (1024 * 1024 * 1024)).toFixed(2) + "GB";
+    }
+}
+
 class Utils {
     constructor() { }
-    static convert_to_file_item = convert_to_file_item;
+    static project_set = project_set
+    static dictionary_get = dictionary_get;
     static files_get = files_get;
     static tags_get = tags_get;
     static tags_set = tags_set;
@@ -471,6 +556,7 @@ class Utils {
     static log_info_append = log_info_append
     static prj_info_get = prj_info_get;
     static heartbeat = heartbeat;
+    static gen_size_str = gen_size_str;
     static folder_get(folder: string) {
         const reqDat = {
             folder: folder
