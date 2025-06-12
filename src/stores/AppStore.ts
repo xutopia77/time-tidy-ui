@@ -44,7 +44,8 @@ export type AppStore = {
     curSltFile: DataTypes.FileItem | null,      // 当前选中的文件
     curDirs: DataTypes.DirItem[],               // 当前展示的文件夹列表
     curAllDirs: DataTypes.DirItem[],            // 当前工程中所有文件夹列表
-    DirTrees: DataTypes.DirItem[],              // 当前工程中所有文件夹列表的树状结构
+    DirTrees: DataTypes.DirTreeItem[],          // 当前工程中所有文件夹列表的树状结构
+    curSltDirTreeItem: DataTypes.DirTreeItem | null,          // 当前选中的文件夹树
     curFileTotal: number,                       // 当前文件列表的总数
     searchCon: DataTypes.FileSearchCondition,   // 文件搜索条件
     curPath: string,                            // 当前路径
@@ -74,6 +75,7 @@ export const useAppStore = defineStore('app', {
         curDirs: [],
         curAllDirs: [],
         DirTrees: [],
+        curSltDirTreeItem: null,
         curFileTotal: 0,
         searchCon: fileSearchConditionInit,
         curPath: '/',

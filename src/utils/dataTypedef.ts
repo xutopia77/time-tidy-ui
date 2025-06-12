@@ -42,6 +42,7 @@ export class DirTreeItem {
     expanded: boolean = true;
     name: string = '';
     count: number = 0;
+    dirInfo: DirItem = new DirItem();
     children?: DirTreeItem[];
 }
 

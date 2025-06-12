@@ -1,10 +1,42 @@
-
-
 import axios from 'axios';
 import type { AppStore } from '@/stores/AppStore'
 let appStore: AppStore
 
 import * as DatTypes from '@/utils/dataTypedef'
+
+function get_dir_trees() {
+    const allDirs = appStore.curAllDirs;
+    const dirTree: DatTypes.DirTreeItem[] = [];
+    appStore.DirTrees = []
+    // 遍历所有目录项
+    for (const dir of allDirs) {
+        // 分割路径，过滤掉空字符串
+        const pathParts = dir.path.split('/').filter(part => part);
+        let currentLevel = dirTree;
+        for (const part of pathParts) {
+            // 查找当前层级是否已存在该节点
+            let foundNode = currentLevel.find(node => node.name === part);
+
+            if (!foundNode) {
+                // 若不存在则创建新节点
+                foundNode = {
+                    expanded: true,
+                    name: part,
+                    count: 0,
+                    dirInfo: dir,
+                    children: []
+                };
+                currentLevel.push(foundNode);
+            }
+            // 移动到下一层级
+            currentLevel = foundNode.children || [];
+        }
+    }
+
+    appStore.DirTrees = dirTree;
+    console.log("dirTree", appStore.DirTrees)
+}
+
 
 function convert_to_file_item(_srcStr: string): DatTypes.Resp {
     const resp: DatTypes.Resp = {
@@ -200,6 +232,7 @@ async function files_get(_req: DatTypes.FilesGetReq | null) {
             console.log('file info:', response.data);
             const resp: DatTypes.Resp = convert_to_file_item(JSON.stringify(response.data))
             if (resp.code === 0) {
+                get_dir_trees()
             } else {
                 console.error('Error converting file items:', resp.status);
             }

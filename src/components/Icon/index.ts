@@ -12,6 +12,8 @@ import BookIcon from '@/components/Icon/BookIcon.vue';
 import XIcon from '@/components/Icon/XIcon.vue';
 import FolderOpenIcon from '@/components/Icon/FolderOpenIcon.vue';
 import FolderCloseIcon from '@/components/Icon/FolderCloseIcon.vue';
+import CollapsedIcon from '@/components/Icon/CollapsedIcon.vue';
+import ExpandedIcon from '@/components/Icon/ExpandedIcon.vue';
 
 export {
     FileSettingIcon,
@@ -27,5 +29,7 @@ export {
     BookIcon,
     XIcon,
     FolderOpenIcon,
-    FolderCloseIcon
+    FolderCloseIcon,
+    CollapsedIcon,
+    ExpandedIcon
 };
