@@ -5,7 +5,9 @@
             backgroundColor: tag.color
         }">
             {{ tag.name }}
-            <button @click="removeTag(tag)" class="delete-btn">x</button>
+            <button @click="removeTag(tag)" class="delete-btn">
+                <XIcon style="padding: 0;" />
+            </button>
         </div>
     </div>
 </template>
@@ -16,7 +18,8 @@ import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
-
+import '@/assets/common.css';
+import { XIcon } from '@/components/Icon'
 // 新标签输入值
 const newTag = ref('');
 

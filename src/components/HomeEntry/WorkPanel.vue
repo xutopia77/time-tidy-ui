@@ -1,5 +1,5 @@
 <template>
-    <div class="work-panel">
+    <div class="work-panel xc-scrollbar">
         <!-- 文件基础信息折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('basicInfo')">
@@ -48,6 +48,16 @@
                 <WorkSearch />
             </div>
         </div>
+        <!-- 文件夹面板 -->
+        <div class="collapse-panel">
+            <div class="panel-header" @click="togglePanel('tree')">
+                <span v-html="isPanelOpen('tree') ? expandedSvg : collapsedSvg" class="span-close-exp"></span>
+                <SearchIcon />
+            </div>
+            <div v-if="isPanelOpen('tree')" class="panel-content">
+                <WorkTree />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -57,6 +67,7 @@ import WorkTag from '@/components/HomeEntry/WorkPanel/WorkTag.vue';
 import WorkOperate from '@/components/HomeEntry/WorkPanel/WorkOperate.vue';
 import WorkSearch from '@/components/HomeEntry/WorkPanel/WorkSearch.vue';
 import WorkInfo from '@/components/HomeEntry/WorkPanel/WorkInfo.vue';
+import WorkTree from '@/components/HomeEntry/WorkPanel/WorkTree.vue';
 import '@/assets/common.css';
 import { FileSettingIcon, TagOneIcon, InfoIcon, SearchIcon } from '@/components/Icon'
 
@@ -79,7 +90,8 @@ const panelStates = ref({
     basicInfo: true,
     tagInfo: true,
     operation: true,
-    search: true
+    search: true,
+    tree: true
 });
 type PanelName = keyof typeof panelStates.value;
 

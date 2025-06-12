@@ -9,6 +9,9 @@ import HardDiskIcon from '@/components/Icon/HardDiskIcon.vue';
 import SettingIcon from '@/components/Icon/SettingIcon.vue';
 import ApplicationIcon from '@/components/Icon/ApplicationIcon.vue';
 import BookIcon from '@/components/Icon/BookIcon.vue';
+import XIcon from '@/components/Icon/XIcon.vue';
+import FolderOpenIcon from '@/components/Icon/FolderOpenIcon.vue';
+import FolderCloseIcon from '@/components/Icon/FolderCloseIcon.vue';
 
 export {
     FileSettingIcon,
@@ -22,4 +25,7 @@ export {
     TagOneIcon,
     ApplicationIcon,
     BookIcon,
+    XIcon,
+    FolderOpenIcon,
+    FolderCloseIcon
 };

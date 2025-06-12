@@ -24,11 +24,12 @@ import OperateEntry from '@/components/OperateEntry.vue';
 import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
 import '@/assets/common.css'
+// import { FileSettingIcon, TagOneIcon, InfoIcon, SearchIcon } from '@/components/Icon'
 import Utils from '@/utils/utils'
-import * as DatTypes from '@/utils/dataTypedef'
+import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-import '@/assets/common.css'
+
 const pageCtrl = computed(() => {
     return appStore.pageCtrl
 })
@@ -38,17 +39,17 @@ onBeforeMount(() => {
     const isDev = import.meta.env.MODE === 'development';
     // 判断当前是否为生产环境
     // const isProd = import.meta.env.MODE === 'production';
-    appStore.envMode = isDev ? DatTypes.EnvModeType.dev : DatTypes.EnvModeType.pro
+    appStore.envMode = isDev ? DatType.EnvModeType.dev : DatType.EnvModeType.pro
     console.log(`env: navigator.userAgent: ${navigator.userAgent}; MODE : ${import.meta.env.MODE}; `);
     if (navigator.userAgent.includes('time_capsule')) {
         console.log('当前在Electron中运行');
-        appStore.platform = DatTypes.PlatformType.electron;
+        appStore.platform = DatType.PlatformType.electron;
     }
     else {
         console.log('当前在浏览器中运行');
-        appStore.platform = DatTypes.PlatformType.browser;
+        appStore.platform = DatType.PlatformType.browser;
     }
-    if (appStore.platform == DatTypes.PlatformType.electron) {
+    if (appStore.platform == DatType.PlatformType.electron) {
         appStore.srvPrefix = 'http://127.0.0.1:38080'
     }
     else {

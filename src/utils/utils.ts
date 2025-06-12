@@ -460,6 +460,7 @@ async function prj_info_get() {
         });
     await Utils.files_get(null)
     await dictionary_get()
+    await tags_get()
 }
 
 function heartbeat() {

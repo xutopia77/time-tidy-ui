@@ -39,28 +39,40 @@ const appStore = useAppStore()
 import '@/assets/common.css'
 
 const fileTags = computed(() => {
-    // 初始化一个 Set 用于存储不重复标签的唯一标识
-    const uniqueTagKeys = new Set<string>();
-    const uniqueTags: DatType.FileItemTag[] = [];
+    const bGetAllTag = true
+    if (bGetAllTag) {
+        const uniqueTags: DatType.FileItemTag[] = [];
+        for (const item of appStore.allTags) {
+            uniqueTags.push({ name: item.name, color: item.color });
+        }
+        return uniqueTags;
+    }
+    else { // 只是根据当前的文件来获取标签
+        // 初始化一个 Set 用于存储不重复标签的唯一标识
+        const uniqueTagKeys = new Set<string>();
+        const uniqueTags: DatType.FileItemTag[] = [];
 
-    // 遍历 appStore.curFiles
-    for (const item of appStore.curFiles) {
-        if (item.tags && Array.isArray(item.tags)) {
-            // 遍历每个文件的 tags 数组
-            for (const tag of item.tags) {
-                // 简单类型检查，确保 tag 符合 DatType.FileItemTag 基本结构
-                if (tag && typeof tag === 'object' && 'name' in tag && 'color' in tag) {
-                    // 生成标签的唯一标识
-                    const tagKey = `${tag.name}-${tag.color}`;
-                    if (!uniqueTagKeys.has(tagKey)) {
-                        uniqueTagKeys.add(tagKey);
-                        uniqueTags.push(tag as DatType.FileItemTag);
+        // 遍历 appStore.curFiles
+        for (const item of appStore.curFiles) {
+            if (item.tags && Array.isArray(item.tags)) {
+                // 遍历每个文件的 tags 数组
+                for (const tag of item.tags) {
+                    // 简单类型检查，确保 tag 符合 DatType.FileItemTag 基本结构
+                    if (tag && typeof tag === 'object' && 'name' in tag && 'color' in tag) {
+                        // 生成标签的唯一标识
+                        const tagKey = `${tag.name}-${tag.color}`;
+                        if (!uniqueTagKeys.has(tagKey)) {
+                            uniqueTagKeys.add(tagKey);
+                            uniqueTags.push(tag as DatType.FileItemTag);
+                        }
                     }
                 }
             }
         }
+        return uniqueTags;
     }
-    return uniqueTags;
+
+
 });
 
 // 排序依据

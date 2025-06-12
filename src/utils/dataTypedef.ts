@@ -32,6 +32,19 @@ export function fileTypeToString(fileType: FileType): string {
     return fileType;
 }
 
+export class FolderItemInfo {
+    name: string = '';
+    count: number = 0;
+    children?: FolderItemInfo[];
+}
+
+export class DirTreeItem {
+    expanded: boolean = true;
+    name: string = '';
+    count: number = 0;
+    children?: DirTreeItem[];
+}
+
 export class DirInfo {
     count: number = 0;      // 文件数量
     size: number = 0;       // 文件大小（字节）
