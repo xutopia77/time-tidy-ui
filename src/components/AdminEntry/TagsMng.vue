@@ -18,7 +18,11 @@
                         <td>
                             <div :style="{ backgroundColor: item.color, width: '20px', height: '20px' }"></div>
                         </td>
-                        <td><button @click.stop="showEditDialog(item)" class="xc-button">编辑</button></td>
+                        <td>
+                            <button @click.stop="showEditDialog(item)" class="xc-button"
+                                style="margin-right: 10px;">编辑</button>
+                            <button @click="btn_deletetag(item)" class="xc-button">删除</button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -72,6 +76,10 @@ const editingTag = ref<DatType.TagItem>({ name: '', color: '', id: 0 });
 function showEditDialog(item: DatType.TagItem) {
     editingTag.value = { ...item };
     isEditDialogVisible.value = true;
+}
+
+function btn_deletetag(item: DatType.TagItem) {
+    Utils.tag_delete(item)
 }
 
 // 提交编辑

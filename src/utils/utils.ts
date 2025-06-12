@@ -34,7 +34,7 @@ function get_dir_trees() {
     }
 
     appStore.DirTrees = dirTree;
-    console.log("dirTree", appStore.DirTrees)
+    // console.log("dirTree", appStore.DirTrees)
 }
 
 
@@ -348,14 +348,18 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
 
     await axios.post(`${appStore.srvPrefix}/api/v1/files_path_chg`, JSON.stringify(_req))
         .then((response) => {
+            console.log('file info:', response.data);
+            resp.code = response.data.code;
+            resp.status = response.data.status;
+            if (resp.code != 0) {
+                Utils.message_notify({ content: `文件操作失败 ${resp.status}`, type: "error" })
+                return resp;
+            }
             if (resp.data == null || resp.data == undefined) {
                 console.log('resp.data is null or undefined');
                 resp.code = 1;
                 return resp;
             }
-            console.log('file info:', response.data);
-            resp.code = response.data.code;
-            resp.status = response.data.status;
             const respDat = response.data.data
             if (respDat != null) {
                 resp.data.bNeedSure = respDat.bNeedSure != null ? respDat.bNeedSure : false;
@@ -591,7 +595,23 @@ function dir_slt_update(treeItem: DatTypes.DirTreeItem | string) {
     if (typeof treeItem === 'string') {
         const path = treeItem; // 假设 treeItem 是路径字符串
         appStore.curPath = path;
-        const titem = appStore.DirTrees.find(item => item.dirInfo.path === path);
+        // 递归查找函数
+        const findNodeRecursively = (nodes: DatTypes.DirTreeItem[]): DatTypes.DirTreeItem | undefined => {
+            for (const node of nodes) {
+                if (node.dirInfo.path === path) {
+                    return node;
+                }
+                if (node.children && node.children.length > 0) {
+                    const foundInChildren = findNodeRecursively(node.children);
+                    if (foundInChildren) {
+                        return foundInChildren;
+                    }
+                }
+            }
+            return undefined;
+        };
+
+        const titem = findNodeRecursively(appStore.DirTrees);
         if (titem == null) {
             if (treeItem != '/') {
                 console.log(`dir slt update: path:${path} not found`);
@@ -614,6 +634,29 @@ function dir_slt_update(treeItem: DatTypes.DirTreeItem | string) {
     Utils.files_get(null)
 }
 
+async function tag_delete(_req: DatTypes.TagItem): Promise<DatTypes.Resp> {
+    await axios.post(`${appStore.srvPrefix}/api/v1/tags_delete`, JSON.stringify({ tagName: _req.name }))
+        .then((response) => {
+            const resp = response.data
+            if (resp.code != 0) {
+                console.log("dictionary get err ", resp.status)
+                Utils.message_notify({ content: `删除标签失败:${resp.status}`, type: "error" })
+            }
+            else {
+                // appStore.prj = resp.data;
+                // console.log('Project info:', appStore.prj);
+                console.log('dictionary info:', resp.data);
+                Utils.message_notify({ content: `删除标签成功` })
+            }
+            Utils.tags_get()
+        })
+        .catch((error) => {
+            console.error('Error fetching project info:', error);
+            Utils.message_notify({ content: `程序错误:${error}`, type: "error" })
+        });
+    return { code: 0, status: "" }
+}
+
 class Utils {
     constructor() { }
     // ------
@@ -631,6 +674,7 @@ class Utils {
     static tags_set = tags_set;
     static files_tag_set = files_tag_set;
     static files_tag_delete = files_tag_delete;
+    static tag_delete = tag_delete;
     static files_path_chg = files_path_chg;
     static files_delete = files_delete;
     static project_health = project_health;
