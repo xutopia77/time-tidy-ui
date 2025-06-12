@@ -20,7 +20,7 @@
             <option value="allPath">所有路径</option>
         </select>
         <div class="tags-panel">
-            <label> 文件标签: </label>
+            <label> 文件标签({{ curSltTagNum }}): </label>
             <!-- 动态绑定 selected 类 -->
             <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag" :class="{ selected: isTagSelected(tag) }"
                 :style="{ backgroundColor: tag.color }" @click="btnclk_tag(tag)">
@@ -71,8 +71,6 @@ const fileTags = computed(() => {
         }
         return uniqueTags;
     }
-
-
 });
 
 // 排序依据
@@ -108,6 +106,10 @@ const pathType = computed({
 const isTagSelected = (tag: DatType.FileItemTag) => {
     return appStore.searchCon.tags.includes(tag.name);
 };
+
+const curSltTagNum = computed(() => {
+    return appStore.searchCon.tags.length;
+});
 
 // 点击标签处理方法
 function btnclk_tag(tag: DatType.FileItemTag) {

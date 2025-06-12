@@ -1,20 +1,23 @@
 <template>
-    <div class="pagination">
-        <button @click="btnclk_prevPage" :disabled="currentPage === 1" class="xc-button pagination-btn">上一页</button>
-        <span>第 {{ currentPage }} 页 / 共 {{ totalPages }} 页</span>
-        <button @click="btnclk_nextPage" :disabled="currentPage === totalPages"
-            class="xc-button pagination-btn">下一页</button>
-        <span>总数: {{ totalItems }}</span>
-        <label>
-            每页数量:
-            <select v-model="pageSize" @change="btnclk_chgePageSize" class="xc-select pagination-slt">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="200">200</option>
-            </select>
-        </label>
+    <div class="footer-container">
+        <div class="pagination">
+            <button @click="btnclk_prevPage" :disabled="currentPage === 1" class="xc-button pagination-btn">上一页</button>
+            <span>第 {{ currentPage }} 页 / 共 {{ totalPages }} 页</span>
+            <button @click="btnclk_nextPage" :disabled="currentPage === totalPages"
+                class="xc-button pagination-btn">下一页</button>
+            <span>总数: {{ totalItems }}</span>
+            <label>
+                每页数量:
+                <select v-model="pageSize" @change="btnclk_chgePageSize" class="xc-select pagination-slt">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                </select>
+            </label>
+        </div>
+        <div><span>{{ footerInfo }}</span></div>
     </div>
 </template>
 <script setup lang="ts">
@@ -65,8 +68,37 @@ function btnclk_chgePageSize() {
     Utils.files_get(null)
 }
 
+// ------
+
+const footerInfo = computed(() => {
+    if (appStore.curFiles == null) {
+        return '';
+    }
+    let checkedNum = 0;
+    appStore.curFiles.forEach((file) => {
+        if (file.checked) {
+            checkedNum++;
+        }
+    })
+    if (checkedNum == 0) {
+        return '';
+    }
+    return `选中数量: ${checkedNum}`;
+})
+
 </script>
 <style scoped>
+.footer-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0px;
+    color: var(--xc-text-color);
+    background-color: var(--xc-background-color);
+}
+
 .pagination {
     display: flex;
     justify-content: center;

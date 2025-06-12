@@ -219,6 +219,7 @@
     background-color: var(--xc-background-color);
     transition: all 0.3s;
     cursor: pointer;
+    opacity: 0.8;
 }
 
 .xc-tag:hover {

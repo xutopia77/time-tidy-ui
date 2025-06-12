@@ -4,11 +4,14 @@
             <!-- 根据是否有子项和展开状态显示对应图标，并添加点击事件切换展开状态 -->
             <div class="dir-item" :class="{ 'selected': curSltDirTreeItem?.dirInfo.id == item.dirInfo.id }">
                 <div v-if="!bShowDirIcon(item, 1) && !bShowDirIcon(item, 2)" class="icon-placeholder"></div>
-                <CollapsedIcon v-if="bShowDirIcon(item, 1)" width="24" height="24" @click="toggleExpand(item)" />
-                <ExpandedIcon v-if="bShowDirIcon(item, 2)" @click="toggleExpand(item)" />
-                <FolderCloseIcon v-if="true" />
-                <FolderOpenIcon v-if="false" />
-                <div @click="btn_sltTreeItem(item)" class="no-wrap">{{ item.name }}</div>
+                <CollapsedIcon v-if="bShowDirIcon(item, 1)" width="24" height="24" @click="btn_toggleExpand(item)" />
+                <ExpandedIcon v-if="bShowDirIcon(item, 2)" @click="btn_toggleExpand(item)" />
+
+                <div @click="btn_sltTreeItem(item)" class="no-wrap">
+                    <FolderCloseIcon v-if="true" />
+                    <FolderOpenIcon v-if="false" />
+                    {{ item.name }}
+                </div>
             </div>
             <!-- 仅在文件夹有子项且展开时渲染子项的 ul -->
             <ul v-if="item.children && item.children.length > 0 && item.expanded" class="folder-list">
@@ -25,6 +28,7 @@ import { FolderCloseIcon, FolderOpenIcon, CollapsedIcon, ExpandedIcon } from '@/
 // import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
+import Utils from '@/utils/utils';
 const appStore = useAppStore()
 
 const prop = defineProps<{
@@ -53,7 +57,7 @@ const curSltDirTreeItem = computed({
         return appStore.curSltDirTreeItem;
     }
     , set(value: DatType.DirTreeItem) {
-        appStore.curSltDirTreeItem = value;
+        Utils.dir_slt_update(value)
     }
 })
 
@@ -63,7 +67,7 @@ function btn_sltTreeItem(iteam: DatType.DirTreeItem) {
 }
 
 // 切换文件夹展开状态的方法
-const toggleExpand = (item: DatType.DirTreeItem) => {
+const btn_toggleExpand = (item: DatType.DirTreeItem) => {
     item.expanded = !item.expanded;
 };
 </script>

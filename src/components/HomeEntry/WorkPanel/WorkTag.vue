@@ -6,7 +6,7 @@
         }">
             {{ tag.name }}
             <button @click="removeTag(tag)" class="delete-btn">
-                <XIcon style="padding: 0;" />
+                <XIcon width="12" height="12" />
             </button>
         </div>
     </div>
@@ -88,9 +88,11 @@ const removeTag = (tag: DatType.FileItemTag) => {
     cursor: pointer;
     color: #ff4444;
     font-weight: bold;
+    border-radius: 4px;
 }
 
 .delete-btn:hover {
+    border: var(--xc-border-hover);
     color: #cc0000;
 }
 </style>

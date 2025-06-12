@@ -41,11 +41,11 @@ export type AppStore = {
     // 
     allTags: DataTypes.TagItem[],               // 所有标签列表
     curFiles: DataTypes.FileItem[],             // 当前展示的文件列表
-    curSltFile: DataTypes.FileItem | null,      // 当前选中的文件
+    curSltFile: DataTypes.FileItem | null,      // 当前 选中 的单个文件
     curDirs: DataTypes.DirItem[],               // 当前展示的文件夹列表
     curAllDirs: DataTypes.DirItem[],            // 当前工程中所有文件夹列表
     DirTrees: DataTypes.DirTreeItem[],          // 当前工程中所有文件夹列表的树状结构
-    curSltDirTreeItem: DataTypes.DirTreeItem | null,          // 当前选中的文件夹树
+    curSltDirTreeItem: DataTypes.DirTreeItem | null,    // 当前选中的文件夹树
     curFileTotal: number,                       // 当前文件列表的总数
     searchCon: DataTypes.FileSearchCondition,   // 文件搜索条件
     curPath: string,                            // 当前路径

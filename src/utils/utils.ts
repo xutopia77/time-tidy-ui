@@ -573,8 +573,57 @@ function gen_size_str(size: number): string {
     }
 }
 
+function folder_get(folder: string) {
+    const reqDat = {
+        folder: folder
+    }
+    axios.post(`${appStore.srvPrefix}/api/v1/folder`, JSON.stringify(reqDat))
+        .then((response) => {
+            appStore.curFiles = response.data;
+            console.log('file info:', response.data);
+        })
+        .catch((error) => {
+            console.error('Error fetching project info:', error);
+        });
+}
+
+function dir_slt_update(treeItem: DatTypes.DirTreeItem | string) {
+    if (typeof treeItem === 'string') {
+        const path = treeItem; // 假设 treeItem 是路径字符串
+        appStore.curPath = path;
+        const titem = appStore.DirTrees.find(item => item.dirInfo.path === path);
+        if (titem == null) {
+            if (treeItem != '/') {
+                console.log(`dir slt update: path:${path} not found`);
+                return;
+            }
+        }
+        if (titem == undefined) {
+            appStore.curSltDirTreeItem = null;
+        }
+        else {
+            appStore.curSltDirTreeItem = titem;
+        }
+    }
+    else {
+        appStore.curSltDirTreeItem = treeItem;
+        if (treeItem.dirInfo != null) {
+            appStore.curPath = treeItem.dirInfo.path;
+        }
+    }
+    Utils.files_get(null)
+}
+
 class Utils {
     constructor() { }
+    // ------
+    static appstore_set(store: AppStore) { appStore = store; }
+    static page_show = page_show;
+    static message_notify = message_notify;
+    static log_info_append = log_info_append
+    static gen_size_str = gen_size_str;
+    static dir_slt_update = dir_slt_update;
+    // ------
     static project_set = project_set
     static dictionary_get = dictionary_get;
     static files_get = files_get;
@@ -585,28 +634,9 @@ class Utils {
     static files_path_chg = files_path_chg;
     static files_delete = files_delete;
     static project_health = project_health;
-    static page_show = page_show;
-    static message_notify = message_notify;
-    static log_info_append = log_info_append
     static prj_info_get = prj_info_get;
     static heartbeat = heartbeat;
-    static gen_size_str = gen_size_str;
-    static folder_get(folder: string) {
-        const reqDat = {
-            folder: folder
-        }
-        axios.post(`${appStore.srvPrefix}/api/v1/folder`, JSON.stringify(reqDat))
-            .then((response) => {
-                appStore.curFiles = response.data;
-                console.log('file info:', response.data);
-            })
-            .catch((error) => {
-                console.error('Error fetching project info:', error);
-            });
-    }
-    static appstore_set(store: AppStore) {
-        appStore = store;
-    }
+    static folder_get = folder_get
 }
 
 export default Utils;

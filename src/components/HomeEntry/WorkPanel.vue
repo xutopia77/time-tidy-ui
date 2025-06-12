@@ -52,7 +52,7 @@
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('tree')">
                 <span v-html="isPanelOpen('tree') ? expandedSvg : collapsedSvg" class="span-close-exp"></span>
-                <SearchIcon />
+                <FolderOpenIcon />
             </div>
             <div v-if="isPanelOpen('tree')" class="panel-content">
                 <WorkTree />
@@ -69,7 +69,7 @@ import WorkSearch from '@/components/HomeEntry/WorkPanel/WorkSearch.vue';
 import WorkInfo from '@/components/HomeEntry/WorkPanel/WorkInfo.vue';
 import WorkTree from '@/components/HomeEntry/WorkPanel/WorkTree.vue';
 import '@/assets/common.css';
-import { FileSettingIcon, TagOneIcon, InfoIcon, SearchIcon } from '@/components/Icon'
+import { FileSettingIcon, TagOneIcon, InfoIcon, SearchIcon, FolderOpenIcon } from '@/components/Icon'
 
 // 定义 SVG 变量
 const expandedSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
