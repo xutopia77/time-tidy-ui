@@ -51,7 +51,6 @@ const pathParts: ComputedRef<PathPart[]> = computed(() => {
 
 // 导航到指定路径
 const navigateToPath = (path: string) => {
-    console.log(`to path: ${path}`);
     appStore.searchCon.pathType = 'curPath';
     Utils.dir_slt_update(path);
 };

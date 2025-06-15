@@ -1,15 +1,15 @@
 <template>
     <div class="folder-tree">
-        <DirTreeItem :data="processedFolderData" />
+        <DirTreeItem :data="dirTrees" v-model="selectedItem" />
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import '@/assets/common.css'
 // import { FolderCloseIcon, FolderOpenIcon } from '@/components/Icon'
-// import Utils from '@/utils/utils'
-// import * as DatType from '@/utils/dataTypedef'
+import Utils from '@/utils/utils'
+import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 
@@ -77,8 +77,27 @@ import DirTreeItem from '@/components/HomeEntry/WorkPanel/DirTreeItem.vue'
 //     });
 // };
 
+// const selectedItem = computed({
+//     get() {
+//         return appStore.curSltDirTreeItem;
+//     },
+//     set(value: DatType.DirTreeItem) {
+//         Utils.dir_slt_update(value)
+//     }
+// });
+
+const selectedItem = ref<DatType.DirTreeItem | null>(null);
+watch(selectedItem, (newValue: DatType.DirTreeItem | null) => {
+    if (null == newValue) {
+        return;
+    }
+    console.log('选中项已更新:', newValue);
+    Utils.dir_slt_update(newValue)
+});
+
+
 // 处理文件夹数据，添加展开状态
-const processedFolderData = computed(() => {
+const dirTrees = computed(() => {
     // const bT = false
     // if (bT) {
     //     return addExpandedProperty(folderSource);
@@ -87,6 +106,9 @@ const processedFolderData = computed(() => {
         return appStore.DirTrees;
     }
 });
+
+
+
 </script>
 
 <style scoped>

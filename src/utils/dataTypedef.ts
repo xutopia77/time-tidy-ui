@@ -1,4 +1,18 @@
 
+// 不可修改，和后端约定好的
+export enum Code {
+    Success = 0,       // 0
+    Err,                     // 1
+    SysBusy,                    // 2
+    ReqErr,                   // 3
+    DbErr,                  // 4
+    NeedSure,                     // 5
+    FileAlreadyExist,                 // 6
+}
+
+
+// ----------------------
+
 export enum PlatformType {
     browser = "browser",
     electron = "electron",
@@ -52,9 +66,19 @@ export class DirInfo {
     dirCount: number = 0;   // 文件夹数量
 }
 
+export class FilePathChgRespItemInfo {
+    id: number = 0;
+    srcPath: string = "";
+    destPath: string = "";
+    status: string = "";
+    code: Code = 0;
+}
+
 export class FilePathChgResp {
     dirInfos: DirInfo[] = [];
     bNeedSure: boolean = false;
+    items: FilePathChgRespItemInfo[] = [];
+    remainFileIds: number[] = [];
 }
 
 export class TagItem {
@@ -168,6 +192,8 @@ export class FilePathChgReq {
     distRootPathId: number = 0;
     srcRootPathId: number = 0;
     bNeedSure: boolean = true; // 如果请求中没有目录，这个参数不起作用
+    bAllFileCover: boolean = false;
+    fileIdsCover: number[] = [];
 }
 
 export class FileDeleteReq {

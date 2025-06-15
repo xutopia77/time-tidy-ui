@@ -340,45 +340,47 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
         status: "",
         data: new DatTypes.FilePathChgResp(),
     }
-    if (resp.data == null || resp.data == undefined) {
-        resp.code = 1;
-        return resp;
-    }
+
     _req.distPath = _req.distPath.substring(1);
 
     await axios.post(`${appStore.srvPrefix}/api/v1/files_path_chg`, JSON.stringify(_req))
         .then((response) => {
-            console.log('file info:', response.data);
+
             resp.code = response.data.code;
             resp.status = response.data.status;
-            if (resp.code != 0) {
-                Utils.message_notify({ content: `文件操作失败 ${resp.status}`, type: "error" })
-                return resp;
-            }
-            if (resp.data == null || resp.data == undefined) {
-                console.log('resp.data is null or undefined');
-                resp.code = 1;
-                return resp;
-            }
-            const respDat = response.data.data
-            if (respDat != null) {
-                resp.data.bNeedSure = respDat.bNeedSure != null ? respDat.bNeedSure : false;
-                if (respDat.dirInfos != null) {
-                    for (const item of respDat.dirInfos) {
-                        const dirInfo = new DatTypes.DirInfo();
-                        dirInfo.count = item.count;
-                        dirInfo.size = item.size;
-                        dirInfo.dirCount = item.dirCount;
-                        resp.data?.dirInfos.push(dirInfo);
-                    }
+            resp.data = response.data.data;
+            console.log('file info:', response.data, "get resp:", resp);
+            switch (resp.code) {
+                case DatTypes.Code.Success: {
+                    Utils.files_get(null);
+                    Utils.message_notify({ content: `文件操作成功` })
+                    break;
                 }
-
+                case DatTypes.Code.NeedSure: {
+                    const respDat = response.data.data
+                    if (respDat != null) {
+                        if (respDat.dirInfos != null) {
+                            for (const item of respDat.dirInfos) {
+                                const dirInfo = new DatTypes.DirInfo();
+                                dirInfo.count = item.count;
+                                dirInfo.size = item.size;
+                                dirInfo.dirCount = item.dirCount;
+                                resp.data?.dirInfos.push(dirInfo);
+                            }
+                        }
+                    }
+                    Utils.message_notify({ content: `文件操作需要确认` })
+                    break;
+                }
+                case DatTypes.Code.FileAlreadyExist: {
+                    Utils.message_notify({ content: `文件已存在` })
+                    break;
+                }
+                default: {
+                    Utils.message_notify({ content: `文件操作失败 ${resp.status}`, type: "error" })
+                    break;
+                }
             }
-            if (resp.data.bNeedSure) {
-                return resp;
-            }
-            Utils.files_get(null);
-            Utils.message_notify({ content: `文件操作成功` })
         })
         .catch((error) => {
             console.error('Error fetching project info:', error);
@@ -386,6 +388,7 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
             resp.status = error.message;
             Utils.message_notify({ content: `文件操作失败\n${error.message}` })
         })
+    console.log("=======12312312312======")
     return resp;
 }
 
@@ -656,6 +659,7 @@ async function tag_delete(_req: DatTypes.TagItem): Promise<DatTypes.Resp> {
         });
     return { code: 0, status: "" }
 }
+
 
 class Utils {
     constructor() { }

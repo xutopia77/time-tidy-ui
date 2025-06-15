@@ -37,7 +37,7 @@ watch(() => appStore.messageNotify, () => {
 }, { deep: true });
 
 // 启动 1 秒定时器
-timerId = window.setInterval(checkMessages, 1000);
+timerId = window.setInterval(checkMessages, 600);
 
 // 组件卸载时清除定时器
 onUnmounted(() => {
@@ -67,7 +67,7 @@ onUnmounted(() => {
 }
 
 .message-item {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: #62c64e;
     color: white;
     padding: 2px;
     margin-bottom: 5px;

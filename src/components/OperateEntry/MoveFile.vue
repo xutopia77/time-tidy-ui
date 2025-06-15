@@ -1,21 +1,7 @@
 <template>
     <div class="move-file-container">
-        <div class="table-content xc-scrollbar">
-            <table class="path-table">
-                <thead>
-                    <tr>
-                        <th class="index-col">序号</th>
-                        <th>路径</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(item, index) in allDirs" :key="index"
-                        :class="{ 'selected': selectedPathItem?.path === item.path }" @click="selectPath(item)">
-                        <td class="index-col">{{ index + 1 }}</td>
-                        <td>{{ item.path }}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="dirtree-content xc-scrollbar">
+            <DirTreeItem :data="dirTrees" v-model="selectedItem" />
         </div>
         <div class="operate-content">
             <p class="info-content">选择目标路径:{{ selectedPathItem != null ? selectedPathItem.path : "" }}</p>
@@ -29,29 +15,54 @@
                 <button @click="btnclk_sureDialog_confirm(true)" class="xc-button">确定</button>
                 <button @click="btnclk_sureDialog_confirm(false)" class="xc-button">取消</button>
             </div>
-
+        </div>
+        <div class="sure-dialog" v-if="isDialogVisibleFileExist">
+            <div>
+                <p> {{ sureDialogContentFileExist }} </p>
+                <button @click="btnclk_fileExistDialog_confirm(true)" class="xc-button">覆盖</button>
+                <button @click="btnclk_fileExistDialog_confirm(false)" class="xc-button">取消</button>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 // import axios from 'axios';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 import '@/assets/common.css'
-const allDirs = computed(() => {
-    return appStore.curAllDirs
-})
-const selectedPathItem = ref<DatType.DirItem | null>(null);
-const selectPath = (item: DatType.DirItem) => {
-    selectedPathItem.value = item
-};
+import DirTreeItem from '@/components/HomeEntry/WorkPanel/DirTreeItem.vue'
 
-// 确认移动文件的方法
-const confirmMove = async (bNeedSure: boolean) => {
+const selectedPathItem = ref<DatType.DirItem | null>(null);
+const selectedItem = ref<DatType.DirTreeItem | null>(null);
+watch(selectedItem, (newValue: DatType.DirTreeItem | null) => {
+    if (null == newValue) {
+        return;
+    }
+    console.log('选中项已更新:', newValue);
+    // Utils.dir_slt_update(newValue)
+    selectedPathItem.value = newValue.dirInfo
+});
+
+const dirTrees = computed(() => {
+    return appStore.DirTrees;
+});
+
+class FileMoveReq {
+    bNeedSure: boolean = true;
+    bAllFileCover: boolean = false;
+    fileIdsCover: number[] = [];
+}
+
+const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null) => {
+
+    isDialogVisibleFileExist.value = false;
+    sureDialogContentFileExist.value = ``
+
+    const bNeedSure = fileMoveReq?.bNeedSure ?? true;
     if (selectedPathItem.value == null) {
         Utils.message_notify({ content: '请选择目标路径' })
         return;
@@ -69,6 +80,8 @@ const confirmMove = async (bNeedSure: boolean) => {
         srcRootPathId: 0,
         type: 'move',
         bNeedSure: bNeedSure,
+        bAllFileCover: fileMoveReq?.bAllFileCover ?? false,
+        fileIdsCover: fileMoveReq?.fileIdsCover ?? [],
     };
 
     for (const item of appStore.curFiles) {
@@ -77,6 +90,23 @@ const confirmMove = async (bNeedSure: boolean) => {
             req.srcRootPathId = item.rootPathId
         }
     }
+
+    if (req.bAllFileCover && curResp?.data?.items) {
+        for (const item of curResp.data.items) {
+            if (item.code == DatType.Code.FileAlreadyExist) {
+                req.fileIdsCover.push(item.id)
+            }
+            if (item.code == DatType.Code.Success) {
+                req.fileIds.slice(req.fileIds.indexOf(item.id), 1)
+            }
+        }
+    }
+    if (req.bAllFileCover) {
+        if (curResp?.data?.remainFileIds) {
+            req.fileIds = curResp.data.remainFileIds
+        }
+    }
+
     for (const item of appStore.curDirs) {
         if (item.checked) {
             const srcDir = item.path;
@@ -105,31 +135,36 @@ const confirmMove = async (bNeedSure: boolean) => {
     }
     const resp = await Utils.files_path_chg(req)
     console.log("files path change result:", resp)
-    if (resp.code == 0) {
-        if (resp.data?.bNeedSure == true) {
-            isSureDialogVisible.value = true;
-            const respDirInfo = new DatType.DirInfo();
-            for (const item of resp.data.dirInfos) {
-                respDirInfo.count += item.count;
-                respDirInfo.dirCount += item.dirCount;
-                respDirInfo.size += item.size;
+    switch (resp.code) {
+        case DatType.Code.Success:
+            isDialogVisibleFileExist.value = false;
+            sureDialogContentFileExist.value = ``
+            if (resp.data?.bNeedSure == true) {
+                isSureDialogVisible.value = true;
+                const respDirInfo = new DatType.DirInfo();
+                for (const item of resp.data.dirInfos) {
+                    respDirInfo.count += item.count;
+                    respDirInfo.dirCount += item.dirCount;
+                    respDirInfo.size += item.size;
+                }
+                const fileTotalSizeStr = Utils.gen_size_str(respDirInfo.size)
+                sureDialogContent.value = `file count: ${respDirInfo.count}, dir count: ${respDirInfo.dirCount}, file size: ${fileTotalSizeStr}`
             }
-            let fileTotalSizeStr = `${respDirInfo.size} B`;
-            if (respDirInfo.size > 1024 * 1024 * 1024) {
-                // 转换为 GB 并保留两位小数
-                fileTotalSizeStr = `${(respDirInfo.size / (1024 * 1024 * 1024)).toFixed(2)} GB`
-            }
-            else if (respDirInfo.size > 1024 * 1024) {
-                // 转换为 MB 并保留两位小数
-                fileTotalSizeStr = `${(respDirInfo.size / (1024 * 1024)).toFixed(2)} MB`
-            }
-            else {
-                // 转换为 KB 并保留两位小数
-                fileTotalSizeStr = `${(respDirInfo.size / 1024).toFixed(2)} KB`
-            }
-            sureDialogContent.value = `file count: ${respDirInfo.count}, dir count: ${respDirInfo.dirCount}, file size: ${fileTotalSizeStr}`
+            break;
+        case DatType.Code.FileAlreadyExist: {
+            isDialogVisibleFileExist.value = true;
+            sureDialogContentFileExist.value = `文件已存在: ${resp.status}`
+            curResp = resp
+            break;
+        }
+        default: {
+            isDialogVisibleFileExist.value = false;
+            sureDialogContentFileExist.value = ``
+            Utils.message_notify({ content: `文件操作失败: ${resp.status} ` })
         }
     }
+
+
 };
 
 // ------
@@ -139,20 +174,33 @@ const sureDialogContent = ref<string>('');
 async function btnclk_sureDialog_confirm(bSure: boolean) {
     console.log(`sure: ${bSure} `, typeof (bSure))
     if (bSure) {
-        const resp = await confirmMove(false)
+        const resp = await confirmMove({ bNeedSure: true, bAllFileCover: false })
         console.log(resp)
     }
     else {
-        // 取消操作，不执行任何操作
         Utils.message_notify({ content: '操作已取消' })
     }
     isSureDialogVisible.value = false;
 }
 
 function btnclk_confirmMove() {
-    confirmMove(true)
+    confirmMove(null)
 }
 
+// ------
+const isDialogVisibleFileExist = ref(false);
+const sureDialogContentFileExist = ref<string>('');
+let curResp: DatType.Resp<DatType.FilePathChgResp> | null = null;
+async function btnclk_fileExistDialog_confirm(bSure: boolean) {
+    console.log(`sure file cover: ${bSure} `, typeof (bSure))
+    if (bSure) {
+        await confirmMove({ bNeedSure: false, bAllFileCover: true })
+    }
+    else {
+        Utils.message_notify({ content: '操作已取消' })
+        isDialogVisibleFileExist.value = false;
+    }
+}
 </script>
 
 <style scoped>
@@ -163,6 +211,16 @@ function btnclk_confirmMove() {
     height: 100%;
     color: var(--xc-text-color);
     background-color: var(--xc-background-color);
+}
+
+.dirtree-content {
+    width: calc(100% - 0px);
+    height: calc(100% - 40px);
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    text-align: center;
+    overflow-x: hidden;
 }
 
 .operate-content {
@@ -180,57 +238,6 @@ function btnclk_confirmMove() {
     margin: 0px;
     padding: 0px;
     padding-right: 16px;
-}
-
-/* ------ table */
-
-.table-content {
-    width: 100%;
-    height: calc(100% - 40px);
-    margin: 0;
-    padding: 0;
-    overflow: auto;
-    text-align: center;
-}
-
-.path-table {
-    width: 100%;
-    border-collapse: collapse;
-    /* margin-bottom: 2px; */
-    border: var(--xc-border);
-    color: var(--xc-text-color);
-}
-
-.path-table th,
-.path-table td {
-    border: var(--xc-border);
-    /* 设置单元格边框 */
-    padding: 2px;
-    text-align: left;
-}
-
-.path-table thead th {
-    background-color: #232430;
-}
-
-/* 为序号列添加特定宽度 */
-.path-table th.index-col,
-.path-table td.index-col {
-    width: 50px;
-    /* 可根据需要调整宽度 */
-    text-align: center;
-    /* 让序号居中显示 */
-}
-
-.path-table tr:hover {
-    background-color: #232430;
-    /* 设置行悬停背景色 */
-    cursor: pointer;
-}
-
-.path-table tr.selected {
-    background-color: #232430;
-    /* 设置选中行背景色 */
 }
 
 .sure-dialog {

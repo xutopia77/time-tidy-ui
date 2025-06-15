@@ -15,29 +15,44 @@
             </div>
             <!-- 仅在文件夹有子项且展开时渲染子项的 ul -->
             <ul v-if="item.children && item.children.length > 0 && item.expanded" class="folder-list">
-                <DirTreeItem :data="item.children" />
+                <DirTreeItem :data="item.children" v-model="curSltDirTreeItem" />
             </ul>
         </li>
     </ul>
 </template>
 
 <script setup lang="ts">
-import { defineProps, watch, computed, ref } from 'vue'
+import { defineProps, defineEmits, watch, computed, ref } from 'vue'
 import '@/assets/common.css'
 import { FolderCloseIcon, FolderOpenIcon, CollapsedIcon, ExpandedIcon } from '@/components/Icon'
 // import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
-import { useAppStore } from '@/stores/AppStore';
-import Utils from '@/utils/utils';
-const appStore = useAppStore()
+// import { useAppStore } from '@/stores/AppStore';
+// const appStore = useAppStore()
+// import Utils from '@/utils/utils';
 
-const prop = defineProps<{
+
+const props = defineProps<{
     data: DatType.DirTreeItem[];
+    modelValue?: DatType.DirTreeItem | null;
 }>();
-const dirTrees = ref<DatType.DirTreeItem[]>(prop.data)
-watch(prop, (newVal) => {
+
+const emit = defineEmits(['update:modelValue']);
+
+const dirTrees = ref<DatType.DirTreeItem[]>(props.data)
+watch(props, (newVal) => {
     dirTrees.value = newVal.data;
 }, { deep: true })
+
+const curSltDirTreeItem = computed({
+    get() {
+        return props.modelValue;
+    },
+    set(value: DatType.DirTreeItem) {
+        // Utils.dir_slt_update(value)
+        emit('update:modelValue', value);
+    }
+})
 
 function bShowDirIcon(iteam: DatType.DirTreeItem, type: number): boolean {
     if (!(iteam.children && iteam.children.length > 0)) {
@@ -52,18 +67,9 @@ function bShowDirIcon(iteam: DatType.DirTreeItem, type: number): boolean {
     return false
 }
 
-const curSltDirTreeItem = computed({
-    get() {
-        return appStore.curSltDirTreeItem;
-    }
-    , set(value: DatType.DirTreeItem) {
-        Utils.dir_slt_update(value)
-    }
-})
-
 function btn_sltTreeItem(iteam: DatType.DirTreeItem) {
     curSltDirTreeItem.value = iteam;
-    console.log("curSltDirTreeItem: ", curSltDirTreeItem.value);
+    console.log("curSltDirTreeItem: ", iteam);
 }
 
 // 切换文件夹展开状态的方法
@@ -74,6 +80,7 @@ const btn_toggleExpand = (item: DatType.DirTreeItem) => {
 
 <style scoped>
 ul {
+    width: calc(100% - 0px);
     list-style: none;
     /* 去掉列表项前面的标识 */
     padding-left: 10px;
