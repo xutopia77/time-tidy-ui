@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeMount, onMounted, onUnmounted } from 'vue';
-import HeaderPanel from '@/components/HeaderPanel.vue';
+import HeaderPanel from '@/components/AppNav.vue';
 import OperateEntry from '@/components/OperateEntry.vue';
 import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'

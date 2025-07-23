@@ -19,7 +19,7 @@
                             <div :style="{ backgroundColor: item.color, width: '20px', height: '20px' }"></div>
                         </td>
                         <td>
-                            <button @click.stop="showEditDialog(item)" class="xc-button"
+                            <button @click.stop="btn_showEditDialog(item)" class="xc-button"
                                 style="margin-right: 10px;">编辑</button>
                             <button @click="btn_deletetag(item)" class="xc-button">删除</button>
                         </td>
@@ -73,7 +73,7 @@ const isEditDialogVisible = ref(false);
 const editingTag = ref<DatType.TagItem>({ name: '', color: '', id: 0 });
 
 // 显示编辑弹窗
-function showEditDialog(item: DatType.TagItem) {
+function btn_showEditDialog(item: DatType.TagItem) {
     editingTag.value = { ...item };
     isEditDialogVisible.value = true;
 }

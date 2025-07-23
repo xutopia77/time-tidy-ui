@@ -1,6 +1,11 @@
 <template>
     <div class="admin-nav">
         <button class="nav-button">
+            <router-link class="no-underline-link" to="/admin/PrjSet">
+                <SettingIcon />
+            </router-link>
+        </button>
+        <button class="nav-button">
             <router-link class="no-underline-link" to="/admin/TagsMng">
                 <TagOneIcon />
             </router-link>
@@ -18,7 +23,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { TagOneIcon, InfoIcon, ApplicationIcon } from '@/components/Icon'
+import { TagOneIcon, SettingIcon, InfoIcon, ApplicationIcon } from '@/components/Icon'
 import '@/assets/common.css';
 </script>
 <style scoped>

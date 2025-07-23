@@ -8,11 +8,6 @@
                 </router-link>
             </span>
             <span class="nav-button">
-                <router-link class="no-underline-link" to="/set">
-                    <SettingIcon />
-                </router-link>
-            </span>
-            <span class="nav-button">
                 <router-link class="no-underline-link" to="/admin">
                     <ApplicationIcon />
                 </router-link>
@@ -24,7 +19,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { HomeIcon, SettingIcon, ApplicationIcon, BookIcon } from '@/components/Icon'
+import { HomeIcon, ApplicationIcon, BookIcon } from '@/components/Icon'
 </script>
 <style scoped>
 .no-underline-link {

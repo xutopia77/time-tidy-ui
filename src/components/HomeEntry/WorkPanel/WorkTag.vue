@@ -1,11 +1,11 @@
 <template>
     <div>
-        <input v-model="newTag" @keyup.enter="addTag" placeholder="输入新标签并按回车键添加" class="tag-input" />
+        <input v-model="newTag" @keyup.enter="btn_addTag" placeholder="输入新标签并按回车键添加" class="tag-input" />
         <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag" :style="{
             backgroundColor: tag.color
         }">
             {{ tag.name }}
-            <button @click="removeTag(tag)" class="delete-btn">
+            <button @click="btn_removeTag(tag)" class="delete-btn">
                 <XIcon width="12" height="12" />
             </button>
         </div>
@@ -29,7 +29,7 @@ const fileTags = computed(() => {
 });
 
 // 添加标签方法
-const addTag = () => {
+const btn_addTag = () => {
     const req: DatType.FilesTagSetReq = {
         fileIds: [],
         tagName: ''
@@ -51,7 +51,7 @@ const addTag = () => {
     Utils.files_tag_set(req)
 }
 
-const removeTag = (tag: DatType.FileItemTag) => {
+const btn_removeTag = (tag: DatType.FileItemTag) => {
     if (appStore.curSltFile?.id == null) return
     const req: DatType.FilesTagSetReq = {
         fileIds: [appStore.curSltFile.id],
