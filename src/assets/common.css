@@ -11,6 +11,7 @@
     --xc-card-desc-height: 60px;
 }
 
+/* ==================================== button */
 .xc-button {
     height: var(--xc-normal-height);
     background-color: var(--xc-background-color);
@@ -206,6 +207,30 @@
 .xc-checkbox:focus {
     box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
     /* 获得焦点时的阴影效果 */
+}
+
+/* ==================================== label */
+
+.xc-label {
+    color: var(--xc-text-color);
+}
+
+/* ==================================== input text */
+.xc-input-text {
+    height: var(--xc-normal-height);
+    background-color: var(--xc-background-color);
+    color: var(--xc-text-color);
+    border: var(--xc-border);
+    border-radius: 4px;
+    outline: none;
+    padding: var(--xc-normal-padding);
+    margin: var(--xc-normal-margin);
+}
+
+.xc-input-text:hover {
+    background-color: var(--xc-background-color);
+    /* 设置鼠标悬停时的背景颜色 */
+    border: var(--xc-border-hover);
 }
 
 /* ==================================== tag */

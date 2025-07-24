@@ -2,11 +2,6 @@ import { defineStore } from 'pinia'
 
 import * as DataTypes from '@/utils/dataTypedef'
 
-export class PrjInfo {
-    name: string = '';
-    basePath: string = '';
-}
-
 const pageCtrlInit: DataTypes.AppPageCtrl = {
     imageView: { idx: 48, bShow: false },
     set: { idx: 49, bShow: false },
@@ -29,7 +24,7 @@ export type AppStore = {
     cardWidth: number,                          // 卡片宽度
     cardHeight: number,                         // 卡片高度
     // 
-    prj: PrjInfo | null,                        // 当前项目信息
+    prj: DataTypes.Prj,                        // 当前项目信息
     srvPrefix: string,                          // 服务器前缀
     logInfo: string,                            // 日志信息
 
@@ -62,7 +57,7 @@ export const useAppStore = defineStore('app', {
         srvPrefix: 'http://127.0.0.1:38080', // debug，electron
         // srvPrefix: '', // release
         logInfo: '', // 日志信息
-        prj: null,
+        prj: new DataTypes.Prj(),
         messageNotify: [], // 消息通知
         // 
         pageCtrl: pageCtrlInit,

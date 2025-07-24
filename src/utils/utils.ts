@@ -543,31 +543,6 @@ async function dictionary_get() {
         });
 }
 
-
-function project_set(req: DatTypes.ProjectSetReq) {
-    Utils.log_info_append("------开始设置项目\n");
-    axios.post(`${appStore.srvPrefix}/api/v1/project_set`, JSON.stringify(req))
-        .then((response) => {
-            console.log('file info:', response.data);
-            const resp = response.data
-            if (resp.code != 0) {
-                Utils.message_notify({ content: resp.status, type: "error" })
-            }
-            else {
-                if (resp.doing == true) {
-                    Utils.message_notify({ content: "设置中", type: "warning" })
-                }
-                else {
-                    Utils.message_notify({ content: "设置完成", type: "success" })
-                }
-            }
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-            Utils.message_notify({ content: `程序发生错误:${error}`, type: "error" })
-        });
-}
-
 function gen_size_str(size: number): string {
     if (size < 1024 * 1024) {
         return (size / 1024).toFixed(2) + "KB";
@@ -671,7 +646,24 @@ class Utils {
     static gen_size_str = gen_size_str;
     static dir_slt_update = dir_slt_update;
     // ------
-    static project_set = project_set
+    static async project_set(req: DatTypes.PrjSetReq) {
+        Utils.log_info_append("------开始设置项目\n");
+        const response: DatTypes.Resp<DatTypes.PrjSetResp> = await axios.post(`${appStore.srvPrefix}/api/v1/project_set`, JSON.stringify(req))
+        if (response.code != 0) {
+            Utils.message_notify({ content: response.status, type: "error" })
+            return
+        }
+        if (response.doing) {
+            Utils.message_notify({ content: "设置中", type: "warning" })
+        }
+        else {
+            Utils.message_notify({ content: "设置完成", type: "success" })
+        }
+    }
+    static convertToLinuxPath(path: string): string {
+        // 替换所有反斜杠为正斜杠, 转换为linux的风格
+        return path.replace(/\\/g, '/');
+    }
     static dictionary_get = dictionary_get;
     static files_get = files_get;
     static tags_get = tags_get;

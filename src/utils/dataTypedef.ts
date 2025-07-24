@@ -176,8 +176,35 @@ export class FilesTagSetReq {
     tagName: string = "";
 }
 
-export class ProjectSetReq {
-    basePath: string = "";
+
+export enum PrjSetType {
+    Create = 1,
+    Open = 2,
+    Save = 3,
+    Sync = 4,
+    GenThumb = 5,
+    ScanExif = 6,
+    GenHash = 7
+}
+
+export class Repo {
+    path = ''
+}
+
+
+export class Prj {
+    name: string = '';
+    path: string = '';
+    repo: Repo[] = []
+}
+
+export class PrjSetReq {
+    prj: Prj = new Prj();
+    type: PrjSetType[] = [];
+}
+
+export class PrjSetResp {
+    prj: Prj = new Prj();
 }
 
 export class HeartBeat {
@@ -205,5 +232,6 @@ export class FileDeleteReq {
 export interface Resp<T = string> {
     code: number;
     status: string;
+    doing: boolean;
     data?: T;
 }
