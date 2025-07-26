@@ -2,19 +2,24 @@
     <div class="set-entry">
         <div class="set-options">
             <label class="xc-label">项目路径:</label>
-            <input type="text" v-model="prjPath" placeholder="输入基础路径" class="xc-input-text text-base-path" />
+            <input type="text" v-model="prjPath" placeholder="输入项目路径" class="xc-input-text text-base-path" />
             <br>
             <label class="xc-label">仓库1:</label>
-            <input type="text" v-model="repoPath[0].path" placeholder="输入基础路径" class="xc-input-text text-base-path" />
+            <input type="text" v-model="repoPath[0].path" placeholder="输入仓库路径" class="xc-input-text text-base-path" />
             <br>
             <label class="xc-label">仓库2:</label>
-            <input type="text" v-model="repoPath[1].path" placeholder="输入基础路径" class="xc-input-text text-base-path" />
+            <input type="text" v-model="repoPath[1].path" placeholder="输入仓库路径" class="xc-input-text text-base-path" />
             <br>
             <label class="xc-label">仓库3:</label>
-            <input type="text" v-model="repoPath[2].path" placeholder="输入基础路径" class="xc-input-text text-base-path" />
+            <input type="text" v-model="repoPath[2].path" placeholder="输入仓库路径" class="xc-input-text text-base-path" />
             <br>
             <button title="创建项目" @click="btnclk_set([DatType.PrjSetType.Create])" class="xc-button">创建项目</button>
             <button title="打开项目" @click="btnclk_set([DatType.PrjSetType.Open])" class="xc-button">打开项目</button>
+            <br>
+            <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSave" />
+            <label class="xc-label">保存项目信息</label>
+            <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSync" />
+            <label class="xc-label">同步仓库文件信息</label>
             <input type="checkbox" class="xc-checkbox" v-model="bPrjSetGenThumb" />
             <label class="xc-label">生成缩略图</label>
             <input type="checkbox" class="xc-checkbox" v-model="bPrjSetScanExif" />
@@ -24,7 +29,7 @@
 
             <button title="同步项目下的文件信息" @click="btnclk_set()" class="xc-button">同步项目</button>
             <br>
-            <button title="数据健康度检查" @click="btnclk_detect_health" class="xc-button">数据检查</button>
+            <button title="数据健康度检查" @click="btnclk_detect_health()" class="xc-button">数据检查</button>
             <button title="清理日志" @click="btnclk_clean_log" class="xc-button">清空日志</button>
         </div>
         <div class="set-log">
@@ -48,7 +53,6 @@ import SetEntryLog from '@/components/SetEntry/SetEntryLog.vue';
 
 // 使用 ref 创建响应式变量来存储输入框的值
 const prjPath = ref('');
-
 watch(() => appStore.prj.path, () => {
     prjPath.value = appStore.prj.path == null ? "" : appStore.prj.path
 })
@@ -64,13 +68,23 @@ function btnclk_clean_log() {
 
 // ------------------------------------
 const repoPath = ref<DatType.Repo[]>([{ path: '' }, { path: '' }, { path: '' }])
+watch(() => appStore.prj.repo, () => {
+    for (let i = 0; i < appStore.prj.repo.length; i++) {
+        repoPath.value[i] = appStore.prj.repo[i]
+    }
+})
 
 // ------------------------------------
 const bPrjSetGenThumb = ref(false)
 const bPrjSetScanExif = ref(false)
 const bPrjSetGenHash = ref(false)
+const bPrjSetSave = ref(true)
+const bPrjSetSync = ref(false)
 
 function btnclk_set(types: DatType.PrjSetType[] = []) {
+    for (const repo of repoPath.value) {
+        repo.path = Utils.convertToLinuxPath(repo.path)
+    }
     const req: DatType.PrjSetReq = new DatType.PrjSetReq()
     if (types.length > 0) {
         req.type = types
@@ -80,10 +94,14 @@ function btnclk_set(types: DatType.PrjSetType[] = []) {
                 for (const repo of repoPath.value) {
                     if (repo.path != '') { req.prj.repo.push(repo) }
                 }
-            } else if (DatType.PrjSetType.Open == types[0]) { }
+            } else if (DatType.PrjSetType.Open == types[0]) {
+                req.prj.path = Utils.convertToLinuxPath(prjPath.value)
+            }
         }
     }
     else {
+        if (bPrjSetSave.value) { req.type.push(DatType.PrjSetType.Save) }
+        if (bPrjSetSync.value) { req.type.push(DatType.PrjSetType.Sync) }
         if (bPrjSetGenThumb.value) { req.type.push(DatType.PrjSetType.GenThumb) }
         if (bPrjSetScanExif.value) { req.type.push(DatType.PrjSetType.ScanExif) }
         if (bPrjSetGenHash.value) { req.type.push(DatType.PrjSetType.GenHash) }
@@ -97,6 +115,9 @@ function btnclk_set(types: DatType.PrjSetType[] = []) {
 
 onMounted(() => {
     prjPath.value = appStore.prj.path == null ? "" : appStore.prj.path
+    for (let i = 0; i < appStore.prj.repo.length; i++) {
+        repoPath.value[i] = appStore.prj.repo[i]
+    }
 })
 
 </script>

@@ -37,13 +37,8 @@ function get_dir_trees() {
     // console.log("dirTree", appStore.DirTrees)
 }
 
-
 function convert_to_file_item(_srcStr: string): DatTypes.Resp {
-    const resp: DatTypes.Resp = {
-        code: 0,
-        status: ""
-    }
-
+    const resp = new DatTypes.Resp()
     const update_after_get_files = () => {
         if (appStore.curFiles.length == 0) {
             appStore.curSltFile = null;
@@ -200,6 +195,19 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
 
 async function files_get(_req: DatTypes.FilesGetReq | null) {
 
+
+    let includeTags: string[] = []
+    if (appStore.searchCon.bReverseSltTag) {
+        for (const tag of appStore.allTags) {
+            if (appStore.searchCon.tags.indexOf(tag.name) == -1) {
+                includeTags.push(tag.name)
+            }
+        }
+    }
+    else {
+        includeTags = appStore.searchCon.tags;
+    }
+
     const req: DatTypes.FilesGetReq = {
         id: 0,
         bFilterModel: false,
@@ -209,7 +217,7 @@ async function files_get(_req: DatTypes.FilesGetReq | null) {
         origins: [],
         sortOrder: appStore.searchCon.sortOrder,
         sortBy: appStore.searchCon.sortBy,
-        tags: appStore.searchCon.tags,
+        tags: includeTags,
     }
     if (appStore.searchCon.pathType == "allPath") {
         req.dirs = [];
@@ -293,10 +301,7 @@ function tags_set(tag: DatTypes.TagItem) {
 
 
 function files_tag_set(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
-    const resp: DatTypes.Resp = {
-        code: 0,
-        status: "",
-    }
+    const resp = new DatTypes.Resp()
     axios.post(`${appStore.srvPrefix}/api/v1/files_tag_set`, JSON.stringify(_req))
         .then((response) => {
             console.log('file info:', response.data);
@@ -314,10 +319,7 @@ function files_tag_set(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
 }
 
 function files_tag_delete(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
-    const resp: DatTypes.Resp = {
-        code: 0,
-        status: "",
-    }
+    const resp = new DatTypes.Resp()
     axios.post(`${appStore.srvPrefix}/api/v1/files_tag_delete`, JSON.stringify(_req))
         .then((response) => {
             console.log('file info:', response.data);
@@ -335,11 +337,8 @@ function files_tag_delete(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
 }
 
 async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.Resp<DatTypes.FilePathChgResp>> {
-    const resp: DatTypes.Resp<DatTypes.FilePathChgResp> = {
-        code: 0,
-        status: "",
-        data: new DatTypes.FilePathChgResp(),
-    }
+    const resp = new DatTypes.Resp<DatTypes.FilePathChgResp>()
+    resp.data = new DatTypes.FilePathChgResp()
 
     _req.distPath = _req.distPath.substring(1);
 
@@ -393,11 +392,7 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
 }
 
 function files_delete(_req: DatTypes.FileDeleteReq): DatTypes.Resp {
-    const resp: DatTypes.Resp = {
-        code: 0,
-        status: "",
-    }
-
+    const resp = new DatTypes.Resp()
     axios.post(`${appStore.srvPrefix}/api/v1/files_delete`, JSON.stringify(_req))
         .then((response) => {
             console.log('file info:', response.data);
@@ -416,10 +411,7 @@ function files_delete(_req: DatTypes.FileDeleteReq): DatTypes.Resp {
 }
 
 function project_health(): DatTypes.Resp {
-    const resp: DatTypes.Resp = {
-        code: 0,
-        status: "",
-    }
+    const resp = new DatTypes.Resp()
     Utils.log_info_append("------开始数据健康度检查\n");
     axios.post(`${appStore.srvPrefix}/api/v1/project_health`, JSON.stringify({ type: 2 }))
         .then((response) => {
@@ -438,10 +430,7 @@ function project_health(): DatTypes.Resp {
 
 
 function message_notify(_req: DatTypes.MessageReq): DatTypes.Resp {
-    const resp: DatTypes.Resp = {
-        code: 0,
-        status: "",
-    }
+    const resp = new DatTypes.Resp()
     const msg: DatTypes.Message = new DatTypes.Message();
     msg.content = _req.content;
     msg.durationMs = _req.duration ? _req.duration : 2000;
@@ -460,10 +449,7 @@ function message_notify(_req: DatTypes.MessageReq): DatTypes.Resp {
 }
 
 function page_show(_req: DatTypes.AppPageCtrlReq): DatTypes.Resp {
-    const resp: DatTypes.Resp = {
-        code: 0,
-        status: "",
-    }
+    const resp = new DatTypes.Resp()
     const validPages = ['home', 'set', 'imageView', 'message'];
 
     if (validPages.includes(_req.page)) {
@@ -501,24 +487,6 @@ async function prj_info_get() {
     await Utils.files_get(null)
     await dictionary_get()
     await tags_get()
-}
-
-function heartbeat() {
-    axios.post(`${appStore.srvPrefix}/api/v1/heartbeat`)
-        .then((response) => {
-            const resp = response.data
-            if (resp.code != 0) {
-                console.log("heartbeat err ", resp.status)
-            }
-            else {
-                appStore.heartbeat.status = resp.data.status;
-                appStore.logInfo += resp.data.logInfo;
-                // console.log('heart beat:', appStore.heartbeat);
-            }
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-        });
 }
 
 function log_info_append(cont: string) {
@@ -613,6 +581,7 @@ function dir_slt_update(treeItem: DatTypes.DirTreeItem | string) {
 }
 
 async function tag_delete(_req: DatTypes.TagItem): Promise<DatTypes.Resp> {
+    const resp = new DatTypes.Resp()
     await axios.post(`${appStore.srvPrefix}/api/v1/tags_delete`, JSON.stringify({ tagName: _req.name }))
         .then((response) => {
             const resp = response.data
@@ -632,7 +601,7 @@ async function tag_delete(_req: DatTypes.TagItem): Promise<DatTypes.Resp> {
             console.error('Error fetching project info:', error);
             Utils.message_notify({ content: `程序错误:${error}`, type: "error" })
         });
-    return { code: 0, status: "" }
+    return resp
 }
 
 
@@ -648,12 +617,13 @@ class Utils {
     // ------
     static async project_set(req: DatTypes.PrjSetReq) {
         Utils.log_info_append("------开始设置项目\n");
-        const response: DatTypes.Resp<DatTypes.PrjSetResp> = await axios.post(`${appStore.srvPrefix}/api/v1/project_set`, JSON.stringify(req))
-        if (response.code != 0) {
-            Utils.message_notify({ content: response.status, type: "error" })
+        const response = await axios.post(`${appStore.srvPrefix}/api/v1/project_set`, JSON.stringify(req))
+        const resp: DatTypes.Resp<DatTypes.PrjSetResp> = response.data
+        if (resp.code != 0) {
+            Utils.message_notify({ content: resp.status, type: "error" })
             return
         }
-        if (response.doing) {
+        if (resp.doing) {
             Utils.message_notify({ content: "设置中", type: "warning" })
         }
         else {
@@ -675,7 +645,32 @@ class Utils {
     static files_delete = files_delete;
     static project_health = project_health;
     static prj_info_get = prj_info_get;
-    static heartbeat = heartbeat;
+    static async heartbeat() {
+        const responseHttp = await axios.post(`${appStore.srvPrefix}/api/v1/heartbeat`)
+        const response: DatTypes.Resp<DatTypes.HeartBeatResp> = responseHttp.data
+
+        if (response.code != 0) {
+            console.log("heartbeat err ", response.status)
+            return
+        }
+        const resp = response.data
+        // console.log('resp:', resp, resp?.sysStatus.curCmd, resp?.sysStatus.curTask);
+        appStore.logInfo += resp?.sysStatus.logInfo
+        if (resp?.sysStatus.curTask != null) {
+            if (resp?.sysStatus.curCmd == 'prj_set') {
+                const cmdResp: DatTypes.Resp<DatTypes.PrjSetResp> = resp?.sysStatus.curTask.resp as unknown as DatTypes.Resp<DatTypes.PrjSetResp>;
+                if (cmdResp.code != 0) {
+                    Utils.message_notify({ content: `设置失败:${cmdResp.status}`, type: "error" })
+                }
+                else {
+                    if (cmdResp.data?.prj != null) {
+                        appStore.prj = cmdResp.data?.prj
+                    }
+                    Utils.message_notify({ content: `设置完成:${cmdResp.status}` })
+                }
+            }
+        }
+    }
     static folder_get = folder_get
 }
 

@@ -12,11 +12,23 @@ go_dir='D:/02_workspace/05_timeCapsule/time_capsule'
 etectron_path='D:/02_workspace/05_timeCapsule/timeCapsule_ui/time_capsule_app_v2/time_capsule'
 go_release_dir='D:/02_workspace/05_timeCapsule/time_capsule_release/time_capsule_exe'
 
+web_dist_dir = 'D:/02_workspace/05_timeCapsule/timeCapsule_ui/time_capsule_ui_v2/dist'
+
 # 解析命令行参数
 # app 打包electron， app_dbg，只打包web，然后替换进去，不打包electron
 def parse_args():
-    parser = argparse.ArgumentParser(description='根据打包类型进行打包操作')
-    parser.add_argument('type', choices=['app','app_dbg', 'web', 'go'], help='打包类型，可选值：app, app_dbg, web, go')
+
+    helpStr = """
+    打包类型，可选值：app, web, go, all
+    app: 构建electron 并打包，把go程序和web资源替换过来
+    web: 只打包web
+    go: 只打包go，同时把web资源复制进去
+    all: 先打包web，再构建打包go程序，再构建app，最终打包
+    """
+
+    # 使用 RawTextHelpFormatter 保留自定义的换行格式
+    parser = argparse.ArgumentParser(description='根据打包类型进行打包操作', formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('type', choices=['app','all', 'web', 'go'], help=helpStr)
     return parser.parse_args()
 def build_go():
     try:
@@ -37,15 +49,14 @@ def pack_go():
     if os.path.exists(go_web_dir):
         # 删除目录及其所有内容
         shutil.rmtree(go_web_dir)
-        print(f"目录 {go_web_dir} 及其所有内容已成功删除。")
+        print(f"删除go的web文件 {go_web_dir}")
     # 把 web_dist_dir 复制到 go_web_dir 目录
-    target_dir = go_web_dir
     # 检查源目录是否存在
     if os.path.exists(web_dist_dir):
         try:
-            os.makedirs(target_dir, exist_ok=True)
-            shutil.copytree(web_dist_dir, target_dir, dirs_exist_ok=True)
-            print(f"所有文件和子目录已成功复制到 {target_dir}。")
+            os.makedirs(go_web_dir, exist_ok=True)
+            shutil.copytree(web_dist_dir, go_web_dir, dirs_exist_ok=True)
+            print(f"web已经复制到go {go_web_dir}。")
         except Exception as e:
             print(f"复制过程中出现错误: {e}")
             exit(1)
@@ -53,7 +64,7 @@ def pack_go():
     #3，打包 go 程序 
     if os.path.exists(go_release_dir):
         shutil.rmtree(go_release_dir)
-        print(f"目录 {go_release_dir} 及其所有内容已成功删除。")
+        print(f"删除go的打包目录 {go_release_dir} ")
     #3.1， 复制 go_dir目录下的time_capsule.exe 到 go_release_dir 目录
     target_file = os.path.join(go_release_dir, 'time_capsule.exe')
     source_file = os.path.join(go_dir, 'time_capsule.exe')
@@ -61,7 +72,7 @@ def pack_go():
     os.makedirs(os.path.dirname(target_file), exist_ok=True)
     # 复制文件到目标目录
     shutil.copy2(source_file, target_file)
-    print(f"文件已成功复制到 {target_file}。")
+    print(f"go程序已经复制 {target_file}。")
     # 3.2，复制 go_dir目录下的assets 目录 到 go_release_dir 目录
     target_dir = os.path.join(go_release_dir, 'assets')
     source_dir = os.path.join(go_dir, 'assets')
@@ -69,8 +80,27 @@ def pack_go():
     os.makedirs(os.path.dirname(target_dir), exist_ok=True)
     # 复制目录到目标目录
     shutil.copytree(source_dir, target_dir)
-    print(f"目录已成功复制到 {target_dir}。")
+    print(f"go的依赖资源已经复制 {target_dir}")
     print('------------go 打包完成')
+
+
+npm_path = r'C:/Program Files/nodejs/npm.cmd'
+def pack_web():
+    # 获取当前脚本所在的目录
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    # 进入..目录下
+    parent_dir = os.path.dirname(current_dir)
+    os.chdir(parent_dir)
+
+    try:
+        subprocess.run([npm_path, 'run', 'build'], check=True)
+        print('------------web 构建完成')
+    except FileNotFoundError:
+        print("未找到 npm，请检查 npm 路径是否正确。")
+    except subprocess.CalledProcessError:
+        print("构建过程中出错，请检查构建命令。")
+        exit(1)
+
 
 def build_electron():
     try:
@@ -88,7 +118,7 @@ def pack_electron():
     time_capsule_exe_dir = os.path.join(etectron_path, 'resources/time_capsule_exe')
     if os.path.exists(time_capsule_exe_dir):
         shutil.rmtree(time_capsule_exe_dir)
-        print(f"目录 {time_capsule_exe_dir} 及其所有内容已成功删除。")
+        print(f"app中go程序删除成功 {time_capsule_exe_dir}")
     resources_dir = os.path.join(etectron_path, 'resources/time_capsule_exe')
     # 把go_release_dir目录复制到 resources_dir 目录下
     target_dir = resources_dir
@@ -96,7 +126,7 @@ def pack_electron():
     if os.path.exists(go_release_dir):
         try:
             shutil.copytree(go_release_dir, target_dir)
-            print(f"------------web资源复制成功")
+            print(f"app中go程序复制成功 {target_dir}")
         except FileExistsError:
             print(f"目标目录 {target_dir} 已存在，复制失败。")
             exit(1)
@@ -112,25 +142,6 @@ def pack_electron():
     print('------------成果物路径：', os.path.join(etectron_path, 'dist'))
 
 args = parse_args()
-
-# 获取当前脚本所在的目录
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# 进入..目录下
-parent_dir = os.path.dirname(current_dir)
-os.chdir(parent_dir)
-
-npm_path = r'C:/Program Files/nodejs/npm.cmd'
-
-try:
-    subprocess.run([npm_path, 'run', 'build'], check=True)
-    print('------------web 构建完成')
-except FileNotFoundError:
-    print("未找到 npm，请检查 npm 路径是否正确。")
-except subprocess.CalledProcessError:
-    print("构建过程中出错，请检查构建命令。")
-    exit(1)
-
-web_dist_dir = r'D:\\02_workspace\\05_timeCapsule\\timeCapsule_ui\\time_capsule_ui_v2\\dist'
 
 # 打包 electron 应用
 if args.type in ['app','app_dbg']:
@@ -176,6 +187,18 @@ if args.type in ['app','app_dbg']:
 
     # 4, 打包go程序
 
+
+if args.type == 'all':
+    pack_web()
+    pack_go()
+    pack_electron()
+    exeSrcPath = 'D:/02_workspace/05_timeCapsule/time_capsule/appData'
+    exeDestPath = 'D:/02_workspace/05_timeCapsule/timeCapsule_ui/time_capsule_app_v2/time_capsule/dist/win-unpacked/resources/app.asar.unpacked/resources/time_capsule_exe/appData'
+    # 把exeSrcPath目录下的所有文件复制到exeDestPath目录下
+    shutil.copytree(exeSrcPath, exeDestPath, dirs_exist_ok=True)
+    # 查看exeDestPath目录下的所有文件
+    print("工程文件复制成功", os.listdir(exeDestPath))
+    print('------------all 打包完成')
 
 if args.type == 'go':
     pack_go()

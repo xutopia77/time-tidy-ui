@@ -21,6 +21,7 @@
         </select>
         <div class="tags-panel">
             <label> 文件标签({{ curSltTagNum }}): </label>
+            <input type="checkbox" v-model="bReverseSltTag" class="xc-checkbox" /> 反选
             <!-- 动态绑定 selected 类 -->
             <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag" :class="{ selected: isTagSelected(tag) }"
                 :style="{ backgroundColor: tag.color }" @click="btnclk_tag(tag)">
@@ -31,47 +32,13 @@
 </template>
 
 <script setup lang="ts">
+
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import { computed } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 import '@/assets/common.css'
-
-const fileTags = computed(() => {
-    const bGetAllTag = true
-    if (bGetAllTag) {
-        const uniqueTags: DatType.FileItemTag[] = [];
-        for (const item of appStore.allTags) {
-            uniqueTags.push({ name: item.name, color: item.color });
-        }
-        return uniqueTags;
-    }
-    else { // 只是根据当前的文件来获取标签
-        // 初始化一个 Set 用于存储不重复标签的唯一标识
-        const uniqueTagKeys = new Set<string>();
-        const uniqueTags: DatType.FileItemTag[] = [];
-
-        // 遍历 appStore.curFiles
-        for (const item of appStore.curFiles) {
-            if (item.tags && Array.isArray(item.tags)) {
-                // 遍历每个文件的 tags 数组
-                for (const tag of item.tags) {
-                    // 简单类型检查，确保 tag 符合 DatType.FileItemTag 基本结构
-                    if (tag && typeof tag === 'object' && 'name' in tag && 'color' in tag) {
-                        // 生成标签的唯一标识
-                        const tagKey = `${tag.name}-${tag.color}`;
-                        if (!uniqueTagKeys.has(tagKey)) {
-                            uniqueTagKeys.add(tagKey);
-                            uniqueTags.push(tag as DatType.FileItemTag);
-                        }
-                    }
-                }
-            }
-        }
-        return uniqueTags;
-    }
-});
 
 // 排序依据
 const sortBy = computed({
@@ -111,6 +78,16 @@ const curSltTagNum = computed(() => {
     return appStore.searchCon.tags.length;
 });
 
+// ------------------------------------ tag
+const bReverseSltTag = computed({
+    get: () => appStore.searchCon.bReverseSltTag,
+    set: (newValue) => {
+        appStore.searchCon.bReverseSltTag = newValue;
+        // 触发文件重新获取以应用新的排序规则
+        Utils.files_get(null);
+    }
+});
+
 // 点击标签处理方法
 function btnclk_tag(tag: DatType.FileItemTag) {
     const tags = appStore.searchCon.tags;
@@ -125,6 +102,42 @@ function btnclk_tag(tag: DatType.FileItemTag) {
     // 触发文件重新获取以应用新的标签过滤条件
     Utils.files_get(null);
 }
+
+const fileTags = computed(() => {
+    const bGetAllTag = true
+    if (bGetAllTag) {
+        const uniqueTags: DatType.FileItemTag[] = [];
+        for (const item of appStore.allTags) {
+            uniqueTags.push({ name: item.name, color: item.color });
+        }
+        return uniqueTags;
+    }
+    else { // 只是根据当前的文件来获取标签
+        // 初始化一个 Set 用于存储不重复标签的唯一标识
+        const uniqueTagKeys = new Set<string>();
+        const uniqueTags: DatType.FileItemTag[] = [];
+
+        // 遍历 appStore.curFiles
+        for (const item of appStore.curFiles) {
+            if (item.tags && Array.isArray(item.tags)) {
+                // 遍历每个文件的 tags 数组
+                for (const tag of item.tags) {
+                    // 简单类型检查，确保 tag 符合 DatType.FileItemTag 基本结构
+                    if (tag && typeof tag === 'object' && 'name' in tag && 'color' in tag) {
+                        // 生成标签的唯一标识
+                        const tagKey = `${tag.name}-${tag.color}`;
+                        if (!uniqueTagKeys.has(tagKey)) {
+                            uniqueTagKeys.add(tagKey);
+                            uniqueTags.push(tag as DatType.FileItemTag);
+                        }
+                    }
+                }
+            }
+        }
+        return uniqueTags;
+    }
+});
+
 </script>
 
 <style scoped>

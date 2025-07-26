@@ -44,7 +44,6 @@ export type AppStore = {
     curFileTotal: number,                       // 当前文件列表的总数
     searchCon: DataTypes.FileSearchCondition,   // 文件搜索条件
     curPath: string,                            // 当前路径
-    heartbeat: DataTypes.HeartBeat,
 }
 
 export const useAppStore = defineStore('app', {
@@ -74,7 +73,6 @@ export const useAppStore = defineStore('app', {
         curFileTotal: 0,
         searchCon: fileSearchConditionInit,
         curPath: '/',
-        heartbeat: { status: "" }
     }),
     actions: {
         setData(key: string, value: string): void {

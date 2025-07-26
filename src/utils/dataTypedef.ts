@@ -142,6 +142,7 @@ export class FileSearchCondition {
     page: number = 0;
     pageSize: number = 10;
     tags: string[] = [];// tags
+    bReverseSltTag: boolean = false; // 反向选择标签
 }
 
 // ============================================================== communicate with back server
@@ -195,6 +196,8 @@ export class Repo {
 export class Prj {
     name: string = '';
     path: string = '';
+    thumbPath: string = '';
+    dbPath: string = '';
     repo: Repo[] = []
 }
 
@@ -207,9 +210,22 @@ export class PrjSetResp {
     prj: Prj = new Prj();
 }
 
-export class HeartBeat {
-    status: string = "";
-};
+export class TaskInfo<T = string> {
+    resp?: T
+    doing: boolean = false;
+}
+
+export class SystemStatus {
+    busy: boolean = false;
+    status: string = '';
+    logInfo: string = '';
+    curCmd: string = ''; // get in heartbeat, and set '' when get finish
+    curTask: TaskInfo = new TaskInfo();
+}
+
+export class HeartBeatResp {
+    sysStatus: SystemStatus = new SystemStatus();
+}
 
 export class FilePathChgReq {
     fileIds: number[] = [];
@@ -229,9 +245,9 @@ export class FileDeleteReq {
     bRemoveToDtrash: boolean = true;
 }
 
-export interface Resp<T = string> {
-    code: number;
-    status: string;
-    doing: boolean;
+export class Resp<T = string> {
+    code: number = 0;
+    status: string = '';
+    doing: boolean = false;
     data?: T;
 }
