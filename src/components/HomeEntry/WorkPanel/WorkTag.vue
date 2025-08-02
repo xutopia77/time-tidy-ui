@@ -1,6 +1,10 @@
 <template>
     <div>
-        <input v-model="newTag" @keyup.enter="btn_addTag" placeholder="输入新标签并按回车键添加" class="tag-input" />
+        <input v-model="newTag" @keyup.enter="btn_addTag" placeholder="输入新标签并按回车键添加" class="tag-input"
+            list="tagSuggestions" />
+        <datalist id="tagSuggestions" class="input-suggestions">
+            <option v-for="tag in tagSuggestions" :key="tag" :value="tag"></option>
+        </datalist>
         <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag" :style="{
             backgroundColor: tag.color
         }">
@@ -23,7 +27,27 @@ import { XIcon } from '@/components/Icon'
 // 新标签输入值
 const newTag = ref('');
 
+// 联想标签集合，这里假设从 appStore.allTags 获取
+const tagSuggestions = computed(() => appStore.allTags.map(tag => tag.name));
+
 const fileTags = computed(() => {
+    const fSlt: DatType.File[] = [];
+    for (const item of appStore.curFiles) {
+        if (item.checked)
+            fSlt.push(item)
+    }
+    if (fSlt.length > 0) {
+        const allTags: DatType.FileItemTag[] = [];
+        for (const item of fSlt) {
+            for (const tag of item.tags) {
+                if (!allTags.some(t => t.name === tag.name)) {
+                    allTags.push(tag);
+                }
+            }
+        }
+        return allTags;
+    }
+
     if (appStore.curSltFile == null) return []
     return appStore.curSltFile.tags
 });
@@ -38,24 +62,14 @@ const btn_addTag = () => {
         req.tagName = newTag.value.trim()
         newTag.value = '';
     }
-    for (const item of appStore.curFiles) {
-        if (item.checked)
-            req.fileIds.push(item.id)
-    }
-    if (req.fileIds.length > 0) {
-        Utils.files_tag_set(req)
-        return
-    }
-    if (appStore.curSltFile == null) return;
-    req.fileIds.push(appStore.curSltFile.id)
     Utils.files_tag_set(req)
 }
 
 const btn_removeTag = (tag: DatType.FileItemTag) => {
     if (appStore.curSltFile?.id == null) return
     const req: DatType.FilesTagSetReq = {
-        fileIds: [appStore.curSltFile.id],
-        tagName: tag.name
+        tagName: tag.name,
+        fileIds: []
     };
     Utils.files_tag_delete(req)
 };
@@ -76,8 +90,28 @@ const btn_removeTag = (tag: DatType.FileItemTag) => {
 
 .tag-input:hover {
     background-color: var(--xc-background-color);
-    /* 设置鼠标悬停时的背景颜色 */
     border: var(--xc-border-hover);
+}
+
+.input-suggestions {
+    background-color: var(--xc-background-color);
+    color: var(--xc-text-color);
+}
+
+/* 尝试设置 option 样式 */
+.input-suggestions option {
+    background-color: var(--xc-background-color);
+    color: var(--xc-text-color);
+}
+
+/* 针对 Chrome 和 Safari */
+.tag-input::-webkit-calendar-picker-indicator {
+    background-color: var(--xc-background-color);
+}
+
+/* 针对 Firefox */
+.tag-input::-moz-list-bullet {
+    background-color: var(--xc-background-color);
 }
 
 .delete-btn {

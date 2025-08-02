@@ -19,6 +19,19 @@
         </div>
         <div><span>{{ footerInfo }}</span></div>
         <div class="operate-contianer">
+            <button @click="btnclk_set_file_level()" class="xc-button op-button">设置等级</button>
+            <select v-model="sltLevel" class="xc-select pagination-slt">
+                <option value="level1">level1</option>
+                <option value="level2">level2</option>
+                <option value="level3">level3</option>
+                <option value="level4">level4</option>
+                <option value="level5">level5</option>
+                <option value="level6">level6</option>
+                <option value="level7">level7</option>
+                <option value="level8">level8</option>
+                <option value="level9">level9</option>
+                <option value="level10">level10</option>
+            </select>
             <button @click="btnclk_operate_file('files_move')" class="xc-button op-button">移动</button>
             <button @click="btnclk_operate_file('files_cpy')" class="xc-button op-button">复制</button>
             <button @click="btnclk_delete_file" class="xc-button op-button">删除</button>
@@ -26,7 +39,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
@@ -119,6 +132,20 @@ function btnclk_delete_file() {
         return;
     }
     Utils.files_delete(req)
+}
+
+const sltLevel = ref("level3")
+
+function btnclk_set_file_level() {
+    const req: DatType.FilesTagSetReq = {
+        fileIds: [],
+        tagName: ''
+    };
+    if (sltLevel.value == '') {
+        Utils.message_notify({ content: '请选择要设置的等级' })
+    }
+    req.tagName = sltLevel.value
+    Utils.files_tag_set(req)
 }
 
 </script>

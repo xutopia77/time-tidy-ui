@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, ref } from 'vue';
+import { computed, defineProps, ref, watch } from 'vue';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils'
 import { useAppStore } from '@/stores/AppStore';
@@ -55,6 +55,10 @@ const handleCheckboxChange = () => {
         }
     })
 };
+
+watch(() => props.item.checked, (newValue) => {
+    isChecked.value = newValue;
+});
 
 const btnclk_handleClickImage = () => {
     if (appStore.envMode == DatType.EnvModeType.pro) {

@@ -243,43 +243,6 @@ function tags_set(tag: DatTypes.TagItem) {
         });
 }
 
-
-function files_tag_set(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
-    const resp = new DatTypes.Resp()
-    axios.post(`${appStore.srvPrefix}/api/v1/files_tag_set`, JSON.stringify(_req))
-        .then((response) => {
-            console.log('file info:', response.data);
-            resp.code = response.data.code;
-            resp.status = response.data.status;
-            Utils.files_get(null);
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-            resp.code = -1;
-            resp.status = error.message;
-        }
-        );
-    return resp;
-}
-
-function files_tag_delete(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
-    const resp = new DatTypes.Resp()
-    axios.post(`${appStore.srvPrefix}/api/v1/files_tag_delete`, JSON.stringify(_req))
-        .then((response) => {
-            console.log('file info:', response.data);
-            resp.code = response.data.code;
-            resp.status = response.data.status;
-            Utils.files_get(null);
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-            resp.code = -1;
-            resp.status = error.message;
-        }
-        );
-    return resp;
-}
-
 async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.Resp<DatTypes.FilePathChgResp>> {
     const resp = new DatTypes.Resp<DatTypes.FilePathChgResp>()
     resp.data = new DatTypes.FilePathChgResp()
@@ -618,10 +581,108 @@ class Utils {
             });
     }
 
+    static cancle_file_checked() {
+        for (const item of appStore.curFiles) {
+            item.checked = false;
+        }
+    }
+
     static tags_get = tags_get;
     static tags_set = tags_set;
-    static files_tag_set = files_tag_set;
-    static files_tag_delete = files_tag_delete;
+    static async files_tag_set(_req: DatTypes.FilesTagSetReq): Promise<DatTypes.Resp> {
+        const resp = new DatTypes.Resp()
+        _req.fileIds = []
+        for (const item of appStore.curFiles) {
+            if (item.checked)
+                _req.fileIds.push(item.id)
+        }
+        if (_req.fileIds.length == 0) {
+            if (appStore.curSltFile == null) {
+                resp.code = -1;
+                resp.status = `no file selected`;
+                return resp;
+            }
+            else {
+                _req.fileIds.push(appStore.curSltFile.id)
+            }
+        }
+
+        await axios.post(`${appStore.srvPrefix}/api/v1/files_tag_set`, JSON.stringify(_req))
+            .then((response) => {
+                console.log('file info:', response.data);
+                resp.code = response.data.code;
+                resp.status = response.data.status;
+                if (resp.code != 0) {
+                    Utils.message_notify({ content: `文件操作失败:${resp.status}`, type: "error" })
+                    return resp;
+                }
+                else if (resp.doing) {
+                    Utils.message_notify({ content: `文件操作中`, type: "warning" })
+                    return resp
+                }
+                this.cancle_file_checked()
+                Utils.message_notify({ content: `文件操作成功` })
+                Utils.files_get(null);
+            })
+            .catch((error) => {
+                console.error('Error fetching project info:', error);
+                resp.code = -1;
+                resp.status = error.message;
+            }
+            );
+        return resp;
+    }
+
+    static files_tag_delete(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
+        const resp = new DatTypes.Resp()
+        _req.fileIds = []
+        for (const item of appStore.curFiles) {
+            if (item.checked)
+                _req.fileIds.push(item.id)
+        }
+        if (_req.fileIds.length == 0) {
+            if (appStore.curSltFile == null) {
+                resp.code = -1;
+                resp.status = `no file selected`;
+                return resp;
+            }
+            else {
+                _req.fileIds.push(appStore.curSltFile.id)
+            }
+        }
+        if (_req.fileIds.length == 0) {
+            resp.code = -1;
+            resp.status = `no file selected`;
+            Utils.message_notify({ content: `no file selected`, type: "error" })
+            return resp;
+        }
+
+        axios.post(`${appStore.srvPrefix}/api/v1/files_tag_delete`, JSON.stringify(_req))
+            .then((response) => {
+                console.log('file info:', response.data);
+                resp.code = response.data.code;
+                resp.status = response.data.status;
+                if (resp.code != 0) {
+                    Utils.message_notify({ content: `文件操作失败:${resp.status}`, type: "error" })
+                    return resp;
+                }
+                else if (resp.doing) {
+                    Utils.message_notify({ content: `文件操作中`, type: "warning" })
+                    return resp
+                }
+                this.cancle_file_checked()
+                Utils.message_notify({ content: `文件操作成功` })
+                Utils.files_get(null);
+            })
+            .catch((error) => {
+                console.error('Error fetching project info:', error);
+                resp.code = -1;
+                resp.status = error.message;
+            }
+            );
+        return resp;
+    }
+
     static tag_delete = tag_delete;
     static files_path_chg = files_path_chg;
     static files_delete = files_delete;
