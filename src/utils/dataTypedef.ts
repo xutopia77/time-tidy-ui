@@ -30,6 +30,7 @@ export enum FileType {
     audio = "audio",
     document = "document",
     folder = "folder",
+    other = "other",
 }
 
 // 字符串转 FileType 枚举
@@ -92,7 +93,7 @@ export class FileItemTag {
     color: string = "#e6475e";
 }
 
-export class FileItem {
+export class File {
     id: number = 0;
     rootPathId: number = 0;
     name: string = "";
@@ -136,14 +137,15 @@ export class AppPageCtrlReq {
 }
 
 export class FileSearchCondition {
-    sortBy: string = "";// name, size, time, type
-    sortOrder: string = "";// asc, desc
-    pathType: string = "";// curPath, allPath
-    page: number = 0;
-    pageSize: number = 10;
+    sortBy: string = "time";// name, size, time, type
+    sortOrder: string = "asc";// asc, desc
+    pathType: string = "curPath";// curPath, allPath
+    page: number = 1;
+    pageSize: number = 50;
     tags: string[] = [];// tags
     noTag: 'true' | 'false' | '' = '';
     bReverseSltTag: boolean = false; // 反向选择标签
+    types: FileType[] = [];
 }
 
 // ============================================================== communicate with back server
@@ -162,17 +164,23 @@ export class Message {
 
 
 export class FilesGetReq {
-    id: number | null = null;
-    bFilterModel: boolean | null = null;
     pageSize: number | null = 10;
     page: number | null = 0;
-    origins: string[] | null = [];
-    dirs: string[] | null = [];
     tags: string[] | null = [];
     noTag: 'true' | 'false' | '' = '';
     bReverseTag: boolean = false; // 反向选择标签
+    types: FileType[] | null = null;
+    dirs: string[] | null = [];
+    statuss: number[] | null = null;
+    origins: string[] | null = [];
+    startTime: string | null = null;
+    endTime: string | null = null;
     sortBy: string | null = null;
     sortOrder: string | null = null; // asc, desc
+    fileId: number | null = null;
+
+    id: number | null = null;
+    bFilterModel: boolean | null = null;
 }
 
 export class FilesTagSetReq {

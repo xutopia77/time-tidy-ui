@@ -60,7 +60,7 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
         return resp;
     }
     if (jData.data.files != null) {
-        const files: DatTypes.FileItem[] = []
+        const files: DatTypes.File[] = []
         const jRecords = jData.data.files.records;
         if (jRecords != null) {
             for (const jRecord of jRecords) {
@@ -69,7 +69,7 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
                     console.warn(`Unknown file type: ${jRecord.Type}, skipping file ${jRecord.FileName}`);
                     continue;
                 }
-                const fileItem = new DatTypes.FileItem();
+                const fileItem = new DatTypes.File();
                 fileItem.id = jRecord.ID;
                 fileItem.rootPathId = jRecord.RootPathID;
                 fileItem.name = jRecord.FileName;
@@ -193,53 +193,6 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
     return resp;
 }
 
-async function files_get(_req: DatTypes.FilesGetReq | null) {
-
-    const req: DatTypes.FilesGetReq = {
-        id: 0,
-        bFilterModel: false,
-        pageSize: appStore.searchCon.pageSize,
-        page: appStore.searchCon.page - 1,
-        dirs: [appStore.curPath.substring(1)],
-        origins: [],
-        sortOrder: appStore.searchCon.sortOrder,
-        sortBy: appStore.searchCon.sortBy,
-        tags: appStore.searchCon.tags,
-        bReverseTag: appStore.searchCon.bReverseSltTag,
-        noTag: appStore.searchCon.noTag
-    }
-    if (appStore.searchCon.pathType == "allPath") {
-        req.dirs = [];
-    }
-
-    if (_req != null) {
-        if (_req.id != null) { req.id = _req.id; }
-        if (_req.bFilterModel != null) { req.bFilterModel = _req.bFilterModel; }
-        if (_req.pageSize != null) { req.pageSize = _req.pageSize; }
-        if (_req.page != null) { req.page = _req.page; }
-        if (_req.dirs != null) { req.dirs = _req.dirs; }
-        if (_req.origins != null) { req.origins = _req.origins; }
-        if (_req.sortOrder != null) { req.sortOrder = _req.sortOrder; }
-        if (_req.sortBy != null) { req.sortBy = _req.sortBy; }
-        if (_req.tags != null) { req.tags = _req.tags; }
-        if (_req.noTag != null) { req.noTag = _req.noTag; }
-        if (_req.bReverseTag != null) { req.bReverseTag = _req.bReverseTag; }
-    }
-
-    await axios.post(`${appStore.srvPrefix}/api/v1/files_get`, JSON.stringify(req))
-        .then((response) => {
-            console.log('file info:', response.data);
-            const resp: DatTypes.Resp = convert_to_file_item(JSON.stringify(response.data))
-            if (resp.code === 0) {
-                get_dir_trees()
-            } else {
-                console.error('Error converting file items:', resp.status);
-            }
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-        });
-}
 
 function tags_get() {
     appStore.allTags = [];
@@ -459,27 +412,6 @@ function page_show(_req: DatTypes.AppPageCtrlReq): DatTypes.Resp {
     return resp;
 }
 
-async function prj_info_get() {
-    await axios.post(`${appStore.srvPrefix}/api/v1/project`)
-        .then((response) => {
-            const resp = response.data
-            if (resp.code != 0) {
-                console.log("project info get err ", resp.status)
-            }
-            else {
-                appStore.prj = resp.data;
-                console.log('Project info:', appStore.prj);
-
-            }
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-        });
-    await Utils.files_get(null)
-    await dictionary_get()
-    await tags_get()
-}
-
 function log_info_append(cont: string) {
     appStore.logInfo += cont
 }
@@ -619,6 +551,9 @@ class Utils {
         }
         else {
             Utils.message_notify({ content: "设置完成", type: "success" })
+            if (req.type.length > 0 && req.type[0] == DatTypes.PrjSetType.Open) {
+                await this.prj_info_get()
+            }
         }
     }
     static convertToLinuxPath(path: string): string {
@@ -626,7 +561,63 @@ class Utils {
         return path.replace(/\\/g, '/');
     }
     static dictionary_get = dictionary_get;
-    static files_get = files_get;
+    static async files_get(_req: DatTypes.FilesGetReq | null) {
+        const req: DatTypes.FilesGetReq = {
+            pageSize: appStore.searchCon.pageSize,
+            page: appStore.searchCon.page - 1,
+            tags: appStore.searchCon.tags,
+            noTag: appStore.searchCon.noTag,
+            bReverseTag: appStore.searchCon.bReverseSltTag,
+            types: appStore.searchCon.types,
+            dirs: [appStore.curPath.substring(1)],
+            statuss: [],
+            origins: [],
+            startTime: '',
+            endTime: '',
+            sortBy: appStore.searchCon.sortBy,
+            sortOrder: appStore.searchCon.sortOrder,
+            fileId: 0,
+            id: 0,
+            bFilterModel: false,
+        }
+        if (appStore.searchCon.pathType == "allPath") {
+            req.dirs = [];
+        }
+
+        if (_req != null) {
+            if (_req.pageSize != null) { req.pageSize = _req.pageSize; }
+            if (_req.page != null) { req.page = _req.page; }
+            if (_req.tags != null) { req.tags = _req.tags; }
+            if (_req.noTag != null) { req.noTag = _req.noTag; }
+            if (_req.bReverseTag != null) { req.bReverseTag = _req.bReverseTag; }
+            if (_req.types != null) { req.types = _req.types; }
+            if (_req.dirs != null) { req.dirs = _req.dirs; }
+            if (_req.statuss != null) { req.statuss = _req.statuss; }
+            if (_req.origins != null) { req.origins = _req.origins; }
+            if (_req.startTime != null) { req.startTime = _req.startTime; }
+            if (_req.endTime != null) { req.endTime = _req.endTime; }
+            if (_req.sortOrder != null) { req.sortOrder = _req.sortOrder; }
+            if (_req.sortBy != null) { req.sortBy = _req.sortBy; }
+
+            if (_req.id != null) { req.id = _req.id; }
+            if (_req.bFilterModel != null) { req.bFilterModel = _req.bFilterModel; }
+        }
+
+        await axios.post(`${appStore.srvPrefix}/api/v1/files_get`, JSON.stringify(req))
+            .then((response) => {
+                console.log('file info:', response.data);
+                const resp: DatTypes.Resp = convert_to_file_item(JSON.stringify(response.data))
+                if (resp.code === 0) {
+                    get_dir_trees()
+                } else {
+                    console.error('Error converting file items:', resp.status);
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching project info:', error);
+            });
+    }
+
     static tags_get = tags_get;
     static tags_set = tags_set;
     static files_tag_set = files_tag_set;
@@ -635,7 +626,27 @@ class Utils {
     static files_path_chg = files_path_chg;
     static files_delete = files_delete;
     static project_health = project_health;
-    static prj_info_get = prj_info_get;
+    static async prj_info_get() {
+        await axios.post(`${appStore.srvPrefix}/api/v1/project`)
+            .then((response) => {
+                const resp = response.data
+                if (resp.code != 0) {
+                    console.log("project info get err ", resp.status)
+                }
+                else {
+                    appStore.prj = resp.data;
+                    console.log('Project info:', appStore.prj);
+
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching project info:', error);
+            });
+        await Utils.files_get(null)
+        await dictionary_get()
+        await tags_get()
+    }
+
     static async heartbeat() {
         const responseHttp = await axios.post(`${appStore.srvPrefix}/api/v1/heartbeat`)
         const response: DatTypes.Resp<DatTypes.HeartBeatResp> = responseHttp.data

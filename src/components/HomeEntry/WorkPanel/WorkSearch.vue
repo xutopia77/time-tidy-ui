@@ -19,6 +19,11 @@
             <option value="curPath">当前路径</option>
             <option value="allPath">所有路径</option>
         </select>
+        <br>
+        <label>文件类型:</label>
+        <input type="checkbox" v-model="bSltVideo" class="xc-checkbox" style="vertical-align: text-top;" /> 视频
+        <input type="checkbox" v-model="bSltImage" class="xc-checkbox" style="vertical-align: text-top;" /> 图片
+        <input type="checkbox" v-model="bSltOther" class="xc-checkbox" style="vertical-align: text-top;" /> 其他
         <div class="tags-panel">
             <label> 文件标签({{ curSltTagNum }}): </label>
             <input type="checkbox" v-model="bReverseSltTag" class="xc-checkbox" /> 反选
@@ -42,7 +47,7 @@
 
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 import '@/assets/common.css'
@@ -75,6 +80,20 @@ const pathType = computed({
         Utils.files_get(null);
     }
 });
+
+// ------------------------------------ file type
+const bSltVideo = ref<boolean>(false);
+const bSltImage = ref<boolean>(false);
+const bSltOther = ref<boolean>(false);
+
+watch([bSltVideo, bSltImage, bSltOther], () => {
+    appStore.searchCon.types = [];
+    if (bSltVideo.value) { appStore.searchCon.types.push(DatType.FileType.video); }
+    if (bSltImage.value) { appStore.searchCon.types.push(DatType.FileType.image); }
+    if (bSltOther.value) { appStore.searchCon.types.push(DatType.FileType.other); }
+    Utils.files_get(null);
+}
+)
 
 // 判断标签是否被选中
 const isTagSelected = (tag: DatType.FileItemTag) => {

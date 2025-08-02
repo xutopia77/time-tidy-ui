@@ -9,16 +9,16 @@ const pageCtrlInit: DataTypes.AppPageCtrl = {
     message: { idx: 51, bShow: false },
 };
 
-const fileSearchConditionInit: DataTypes.FileSearchCondition = {
-    sortBy: '', // '', name, size, time, type
-    sortOrder: 'asc', // asc, desc
-    pathType: 'curPath', // curPath, allPath
-    page: 1,
-    pageSize: 50,
-    tags: [], // tags
-    noTag: '',
-    bReverseSltTag: false,
-};
+// const fileSearchConditionInit: DataTypes.FileSearchCondition = {
+//     sortBy: '', // '', name, size, time, type
+//     sortOrder: 'asc', // asc, desc
+//     pathType: 'curPath', // curPath, allPath
+//     page: 1,
+//     pageSize: 50,
+//     tags: [], // tags
+//     noTag: '',
+//     bReverseSltTag: false,
+// };
 
 export type AppStore = {
     platform: DataTypes.PlatformType,
@@ -37,8 +37,8 @@ export type AppStore = {
     pageCtrlInit: DataTypes.AppPageCtrl,
     // 
     allTags: DataTypes.TagItem[],               // 所有标签列表
-    curFiles: DataTypes.FileItem[],             // 当前展示的文件列表
-    curSltFile: DataTypes.FileItem | null,      // 当前 选中 的单个文件
+    curFiles: DataTypes.File[],             // 当前展示的文件列表
+    curSltFile: DataTypes.File | null,      // 当前 选中 的单个文件
     curDirs: DataTypes.DirItem[],               // 当前展示的文件夹列表
     curAllDirs: DataTypes.DirItem[],            // 当前工程中所有文件夹列表
     DirTrees: DataTypes.DirTreeItem[],          // 当前工程中所有文件夹列表的树状结构
@@ -73,7 +73,7 @@ export const useAppStore = defineStore('app', {
         DirTrees: [],
         curSltDirTreeItem: null,
         curFileTotal: 0,
-        searchCon: fileSearchConditionInit,
+        searchCon: new DataTypes.FileSearchCondition(),
         curPath: '/',
     }),
     actions: {

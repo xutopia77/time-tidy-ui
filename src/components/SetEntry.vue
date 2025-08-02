@@ -81,7 +81,92 @@ const bPrjSetGenHash = ref(false)
 const bPrjSetSave = ref(true)
 const bPrjSetSync = ref(false)
 
-function btnclk_set(types: DatType.PrjSetType[] = []) {
+async function btnclk_set(types: DatType.PrjSetType[] = []) {
+
+    if (types.length > 0 && types[0] == DatType.PrjSetType.Open) {
+        // 选择一个 JSON 文件
+        const selectFile = () => {
+            return new Promise<File>((resolve, reject) => {
+                // 创建一个隐藏的文件输入元素
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json'; // 只允许选择 JSON 文件
+                input.multiple = false; // 只允许选择一个文件
+
+                input.addEventListener('change', () => {
+                    const files = input.files;
+                    if (files && files.length > 0) {
+                        const file = files[0];
+                        if (file.type === 'application/json' || file.name.endsWith('.json')) {
+                            resolve(file);
+                        } else {
+                            reject(new Error('请选择有效的 JSON 文件'));
+                        }
+                    } else {
+                        reject(new Error('未选择文件'));
+                    }
+                });
+
+                input.addEventListener('error', (error) => {
+                    reject(error);
+                });
+
+                // 触发文件选择对话框
+                input.click();
+            });
+        };
+
+        const readFileContent = (file: File) => {
+            return new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    if (event.target?.result) {
+                        resolve(event.target.result as string);
+                    } else {
+                        reject(new Error('读取文件内容失败'));
+                    }
+                };
+                reader.onerror = (error) => {
+                    reject(error);
+                };
+                reader.readAsText(file);
+            });
+        };
+
+        const getFileContent = async (): Promise<DatType.Resp> => {
+            const resp: DatType.Resp = new DatType.Resp()
+            try {
+                // 等待用户选择文件
+                const file = await selectFile();
+                // 读取文件内容
+                const content = await readFileContent(file);
+                try {
+                    // 解析 JSON 内容
+                    const jsonData = JSON.parse(content);
+                    // 这里可以根据需求处理解析后的 JSON 数据
+                    console.log('解析后的 JSON 数据:', jsonData);
+                    // 将文件名赋值给 prjPath
+                    prjPath.value = jsonData['path'];
+                    resp.code = 0
+                } catch (parseError) {
+                    console.error('解析 JSON 文件出错:', parseError);
+                    Utils.message_notify({ content: "解析 JSON 文件出错，请检查文件格式", type: "error" });
+                    resp.code = 1;
+                }
+            } catch (error) {
+                console.error('选择或读取文件出错:', error);
+                Utils.message_notify({ content: "选择或读取文件出错，请重试", type: "error" });
+                resp.code = 1;
+            }
+            return resp
+        };
+        const sltResp = await getFileContent();
+        if (sltResp.code != 0) {
+            return
+        }
+    }
+
+
     for (const repo of repoPath.value) {
         repo.path = Utils.convertToLinuxPath(repo.path)
     }

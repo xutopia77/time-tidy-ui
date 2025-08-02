@@ -38,7 +38,7 @@ import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 import '@/assets/common.css'
 
-const props = defineProps<{ item: DatType.FileItem; }>();
+const props = defineProps<{ item: DatType.File; }>();
 
 const cardWidth = computed(() => {
     return appStore.cardWidth;
