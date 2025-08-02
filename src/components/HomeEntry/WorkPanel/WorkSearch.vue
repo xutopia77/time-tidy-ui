@@ -22,6 +22,13 @@
         <div class="tags-panel">
             <label> 文件标签({{ curSltTagNum }}): </label>
             <input type="checkbox" v-model="bReverseSltTag" class="xc-checkbox" /> 反选
+            <label> 无标签: </label>
+            <select v-model="bNoTag" class="xc-select">
+                <option value="">全部</option>
+                <option value="false">有标签</option>
+                <option value="true">无标签</option>
+            </select>
+
             <!-- 动态绑定 selected 类 -->
             <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag" :class="{ selected: isTagSelected(tag) }"
                 :style="{ backgroundColor: tag.color }" @click="btnclk_tag(tag)">
@@ -83,6 +90,14 @@ const bReverseSltTag = computed({
     get: () => appStore.searchCon.bReverseSltTag,
     set: (newValue) => {
         appStore.searchCon.bReverseSltTag = newValue;
+        // 触发文件重新获取以应用新的排序规则
+        Utils.files_get(null);
+    }
+});
+const bNoTag = computed({
+    get: () => appStore.searchCon.noTag,
+    set: (newValue) => {
+        appStore.searchCon.noTag = newValue;
         // 触发文件重新获取以应用新的排序规则
         Utils.files_get(null);
     }

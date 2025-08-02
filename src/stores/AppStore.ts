@@ -16,6 +16,8 @@ const fileSearchConditionInit: DataTypes.FileSearchCondition = {
     page: 1,
     pageSize: 50,
     tags: [], // tags
+    noTag: '',
+    bReverseSltTag: false,
 };
 
 export type AppStore = {

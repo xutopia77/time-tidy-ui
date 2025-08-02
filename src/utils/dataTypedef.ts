@@ -142,6 +142,7 @@ export class FileSearchCondition {
     page: number = 0;
     pageSize: number = 10;
     tags: string[] = [];// tags
+    noTag: 'true' | 'false' | '' = '';
     bReverseSltTag: boolean = false; // 反向选择标签
 }
 
@@ -168,6 +169,8 @@ export class FilesGetReq {
     origins: string[] | null = [];
     dirs: string[] | null = [];
     tags: string[] | null = [];
+    noTag: 'true' | 'false' | '' = '';
+    bReverseTag: boolean = false; // 反向选择标签
     sortBy: string | null = null;
     sortOrder: string | null = null; // asc, desc
 }

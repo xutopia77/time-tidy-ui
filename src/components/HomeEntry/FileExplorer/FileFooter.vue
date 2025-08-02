@@ -18,10 +18,16 @@
             </label>
         </div>
         <div><span>{{ footerInfo }}</span></div>
+        <div class="operate-contianer">
+            <button @click="btnclk_operate_file('files_move')" class="xc-button op-button">移动</button>
+            <button @click="btnclk_operate_file('files_cpy')" class="xc-button op-button">复制</button>
+            <button @click="btnclk_delete_file" class="xc-button op-button">删除</button>
+        </div>
     </div>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
+import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
@@ -85,6 +91,35 @@ const footerInfo = computed(() => {
     }
     return `选中数量: ${checkedNum}`;
 })
+
+// ------
+function btnclk_operate_file(op: string) {
+    appStore.setOperateType = op
+    Utils.page_show({ page: 'set', bShow: true })
+}
+
+function btnclk_delete_file() {
+    const req: DatType.FileDeleteReq = {
+        fileIds: [],
+        dirIds: [],
+        bRemoveToDtrash: true,
+    };
+    for (const item of appStore.curFiles) {
+        if (item.checked) {
+            req.fileIds.push(item.id)
+        }
+    }
+    for (const item of appStore.curDirs) {
+        if (item.checked) {
+            req.dirIds.push(item.id)
+        }
+    }
+    if (req.fileIds.length == 0 && req.dirIds.length == 0) {
+        Utils.message_notify({ content: '请选择要操作的文件' })
+        return;
+    }
+    Utils.files_delete(req)
+}
 
 </script>
 <style scoped>

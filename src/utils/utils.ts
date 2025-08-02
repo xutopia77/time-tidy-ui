@@ -195,19 +195,6 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
 
 async function files_get(_req: DatTypes.FilesGetReq | null) {
 
-
-    let includeTags: string[] = []
-    if (appStore.searchCon.bReverseSltTag) {
-        for (const tag of appStore.allTags) {
-            if (appStore.searchCon.tags.indexOf(tag.name) == -1) {
-                includeTags.push(tag.name)
-            }
-        }
-    }
-    else {
-        includeTags = appStore.searchCon.tags;
-    }
-
     const req: DatTypes.FilesGetReq = {
         id: 0,
         bFilterModel: false,
@@ -217,7 +204,9 @@ async function files_get(_req: DatTypes.FilesGetReq | null) {
         origins: [],
         sortOrder: appStore.searchCon.sortOrder,
         sortBy: appStore.searchCon.sortBy,
-        tags: includeTags,
+        tags: appStore.searchCon.tags,
+        bReverseTag: appStore.searchCon.bReverseSltTag,
+        noTag: appStore.searchCon.noTag
     }
     if (appStore.searchCon.pathType == "allPath") {
         req.dirs = [];
@@ -233,6 +222,8 @@ async function files_get(_req: DatTypes.FilesGetReq | null) {
         if (_req.sortOrder != null) { req.sortOrder = _req.sortOrder; }
         if (_req.sortBy != null) { req.sortBy = _req.sortBy; }
         if (_req.tags != null) { req.tags = _req.tags; }
+        if (_req.noTag != null) { req.noTag = _req.noTag; }
+        if (_req.bReverseTag != null) { req.bReverseTag = _req.bReverseTag; }
     }
 
     await axios.post(`${appStore.srvPrefix}/api/v1/files_get`, JSON.stringify(req))
