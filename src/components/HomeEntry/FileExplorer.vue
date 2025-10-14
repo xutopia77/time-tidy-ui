@@ -134,7 +134,8 @@ onUnmounted(() => {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
-    margin-top: 20px;
+    /* margin-top: 20px; */
+    height: calc(100% - 32px - 32px);
 }
 
 
