@@ -482,6 +482,7 @@ async function tag_delete(_req: DatTypes.TagItem): Promise<DatTypes.Resp> {
                 Utils.message_notify({ content: `删除标签成功` })
             }
             Utils.tags_get()
+            Utils.files_get(null)
         })
         .catch((error) => {
             console.error('Error fetching project info:', error);
@@ -622,6 +623,7 @@ class Utils {
                 }
                 this.cancle_file_checked()
                 Utils.message_notify({ content: `文件操作成功` })
+                Utils.tags_get()
                 Utils.files_get(null);
             })
             .catch((error) => {
@@ -687,6 +689,61 @@ class Utils {
     static files_path_chg = files_path_chg;
     static files_delete = files_delete;
     static project_health = project_health;
+
+    static async file_similarity_detect(): Promise<DatTypes.Resp> {
+        const resp = new DatTypes.Resp()
+        await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_detect`)
+            .then((response) => {
+                console.log('file info:', response.data);
+                resp.code = response.data.code;
+                resp.status = response.data.status;
+                if (resp.code != 0) {
+                    Utils.message_notify({ content: `文件操作失败:${resp.status}`, type: "error" })
+                }
+                else if (resp.doing) {
+                    Utils.message_notify({ content: `文件操作中`, type: "warning" })
+                }
+                else {
+                    Utils.message_notify({ content: `文件操作成功` })
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching project info:', error);
+                resp.code = -1;
+                resp.status = error.message;
+                Utils.message_notify({ content: `程序错误:${error}`, type: "error" })
+            }
+            );
+        return resp;
+    }
+
+    static async file_similarity_get(): Promise<DatTypes.Resp> {
+        const resp = new DatTypes.Resp()
+        await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_get`)
+            .then((response) => {
+                console.log('file info:', response.data);
+                resp.code = response.data.code;
+                resp.status = response.data.status;
+                if (resp.code != 0) {
+                    Utils.message_notify({ content: `文件操作失败:${resp.status}`, type: "error" })
+                }
+                else if (resp.doing) {
+                    Utils.message_notify({ content: `文件操作中`, type: "warning" })
+                }
+                else {
+                    Utils.message_notify({ content: `文件操作成功` })
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching project info:', error);
+                resp.code = -1;
+                resp.status = error.message;
+                Utils.message_notify({ content: `程序错误:${error}`, type: "error" })
+            }
+            );
+        return resp;
+    }
+
     static async prj_info_get() {
         await axios.post(`${appStore.srvPrefix}/api/v1/project`)
             .then((response) => {

@@ -4,7 +4,10 @@
             <BookIcon style="margin-left: 6px; margin-right: 16px;" />
             <span class="nav-button">
                 <router-link class="no-underline-link" to="/">
-                    <HomeIcon />
+                    <!-- <HomeIcon /> -->
+                    <el-icon :size="24">
+                        <House />
+                    </el-icon>
                 </router-link>
             </span>
             <span class="nav-button">
@@ -19,7 +22,10 @@
     </div>
 </template>
 <script setup lang="ts">
-import { HomeIcon, ApplicationIcon, BookIcon } from '@/components/Icon'
+import { ApplicationIcon, BookIcon } from '@/components/Icon'
+import { House } from '@element-plus/icons-vue'
+import { ElIcon } from 'element-plus'
+
 </script>
 <style scoped>
 .no-underline-link {

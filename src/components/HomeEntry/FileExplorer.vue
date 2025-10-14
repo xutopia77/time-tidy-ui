@@ -7,6 +7,9 @@
                 <ImageCard :item="item" />
             </template>
             <template v-for="item in dirs" :key="item.id">
+                <!-- <hr />
+                asdasdas
+                <br /> -->
                 <FolderCard :item="item" />
             </template>
         </div>
@@ -126,6 +129,15 @@ onUnmounted(() => {
     height: calc(100% - 32px - 32px);
     /* background-color: bisque; */
 }
+
+
+/* .file-grid hr {
+    display: block;
+    margin: 10px 0;
+    border: none;
+    border-top: 1px solid #ccc;
+    width: 100%;
+} */
 
 
 .file-footer {

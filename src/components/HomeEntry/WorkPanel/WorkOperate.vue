@@ -3,6 +3,8 @@
         <button @click="btnclk_operate_file('files_move')" class="xc-button op-button">移动</button>
         <button @click="btnclk_operate_file('files_cpy')" class="xc-button op-button">复制</button>
         <button @click="btnclk_delete_file" class="xc-button op-button">删除</button>
+        <button @click="btnclk_similarity_file" class="xc-button op-button">相似文件查看</button>
+        <button @click="btnclk_search_setting" class="xc-button op-button">搜索筛选</button>
         <br>
         <div style="display: flex; flex-wrap: wrap;">
             <label for="cardWidthSlider1" style="font-size: small;">卡片大小</label>
@@ -56,6 +58,14 @@ function btnclk_delete_file() {
         return;
     }
     Utils.files_delete(req)
+}
+
+function btnclk_similarity_file() {
+    Utils.file_similarity_get()
+}
+
+function btnclk_search_setting() {
+
 }
 
 const cardWidth = computed({
