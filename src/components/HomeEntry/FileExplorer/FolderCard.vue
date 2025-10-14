@@ -10,7 +10,7 @@
         </div>
         <div class="xc-card-content" @click="btnclk_dir">
             <div class="xc-card-icon">
-                <FolderClose theme="outline" size="24" fill="#333" />
+                <FolderClose v-bind="iconProps" :size="cardWidth - 64" :strokeWidth=1 color="#333" />
             </div>
             <div class="xc-card-desc">{{ item.name }}</div>
         </div>
@@ -25,6 +25,8 @@ const appStore = useAppStore()
 import '@/assets/common.css'
 import Utils from '@/utils/utils';
 import { FolderClose } from '@icon-park/vue-next'
+const iconProps = computed(() => (appStore.iconProps))
+
 const props = defineProps<{
     item: DatType.DirItem;
     // 新增：接收是否选中的初始状态

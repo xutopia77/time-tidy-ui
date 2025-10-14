@@ -1,15 +1,15 @@
 <template>
     <div class="header-panel">
         <div class="header-panel-operate">
-            <Home theme="outline" size="24" />
+            <WindmillTwo v-bind="iconProps" />
             <span class="nav-button">
                 <router-link class="no-underline-link" to="/">
-                    <Home theme="outline" size="24" />
+                    <Home v-bind="iconProps" />
                 </router-link>
             </span>
             <span class="nav-button">
                 <router-link class="no-underline-link" to="/admin">
-                    <System theme="outline" size="24" fill="#333" />
+                    <System v-bind="iconProps" />
                 </router-link>
             </span>
         </div>
@@ -19,7 +19,14 @@
     </div>
 </template>
 <script setup lang="ts">
-import { Home, System } from '@icon-park/vue-next'
+import { computed } from 'vue';
+import { Home, System, WindmillTwo } from '@icon-park/vue-next'
+import '@/assets/common.css'
+// import Utils from '@/utils/utils';
+import { useAppStore } from '@/stores/AppStore';
+const appStore = useAppStore()
+const iconProps = computed(() => (appStore.iconProps))
+
 </script>
 <style scoped>
 .no-underline-link {

@@ -262,3 +262,10 @@ export class Resp<T = string> {
     doing: boolean = false;
     data?: T;
 }
+
+export class IconProps {
+    size: number = 24;                           // 图标大小
+    color: string = "#333";                         // 图标颜色 
+    strokeWidth: number = 2;                    // 图标描边宽度
+    theme: 'outline' | 'filled' | 'two-tone' | 'multi-color' | undefined = 'outline';                          // 图标主题, 
+}

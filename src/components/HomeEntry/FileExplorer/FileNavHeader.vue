@@ -2,10 +2,9 @@
     <div class="file-explorer">
         <!-- 路径显示区域 -->
         <div class="path-display">
-
             <span v-for="(part, index) in pathParts" :key="index" @click="navigateToPath(part.path)" class="path-part">
                 {{ part.name }}
-                <HardDisk theme="outline" size="24" fill="#333" :strokeWidth="2" v-if="part.name == ''" />
+                <HardDisk v-bind="iconProps" v-if="part.name == ''" />
                 <span v-if="index < pathParts.length - 1">/</span>
             </span>
         </div>
@@ -15,11 +14,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { ComputedRef } from 'vue';
+import '@/assets/common.css'
 import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-import '@/assets/common.css'
 import { HardDisk } from '@icon-park/vue-next'
+
+const iconProps = computed(() => (appStore.iconProps))
+
 class PathPart {
     name: string = '';
     path: string = '';
@@ -67,7 +69,6 @@ const navigateToPath = (path: string) => {
     font-size: 16px;
     background-color: var(--xc-background-color-hover);
     color: var(--xc-text-color);
-    border-radius: 10px;
     border: var(--xc-border);
 }
 

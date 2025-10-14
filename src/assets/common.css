@@ -276,7 +276,7 @@
 .xc-scrollbar::-webkit-scrollbar-track {
     background: var(--xc-background-color);
     /* 轨道背景颜色 */
-    border-radius: 6px;
+    /* border-radius: 6px; */
     /* 轨道圆角 */
     border: none;
     /* 轨道边框 */
@@ -286,7 +286,7 @@
 .xc-scrollbar::-webkit-scrollbar-thumb {
     background: #2a2c3a;
     /* 滑块颜色 */
-    border-radius: 6px;
+    /* border-radius: 6px; */
     /* 滑块圆角 */
     border: none;
     /* 滑块边框 */

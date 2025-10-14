@@ -49,6 +49,9 @@ export type AppStore = {
     curFileTotal: number,                       // 当前文件列表的总数
     searchCon: DataTypes.FileSearchCondition,   // 文件搜索条件
     curPath: string,                            // 当前路径
+
+    // icon
+    iconProps: DataTypes.IconProps,                          // 图标主题
 }
 
 export const useAppStore = defineStore('app', {
@@ -81,6 +84,9 @@ export const useAppStore = defineStore('app', {
         curFileTotal: 0,
         searchCon: new DataTypes.FileSearchCondition(),
         curPath: '/',
+        // 
+        iconProps: new DataTypes.IconProps,
+
     }),
     actions: {
         setData(key: string, value: string): void {
