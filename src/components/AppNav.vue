@@ -1,17 +1,13 @@
 <template>
     <div class="header-panel">
         <div class="header-panel-operate">
-            <WindmillTwo v-bind="iconProps" />
-            <span class="nav-button">
-                <router-link class="no-underline-link" to="/">
-                    <Home v-bind="iconProps" />
-                </router-link>
-            </span>
-            <span class="nav-button">
-                <router-link class="no-underline-link" to="/admin">
-                    <System v-bind="iconProps" />
-                </router-link>
-            </span>
+            <WindmillTwo v-bind="iconProps" style="padding-right: 16px; padding-right: 16px;" />
+            <router-link class="no-underline-link" to="/">
+                <Home v-bind="iconProps"> </Home>
+            </router-link>
+            <router-link class="no-underline-link" to="/admin">
+                <System v-bind="iconProps" />
+            </router-link>
         </div>
         <div class="header-panel-info">
 
@@ -31,10 +27,9 @@ const iconProps = computed(() => (appStore.iconProps))
 <style scoped>
 .no-underline-link {
     text-decoration: none;
-}
-
-.nav-button {
-    margin-right: 20px;
+    color: var(--xc-text-color);
+    padding-right: 16px;
+    padding-left: 16px;
 }
 
 .header-panel {
@@ -50,6 +45,7 @@ const iconProps = computed(() => (appStore.iconProps))
     height: 100%;
     padding: 0;
     margin: 0;
+    color: var(--xc-text-color);
 }
 
 .header-panel-info {

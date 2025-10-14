@@ -3,12 +3,12 @@
         <li v-for="(item, index) in dirTrees" :key="index" class="dir-item-group">
             <!-- 根据是否有子项和展开状态显示对应图标，并添加点击事件切换展开状态 -->
             <div class="dir-item" :class="{ 'selected': curSltDirTreeItem?.dirInfo.id == item.dirInfo.id }">
-                <!-- <div v-if="!bShowDirIcon(item, 1) && !bShowDirIcon(item, 2)" class="icon-placeholder">
-                </div> -->
-                <Right v-bind="iconProps" size="28" v-if="bShowDirIcon(item, 1)" @click="btn_toggleExpand(item)" />
-                <Down v-bind="iconProps" size="28" v-if="bShowDirIcon(item, 2)" @click="btn_toggleExpand(item)" />
+                <div v-if="!bShowDirIcon(item, 1) && !bShowDirIcon(item, 2)" class="icon-placeholder">
+                </div>
+                <Right v-bind="iconProps" size="18" v-if="bShowDirIcon(item, 1)" @click="btn_toggleExpand(item)" />
+                <Down v-bind="iconProps" size="18" v-if="bShowDirIcon(item, 2)" @click="btn_toggleExpand(item)" />
                 <div @click="btn_sltTreeItem(item)" class="no-wrap">
-                    <FolderClose v-bind="iconProps" />
+                    <FolderClose v-bind="iconProps" :size="16" />
                     {{ item.name }}
                 </div>
             </div>
@@ -23,13 +23,11 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, watch, computed, ref } from 'vue'
 import '@/assets/common.css'
-// import { CollapsedIcon, ExpandedIcon } from '@/components/Icon'
 import { FolderClose, Right, Down } from '@icon-park/vue-next'
 // import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-// import Utils from '@/utils/utils';
 const iconProps = computed(() => (appStore.iconProps))
 
 const props = defineProps<{
@@ -122,13 +120,14 @@ svg {
 
 .icon-placeholder {
     /* display: inline-block; */
-    width: 28px;
-    height: 28px;
-    /* vertical-align: middle; */
+    /* width: 28px; */
+    /* height: 28px; */
+    vertical-align: middle;
 }
 
 .no-wrap {
     white-space: nowrap;
+    font-size: small;
 }
 
 

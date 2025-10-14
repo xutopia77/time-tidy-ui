@@ -67,9 +67,9 @@ const navigateToPath = (path: string) => {
 .path-display {
     margin-bottom: 20px;
     font-size: 16px;
-    background-color: var(--xc-background-color-hover);
+    /* background-color: var(--xc-background-color-hover); */
     color: var(--xc-text-color);
-    border: var(--xc-border);
+    border-bottom: var(--xc-border);
 }
 
 .path-display:hover {
