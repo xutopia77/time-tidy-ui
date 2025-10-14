@@ -5,6 +5,7 @@
         <button @click="btnclk_delete_file" class="xc-button op-button">删除</button>
         <button @click="btnclk_similarity_file" class="xc-button op-button">相似文件查看</button>
         <button @click="btnclk_search_setting" class="xc-button op-button">搜索筛选</button>
+        <button @click="btnclk_file_transfer" class="xc-button op-button">文件转移</button>
         <br>
         <div style="display: flex; flex-wrap: wrap;">
             <label for="cardWidthSlider1" style="font-size: small;">卡片大小</label>
@@ -65,7 +66,11 @@ function btnclk_similarity_file() {
 }
 
 function btnclk_search_setting() {
+    appStore.bPageSearchSetting = true
+}
 
+function btnclk_file_transfer() {
+    appStore.bPageFileTransfer = true
 }
 
 const cardWidth = computed({

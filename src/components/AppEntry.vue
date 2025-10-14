@@ -14,6 +14,15 @@
         <div class="message-show" v-show="pageCtrl.message.bShow" :style="{ zIndex: pageCtrl.message.idx }">
             <MessageNotify />
         </div>
+
+        <div v-if="bPageSearchSetting" class="fullscreen-overlay">
+            <SearchSet>
+            </SearchSet>
+        </div>
+        <div v-if="bPageFileTransfer" class="fullscreen-overlay">
+            <FileTransfer>
+            </FileTransfer>
+        </div>
     </div>
 </template>
 
@@ -23,6 +32,8 @@ import HeaderPanel from '@/components/AppNav.vue';
 import OperateEntry from '@/components/OperateEntry.vue';
 import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
+import SearchSet from '@/components/HomeEntry/WorkPanel/SearchSet.vue'
+import FileTransfer from '@/components/HomeEntry/WorkPanel/FileTransfer.vue'
 import '@/assets/common.css'
 import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
@@ -31,6 +42,13 @@ const appStore = useAppStore()
 
 const pageCtrl = computed(() => {
     return appStore.pageCtrl
+})
+
+const bPageSearchSetting = computed(() => {
+    return appStore.bPageSearchSetting
+})
+const bPageFileTransfer = computed(() => {
+    return appStore.bPageFileTransfer
 })
 
 onBeforeMount(() => {
@@ -85,7 +103,7 @@ onUnmounted(() => {
     margin: 0px;
     height: 100%;
     width: 100%;
-    position: relative;
+    /* position: relative; */
     /* position: flex; */
     /* 为子元素的绝对定位提供参考 */
 }
@@ -153,5 +171,27 @@ onUnmounted(() => {
     padding: 0px;
     height: calc(100% - 32px);
     background-color: var(--xc-background-color);
+}
+
+.fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.fullscreen-overlay>div {
+    width: 90%;
+    max-width: 800px;
+    max-height: 90%;
+    overflow: hidden;
 }
 </style>
