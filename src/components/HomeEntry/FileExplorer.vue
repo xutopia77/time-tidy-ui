@@ -116,7 +116,7 @@ onUnmounted(() => {
     /* background-color: aquamarine; */
 }
 
-.file-grid {
+.file-grid---delete {
     padding: 0px;
     margin: 0px;
     /* display: flex;
@@ -129,6 +129,14 @@ onUnmounted(() => {
     height: calc(100% - 32px - 32px);
     /* background-color: bisque; */
 }
+
+.file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
 
 
 /* .file-grid hr {

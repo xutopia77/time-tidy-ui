@@ -23,6 +23,9 @@
             <FileTransfer>
             </FileTransfer>
         </div>
+        <div v-if="bPageSet" class="fullscreen-overlay">
+            <PageSet />
+        </div>
     </div>
 </template>
 
@@ -34,6 +37,7 @@ import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
 import SearchSet from '@/components/HomeEntry/WorkPanel/SearchSet.vue'
 import FileTransfer from '@/components/HomeEntry/WorkPanel/FileTransfer.vue'
+import PageSet from '@/components/HomeEntry/WorkPanel/PageSet.vue'
 import '@/assets/common.css'
 import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
@@ -44,12 +48,9 @@ const pageCtrl = computed(() => {
     return appStore.pageCtrl
 })
 
-const bPageSearchSetting = computed(() => {
-    return appStore.bPageSearchSetting
-})
-const bPageFileTransfer = computed(() => {
-    return appStore.bPageFileTransfer
-})
+const bPageSearchSetting = computed(() => { return appStore.bPageSearchSetting })
+const bPageFileTransfer = computed(() => { return appStore.bPageFileTransfer })
+const bPageSet = computed(() => { return appStore.bPageSet })
 
 onBeforeMount(() => {
     // 判断当前是否为开发环境

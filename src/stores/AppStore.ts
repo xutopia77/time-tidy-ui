@@ -37,6 +37,7 @@ export type AppStore = {
     pageCtrlInit: DataTypes.AppPageCtrl,
     bPageSearchSetting: boolean,
     bPageFileTransfer: boolean,
+    bPageSet: boolean,
     // 
     allTags: DataTypes.TagItem[],               // 所有标签列表
     curFiles: DataTypes.File[],             // 当前展示的文件列表
@@ -67,6 +68,7 @@ export const useAppStore = defineStore('app', {
         pageCtrlInit: pageCtrlInit,
         bPageSearchSetting: false,
         bPageFileTransfer: false,
+        bPageSet: false,
         setOperateType: '', // 当前操作类型 files_cpy, files_mv
         // 
         allTags: [], // 所有标签列表
