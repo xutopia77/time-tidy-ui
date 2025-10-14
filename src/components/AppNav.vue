@@ -1,18 +1,15 @@
 <template>
     <div class="header-panel">
         <div class="header-panel-operate">
-            <BookIcon style="margin-left: 6px; margin-right: 16px;" />
+            <Home theme="outline" size="24" />
             <span class="nav-button">
                 <router-link class="no-underline-link" to="/">
-                    <!-- <HomeIcon /> -->
-                    <el-icon :size="24">
-                        <House />
-                    </el-icon>
+                    <Home theme="outline" size="24" />
                 </router-link>
             </span>
             <span class="nav-button">
                 <router-link class="no-underline-link" to="/admin">
-                    <ApplicationIcon />
+                    <System theme="outline" size="24" fill="#333" />
                 </router-link>
             </span>
         </div>
@@ -22,10 +19,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ApplicationIcon, BookIcon } from '@/components/Icon'
-import { House } from '@element-plus/icons-vue'
-import { ElIcon } from 'element-plus'
-
+import { Home, System } from '@icon-park/vue-next'
 </script>
 <style scoped>
 .no-underline-link {

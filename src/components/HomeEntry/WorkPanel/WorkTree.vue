@@ -7,7 +7,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import '@/assets/common.css'
-// import { FolderCloseIcon, FolderOpenIcon } from '@/components/Icon'
 import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';

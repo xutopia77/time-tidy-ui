@@ -2,29 +2,31 @@
     <div class="admin-nav">
         <button class="nav-button">
             <router-link class="no-underline-link" to="/admin/PrjSet">
-                <SettingIcon />
+                <Setting theme="outline" size="24" fill="#333" />
             </router-link>
         </button>
         <button class="nav-button">
             <router-link class="no-underline-link" to="/admin/TagsMng">
-                <TagOneIcon />
+                <TagOne theme="outline" size="24" fill="#333" />
             </router-link>
+
         </button>
         <button class="nav-button">
             <router-link class="no-underline-link" to="/admin/DbInfo">
-                <InfoIcon />
+                <Info theme="outline" size="24" fill="#333" />
             </router-link>
         </button>
         <button class="nav-button" v-if="false">
             <router-link class="no-underline-link" to="/admin/OtherMisc">
-                <ApplicationIcon />
+                <Book theme="outline" size="24" fill="#333" />
             </router-link>
         </button>
     </div>
 </template>
 <script setup lang="ts">
-import { TagOneIcon, SettingIcon, InfoIcon, ApplicationIcon } from '@/components/Icon'
 import '@/assets/common.css';
+import { Book, TagOne, Setting, Info } from '@icon-park/vue-next';
+
 </script>
 <style scoped>
 .admin-nav {}

@@ -8,8 +8,7 @@
                 <ExpandedIcon v-if="bShowDirIcon(item, 2)" @click="btn_toggleExpand(item)" />
 
                 <div @click="btn_sltTreeItem(item)" class="no-wrap">
-                    <FolderCloseIcon v-if="true" />
-                    <FolderOpenIcon v-if="false" />
+                    <FolderClose theme="outline" size="24" fill="#333" />
                     {{ item.name }}
                 </div>
             </div>
@@ -24,7 +23,8 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, watch, computed, ref } from 'vue'
 import '@/assets/common.css'
-import { FolderCloseIcon, FolderOpenIcon, CollapsedIcon, ExpandedIcon } from '@/components/Icon'
+import { CollapsedIcon, ExpandedIcon } from '@/components/Icon'
+import { FolderClose } from '@icon-park/vue-next'
 // import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 // import { useAppStore } from '@/stores/AppStore';

@@ -24,7 +24,6 @@ import OperateEntry from '@/components/OperateEntry.vue';
 import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
 import '@/assets/common.css'
-// import { FileSettingIcon, TagOneIcon, InfoIcon, SearchIcon } from '@/components/Icon'
 import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';

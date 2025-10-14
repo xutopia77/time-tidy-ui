@@ -5,7 +5,7 @@
 
             <span v-for="(part, index) in pathParts" :key="index" @click="navigateToPath(part.path)" class="path-part">
                 {{ part.name }}
-                <HardDiskIcon v-if="part.name == ''" />
+                <HardDisk theme="outline" size="24" fill="#333" :strokeWidth="2" v-if="part.name == ''" />
                 <span v-if="index < pathParts.length - 1">/</span>
             </span>
         </div>
@@ -19,7 +19,7 @@ import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 import '@/assets/common.css'
-import { HardDiskIcon } from '@/components/Icon'
+import { HardDisk } from '@icon-park/vue-next'
 class PathPart {
     name: string = '';
     path: string = '';
