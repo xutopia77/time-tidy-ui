@@ -37,17 +37,6 @@
                 <WorkOperate />
             </div>
         </div>
-        <!-- 文件搜索区域折叠面板 -->
-        <div class="collapse-panel">
-            <div class="panel-header" @click="togglePanel('search')">
-                <span v-html="isPanelOpen('search') ? expandedSvg : collapsedSvg" class="span-close-exp"></span>
-                <!-- <img src="/assets/images/search.svg" alt="Tag Icon" title="文件搜索"> -->
-                <SearchIcon />
-            </div>
-            <div v-if="isPanelOpen('search')" class="panel-content">
-                <WorkSearch />
-            </div>
-        </div>
         <!-- 文件夹面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('tree')">
@@ -65,12 +54,11 @@
 import { ref } from 'vue';
 import WorkTag from '@/components/HomeEntry/WorkPanel/WorkTag.vue';
 import WorkOperate from '@/components/HomeEntry/WorkPanel/WorkOperate.vue';
-import WorkSearch from '@/components/HomeEntry/WorkPanel/WorkSearch.vue';
 import WorkInfo from '@/components/HomeEntry/WorkPanel/WorkInfo.vue';
 import WorkTree from '@/components/HomeEntry/WorkPanel/WorkTree.vue';
 import '@/assets/common.css';
 import { FolderClose } from '@icon-park/vue-next'
-import { FileSettingIcon, TagOneIcon, InfoIcon, SearchIcon } from '@/components/Icon'
+import { FileSettingIcon, TagOneIcon, InfoIcon } from '@/components/Icon'
 
 // 定义 SVG 变量
 const expandedSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -91,7 +79,6 @@ const panelStates = ref({
     basicInfo: true,
     tagInfo: true,
     operation: true,
-    search: true,
     tree: true
 });
 type PanelName = keyof typeof panelStates.value;
