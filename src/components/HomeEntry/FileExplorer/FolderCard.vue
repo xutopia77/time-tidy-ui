@@ -10,7 +10,7 @@
         </div>
         <div class="xc-card-content" @click="btnclk_dir">
             <div class="xc-card-icon">
-                <FolderClose v-bind="iconProps" :size="cardWidth - 64" :strokeWidth=1 color="#333" />
+                <FolderClose v-bind="iconProps" :size="cardWidth - 80" :strokeWidth=1 color="#333" />
             </div>
             <div class="xc-card-desc">{{ item.name }}</div>
         </div>

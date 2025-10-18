@@ -130,12 +130,32 @@ onUnmounted(() => {
     /* background-color: bisque; */
 }
 
-.file-grid {
+
+
+.file-grid---1 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+    gap: 2px;
     /* margin-top: 20px; */
     height: calc(100% - 32px - 32px);
+}
+
+.file-grid---2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, auto));
+    gap: 15px;
+    height: calc(100% - 32px - 32px);
+    padding: 10px;
+}
+
+.file-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    height: calc(100% - 32px - 32px - 20px);
+    padding: 10px;
+    align-content: flex-start;
+    overflow-y: auto;
 }
 
 
