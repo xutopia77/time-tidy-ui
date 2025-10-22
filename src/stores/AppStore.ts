@@ -39,6 +39,7 @@ export type AppStore = {
     bPageFileTransfer: boolean,                 // 打开界面 文件传输
     bPageSet: boolean,                          // 打开界面 设置
     fileShowType: DataTypes.FileShowType,       // 文件展示目录，目录的类型
+    fileSililarity: DataTypes.FileCatalog[],    // 文件相似目录
     // 
     allTags: DataTypes.TagItem[],               // 所有标签列表
     curFiles: DataTypes.File[],             // 当前展示的文件列表
@@ -74,6 +75,7 @@ export const useAppStore = defineStore('app', {
         bPageFileTransfer: false,
         bPageSet: false,
         fileShowType: "",
+        fileSililarity: [],
         setOperateType: '', // 当前操作类型 files_cpy, files_mv
         // 
         allTags: [], // 所有标签列表

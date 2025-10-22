@@ -33,7 +33,7 @@ export enum FileType {
     other = "other",
 }
 
-export type FileShowType = "time" | "";
+export type FileShowType = "fileSimilarity" | "time" | "";
 
 // 字符串转 FileType 枚举
 export function stringToFileType(str: string): FileType | null {
@@ -107,6 +107,7 @@ export class File {
     size: number = 0;
     time: string = "";
     checked: boolean = false;
+    uniqueHash: string = "";
 }
 
 export class FileCatalog {

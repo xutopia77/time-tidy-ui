@@ -37,8 +37,8 @@ function get_dir_trees() {
     // console.log("dirTree", appStore.DirTrees)
 }
 
-function convert_to_file_item(_srcStr: string): DatTypes.Resp {
-    const resp = new DatTypes.Resp()
+function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.Resp {
+
     const update_after_get_files = () => {
         if (appStore.curFiles.length == 0) {
             appStore.curSltFile = null;
@@ -53,143 +53,200 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
         }
     }
 
-    const jData = JSON.parse(_srcStr);
-    if (jData.code != 0) {
-        resp.code = jData.code;
-        resp.status = jData.msg;
-        return resp;
-    }
-    if (jData.data.files != null) {
-        const files: DatTypes.File[] = []
-        const jRecords = jData.data.files.records;
-        if (jRecords != null) {
-            for (const jRecord of jRecords) {
-                const fileType = DatTypes.stringToFileType(jRecord.Type);
-                if (fileType == null) {
-                    console.warn(`Unknown file type: ${jRecord.Type}, skipping file ${jRecord.FileName}`);
+    const convert_json_str_to_file = (jRecordStr: string): DatTypes.File | null => {
+        const fileItem = new DatTypes.File();
+        const jRecord = JSON.parse(jRecordStr);
+        const fileType = DatTypes.stringToFileType(jRecord.Type);
+        if (fileType == null) {
+            console.warn(`Unknown file type: ${jRecord.Type}, skipping file ${jRecord.FileName}`);
+            return null;
+        }
+
+        fileItem.id = jRecord.ID;
+        fileItem.rootPathId = jRecord.RootPathID;
+        fileItem.name = jRecord.FileName;
+        fileItem.path = jRecord.Path;
+        fileItem.fullpath = jRecord.fullPath;
+        fileItem.size = jRecord.Size;
+        fileItem.time = jRecord.CreateTime
+        fileItem.type = fileType;
+        fileItem.uniqueHash = jRecord.UniqueHash;
+        fileItem.icon = appStore.srvPrefix + "/static_thumb/" + fileItem.id + "_thumbnail.jpg";
+        if (jRecord.Tags != null) {
+            for (const x of jRecord.Tags) {
+                const tag = new DatTypes.FileItemTag();
+                tag.name = x.name
+                tag.color = x.color == '' ? tag.color : x.color
+                if (tag.name == '') {
                     continue;
                 }
-                const fileItem = new DatTypes.File();
-                fileItem.id = jRecord.ID;
-                fileItem.rootPathId = jRecord.RootPathID;
-                fileItem.name = jRecord.FileName;
-                fileItem.path = jRecord.Path;
-                fileItem.fullpath = jRecord.fullPath;
-                fileItem.size = jRecord.Size;
-                fileItem.time = jRecord.CreateTime
-                fileItem.type = fileType;
-                fileItem.icon = appStore.srvPrefix + "/static_thumb/" + fileItem.id + "_thumbnail.jpg";
-                if (jRecord.Tags != null) {
-                    for (const x of jRecord.Tags) {
-                        const tag = new DatTypes.FileItemTag();
-                        tag.name = x.name
-                        tag.color = x.color == '' ? tag.color : x.color
-                        if (tag.name == '') {
-                            continue;
-                        }
-                        fileItem.tags.push(tag)
-                    }
-                }
-                files.push(fileItem);
+                fileItem.tags.push(tag)
             }
-            appStore.curFileTotal = jData.data.files.total;
-            appStore.curFiles = files;
-            update_after_get_files()
+        }
+        return fileItem;
+    }
+
+    if (convType == "") {
+        const resp = new DatTypes.Resp()
+        const jData = JSON.parse(_srcStr);
+        if (jData.code != 0) {
+            resp.code = jData.code;
+            resp.status = jData.status;
+            return resp;
+        }
+        if (jData.data.files != null) {
+            const files: DatTypes.File[] = []
+            const jRecords = jData.data.files.records;
+            if (jRecords != null) {
+                for (const jRecord of jRecords) {
+                    const fileItem = convert_json_str_to_file(JSON.stringify(jRecord));
+                    if (fileItem == null) {
+                        continue;
+                    }
+                    files.push(fileItem);
+                }
+                appStore.curFileTotal = jData.data.files.total;
+                appStore.curFiles = files;
+            }
+            else {
+                appStore.curFileTotal = 0;
+                appStore.curFiles = [];
+            }
         }
         else {
             appStore.curFileTotal = 0;
             appStore.curFiles = [];
-            update_after_get_files()
         }
-    }
-    else {
-        appStore.curFileTotal = 0;
-        appStore.curFiles = [];
         update_after_get_files()
-    }
-    if (jData.data.dirs != null) {
-        {
-            const dirs: DatTypes.DirItem[] = []
-            const jRecords = jData.data.dirs.records;
-            for (const jRecord of jRecords) {
-                if (jRecord.Type == 0) {
-                    continue; // skip the root path
-                }
-                const itemPath = "/" + jRecord.Path;
-                const dirItem = new DatTypes.DirItem();
-                dirItem.id = jRecord.ID;
-                dirItem.rootPathId = jRecord.RootPathId;
-                dirItem.name = jRecord.Path;
-                dirItem.icon = '/assets/images/folders.svg'
-                dirItem.type = DatTypes.FileType.folder;
-
-                dirItem.path = itemPath;
-                if (jRecord.Tags != null) {
-                    dirItem.tags = jRecord.Tags
-                }
-                dirs.push(dirItem);
-            }
-            appStore.curAllDirs = dirs;
-        }
-        const dirs: DatTypes.DirItem[] = []
-        appStore.curDirs = [];
-        const jRecords = jData.data.dirs.records;
-        console.log(`curpath:[${appStore.curPath}], dirs:${dirs}`);
-        if (jRecords != null) {
-            for (const jRecord of jRecords) {
-                if (jRecord.Type == 0) {
-                    continue; // skip the root path
-                }
-                const itemPath = "/" + jRecord.Path;
-                const iteamPaths = itemPath.split('/');
-                const curPaths = appStore.curPath === "/" ? [''] : appStore.curPath.split('/');
-                // console.log(`itemPath:${itemPath},------ iteamPaths:[${iteamPaths}],------ curPaths:[${curPaths}],${iteamPaths.length}, ${curPaths.length}`);
-                if (iteamPaths.length <= curPaths.length) {
-                    // console.log(`continue1, iteamPaths.length:${iteamPaths.length}, curPaths.length:${curPaths.length}`);
-                    continue;
-                }
-
-                let bNot = false
-                let i = 0
-                for (i = 0; i < curPaths.length; i++) {
-                    if (iteamPaths[i] != curPaths[i]) {
-                        // console.log(`continue2, iteamPaths[${i}]:${iteamPaths[i]}, curPaths[${i}]:${curPaths[i]}`);
-                        bNot = true
-                        break
+        if (jData.data.dirs != null) {
+            {
+                const dirs: DatTypes.DirItem[] = []
+                const jRecords = jData.data.dirs.records;
+                for (const jRecord of jRecords) {
+                    if (jRecord.Type == 0) {
+                        continue; // skip the root path
                     }
+                    const itemPath = "/" + jRecord.Path;
+                    const dirItem = new DatTypes.DirItem();
+                    dirItem.id = jRecord.ID;
+                    dirItem.rootPathId = jRecord.RootPathId;
+                    dirItem.name = jRecord.Path;
+                    dirItem.icon = '/assets/images/folders.svg'
+                    dirItem.type = DatTypes.FileType.folder;
+
+                    dirItem.path = itemPath;
+                    if (jRecord.Tags != null) {
+                        dirItem.tags = jRecord.Tags
+                    }
+                    dirs.push(dirItem);
                 }
-                if (bNot) {
-                    continue
-                }
-                if (iteamPaths.length > curPaths.length + 1) {
-                    // console.log(`continue3, iteamPaths.length:${iteamPaths.length}, curPaths.length:${curPaths.length}`);
-                    continue;
-                }
-                const curName = iteamPaths[i]
-                const dirItem = new DatTypes.DirItem();
-                dirItem.id = jRecord.ID;
-                dirItem.rootPathId = jRecord.RootPathId;
-                // dirItem.name = jRecord.Path;
-                dirItem.name = curName
-                dirItem.icon = '/assets/images/folders.svg'
-                dirItem.type = DatTypes.FileType.folder;
-                dirItem.path = itemPath;
-                if (jRecord.Tags != null) {
-                    dirItem.tags = jRecord.Tags
-                }
-                dirs.push(dirItem);
+                appStore.curAllDirs = dirs;
             }
-            appStore.curDirs = dirs;
+            const dirs: DatTypes.DirItem[] = []
+            appStore.curDirs = [];
+            const jRecords = jData.data.dirs.records;
+            console.log(`curpath:[${appStore.curPath}], dirs:${dirs}`);
+            if (jRecords != null) {
+                for (const jRecord of jRecords) {
+                    if (jRecord.Type == 0) {
+                        continue; // skip the root path
+                    }
+                    const itemPath = "/" + jRecord.Path;
+                    const iteamPaths = itemPath.split('/');
+                    const curPaths = appStore.curPath === "/" ? [''] : appStore.curPath.split('/');
+                    // console.log(`itemPath:${itemPath},------ iteamPaths:[${iteamPaths}],------ curPaths:[${curPaths}],${iteamPaths.length}, ${curPaths.length}`);
+                    if (iteamPaths.length <= curPaths.length) {
+                        // console.log(`continue1, iteamPaths.length:${iteamPaths.length}, curPaths.length:${curPaths.length}`);
+                        continue;
+                    }
+
+                    let bNot = false
+                    let i = 0
+                    for (i = 0; i < curPaths.length; i++) {
+                        if (iteamPaths[i] != curPaths[i]) {
+                            // console.log(`continue2, iteamPaths[${i}]:${iteamPaths[i]}, curPaths[${i}]:${curPaths[i]}`);
+                            bNot = true
+                            break
+                        }
+                    }
+                    if (bNot) {
+                        continue
+                    }
+                    if (iteamPaths.length > curPaths.length + 1) {
+                        // console.log(`continue3, iteamPaths.length:${iteamPaths.length}, curPaths.length:${curPaths.length}`);
+                        continue;
+                    }
+                    const curName = iteamPaths[i]
+                    const dirItem = new DatTypes.DirItem();
+                    dirItem.id = jRecord.ID;
+                    dirItem.rootPathId = jRecord.RootPathId;
+                    // dirItem.name = jRecord.Path;
+                    dirItem.name = curName
+                    dirItem.icon = '/assets/images/folders.svg'
+                    dirItem.type = DatTypes.FileType.folder;
+                    dirItem.path = itemPath;
+                    if (jRecord.Tags != null) {
+                        dirItem.tags = jRecord.Tags
+                    }
+                    dirs.push(dirItem);
+                }
+                appStore.curDirs = dirs;
+            }
+            else {
+                appStore.curDirs = [];
+            }
         }
         else {
             appStore.curDirs = [];
         }
+        return resp;
     }
-    else {
+
+    if (convType == "file_similarity_get") {
+        const resp = new DatTypes.Resp()
+        const jData = JSON.parse(_srcStr);
+        if (jData.code != 0) {
+            resp.code = jData.code;
+            resp.status = jData.status;
+            return resp;
+        }
+
+        if (jData.data != null) {
+            const files: DatTypes.File[] = [];
+            const catalogArr: DatTypes.FileCatalog[] = [];
+            const jRecords = jData.data;
+            for (const jRecord of jRecords) {
+                const fileCatalog = new DatTypes.FileCatalog();
+                for (const jFiles of jRecord) {
+                    const fileItem = convert_json_str_to_file(JSON.stringify(jFiles));
+                    if (fileItem == null) {
+                        continue;
+                    }
+                    files.push(fileItem)
+                    fileCatalog.name = fileItem.uniqueHash
+                    fileCatalog.files.push(fileItem)
+                }
+                catalogArr.push(fileCatalog)
+            }
+            appStore.curFileTotal = files.length;
+            appStore.curFiles = files;
+            appStore.fileSililarity = catalogArr;
+        }
+        else {
+            appStore.curFileTotal = 0;
+            appStore.curFiles = [];
+        }
+        update_after_get_files()
         appStore.curDirs = [];
+        appStore.fileShowType = "fileSimilarity"
+        return resp;
     }
+    const resp = new DatTypes.Resp()
+    resp.code = 1;
+    resp.status = "Unknow convert type";
     return resp;
 }
+
 
 
 function tags_get() {
@@ -531,6 +588,9 @@ class Utils {
                 }
             }
         }
+        else if (appStore.fileShowType == "fileSimilarity") {
+            return appStore.fileSililarity
+        }
         return fileCatalog
     }
 
@@ -755,8 +815,8 @@ class Utils {
         await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_get`)
             .then((response) => {
                 console.log('file info:', response.data);
-                resp.code = response.data.code;
-                resp.status = response.data.status;
+
+                const resp = convert_to_file_item(JSON.stringify(response.data), "file_similarity_get")
                 if (resp.code != 0) {
                     Utils.message_notify({ content: `文件操作失败:${resp.status}`, type: "error" })
                 }
@@ -766,6 +826,7 @@ class Utils {
                 else {
                     Utils.message_notify({ content: `文件操作成功` })
                 }
+                return resp
             })
             .catch((error) => {
                 console.error('Error fetching project info:', error);
