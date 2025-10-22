@@ -4,9 +4,6 @@
             <HeaderPanel class="header-panel-section" />
             <router-view class="page-view" />
         </div>
-        <div class="settings-panel" v-show="pageCtrl.set.bShow" :style="{ zIndex: pageCtrl.set.idx }">
-            <OperateEntry />
-        </div>
         <div class='image-view' v-show="pageCtrl.imageView.bShow" :style="{ zIndex: pageCtrl.imageView.idx }">
             <FileViewer />
         </div>
@@ -32,7 +29,6 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onMounted, onUnmounted } from 'vue';
 import HeaderPanel from '@/components/AppNav.vue';
-import OperateEntry from '@/components/OperateEntry.vue';
 import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
 import SearchSet from '@/components/HomeEntry/WorkPanel/SearchSet.vue'

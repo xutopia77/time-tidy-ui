@@ -32,7 +32,6 @@ export type AppStore = {
 
     messageNotify: DataTypes.Message[],         // 消息通知
     // 
-    setOperateType: string,                     // 当前操作类型
     pageCtrl: DataTypes.AppPageCtrl,
     pageCtrlInit: DataTypes.AppPageCtrl,
     bPageSearchSetting: boolean,                // 打开界面 搜索设置
@@ -76,7 +75,6 @@ export const useAppStore = defineStore('app', {
         bPageSet: false,
         fileShowType: "",
         fileSililarity: [],
-        setOperateType: '', // 当前操作类型 files_cpy, files_mv
         // 
         allTags: [], // 所有标签列表
         curFiles: [],

@@ -1,11 +1,11 @@
 <template>
     <div>
-        <button @click="btnclk_operate_file('files_move')" class="xc-button op-button">移动</button>
-        <button @click="btnclk_operate_file('files_cpy')" class="xc-button op-button">复制</button>
+        <button @click="btnclk_file_transfer" class="xc-button op-button">移动</button>
+        <button @click="btnclk_file_transfer" class="xc-button op-button">复制</button>
         <button @click="btnclk_delete_file" class="xc-button op-button">删除</button>
         <button @click="btnclk_similarity_file" class="xc-button op-button">{{ fileSimilarityBtnName }}</button>
         <button @click="btnclk_search_setting" class="xc-button op-button">搜索筛选</button>
-        <button @click="btnclk_file_transfer" class="xc-button op-button">文件转移</button>
+
         <button @click="btnclk_page_set" class="xc-button op-button">界面设置</button>
     </div>
 </template>
@@ -18,10 +18,6 @@ import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 import '@/assets/common.css';
 
-function btnclk_operate_file(op: string) {
-    appStore.setOperateType = op
-    Utils.page_show({ page: 'set', bShow: true })
-}
 
 function btnclk_delete_file() {
     const req: DatType.FileDeleteReq = {

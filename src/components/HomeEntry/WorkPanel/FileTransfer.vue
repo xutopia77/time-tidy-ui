@@ -11,9 +11,6 @@
             </div>
             <div class="operate-content">
                 <p class="info-content">选择目标路径:{{ selectedPathItem != null ? selectedPathItem.path : "" }}</p>
-                <button class="xc-button" @click="btnclk_confirmMove" :disabled="!selectedPathItem">
-                    确认
-                </button>
             </div>
             <div class="sure-dialog" v-if="isSureDialogVisible">
                 <div>
@@ -31,6 +28,12 @@
             </div>
         </div>
 
+        <div class="page-footer">
+            <button class="page-save-button" @click="btn_page_save('move')">移动</button>
+            <button class="page-save-button" @click="btn_page_save('copy')">复制</button>
+            <button class="cancel-button" @click="btn_page_close">取消</button>
+        </div>
+
     </div>
 </template>
 
@@ -43,6 +46,8 @@ const appStore = useAppStore()
 import '@/assets/common.css'
 import DirTreeItem from '@/components/HomeEntry/WorkPanel/DirTreeItem.vue'
 
+type fileOperateType = "move" | "copy" | "";
+const setOperateType = ref<fileOperateType>("")
 
 const selectedPathItem = ref<DatType.DirItem | null>(null);
 const selectedItem = ref<DatType.DirTreeItem | null>(null);
@@ -65,7 +70,8 @@ class FileMoveReq {
     fileIdsCover: number[] = [];
 }
 
-const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null) => {
+const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<DatType.Resp> => {
+    const respOp: DatType.Resp = new DatType.Resp();
 
     isDialogVisibleFileExist.value = false;
     sureDialogContentFileExist.value = ``
@@ -73,12 +79,12 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null) => {
     const bNeedSure = fileMoveReq?.bNeedSure ?? true;
     if (selectedPathItem.value == null) {
         Utils.message_notify({ content: '请选择目标路径' })
-        return;
+        return { ...respOp, code: DatType.Code.Err };
     }
     const selectedPath = selectedPathItem.value?.path;
     if (!selectedPath) {
         Utils.message_notify({ content: '请选择目标路径' })
-        return;
+        return { ...respOp, code: DatType.Code.Err };
     }
     const req: DatType.FilePathChgReq = {
         fileIds: [],
@@ -121,7 +127,7 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null) => {
             const distDir = selectedPathItem.value?.path;
             if (distDir.startsWith(srcDir)) {
                 Utils.message_notify({ content: '不能选择子目录' })
-                return;
+                return { ...respOp, code: DatType.Code.Err };
             }
             req.dirIds.push(item.id)
             req.srcRootPathId = item.rootPathId
@@ -129,17 +135,14 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null) => {
     }
     if (req.fileIds.length == 0 && req.dirIds.length == 0) {
         Utils.message_notify({ content: '请选择要操作的文件' })
-        return;
+        return { ...respOp, code: DatType.Code.Err };
     }
-    if (appStore.setOperateType == 'files_move') {
-        req.type = 'move'
-    }
-    else if (appStore.setOperateType == 'files_cpy') {
-        req.type = 'copy'
+    if (setOperateType.value == '') {
+        Utils.message_notify({ content: '请选择操作类型' })
+        return { ...respOp, code: DatType.Code.Err };
     }
     else {
-        Utils.message_notify({ content: '请选择操作类型' })
-        return;
+        req.type = setOperateType.value
     }
     const resp = await Utils.files_path_chg(req)
     console.log("files path change result:", resp)
@@ -171,7 +174,7 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null) => {
             Utils.message_notify({ content: `文件操作失败: ${resp.status} ` })
         }
     }
-
+    return respOp;
 
 };
 
@@ -191,10 +194,6 @@ async function btnclk_sureDialog_confirm(bSure: boolean) {
     isSureDialogVisible.value = false;
 }
 
-function btnclk_confirmMove() {
-    confirmMove(null)
-}
-
 const isDialogVisibleFileExist = ref(false);
 const sureDialogContentFileExist = ref<string>('');
 let curResp: DatType.Resp<DatType.FilePathChgResp> | null = null;
@@ -211,9 +210,15 @@ async function btnclk_fileExistDialog_confirm(bSure: boolean) {
 
 // 关闭转移界面
 const btn_page_close = () => {
-    // emit('close')
     appStore.bPageFileTransfer = false
 }
+
+const btn_page_save = (opType: fileOperateType = "") => {
+    setOperateType.value = opType
+    confirmMove(null)
+    appStore.bPageFileTransfer = false
+}
+
 </script>
 
 <style scoped>
@@ -264,7 +269,7 @@ const btn_page_close = () => {
 
 .page-content {
     padding: 20px;
-    display: flex;
+    /* display: flex; */
     height: calc(100% - 40px - 40px - 30px - 80px);
 }
 
@@ -278,6 +283,42 @@ const btn_page_close = () => {
     overflow-x: hidden;
 }
 
+.page-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px;
+    border-top: var(--xc-border);
+}
+
+.page-save-button,
+.cancel-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.page-save-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.page-save-button:hover {
+    background-color: #218838;
+}
+
+.cancel-button {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #5a6268;
+}
+
 .operate-content {
     width: 100%;
     height: 40px;
@@ -286,7 +327,8 @@ const btn_page_close = () => {
     display: flex;
     align-items: flex-end;
     background-color: var(--xc-background-color-hover);
-    border-radius: 14px;
+    font-size: small;
+    /* border-radius: 14px; */
 }
 
 .info-content {
