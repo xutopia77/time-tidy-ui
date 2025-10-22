@@ -189,7 +189,7 @@ const fileTags = computed(() => {
 
 // 保存设置到本地存储
 const btn_page_save = () => {
-
+    appStore.bPageSet = false
 }
 
 // 关闭设置界面

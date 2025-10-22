@@ -1,269 +1,253 @@
 <template>
-    <div class="file-transfer-view">
-        <div class="transfer-header">
-            <h2>文件转移工具</h2>
-            <button class="close-button" @click="closeTransfer">&times;</button>
+    <div class="page-view">
+        <div class="page-header">
+            <p>文件操作</p>
+            <button class="page-close-button" @click="btn_page_close">&times;</button>
         </div>
 
-        <div class="transfer-content">
-            <!-- 路径选择区域 -->
-            <div class="path-selection">
-                <div class="path-item">
-                    <label>源目录:</label>
-                    <div class="path-input-container">
-                        <input type="text" v-model="sourcePath" placeholder="请选择源目录" readonly />
-                        <button @click="selectSourcePath">选择</button>
-                    </div>
-                </div>
-
-                <div class="path-item">
-                    <label>目标目录:</label>
-                    <div class="path-input-container">
-                        <input type="text" v-model="destinationPath" placeholder="请选择目标目录" readonly />
-                        <button @click="selectDestinationPath">选择</button>
-                    </div>
-                </div>
+        <div class="page-content">
+            <div class="dirtree-content xc-scrollbar">
+                <DirTreeItem :data="dirTrees" v-model="selectedItem" />
             </div>
-
-            <!-- 文件列表区域 -->
-            <div class="file-list-section">
-                <div class="file-list-header">
-                    <h3>文件列表</h3>
-                    <div class="file-actions">
-                        <button @click="selectAll" :disabled="isTransferring">全选</button>
-                        <button @click="clearSelection" :disabled="isTransferring">清空</button>
-                    </div>
-                </div>
-
-                <div class="file-list-container">
-                    <div v-for="file in sourceFiles" :key="file.name" class="file-item"
-                        :class="{ selected: selectedFiles.includes(file.name) }"
-                        @click="toggleFileSelection(file.name)">
-                        <div class="file-info">
-                            <span class="file-icon">{{ getFileIcon(file.type) }}</span>
-                            <span class="file-name">{{ file.name }}</span>
-                            <span class="file-size">{{ formatFileSize(file.size) }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 转移操作区域 -->
-            <div class="transfer-actions">
-                <button class="transfer-button" @click="transferFiles"
-                    :disabled="selectedFiles.length === 0 || isTransferring">
-                    {{ isTransferring ? `转移中... (${progress.toFixed(0)}%)` : '开始转移' }}
+            <div class="operate-content">
+                <p class="info-content">选择目标路径:{{ selectedPathItem != null ? selectedPathItem.path : "" }}</p>
+                <button class="xc-button" @click="btnclk_confirmMove" :disabled="!selectedPathItem">
+                    确认
                 </button>
-
-                <!-- 进度条 -->
-                <div v-if="isTransferring" class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" :style="{ width: progress + '%' }"></div>
-                    </div>
-                    <div class="progress-text">
-                        已转移: {{ transferredFiles }} / {{ selectedFiles.length }} 个文件
-                    </div>
+            </div>
+            <div class="sure-dialog" v-if="isSureDialogVisible">
+                <div>
+                    <p> {{ sureDialogContent }} </p>
+                    <button @click="btnclk_sureDialog_confirm(true)" class="xc-button">确定</button>
+                    <button @click="btnclk_sureDialog_confirm(false)" class="xc-button">取消</button>
                 </div>
             </div>
-
-            <!-- 日志区域 -->
-            <div v-if="transferLog.length > 0" class="log-section">
-                <h3>转移日志</h3>
-                <div class="log-container">
-                    <div v-for="(log, index) in transferLog" :key="index" class="log-item" :class="log.type">
-                        <span class="log-icon">{{ getLogIcon(log.type) }}</span>
-                        <span class="log-message">{{ log.message }}</span>
-                    </div>
+            <div class="sure-dialog" v-if="isDialogVisibleFileExist">
+                <div>
+                    <p> {{ sureDialogContentFileExist }} </p>
+                    <button @click="btnclk_fileExistDialog_confirm(true)" class="xc-button">覆盖</button>
+                    <button @click="btnclk_fileExistDialog_confirm(false)" class="xc-button">取消</button>
                 </div>
             </div>
         </div>
+
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-// import Utils from '@/utils/utils'
-// import * as DatType from '@/utils/dataTypedef'
+import { ref, computed, watch } from 'vue'
+import Utils from '@/utils/utils'
+import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 import '@/assets/common.css'
-// 文件信息接口
-interface FileInfo {
-    name: string
-    size: number
-    type: 'file' | 'folder'
-}
+import DirTreeItem from '@/components/HomeEntry/WorkPanel/DirTreeItem.vue'
 
-// 日志信息接口
-interface LogEntry {
-    type: 'success' | 'error' | 'info'
-    message: string
-}
 
-// const appStore = useAppStore()
-
-// // 定义 emit 事件
-// const emit = defineEmits<{
-//     (e: 'close'): void
-// }>()
-
-// 响应式数据
-const sourcePath = ref('')
-const destinationPath = ref('')
-const sourceFiles = ref<FileInfo[]>([
-    { name: '文档.txt', size: 1024, type: 'file' },
-    { name: '图片.jpg', size: 204800, type: 'file' },
-    { name: '视频.mp4', size: 10485760, type: 'file' },
-    { name: '项目文件夹', size: 512000, type: 'folder' },
-    { name: '报告.pdf', size: 2048000, type: 'file' },
-    { name: '数据.xlsx', size: 51200, type: 'file' }
-])
-const selectedFiles = ref<string[]>([])
-const isTransferring = ref(false)
-const progress = ref(0)
-const transferredFiles = ref(0)
-const transferLog = ref<LogEntry[]>([])
-
-// 选择源目录（模拟）
-const selectSourcePath = () => {
-    sourcePath.value = 'C:\\Users\\Example\\Source'
-    // appStore.addToast('源目录已选择', 'info')
-}
-
-// 选择目标目录（模拟）
-const selectDestinationPath = () => {
-    destinationPath.value = 'D:\\Users\\Example\\Destination'
-    // appStore.addToast('目标目录已选择', 'info')
-}
-
-// 获取文件图标
-const getFileIcon = (type: string) => {
-    return type === 'folder' ? '📁' : '📄'
-}
-
-// 获取日志图标
-const getLogIcon = (type: string) => {
-    switch (type) {
-        case 'success': return '✅'
-        case 'error': return '❌'
-        case 'info': return 'ℹ️'
-        default: return 'ℹ️'
+const selectedPathItem = ref<DatType.DirItem | null>(null);
+const selectedItem = ref<DatType.DirTreeItem | null>(null);
+watch(selectedItem, (newValue: DatType.DirTreeItem | null) => {
+    if (null == newValue) {
+        return;
     }
+    console.log('选中项已更新:', newValue);
+    // Utils.dir_slt_update(newValue)
+    selectedPathItem.value = newValue.dirInfo
+});
+
+const dirTrees = computed(() => {
+    return appStore.DirTrees;
+});
+
+class FileMoveReq {
+    bNeedSure: boolean = true;
+    bAllFileCover: boolean = false;
+    fileIdsCover: number[] = [];
 }
 
-// 格式化文件大小
-const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
+const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null) => {
 
-// 切换文件选择
-const toggleFileSelection = (fileName: string) => {
-    const index = selectedFiles.value.indexOf(fileName)
-    if (index > -1) {
-        selectedFiles.value.splice(index, 1)
-    } else {
-        selectedFiles.value.push(fileName)
+    isDialogVisibleFileExist.value = false;
+    sureDialogContentFileExist.value = ``
+
+    const bNeedSure = fileMoveReq?.bNeedSure ?? true;
+    if (selectedPathItem.value == null) {
+        Utils.message_notify({ content: '请选择目标路径' })
+        return;
     }
-}
-
-// 全选
-const selectAll = () => {
-    selectedFiles.value = sourceFiles.value.map(file => file.name)
-    // appStore.addToast('已选择所有文件', 'info')
-}
-
-// 清空选择
-const clearSelection = () => {
-    selectedFiles.value = []
-    // appStore.addToast('已清空选择', 'info')
-}
-
-// 转移文件（模拟）
-const transferFiles = () => {
-    if (selectedFiles.value.length === 0) {
-        // appStore.addToast('请选择要转移的文件', 'warning')
-        return
+    const selectedPath = selectedPathItem.value?.path;
+    if (!selectedPath) {
+        Utils.message_notify({ content: '请选择目标路径' })
+        return;
     }
+    const req: DatType.FilePathChgReq = {
+        fileIds: [],
+        dirIds: [],
+        distPath: selectedPath,
+        distRootPathId: selectedPathItem.value.rootPathId,
+        srcRootPathId: 0,
+        type: 'move',
+        bNeedSure: bNeedSure,
+        bAllFileCover: fileMoveReq?.bAllFileCover ?? false,
+        fileIdsCover: fileMoveReq?.fileIdsCover ?? [],
+    };
 
-    isTransferring.value = true
-    progress.value = 0
-    transferredFiles.value = 0
-    transferLog.value = []
-
-    // appStore.addToast(`开始转移 ${selectedFiles.value.length} 个文件`, 'info')
-
-    // 模拟转移过程
-    const totalFiles = selectedFiles.value.length
-    let transferred = 0
-
-    const transferInterval = setInterval(() => {
-        transferred++
-        transferredFiles.value = transferred
-        progress.value = (transferred / totalFiles) * 100
-
-        // 添加日志
-        const fileName = selectedFiles.value[transferred - 1]
-        transferLog.value.push({
-            type: 'success',
-            message: `已转移: ${fileName}`
-        })
-
-        if (transferred >= totalFiles) {
-            clearInterval(transferInterval)
-            isTransferring.value = false
-            transferLog.value.push({
-                type: 'info',
-                message: '所有文件转移完成'
-            })
-            // appStore.addToast('文件转移完成', 'success')
+    for (const item of appStore.curFiles) {
+        if (item.checked) {
+            req.fileIds.push(item.id)
+            req.srcRootPathId = item.rootPathId
         }
-    }, 500)
+    }
+
+    if (req.bAllFileCover && curResp?.data?.items) {
+        for (const item of curResp.data.items) {
+            if (item.code == DatType.Code.FileAlreadyExist) {
+                req.fileIdsCover.push(item.id)
+            }
+            if (item.code == DatType.Code.Success) {
+                req.fileIds.slice(req.fileIds.indexOf(item.id), 1)
+            }
+        }
+    }
+    if (req.bAllFileCover) {
+        if (curResp?.data?.remainFileIds) {
+            req.fileIds = curResp.data.remainFileIds
+        }
+    }
+
+    for (const item of appStore.curDirs) {
+        if (item.checked) {
+            const srcDir = item.path;
+            const distDir = selectedPathItem.value?.path;
+            if (distDir.startsWith(srcDir)) {
+                Utils.message_notify({ content: '不能选择子目录' })
+                return;
+            }
+            req.dirIds.push(item.id)
+            req.srcRootPathId = item.rootPathId
+        }
+    }
+    if (req.fileIds.length == 0 && req.dirIds.length == 0) {
+        Utils.message_notify({ content: '请选择要操作的文件' })
+        return;
+    }
+    if (appStore.setOperateType == 'files_move') {
+        req.type = 'move'
+    }
+    else if (appStore.setOperateType == 'files_cpy') {
+        req.type = 'copy'
+    }
+    else {
+        Utils.message_notify({ content: '请选择操作类型' })
+        return;
+    }
+    const resp = await Utils.files_path_chg(req)
+    console.log("files path change result:", resp)
+    switch (resp.code) {
+        case DatType.Code.Success:
+            isDialogVisibleFileExist.value = false;
+            sureDialogContentFileExist.value = ``
+            if (resp.data?.bNeedSure == true) {
+                isSureDialogVisible.value = true;
+                const respDirInfo = new DatType.DirInfo();
+                for (const item of resp.data.dirInfos) {
+                    respDirInfo.count += item.count;
+                    respDirInfo.dirCount += item.dirCount;
+                    respDirInfo.size += item.size;
+                }
+                const fileTotalSizeStr = Utils.gen_size_str(respDirInfo.size)
+                sureDialogContent.value = `file count: ${respDirInfo.count}, dir count: ${respDirInfo.dirCount}, file size: ${fileTotalSizeStr}`
+            }
+            break;
+        case DatType.Code.FileAlreadyExist: {
+            isDialogVisibleFileExist.value = true;
+            sureDialogContentFileExist.value = `文件已存在: ${resp.status}`
+            curResp = resp
+            break;
+        }
+        default: {
+            isDialogVisibleFileExist.value = false;
+            sureDialogContentFileExist.value = ``
+            Utils.message_notify({ content: `文件操作失败: ${resp.status} ` })
+        }
+    }
+
+
+};
+
+// ------
+const isSureDialogVisible = ref(false);
+const sureDialogContent = ref<string>('');
+
+async function btnclk_sureDialog_confirm(bSure: boolean) {
+    console.log(`sure: ${bSure} `, typeof (bSure))
+    if (bSure) {
+        const resp = await confirmMove({ bNeedSure: true, bAllFileCover: false })
+        console.log(resp)
+    }
+    else {
+        Utils.message_notify({ content: '操作已取消' })
+    }
+    isSureDialogVisible.value = false;
+}
+
+function btnclk_confirmMove() {
+    confirmMove(null)
+}
+
+const isDialogVisibleFileExist = ref(false);
+const sureDialogContentFileExist = ref<string>('');
+let curResp: DatType.Resp<DatType.FilePathChgResp> | null = null;
+async function btnclk_fileExistDialog_confirm(bSure: boolean) {
+    console.log(`sure file cover: ${bSure} `, typeof (bSure))
+    if (bSure) {
+        await confirmMove({ bNeedSure: false, bAllFileCover: true })
+    }
+    else {
+        Utils.message_notify({ content: '操作已取消' })
+        isDialogVisibleFileExist.value = false;
+    }
 }
 
 // 关闭转移界面
-const closeTransfer = () => {
+const btn_page_close = () => {
     // emit('close')
     appStore.bPageFileTransfer = false
 }
 </script>
 
 <style scoped>
-.file-transfer-view {
-    background-color: white;
+.page-view {
+    background-color: var(--xc-background-color);
+    color: var(--xc-text-color);
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     width: 100%;
-    max-width: 800px;
+    max-width: 600px;
     max-height: 90vh;
-    display: flex;
-    flex-direction: column;
+    /* display: flex; */
+    /* flex-direction: column; */
     overflow: hidden;
 }
 
-.transfer-header {
+.page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    border-bottom: 1px solid #e0e0e0;
-    background-color: #f8f9fa;
+    border-bottom: var(--xc-border);
 }
 
-.transfer-header h2 {
+.page-header p {
     margin: 0;
     color: #333;
 }
 
-.close-button {
+.page-close-button {
     background: none;
     border: none;
     font-size: 24px;
     cursor: pointer;
-    color: #666;
     padding: 0;
     width: 30px;
     height: 30px;
@@ -274,257 +258,52 @@ const closeTransfer = () => {
     transition: background-color 0.2s;
 }
 
-.close-button:hover {
-    background-color: #e0e0e0;
+.page-close-button:hover {
+    background-color: var(--xc-background-color-hover);
 }
 
-.transfer-content {
+.page-content {
     padding: 20px;
-    flex: 1;
-    overflow-y: auto;
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    height: calc(100% - 40px - 40px - 30px - 80px);
 }
 
-.path-selection {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.path-item {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.path-item label {
-    font-weight: 500;
-    color: #333;
-}
-
-.path-input-container {
-    display: flex;
-    gap: 10px;
-}
-
-.path-input-container input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    box-sizing: border-box;
-}
-
-.path-input-container button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.path-input-container button:hover {
-    background-color: #0056b3;
-}
-
-.file-list-section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.file-list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.file-list-header h3 {
+.dirtree-content {
+    width: calc(100% - 0px);
+    height: calc(100% - 40px);
     margin: 0;
-    color: #333;
-}
-
-.file-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.file-actions button {
-    padding: 6px 12px;
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-}
-
-.file-actions button:hover {
-    background-color: #5a6268;
-}
-
-.file-actions button:disabled {
-    background-color: #adb5bd;
-    cursor: not-allowed;
-}
-
-.file-list-container {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.file-item {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.file-item:last-child {
-    border-bottom: none;
-}
-
-.file-item:hover {
-    background-color: #f8f9fa;
-}
-
-.file-item.selected {
-    background-color: #e3f2fd;
-}
-
-.file-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.file-icon {
-    font-size: 16px;
-}
-
-.file-name {
-    flex: 1;
-    font-size: 14px;
-}
-
-.file-size {
-    color: #666;
-    font-size: 13px;
-}
-
-.transfer-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.transfer-button {
-    padding: 12px 20px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-
-.transfer-button:hover:not(:disabled) {
-    background-color: #218838;
-}
-
-.transfer-button:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-}
-
-.progress-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.progress-bar {
-    width: 100%;
-    height: 10px;
-    background-color: #e9ecef;
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background-color: #007bff;
-    transition: width 0.3s ease;
-}
-
-.progress-text {
-    font-size: 14px;
-    color: #666;
+    padding: 0;
+    overflow: auto;
     text-align: center;
+    overflow-x: hidden;
 }
 
-.log-section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.log-section h3 {
+.operate-content {
+    width: 100%;
+    height: 40px;
     margin: 0;
-    color: #333;
-}
-
-.log-container {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    max-height: 150px;
-    overflow-y: auto;
-    padding: 10px;
-}
-
-.log-item {
-    padding: 8px;
-    border-radius: 4px;
-    margin-bottom: 5px;
+    padding: 0;
     display: flex;
+    align-items: flex-end;
+    background-color: var(--xc-background-color-hover);
+    border-radius: 14px;
+}
+
+.info-content {
+    margin: 0px;
+    padding: 0px;
+    padding-right: 16px;
+}
+
+.sure-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
-    font-size: 13px;
-}
-
-.log-item:last-child {
-    margin-bottom: 0;
-}
-
-.log-item.success {
-    background-color: rgba(40, 167, 69, 0.1);
-    color: #155724;
-}
-
-.log-item.error {
-    background-color: rgba(220, 53, 69, 0.1);
-    color: #721c24;
-}
-
-.log-item.info {
-    background-color: rgba(23, 162, 184, 0.1);
-    color: #0c5460;
-}
-
-.log-icon {
-    font-size: 14px;
-}
-
-.log-message {
-    flex: 1;
 }
 </style>

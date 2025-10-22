@@ -30,7 +30,6 @@
             <button title="同步项目下的文件信息" @click="btnclk_set()" class="xc-button">同步项目</button>
             <br>
             <button title="数据检查" @click="btnclk_detect_health()" class="xc-button">数据检查</button>
-            <button title="文件相似性检查" @click="btn_file_consistency()" class="xc-button">文件相似性检查</button>
             <button title="清理日志" @click="btnclk_clean_log" class="xc-button">清空日志</button>
         </div>
         <div class="set-log">
@@ -197,11 +196,6 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
         }
     }
     Utils.project_set(req)
-}
-
-// 
-function btn_file_consistency() {
-    Utils.file_similarity_detect()
 }
 
 onMounted(() => {

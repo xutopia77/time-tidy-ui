@@ -3,7 +3,7 @@
         <button @click="btnclk_operate_file('files_move')" class="xc-button op-button">移动</button>
         <button @click="btnclk_operate_file('files_cpy')" class="xc-button op-button">复制</button>
         <button @click="btnclk_delete_file" class="xc-button op-button">删除</button>
-        <button @click="btnclk_similarity_file" class="xc-button op-button">相似文件查看</button>
+        <button @click="btnclk_similarity_file" class="xc-button op-button">{{ fileSimilarityBtnName }}</button>
         <button @click="btnclk_search_setting" class="xc-button op-button">搜索筛选</button>
         <button @click="btnclk_file_transfer" class="xc-button op-button">文件转移</button>
         <button @click="btnclk_page_set" class="xc-button op-button">界面设置</button>
@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-// import { computed } from 'vue';
+import { computed } from 'vue';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 import { useAppStore } from '@/stores/AppStore';
@@ -46,8 +46,16 @@ function btnclk_delete_file() {
     Utils.files_delete(req)
 }
 
+const fileSimilarityBtnName = computed(() => appStore.fileShowType == "fileSimilarity" ? "正常文件查看" : "相似文件查看")
+
 function btnclk_similarity_file() {
-    Utils.file_similarity_get()
+    if (appStore.fileShowType == "fileSimilarity") {
+        appStore.fileShowType = ""
+        Utils.files_get(null)
+    }
+    else {
+        Utils.file_similarity_get()
+    }
 }
 
 function btnclk_search_setting() {
