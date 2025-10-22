@@ -33,6 +33,8 @@ export enum FileType {
     other = "other",
 }
 
+export type FileShowType = "time" | "";
+
 // 字符串转 FileType 枚举
 export function stringToFileType(str: string): FileType | null {
     for (const key in FileType) {
@@ -103,8 +105,13 @@ export class File {
     icon: string = "";
     tags: FileItemTag[] = [];
     size: number = 0;
-    time?: string = "";
+    time: string = "";
     checked: boolean = false;
+}
+
+export class FileCatalog {
+    name: string = "";
+    files: File[] = [];
 }
 
 export class DirItem {

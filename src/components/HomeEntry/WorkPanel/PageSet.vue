@@ -6,18 +6,27 @@
         </div>
 
         <div class="page-content">
-            <label for="cardWidthSlider1" style="font-size: small;">卡片大小</label>
-            <input id="cardWidthSlider" type="range" v-model="cardWidth" min="100" max="800" step="10"
-                @input="handleWidthChange" />
-            <button @click="btn_adjustWidth(-2)" class="xc-button op-button"
-                style="width: 32px; display: flex; align-items: center; justify-content: center;">
-                <Minus theme="outline" size="24" fill="#333" :strokeWidth="2" />
-            </button>
-            <button @click="btn_adjustWidth(2)" class="xc-button op-button"
-                style="width: 32px; display: flex; justify-content: center; align-items: center;">
-                <Plus theme="outline" size="24" fill="#333" :strokeWidth="2" />
-            </button>
-            <span>{{ cardWidth }}</span>
+            <div style="display: flex;">
+                <label for="cardWidthSlider1" style="font-size: small;">卡片大小</label>
+                <input id="cardWidthSlider" type="range" v-model="cardWidth" min="100" max="800" step="10"
+                    @input="handleWidthChange" />
+                <button @click="btn_adjustWidth(-2)" class="xc-button op-button"
+                    style="width: 32px; display: flex; align-items: center; justify-content: center;">
+                    <Minus theme="outline" size="24" fill="#333" :strokeWidth="2" />
+                </button>
+                <button @click="btn_adjustWidth(2)" class="xc-button op-button"
+                    style="width: 32px; display: flex; justify-content: center; align-items: center;">
+                    <Plus theme="outline" size="24" fill="#333" :strokeWidth="2" />
+                </button>
+                <span>{{ cardWidth }}</span>
+            </div>
+            <div>
+                <label for="sortBy">文件展示类型</label>
+                <select id="sortBy" v-model="fileShowType" class="xc-select">
+                    <option value="">默认</option>
+                    <option value="time">按时间分类</option>
+                </select>
+            </div>
         </div>
 
         <div class="page-footer">
@@ -56,6 +65,13 @@ function btn_adjustWidth(step: number) {
         appStore.cardWidth = newValue;
     }
 }
+
+const fileShowType = computed({
+    get: () => appStore.fileShowType,
+    set: (newValue) => {
+        appStore.fileShowType = newValue;
+    }
+});
 
 // 保存设置到本地存储
 const btn_page_save = () => {
@@ -120,7 +136,7 @@ onMounted(() => {
 
 .page-content {
     padding: 20px;
-    display: flex;
+    /* display: flex; */
     height: calc(100% - 40px - 40px - 30px - 80px);
 }
 

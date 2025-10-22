@@ -1,17 +1,46 @@
+<!-- <template>
+    <div class="file-explorer">
+        <FileNavHeader class="file-nav-header" />
+
+        <div class="file-content xc-scrollbar">
+            <div class="file-grid">
+                <template v-for="(item) in items" :key="item.id">
+                    <ImageCard :item="item" />
+                </template>
+            </div>
+            <span style="color: aliceblue;">asdasdas</span>
+            <hr />
+            <div class="file-grid">
+                <template v-for="item in dirs" :key="item.id">
+                    <FolderCard :item="item" />
+                </template>
+            </div>
+        </div>
+        <FileFooter class="file-footer" />
+    </div>
+</template> -->
+
 <template>
     <div class="file-explorer">
         <FileNavHeader class="file-nav-header" />
-        <div class="file-grid xc-scrollbar">
-            <!-- 循环渲染文件和文件夹 -->
-            <template v-for="(item) in items" :key="item.id">
-                <ImageCard :item="item" />
+
+        <div class="file-content xc-scrollbar">
+            <template v-for="catalog in fileCatalog" :key="catalog.name">
+                <div v-if="catalog.name.length">
+                    <span style="color: aliceblue;">{{ catalog.name }}</span>
+                    <hr>
+                </div>
+                <div class="file-grid">
+                    <template v-for="(item) in catalog.files" :key="item.id">
+                        <ImageCard :item="item" />
+                    </template>
+                </div>
             </template>
-            <template v-for="item in dirs" :key="item.id">
-                <!-- <hr />
-                asdasdas
-                <br /> -->
-                <FolderCard :item="item" />
-            </template>
+            <div class="file-grid">
+                <template v-for="item in dirs" :key="item.id">
+                    <FolderCard :item="item" />
+                </template>
+            </div>
         </div>
         <FileFooter class="file-footer" />
     </div>
@@ -23,12 +52,18 @@ import FileNavHeader from '@/components/HomeEntry/FileExplorer/FileNavHeader.vue
 import ImageCard from '@/components/HomeEntry/FileExplorer/ImageCard.vue';
 import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
 import FileFooter from '@/components/HomeEntry/FileExplorer/FileFooter.vue';
-
+import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 import '@/assets/common.css'
+import Utils from '@/utils/utils';
 
+const fileCatalog = ref<DatType.FileCatalog[]>([]);
 const items = computed(() => appStore.curFiles);
+watch([() => appStore.curFiles, () => appStore.fileShowType], () => {
+    fileCatalog.value = Utils.files2Catalog()
+})
+
 const dirs = computed(() => appStore.curDirs);
 
 // 记录 Shift 键是否按下
@@ -148,14 +183,18 @@ onUnmounted(() => {
     padding: 10px;
 }
 
+.file-content {
+    height: calc(100% - 32px - 32px - 20px);
+}
+
 .file-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    height: calc(100% - 32px - 32px - 20px);
+    /* height: calc(100% - 32px - 32px - 20px); */
     padding: 10px;
     align-content: flex-start;
-    overflow-y: auto;
+    /* overflow-y: auto; */
 }
 
 

@@ -89,8 +89,6 @@ function convert_to_file_item(_srcStr: string): DatTypes.Resp {
                         }
                         fileItem.tags.push(tag)
                     }
-
-
                 }
                 files.push(fileItem);
             }
@@ -501,6 +499,41 @@ class Utils {
     static log_info_append = log_info_append
     static gen_size_str = gen_size_str;
     static dir_slt_update = dir_slt_update;
+
+    static files2Catalog(): DatTypes.FileCatalog[] {
+        const fileCatalog: DatTypes.FileCatalog[] = [];
+        if (appStore.fileShowType == "") {
+            const item = new DatTypes.FileCatalog();
+            item.name = "";
+            item.files = appStore.curFiles;
+            fileCatalog.push(item)
+        }
+        else if (appStore.fileShowType == "time") {
+            for (const file of appStore.curFiles) {
+                const time = file.time;
+                const year = time.substring(0, 4);
+                const month = time.substring(5, 7);
+                const day = time.substring(8, 10);
+                const date = year + "-" + month + "-" + day;
+                let found = false;
+                for (const item of fileCatalog) {
+                    if (item.name == date) {
+                        item.files.push(file);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    const item = new DatTypes.FileCatalog();
+                    item.name = date;
+                    item.files.push(file);
+                    fileCatalog.push(item)
+                }
+            }
+        }
+        return fileCatalog
+    }
+
     // ------
     static async project_set(req: DatTypes.PrjSetReq) {
         Utils.log_info_append("------开始设置项目\n");
