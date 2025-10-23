@@ -1,7 +1,6 @@
 import axios from 'axios';
 import type { AppStore } from '@/stores/AppStore'
 let appStore: AppStore
-
 import * as DatTypes from '@/utils/dataTypedef'
 
 function get_dir_trees() {
@@ -32,7 +31,6 @@ function get_dir_trees() {
             currentLevel = foundNode.children || [];
         }
     }
-
     appStore.DirTrees = dirTree;
     // console.log("dirTree", appStore.DirTrees)
 }
@@ -390,26 +388,6 @@ function project_health(): DatTypes.Resp {
     return resp;
 }
 
-
-function message_notify(_req: DatTypes.MessageReq): DatTypes.Resp {
-    const resp = new DatTypes.Resp()
-    const msg: DatTypes.Message = new DatTypes.Message();
-    msg.content = _req.content;
-    msg.durationMs = _req.duration ? _req.duration : 2000;
-    msg.type = _req.type ? _req.type : "info";
-    msg.startTime = Date.now();
-    appStore.messageNotify.push(msg);
-    //删除超过duration的消息
-    const now = Date.now();
-    for (let i = 0; i < appStore.messageNotify.length; i++) {
-        if (now - appStore.messageNotify[i].startTime > appStore.messageNotify[i].durationMs * 1000) {
-            appStore.messageNotify.splice(i, 1);
-            i--;
-        }
-    }
-    return resp;
-}
-
 function page_show(_req: DatTypes.AppPageCtrlReq): DatTypes.Resp {
     const resp = new DatTypes.Resp()
     const validPages = ['home', 'set', 'imageView', 'message'];
@@ -552,10 +530,53 @@ class Utils {
     // ------
     static appstore_set(store: AppStore) { appStore = store; }
     static page_show = page_show;
-    static message_notify = message_notify;
     static log_info_append = log_info_append
     static gen_size_str = gen_size_str;
     static dir_slt_update = dir_slt_update;
+
+    static message_notify(_req: DatTypes.MessageReq) {
+        let typeStr: 'success' | 'error' | 'warning' | 'info' = "success"
+        switch (_req.type) {
+            case 'success': {
+                typeStr = 'success'
+                break;
+            }
+            case 'error': {
+                typeStr = 'error'
+                break;
+            }
+            case 'warning': { typeStr = 'warning'; break; }
+        }
+        Utils.addToast(_req.content, typeStr)
+    }
+
+    static addToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') {
+        const id = Date.now()
+        const timestamp = Date.now()
+        const toast = { id, message, type, timestamp }
+
+        // 添加到当前消息和历史消息
+        appStore.toasts.push(toast)
+        appStore.historyToasts.push(toast)
+
+        // 限制历史消息数量，最多保留100条
+        if (appStore.historyToasts.length > 100) {
+            appStore.historyToasts.shift()
+        }
+
+        // 3秒后自动移除当前显示的消息
+        setTimeout(() => {
+            // this.removeToast(id)
+            const index = appStore.toasts.findIndex(toast => toast.id === id)
+            if (index !== -1) {
+                appStore.toasts.splice(index, 1)
+            }
+        }, 3000)
+    }
+    // 清空所有历史消息
+    static clearHistoryToasts() {
+        appStore.historyToasts = []
+    }
 
     static files2Catalog(): DatTypes.FileCatalog[] {
         const fileCatalog: DatTypes.FileCatalog[] = [];

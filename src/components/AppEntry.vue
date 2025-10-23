@@ -7,10 +7,6 @@
         <div class='image-view' v-show="pageCtrl.imageView.bShow" :style="{ zIndex: pageCtrl.imageView.idx }">
             <FileViewer />
         </div>
-        <!-- 消息显示区域 -->
-        <div class="message-show" v-show="pageCtrl.message.bShow" :style="{ zIndex: pageCtrl.message.idx }">
-            <MessageNotify />
-        </div>
 
         <div v-if="bPageSearchSetting" class="fullscreen-overlay">
             <SearchSet>
@@ -23,13 +19,16 @@
         <div v-if="bPageSet" class="fullscreen-overlay">
             <PageSet />
         </div>
+        <MessageToast />
+        <RecentMessagesPanel />
     </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeMount, onMounted, onUnmounted } from 'vue';
 import HeaderPanel from '@/components/AppNav.vue';
-import MessageNotify from '@/components/MessageNotify/MessageNotify.vue'
+import MessageToast from '@/components/MessageNotify/MessageToast.vue'
+import RecentMessagesPanel from '@/components/MessageNotify/RecentMessagesPanel.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
 import SearchSet from '@/components/HomeEntry/WorkPanel/SearchSet.vue'
 import FileTransfer from '@/components/HomeEntry/WorkPanel/FileTransfer.vue'

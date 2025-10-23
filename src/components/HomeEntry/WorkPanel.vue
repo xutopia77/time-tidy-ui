@@ -1,5 +1,8 @@
 <template>
     <div class="work-panel xc-scrollbar">
+        <div>
+            <button @click="btn_show_resent_msg()" class="xc-button op-button">查看最近消息</button>
+        </div>
         <!-- 文件基础信息折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('basicInfo')">
@@ -55,13 +58,18 @@ import WorkOperate from '@/components/HomeEntry/WorkPanel/WorkOperate.vue';
 import WorkInfo from '@/components/HomeEntry/WorkPanel/WorkInfo.vue';
 import WorkTree from '@/components/HomeEntry/WorkPanel/WorkTree.vue';
 import '@/assets/common.css';
-import '@/assets/common.css'
 // import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 const iconProps = computed(() => (appStore.iconProps))
 
 import { FolderClose, Down, Right, TagOne, Info, Setting } from '@icon-park/vue-next'
+import Utils from '@/utils/utils';
+
+function btn_show_resent_msg() {
+    Utils.addToast('点击了查看最近消息', 'info');
+    appStore.bPageResentMsg = true;
+}
 
 // 管理每个折叠面板的展开状态
 const panelStates = ref({

@@ -20,6 +20,16 @@ const pageCtrlInit: DataTypes.AppPageCtrl = {
 //     bReverseSltTag: false,
 // };
 
+
+// 定义消息类型
+export interface ToastMessage {
+    id: number
+    message: string
+    type: DataTypes.MessageShowType
+    timestamp: number // 添加时间戳
+}
+
+
 export type AppStore = {
     platform: DataTypes.PlatformType,
     envMode: DataTypes.EnvModeType,
@@ -31,12 +41,16 @@ export type AppStore = {
     logInfo: string,                            // 日志信息
 
     messageNotify: DataTypes.Message[],         // 消息通知
+    // 当前显示的消息数组（用于自动消失的消息）
+    toasts: ToastMessage[],
+    historyToasts: ToastMessage[],
     // 
     pageCtrl: DataTypes.AppPageCtrl,
     pageCtrlInit: DataTypes.AppPageCtrl,
     bPageSearchSetting: boolean,                // 打开界面 搜索设置
     bPageFileTransfer: boolean,                 // 打开界面 文件传输
     bPageSet: boolean,                          // 打开界面 设置
+    bPageResentMsg: boolean,                          // 打开界面 最近消息
     fileShowType: DataTypes.FileShowType,       // 文件展示目录，目录的类型
     fileSililarity: DataTypes.FileCatalog[],    // 文件相似目录
     // 
@@ -67,12 +81,15 @@ export const useAppStore = defineStore('app', {
         logInfo: '', // 日志信息
         prj: new DataTypes.Prj(),
         messageNotify: [], // 消息通知
+        toasts: [],
+        historyToasts: [],
         // 
         pageCtrl: pageCtrlInit,
         pageCtrlInit: pageCtrlInit,
         bPageSearchSetting: false,
         bPageFileTransfer: false,
         bPageSet: false,
+        bPageResentMsg: false,
         fileShowType: "",
         fileSililarity: [],
         // 
@@ -94,7 +111,7 @@ export const useAppStore = defineStore('app', {
         setData(key: string, value: string): void {
             console.log(`setData: ${key} = ${value}`)
             // this[key] = value
-        }
+        },
     }
 })
 
