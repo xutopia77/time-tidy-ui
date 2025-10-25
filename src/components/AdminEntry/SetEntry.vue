@@ -4,14 +4,14 @@
             <label class="xc-label">项目路径:</label>
             <input type="text" v-model="prjPath" placeholder="输入项目路径" class="xc-input-text text-base-path" />
             <br>
-            <label class="xc-label">仓库1:</label>
+            <label class="xc-label">仓库:</label>
             <input type="text" v-model="repoPath[0].path" placeholder="输入仓库路径" class="xc-input-text text-base-path" />
-            <br>
+            <!-- <br>
             <label class="xc-label">仓库2:</label>
             <input type="text" v-model="repoPath[1].path" placeholder="输入仓库路径" class="xc-input-text text-base-path" />
             <br>
             <label class="xc-label">仓库3:</label>
-            <input type="text" v-model="repoPath[2].path" placeholder="输入仓库路径" class="xc-input-text text-base-path" />
+            <input type="text" v-model="repoPath[2].path" placeholder="输入仓库路径" class="xc-input-text text-base-path" /> -->
             <br>
             <button title="创建项目" @click="btnclk_set([DatType.PrjSetType.Create])" class="xc-button">创建项目</button>
             <button title="打开项目" @click="btnclk_set([DatType.PrjSetType.Open])" class="xc-button">打开项目</button>

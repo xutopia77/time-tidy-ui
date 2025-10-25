@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router';
-import SetEntry from '@/components/SetEntry.vue'
+import SetEntry from '@/components/AdminEntry/SetEntry.vue'
 import HomeEntry from '@/components/HomeEntry.vue';
 import AdminEntry from '@/components/AdminEntry.vue';
 
@@ -29,7 +29,7 @@ const routes: RouteRecordRaw[] = [
             { path: 'TagsMng', component: () => import('@/components/AdminEntry/TagsMng.vue') },
             { path: 'DbInfo', component: () => import('@/components/AdminEntry/DbInfo.vue') },
             { path: 'OtherMisc', component: () => import('@/components/AdminEntry/OtherMisc.vue') },
-            { path: 'PrjSet', component: () => import('@/components/SetEntry.vue') },
+            { path: 'PrjSet', component: () => import('@/components/AdminEntry/SetEntry.vue') },
         ]
     }
 ]

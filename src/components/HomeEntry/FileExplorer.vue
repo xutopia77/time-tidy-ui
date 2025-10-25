@@ -184,7 +184,7 @@ onUnmounted(() => {
 }
 
 .file-content {
-    height: calc(100% - 32px - 32px - 20px);
+    height: calc(100% - 32px - 32px);
 }
 
 .file-grid {

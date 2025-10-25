@@ -606,11 +606,11 @@ class Utils {
         const response = await axios.post(`${appStore.srvPrefix}/api/v1/project_set`, JSON.stringify(req))
         const resp: DatTypes.Resp<DatTypes.PrjSetResp> = response.data
         if (resp.code != 0) {
-            Utils.message_notify({ content: resp.status, type: "error" })
+            Utils.addToast(resp.status, "error")
             return
         }
         if (resp.doing) {
-            Utils.message_notify({ content: "设置中", type: "warning" })
+            Utils.addToast("设置中", "info")
         }
         else {
             Utils.message_notify({ content: "设置完成", type: "success" })

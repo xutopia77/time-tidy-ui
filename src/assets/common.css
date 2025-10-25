@@ -33,6 +33,7 @@
 .xc-button:hover {
     outline: none;
     border: var(--xc-border-hover);
+    background-color: var(--xc-background-color-hover);
 }
 
 .xc-button:disabled {

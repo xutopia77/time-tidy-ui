@@ -32,8 +32,8 @@
                 <option value="level9">level9</option>
                 <option value="level10">level10</option>
             </select>
-            <button @click="btnclk_operate_file('files_move')" class="xc-button op-button">移动</button>
-            <button @click="btnclk_operate_file('files_cpy')" class="xc-button op-button">复制</button>
+            <button @click="btnclk_operate_file" class="xc-button op-button">移动</button>
+            <button @click="btnclk_operate_file" class="xc-button op-button">复制</button>
             <button @click="btnclk_delete_file" class="xc-button op-button">删除</button>
         </div>
     </div>
@@ -106,9 +106,8 @@ const footerInfo = computed(() => {
 })
 
 // ------
-function btnclk_operate_file(op: string) {
-    appStore.setOperateType = op
-    Utils.page_show({ page: 'set', bShow: true })
+function btnclk_operate_file() {
+    appStore.bPageFileTransfer = true
 }
 
 function btnclk_delete_file() {
@@ -128,7 +127,7 @@ function btnclk_delete_file() {
         }
     }
     if (req.fileIds.length == 0 && req.dirIds.length == 0) {
-        Utils.message_notify({ content: '请选择要操作的文件' })
+        Utils.addToast('请选择要操作的文件')
         return;
     }
     Utils.files_delete(req)
@@ -142,7 +141,7 @@ function btnclk_set_file_level() {
         tagName: ''
     };
     if (sltLevel.value == '') {
-        Utils.message_notify({ content: '请选择要设置的等级' })
+        Utils.addToast('请选择要设置的等级')
     }
     req.tagName = sltLevel.value
     Utils.files_tag_set(req)

@@ -10,7 +10,7 @@
         }">
             {{ tag.name }}
             <button @click="btn_removeTag(tag)" class="delete-btn">
-                <XIcon width="12" height="12" />
+                X
             </button>
         </div>
     </div>
@@ -23,7 +23,6 @@ const appStore = useAppStore()
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import '@/assets/common.css';
-import { XIcon } from '@/components/Icon'
 // 新标签输入值
 const newTag = ref('');
 
