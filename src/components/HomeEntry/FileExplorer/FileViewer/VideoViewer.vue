@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAppStore } from '@/stores/AppStore'
-import Utils from '@/utils/utils'
+// import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef';
 const appStore = useAppStore()
 
@@ -38,7 +38,7 @@ const imageList = computed(() => appStore.curFiles.filter(file => {
 
 const close = () => {
     isVisible.value = false
-    Utils.page_show({ page: 'imageView', bShow: false })
+    appStore.bPageImgView = false
     // 停止视频播放并重置进度
     if (videoRef.value) {
         videoRef.value.pause()
@@ -56,7 +56,7 @@ const currentIndex = computed(() => {
 const currentImage = computed(() => imageList.value[currentIndex.value])
 
 const currentImageUrl = computed(() => {
-    if (appStore.pageCtrl.imageView.bShow == false) {
+    if (appStore.bPageImgView == false) {
         return '';
     }
     const img = imageList.value[currentIndex.value]

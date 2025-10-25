@@ -134,8 +134,6 @@ export class AppPageCtrlItem {
 }
 
 export class AppPageCtrl {
-    message: AppPageCtrlItem = { idx: 1, bShow: true }
-    imageView: AppPageCtrlItem = { idx: 1, bShow: false }
     set: AppPageCtrlItem = { idx: 1, bShow: false }
     home: AppPageCtrlItem = { idx: 1, bShow: true }
 };
@@ -161,14 +159,7 @@ export class FileSearchCondition {
 export class MessageReq {
     content: string = "";
     duration?: number = 0;
-    type?: string = "";//success, error, info, warning
-}
-
-export class Message {
-    content: string = "";
-    durationMs: number = 0;
-    type: string = "";//success, error, info, warning
-    startTime: number = 0;
+    type: MessageShowType = "success";//success, error, info, warning
 }
 
 

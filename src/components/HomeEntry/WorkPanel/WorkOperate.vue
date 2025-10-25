@@ -36,7 +36,7 @@ function btnclk_delete_file() {
         }
     }
     if (req.fileIds.length == 0 && req.dirIds.length == 0) {
-        Utils.message_notify({ content: '请选择要操作的文件' })
+        Utils.message_notify({ content: '请选择要操作的文件', type: 'success' })
         return;
     }
     Utils.files_delete(req)

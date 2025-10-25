@@ -64,14 +64,14 @@ const btnclk_handleClickImage = () => {
     if (appStore.envMode == DatType.EnvModeType.pro) {
         if (appStore.platform != DatType.PlatformType.electron) {
             if (props.item.type != DatType.FileType.image) {
-                Utils.message_notify({ content: ` 当前文件不是图片类型，无法查看` })
+                Utils.message_notify({ content: ` 当前文件不是图片类型，无法查看`, type: 'success' })
                 return;
             }
         }
     }
     console.log('click image', props.item);
     appStore.curSltFile = props.item;
-    Utils.page_show({ page: 'imageView', bShow: true })
+    appStore.bPageImgView = true
 };
 
 const btnclk_handleClickItemMsg = () => {

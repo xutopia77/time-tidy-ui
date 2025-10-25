@@ -254,7 +254,7 @@ function tags_get() {
             console.log('tag info:', response.data);
             const resp = response.data;
             if (resp.code != 0) {
-                Utils.message_notify({ content: `获取标签失败:${resp.status}` })
+                Utils.message_notify({ content: `获取标签失败:${resp.status}`, type: 'success' })
                 return;
             }
             // const tagsColors = ["#6577bf", "#e8cb95", "#e4775e", "#c9cde7", "#34ce72", "#d3adf7", "#4ac0f2"]
@@ -265,10 +265,7 @@ function tags_get() {
                 }
                 const tagItem = new DatTypes.TagItem();
                 tagItem.name = item.TagName;
-
                 tagItem.color = item.Color == '' ? tagItem.color : item.Color;
-
-
                 tagItem.id = item.ID;
                 appStore.allTags.push(tagItem);
             }
@@ -285,11 +282,11 @@ function tags_set(tag: DatTypes.TagItem) {
             console.log('tag info:', response.data);
             const resp = response.data;
             if (resp.code != 0) {
-                Utils.message_notify({ content: `获取标签失败:${resp.status}` })
+                Utils.message_notify({ content: `获取标签失败:${resp.status}`, type: 'success' })
                 return;
             }
             Utils.tags_get()
-            Utils.message_notify({ content: `标签设置成功` })
+            Utils.message_notify({ content: `标签设置成功`, type: 'success' })
         })
         .catch((error) => {
             console.error('Error fetching project info:', error);
@@ -312,7 +309,7 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
             switch (resp.code) {
                 case DatTypes.Code.Success: {
                     Utils.files_get(null);
-                    Utils.message_notify({ content: `文件操作成功` })
+                    Utils.message_notify({ content: `文件操作成功`, type: 'success' })
                     break;
                 }
                 case DatTypes.Code.NeedSure: {
@@ -328,11 +325,11 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
                             }
                         }
                     }
-                    Utils.message_notify({ content: `文件操作需要确认` })
+                    Utils.message_notify({ content: `文件操作需要确认`, type: 'success' })
                     break;
                 }
                 case DatTypes.Code.FileAlreadyExist: {
-                    Utils.message_notify({ content: `文件已存在` })
+                    Utils.message_notify({ content: `文件已存在`, type: 'success' })
                     break;
                 }
                 default: {
@@ -345,7 +342,7 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
             console.error('Error fetching project info:', error);
             resp.code = -1;
             resp.status = error.message;
-            Utils.message_notify({ content: `文件操作失败\n${error.message}` })
+            Utils.message_notify({ content: `文件操作失败\n${error.message}`, type: 'success' })
         })
     console.log("=======12312312312======")
     return resp;
@@ -359,13 +356,13 @@ function files_delete(_req: DatTypes.FileDeleteReq): DatTypes.Resp {
             resp.code = response.data.code;
             resp.status = response.data.status;
             Utils.files_get(null);
-            Utils.message_notify({ content: `文件操作成功` })
+            Utils.message_notify({ content: `文件操作成功`, type: 'success' })
         })
         .catch((error) => {
             console.error('Error fetching project info:', error);
             resp.code = -1;
             resp.status = error.message;
-            Utils.message_notify({ content: `文件操作失败\n${error.message}` })
+            Utils.message_notify({ content: `文件操作失败\n${error.message}`, type: 'success' })
         })
     return resp;
 }
@@ -378,19 +375,19 @@ function project_health(): DatTypes.Resp {
             resp.code = response.data.code;
             resp.status = response.data.status;
             Utils.files_get(null);
-            Utils.message_notify({ content: `数据健康度检查成功` })
+            Utils.message_notify({ content: `数据健康度检查成功`, type: 'success' })
         })
         .catch((error) => {
             resp.code = -1;
             resp.status = error.message;
-            Utils.message_notify({ content: `数据健康度检查失败\n${error.message}` })
+            Utils.message_notify({ content: `数据健康度检查失败\n${error.message}`, type: 'success' })
         })
     return resp;
 }
 
 function page_show(_req: DatTypes.AppPageCtrlReq): DatTypes.Resp {
     const resp = new DatTypes.Resp()
-    const validPages = ['home', 'set', 'imageView', 'message'];
+    const validPages = ['home', 'set', 'message'];
 
     if (validPages.includes(_req.page)) {
         const pageItemInit = appStore.pageCtrlInit[_req.page as keyof typeof appStore.pageCtrl];
@@ -512,7 +509,7 @@ async function tag_delete(_req: DatTypes.TagItem): Promise<DatTypes.Resp> {
                 // appStore.prj = resp.data;
                 // console.log('Project info:', appStore.prj);
                 console.log('dictionary info:', resp.data);
-                Utils.message_notify({ content: `删除标签成功` })
+                Utils.message_notify({ content: `删除标签成功`, type: 'success' })
             }
             Utils.tags_get()
             Utils.files_get(null)
@@ -535,22 +532,10 @@ class Utils {
     static dir_slt_update = dir_slt_update;
 
     static message_notify(_req: DatTypes.MessageReq) {
-        let typeStr: 'success' | 'error' | 'warning' | 'info' = "success"
-        switch (_req.type) {
-            case 'success': {
-                typeStr = 'success'
-                break;
-            }
-            case 'error': {
-                typeStr = 'error'
-                break;
-            }
-            case 'warning': { typeStr = 'warning'; break; }
-        }
-        Utils.addToast(_req.content, typeStr)
+        Utils.addToast(_req.content, _req.type)
     }
 
-    static addToast(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') {
+    static addToast(message: string, type: DatTypes.MessageShowType = 'info') {
         const id = Date.now()
         const timestamp = Date.now()
         const toast = { id, message, type, timestamp }
@@ -736,7 +721,7 @@ class Utils {
                     return resp
                 }
                 this.cancle_file_checked()
-                Utils.message_notify({ content: `文件操作成功` })
+                Utils.message_notify({ content: `文件操作成功`, type: 'success' })
                 Utils.tags_get()
                 Utils.files_get(null);
             })
@@ -787,7 +772,7 @@ class Utils {
                     return resp
                 }
                 this.cancle_file_checked()
-                Utils.message_notify({ content: `文件操作成功` })
+                Utils.message_notify({ content: `文件操作成功`, type: 'success' })
                 Utils.files_get(null);
             })
             .catch((error) => {
@@ -818,7 +803,7 @@ class Utils {
                     Utils.message_notify({ content: `文件操作中`, type: "warning" })
                 }
                 else {
-                    Utils.message_notify({ content: `文件操作成功` })
+                    Utils.message_notify({ content: `文件操作成功`, type: 'success' })
                 }
             })
             .catch((error) => {
@@ -845,7 +830,7 @@ class Utils {
                     Utils.message_notify({ content: `文件操作中`, type: "warning" })
                 }
                 else {
-                    Utils.message_notify({ content: `文件操作成功` })
+                    Utils.message_notify({ content: `文件操作成功`, type: 'success' })
                 }
                 return resp
             })
@@ -901,7 +886,7 @@ class Utils {
                     if (cmdResp.data?.prj != null) {
                         appStore.prj = cmdResp.data?.prj
                     }
-                    Utils.message_notify({ content: `设置完成:${cmdResp.status}` })
+                    Utils.message_notify({ content: `设置完成:${cmdResp.status}`, type: 'success' })
                 }
             }
         }

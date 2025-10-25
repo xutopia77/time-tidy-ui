@@ -1,10 +1,10 @@
 <template>
     <div class="app-entry">
-        <div class="home-entry" v-show="pageCtrl.home.bShow" :style="{ zIndex: pageCtrl.home.idx }">
+        <div class="home-entry">
             <HeaderPanel class="header-panel-section" />
             <router-view class="page-view" />
         </div>
-        <div class='image-view' v-show="pageCtrl.imageView.bShow" :style="{ zIndex: pageCtrl.imageView.idx }">
+        <div class='image-view' v-if="appStore.bPageImgView" style="z-index: 100;">
             <FileViewer />
         </div>
 
@@ -39,9 +39,6 @@ import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 
-const pageCtrl = computed(() => {
-    return appStore.pageCtrl
-})
 
 const bPageSearchSetting = computed(() => { return appStore.bPageSearchSetting })
 const bPageFileTransfer = computed(() => { return appStore.bPageFileTransfer })
@@ -81,7 +78,6 @@ onBeforeMount(() => {
 let timerId = 0
 
 onMounted(() => {
-    Utils.page_show({ page: 'message', bShow: true })
     timerId = window.setInterval(Utils.heartbeat, 1000);
 })
 
@@ -113,10 +109,6 @@ onUnmounted(() => {
     left: 0;
     width: 100%;
     height: 100%;
-}
-
-.message-show {
-    pointer-events: none;
 }
 
 .home-entry {

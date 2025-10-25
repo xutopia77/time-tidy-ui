@@ -78,12 +78,12 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
 
     const bNeedSure = fileMoveReq?.bNeedSure ?? true;
     if (selectedPathItem.value == null) {
-        Utils.message_notify({ content: '请选择目标路径' })
+        Utils.message_notify({ content: '请选择目标路径', type: 'success' })
         return { ...respOp, code: DatType.Code.Err };
     }
     const selectedPath = selectedPathItem.value?.path;
     if (!selectedPath) {
-        Utils.message_notify({ content: '请选择目标路径' })
+        Utils.message_notify({ content: '请选择目标路径', type: 'success' })
         return { ...respOp, code: DatType.Code.Err };
     }
     const req: DatType.FilePathChgReq = {
@@ -126,7 +126,7 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
             const srcDir = item.path;
             const distDir = selectedPathItem.value?.path;
             if (distDir.startsWith(srcDir)) {
-                Utils.message_notify({ content: '不能选择子目录' })
+                Utils.message_notify({ content: '不能选择子目录', type: 'success' })
                 return { ...respOp, code: DatType.Code.Err };
             }
             req.dirIds.push(item.id)
@@ -134,11 +134,11 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
         }
     }
     if (req.fileIds.length == 0 && req.dirIds.length == 0) {
-        Utils.message_notify({ content: '请选择要操作的文件' })
+        Utils.message_notify({ content: '请选择要操作的文件', type: 'success' })
         return { ...respOp, code: DatType.Code.Err };
     }
     if (setOperateType.value == '') {
-        Utils.message_notify({ content: '请选择操作类型' })
+        Utils.message_notify({ content: '请选择操作类型', type: 'success' })
         return { ...respOp, code: DatType.Code.Err };
     }
     else {
@@ -171,7 +171,7 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
         default: {
             isDialogVisibleFileExist.value = false;
             sureDialogContentFileExist.value = ``
-            Utils.message_notify({ content: `文件操作失败: ${resp.status} ` })
+            Utils.message_notify({ content: `文件操作失败: ${resp.status} `, type: 'success' })
         }
     }
     return respOp;
@@ -189,7 +189,7 @@ async function btnclk_sureDialog_confirm(bSure: boolean) {
         console.log(resp)
     }
     else {
-        Utils.message_notify({ content: '操作已取消' })
+        Utils.message_notify({ content: '操作已取消', type: 'success' })
     }
     isSureDialogVisible.value = false;
 }
@@ -203,7 +203,7 @@ async function btnclk_fileExistDialog_confirm(bSure: boolean) {
         await confirmMove({ bNeedSure: false, bAllFileCover: true })
     }
     else {
-        Utils.message_notify({ content: '操作已取消' })
+        Utils.message_notify({ content: '操作已取消', type: 'success' })
         isDialogVisibleFileExist.value = false;
     }
 }

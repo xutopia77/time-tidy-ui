@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAppStore } from '@/stores/AppStore'
-import Utils from '@/utils/utils'
+// import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef';
 const appStore = useAppStore()
 
@@ -97,7 +97,7 @@ const resetImageState = () => {
 // 关闭图片预览
 const close = () => {
     isVisible.value = false
-    Utils.page_show({ page: 'imageView', bShow: false })
+    appStore.bPageImgView = false
     resetImageState() // 重置图片状态
 }
 

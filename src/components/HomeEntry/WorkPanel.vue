@@ -2,6 +2,7 @@
     <div class="work-panel xc-scrollbar">
         <div>
             <button @click="btn_show_resent_msg()" class="xc-button op-button">查看最近消息</button>
+            {{ statusEmoji }}
         </div>
         <!-- 文件基础信息折叠面板 -->
         <div class="collapse-panel">
@@ -52,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import WorkTag from '@/components/HomeEntry/WorkPanel/WorkTag.vue';
 import WorkOperate from '@/components/HomeEntry/WorkPanel/WorkOperate.vue';
 import WorkInfo from '@/components/HomeEntry/WorkPanel/WorkInfo.vue';
@@ -89,6 +90,19 @@ const togglePanel = (panelName: PanelName) => {
 const isPanelOpen = (panelName: PanelName) => {
     return panelStates.value[panelName];
 };
+
+let bBusy = false
+const statusEmoji = ref<string>('🚶‍♂️')
+function status_heartbeat() {
+    bBusy = !bBusy
+    statusEmoji.value = bBusy ? '🏃🏻‍♂️' : '🚶‍♂️'
+    // console.log(Date.now(), statusEmoji.value)
+}
+
+onMounted(() => {
+    window.setInterval(status_heartbeat, 600);
+})
+
 </script>
 
 <style scoped>

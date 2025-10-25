@@ -3,10 +3,8 @@ import { defineStore } from 'pinia'
 import * as DataTypes from '@/utils/dataTypedef'
 
 const pageCtrlInit: DataTypes.AppPageCtrl = {
-    imageView: { idx: 48, bShow: false },
     set: { idx: 49, bShow: false },
     home: { idx: 50, bShow: true },
-    message: { idx: 51, bShow: false },
 };
 
 // const fileSearchConditionInit: DataTypes.FileSearchCondition = {
@@ -40,7 +38,6 @@ export type AppStore = {
     srvPrefix: string,                          // 服务器前缀
     logInfo: string,                            // 日志信息
 
-    messageNotify: DataTypes.Message[],         // 消息通知
     // 当前显示的消息数组（用于自动消失的消息）
     toasts: ToastMessage[],
     historyToasts: ToastMessage[],
@@ -50,7 +47,8 @@ export type AppStore = {
     bPageSearchSetting: boolean,                // 打开界面 搜索设置
     bPageFileTransfer: boolean,                 // 打开界面 文件传输
     bPageSet: boolean,                          // 打开界面 设置
-    bPageResentMsg: boolean,                          // 打开界面 最近消息
+    bPageResentMsg: boolean,                    // 打开界面 最近消息
+    bPageImgView: boolean,                      // 打开界面 图片预览
     fileShowType: DataTypes.FileShowType,       // 文件展示目录，目录的类型
     fileSililarity: DataTypes.FileCatalog[],    // 文件相似目录
     // 
@@ -80,7 +78,6 @@ export const useAppStore = defineStore('app', {
         // srvPrefix: '', // release
         logInfo: '', // 日志信息
         prj: new DataTypes.Prj(),
-        messageNotify: [], // 消息通知
         toasts: [],
         historyToasts: [],
         // 
@@ -90,6 +87,7 @@ export const useAppStore = defineStore('app', {
         bPageFileTransfer: false,
         bPageSet: false,
         bPageResentMsg: false,
+        bPageImgView: false,
         fileShowType: "",
         fileSililarity: [],
         // 
