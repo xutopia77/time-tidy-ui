@@ -624,7 +624,7 @@ class Utils {
         return path.replace(/\\/g, '/');
     }
     static dictionary_get = dictionary_get;
-    static async files_get(_req: DatTypes.FilesGetReq | null) {
+    static async files_get(_req: DatTypes.FilesGetReq | null = null) {
         const req: DatTypes.FilesGetReq = {
             pageSize: appStore.searchCon.pageSize,
             page: appStore.searchCon.page - 1,
@@ -887,6 +887,9 @@ class Utils {
                         appStore.prj = cmdResp.data?.prj
                     }
                     Utils.message_notify({ content: `设置完成:${cmdResp.status}`, type: 'success' })
+                    if (cmdResp.data?.bNeedGetFiles == true) {
+                        await Utils.files_get()
+                    }
                 }
             }
         }

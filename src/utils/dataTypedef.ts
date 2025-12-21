@@ -219,6 +219,7 @@ export class PrjSetReq {
 
 export class PrjSetResp {
     prj: Prj = new Prj();
+    bNeedGetFiles = false;
 }
 
 export class TaskInfo<T = string> {

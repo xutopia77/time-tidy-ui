@@ -166,7 +166,6 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
         }
     }
 
-
     for (const repo of repoPath.value) {
         repo.path = Utils.convertToLinuxPath(repo.path)
     }
