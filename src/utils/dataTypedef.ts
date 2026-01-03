@@ -92,8 +92,13 @@ export class TagItem {
 }
 
 export class FileItemTag {
+    id: number = 0;
     name: string = "";
     color: string = "#e6475e";
+    type: string = "";
+    description: string = "";
+    createdAt: string = "";
+    updatedAt: string = "";
 }
 
 export class File {

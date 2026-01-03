@@ -54,27 +54,29 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
     const convert_json_str_to_file = (jRecordStr: string): DatTypes.File | null => {
         const fileItem = new DatTypes.File();
         const jRecord = JSON.parse(jRecordStr);
-        const fileType = DatTypes.stringToFileType(jRecord.Type);
+        const fileType = DatTypes.stringToFileType(jRecord.type);
         if (fileType == null) {
-            console.warn(`Unknown file type: ${jRecord.Type}, skipping file ${jRecord.FileName}`);
+            console.warn(`Unknown file type: ${jRecord.type}, skipping file ${jRecord.name}`);
             return null;
         }
 
-        fileItem.id = jRecord.ID;
-        fileItem.rootPathId = jRecord.RootPathID;
-        fileItem.name = jRecord.FileName;
-        fileItem.path = jRecord.Path;
-        fileItem.fullpath = jRecord.fullPath;
-        fileItem.size = jRecord.Size;
-        fileItem.time = jRecord.CreateTime
+        fileItem.id = jRecord.id;
+        fileItem.rootPathId = jRecord.root_path_id;
+        fileItem.name = jRecord.name;
+        fileItem.path = jRecord.path;
+        fileItem.fullpath = jRecord.full_path;
+        fileItem.size = jRecord.size;
+        fileItem.time = jRecord.create_time
         fileItem.type = fileType;
-        fileItem.uniqueHash = jRecord.UniqueHash;
+        fileItem.uniqueHash = jRecord.unique_hash;
         fileItem.icon = appStore.srvPrefix + "/static_thumb/" + fileItem.id + "_thumbnail.jpg";
-        if (jRecord.Tags != null) {
-            for (const x of jRecord.Tags) {
+        if (jRecord.tags != null) {
+            for (const x of jRecord.tags) {
                 const tag = new DatTypes.FileItemTag();
-                tag.name = x.name
-                tag.color = x.color == '' ? tag.color : x.color
+                tag.name = x.Name
+                tag.color = x.Color == '' ? tag.color : x.Color
+                tag.type = x.Type == '' ? tag.type : x.Type
+                tag.description = x.Description == '' ? tag.description : x.Description
                 if (tag.name == '') {
                     continue;
                 }
@@ -126,7 +128,7 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
                     }
                     const itemPath = "/" + jRecord.Path;
                     const dirItem = new DatTypes.DirItem();
-                    dirItem.id = jRecord.ID;
+                    dirItem.id = jRecord.Id;
                     dirItem.rootPathId = jRecord.RootPathId;
                     dirItem.name = jRecord.Path;
                     dirItem.icon = '/assets/images/folders.svg'
@@ -264,7 +266,7 @@ function tags_get() {
                     continue;
                 }
                 const tagItem = new DatTypes.TagItem();
-                tagItem.name = item.TagName;
+                tagItem.name = item.Name;
                 tagItem.color = item.Color == '' ? tagItem.color : item.Color;
                 tagItem.id = item.ID;
                 appStore.allTags.push(tagItem);

@@ -1,46 +1,66 @@
 <template>
     <div class="set-entry">
         <div class="set-options">
-            <label class="xc-label">项目路径:</label>
-            <input type="text" v-model="prjPath" placeholder="输入项目路径" class="xc-input-text text-base-path" />
-            <br>
-            <label class="xc-label">仓库:</label>
-            <input type="text" v-model="repoPath[0].path" placeholder="输入仓库路径" class="xc-input-text text-base-path" />
-            <!-- <br>
-            <label class="xc-label">仓库2:</label>
-            <input type="text" v-model="repoPath[1].path" placeholder="输入仓库路径" class="xc-input-text text-base-path" />
-            <br>
-            <label class="xc-label">仓库3:</label>
-            <input type="text" v-model="repoPath[2].path" placeholder="输入仓库路径" class="xc-input-text text-base-path" /> -->
-            <br>
-            <button title="创建项目" @click="btnclk_set([DatType.PrjSetType.Create])" class="xc-button">创建项目</button>
-            <button title="打开项目" @click="btnclk_set([DatType.PrjSetType.Open])" class="xc-button">打开项目</button>
-            <br>
-            <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSave" />
-            <label class="xc-label">保存项目信息</label>
-            <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSync" />
-            <label class="xc-label">同步仓库文件信息</label>
-            <input type="checkbox" class="xc-checkbox" v-model="bPrjSetGenThumb" />
-            <label class="xc-label">生成缩略图</label>
-            <input type="checkbox" class="xc-checkbox" v-model="bPrjSetScanExif" />
-            <label class="xc-label">提取元信息</label>
-            <input type="checkbox" class="xc-checkbox" v-model="bPrjSetGenHash" />
-            <label class="xc-label">生成摘要</label>
+            <div class="settings-group">
+                <div class="form-item">
+                    <label class="xc-label">项目路径:</label>
+                    <input type="text" v-model="prjPath" placeholder="输入项目路径" class="xc-input-text text-base-path" />
+                </div>
+                <div class="form-item">
+                    <label class="xc-label">仓库路径:</label>
+                    <input type="text" v-model="repoPath[0].path" placeholder="输入仓库路径"
+                        class="xc-input-text text-base-path" />
+                </div>
+                <div class="button-group">
+                    <button title="创建项目" @click="btnclk_set([DatType.PrjSetType.Create])"
+                        class="xc-button">创建项目</button>
+                    <button title="打开项目" @click="btnclk_set([DatType.PrjSetType.Open])" class="xc-button">打开项目</button>
+                </div>
+            </div>
 
-            <button title="同步项目下的文件信息" @click="btnclk_set()" class="xc-button">同步项目</button>
-            <br>
-            <button title="数据检查" @click="btnclk_detect_health()" class="xc-button">数据检查</button>
-            <button title="清理日志" @click="btnclk_clean_log" class="xc-button">清空日志</button>
+            <div class="settings-group">
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSave" id="save-option" />
+                        <label class="xc-label" for="save-option">保存项目信息</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSync" id="sync-option" />
+                        <label class="xc-label" for="sync-option">同步仓库文件信息</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" class="xc-checkbox" v-model="bPrjSetGenThumb" id="thumb-option" />
+                        <label class="xc-label" for="thumb-option">生成缩略图</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" class="xc-checkbox" v-model="bPrjSetScanExif" id="exif-option" />
+                        <label class="xc-label" for="exif-option">提取元信息</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" class="xc-checkbox" v-model="bPrjSetGenHash" id="hash-option" />
+                        <label class="xc-label" for="hash-option">生成摘要</label>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button title="同步项目下的文件信息" @click="btnclk_set()" class="xc-button">同步项目</button>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="button-group">
+                    <button title="数据检查" @click="btnclk_detect_health()" class="xc-button">数据检查</button>
+                    <button title="清理日志" @click="btnclk_clean_log" class="xc-button">清空日志</button>
+                    <button title="更新全部文件的缩略图" @click="console.log('not do yet')" class="xc-button">更新缩略图</button>
+                    <button title="更新全部文件的指纹信息" @click="console.log('not do yet')" class="xc-button">更新指纹</button>
+                </div>
+            </div>
         </div>
         <div class="set-log">
             <SetEntryLog />
         </div>
-        <!-- <div>
-            <pre>{{ appStore.heartbeat.status }}
-            </pre>
-        </div> -->
     </div>
 </template>
+
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
@@ -220,7 +240,9 @@ onMounted(() => {
     width: 60%;
     height: 100%;
     margin: 0;
-    padding: 0;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: var(--xc-background-color);
 }
 
 .set-log {
@@ -230,7 +252,50 @@ onMounted(() => {
     padding: 0;
 }
 
+.settings-group {
+    margin-bottom: 25px;
+    padding: 15px;
+    /* border: 1px solid #e0e0e0; */
+    border-radius: 8px;
+    background-color: var(--xc-background-color-hover);
+}
+
+.form-item {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.form-item .xc-label {
+    width: 100px;
+    margin-right: 10px;
+    text-align: right;
+}
+
 .text-base-path {
-    width: calc(80% - 60px);
+    width: calc(100% - 110px);
+}
+
+.checkbox-group {
+    margin: 15px 0;
+    display: flex;
+}
+
+.checkbox-item {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-item {
+    margin-left: 8px;
+    margin-bottom: 0;
+}
+
+.button-group {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 </style>

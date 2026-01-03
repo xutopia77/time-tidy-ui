@@ -1,6 +1,8 @@
 :root {
-    --xc-background-color: #13131a;
-    --xc-background-color-hover: #25262e;
+    --xc-background-color: #161823;
+    --xc-background-color-hover: #363741;
+    --xc-group-color: #252632;
+
     --xc-border: 1px solid #2a2c3a;
     --xc-border-hover: 1px solid #44465a;
     --xc-text-color: #c2cad1;
