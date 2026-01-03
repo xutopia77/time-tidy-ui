@@ -28,17 +28,29 @@
                         <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSync" id="sync-option" />
                         <label class="xc-label" for="sync-option">同步仓库文件信息</label>
                     </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" class="xc-checkbox" v-model="bPrjSetGenThumb" id="thumb-option" />
-                        <label class="xc-label" for="thumb-option">生成缩略图</label>
+                    <div class="form-item select-item">
+                        <label class="xc-label">缩略图选项:</label>
+                        <select v-model="selectedThumbOption" class="xc-select">
+                            <option value="none">不生成缩略图</option>
+                            <option value="full">生成缩略图(全量)</option>
+                            <option value="incremental">生成缩略图(增量)</option>
+                        </select>
                     </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" class="xc-checkbox" v-model="bPrjSetScanExif" id="exif-option" />
-                        <label class="xc-label" for="exif-option">提取元信息</label>
+                    <div class="form-item select-item">
+                        <label class="xc-label">元信息选项:</label>
+                        <select v-model="selectedExifOption" class="xc-select">
+                            <option value="none">不提取元信息</option>
+                            <option value="full">提取元信息(全量)</option>
+                            <option value="incremental">提取元信息(增量)</option>
+                        </select>
                     </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" class="xc-checkbox" v-model="bPrjSetGenHash" id="hash-option" />
-                        <label class="xc-label" for="hash-option">生成摘要</label>
+                    <div class="form-item select-item">
+                        <label class="xc-label">指纹选项:</label>
+                        <select v-model="selectedHashOption" class="xc-select">
+                            <option value="none">不生成指纹</option>
+                            <option value="full">生成指纹(全量)</option>
+                            <option value="incremental">生成指纹(增量)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="button-group">
@@ -50,8 +62,6 @@
                 <div class="button-group">
                     <button title="数据检查" @click="btnclk_detect_health()" class="xc-button">数据检查</button>
                     <button title="清理日志" @click="btnclk_clean_log" class="xc-button">清空日志</button>
-                    <button title="更新全部文件的缩略图" @click="console.log('not do yet')" class="xc-button">更新缩略图</button>
-                    <button title="更新全部文件的指纹信息" @click="console.log('not do yet')" class="xc-button">更新指纹</button>
                 </div>
             </div>
         </div>
@@ -95,9 +105,12 @@ watch(() => appStore.prj.repo, () => {
 })
 
 // ------------------------------------
-const bPrjSetGenThumb = ref(false)
-const bPrjSetScanExif = ref(false)
-const bPrjSetGenHash = ref(false)
+// 缩略图选项：'none' - 不生成, 'full' - 全量, 'incremental' - 增量
+const selectedThumbOption = ref('none')
+// 元信息选项：'none' - 不提取, 'full' - 全量, 'incremental' - 增量
+const selectedExifOption = ref('none')
+// 指纹选项：'none' - 不生成, 'full' - 全量, 'incremental' - 增量
+const selectedHashOption = ref('none')
 const bPrjSetSave = ref(true)
 const bPrjSetSync = ref(false)
 
@@ -206,9 +219,24 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
     else {
         if (bPrjSetSave.value) { req.type.push(DatType.PrjSetType.Save) }
         if (bPrjSetSync.value) { req.type.push(DatType.PrjSetType.Sync) }
-        if (bPrjSetGenThumb.value) { req.type.push(DatType.PrjSetType.GenThumb) }
-        if (bPrjSetScanExif.value) { req.type.push(DatType.PrjSetType.ScanExif) }
-        if (bPrjSetGenHash.value) { req.type.push(DatType.PrjSetType.GenHash) }
+        if (selectedThumbOption.value == 'full') {
+            req.type.push(DatType.PrjSetType.GenThumbFull)
+        }
+        else if (selectedThumbOption.value == 'incremental') {
+            req.type.push(DatType.PrjSetType.GenThumbIncre)
+        }
+        if (selectedExifOption.value == 'full') {
+            req.type.push(DatType.PrjSetType.ScanExifFull)
+        }
+        else if (selectedExifOption.value == 'incremental') {
+            req.type.push(DatType.PrjSetType.ScanExifIncre)
+        }
+        if (selectedHashOption.value == 'full') {
+            req.type.push(DatType.PrjSetType.GenHashFull)
+        }
+        else if (selectedHashOption.value == 'incremental') {
+            req.type.push(DatType.PrjSetType.GenHashIncre)
+        }
         req.prj.path = Utils.convertToLinuxPath(prjPath.value)
         for (const repo of repoPath.value) {
             if (repo.path != '') { req.prj.repo.push(repo) }
@@ -279,6 +307,7 @@ onMounted(() => {
 .checkbox-group {
     margin: 15px 0;
     display: flex;
+    flex-direction: column;
 }
 
 .checkbox-item {
@@ -297,5 +326,11 @@ onMounted(() => {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.select-item {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
 }
 </style>

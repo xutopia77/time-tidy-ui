@@ -195,13 +195,16 @@ export class FilesTagSetReq {
 
 
 export enum PrjSetType {
-    Create = 1,
-    Open = 2,
-    Save = 3,
-    Sync = 4,
-    GenThumb = 5,
-    ScanExif = 6,
-    GenHash = 7
+    Create = "create",
+    Open = "open",
+    Save = "save",
+    Sync = "sync",
+    GenThumbFull = "genThumbFull",
+    GenThumbIncre = "genThumbIncre", // incremental
+    ScanExifFull = "scanExifFull",
+    ScanExifIncre = "scanExifIncre", // incremental
+    GenHashFull = "genHashFull",
+    GenHashIncre = "genHashIncre", // incremental
 }
 
 export class Repo {
