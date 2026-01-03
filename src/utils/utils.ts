@@ -69,7 +69,16 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
         fileItem.time = jRecord.create_time
         fileItem.type = fileType;
         fileItem.uniqueHash = jRecord.unique_hash;
-        fileItem.icon = appStore.srvPrefix + "/static_thumb/" + fileItem.id + "_thumbnail.jpg";
+        if (fileItem.type == DatTypes.FileType.audio) {
+            fileItem.icon = '/assets/images/audio-file.svg'
+        }
+        else if (fileItem.type == DatTypes.FileType.other) {
+            fileItem.icon = '/assets/images/file-question.svg'
+        }
+        else {
+            fileItem.icon = appStore.srvPrefix + "/static_thumb/" + fileItem.id + "_thumbnail.jpg";
+        }
+
         if (jRecord.tags != null) {
             for (const x of jRecord.tags) {
                 const tag = new DatTypes.FileItemTag();
