@@ -199,10 +199,13 @@ export enum PrjSetType {
     Open = "open",
     Save = "save",
     Sync = "sync",
+    GenThumbNone = "genThumbNone",
     GenThumbFull = "genThumbFull",
     GenThumbIncre = "genThumbIncre", // incremental
+    ScanExifNone = "scanExifNone",
     ScanExifFull = "scanExifFull",
     ScanExifIncre = "scanExifIncre", // incremental
+    GenHashNone = "genHashNone",
     GenHashFull = "genHashFull",
     GenHashIncre = "genHashIncre", // incremental
 }

@@ -157,7 +157,10 @@ const fileTags = computed(() => {
     if (bGetAllTag) {
         const uniqueTags: DatType.FileItemTag[] = [];
         for (const item of appStore.allTags) {
-            uniqueTags.push({ name: item.name, color: item.color });
+            const tmpTag = new DatType.FileItemTag();
+            tmpTag.name = item.name;
+            tmpTag.color = item.color;
+            uniqueTags.push(tmpTag);
         }
         return uniqueTags;
     }
@@ -189,7 +192,7 @@ const fileTags = computed(() => {
 
 // 保存设置到本地存储
 const btn_page_save = () => {
-    appStore.bPageSet = false
+    appStore.bPageSearchSetting = false
 }
 
 // 关闭设置界面
