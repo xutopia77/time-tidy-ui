@@ -45,7 +45,7 @@
                     <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag"
                         :class="{ selected: isTagSelected(tag) }" :style="{ backgroundColor: tag.color }"
                         @click="btnclk_tag(tag)">
-                        {{ tag.name }}
+                        {{ Utils.tagName2Display(tag.name) }}
                     </div>
                 </div>
             </div>

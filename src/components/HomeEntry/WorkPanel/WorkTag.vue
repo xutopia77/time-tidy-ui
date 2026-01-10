@@ -8,7 +8,7 @@
         <div v-for="(tag, index) in fileTags" :key="index" class="xc-tag" :style="{
             backgroundColor: tag.color
         }">
-            {{ tag.name }}
+            {{ Utils.tagName2Display(tag.name) }}
             <button @click="btn_removeTag(tag)" class="delete-btn">
                 X
             </button>
@@ -20,14 +20,14 @@
 import { ref, computed } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
+import * as DatType from '@/utils/dataTypedef';
 import '@/assets/common.css';
 // 新标签输入值
 const newTag = ref('');
 
 // 联想标签集合，这里假设从 appStore.allTags 获取
-const tagSuggestions = computed(() => appStore.allTags.map(tag => tag.name));
+const tagSuggestions = computed(() => appStore.allTags.map(tag => Utils.tagName2Display(tag.name)));
 
 const fileTags = computed(() => {
     const fSlt: DatType.File[] = [];

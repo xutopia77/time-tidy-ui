@@ -23,7 +23,7 @@
                 <div class="xc-card-tags">
                     <div v-for="(tag, index) in item.tags" :key="index" class="xc-tag" :style="{
                         backgroundColor: tag.color
-                    }">{{ tag.name }}</div>
+                    }">{{ Utils.tagName2Display(tag.name) }}</div>
                 </div>
             </div>
         </div>

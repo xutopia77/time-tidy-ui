@@ -6,7 +6,7 @@
                 :style="{ backgroundColor: item.color + '20', borderColor: item.color }">
                 <TagOne theme="outline" size="18" fill="currentColor" />
                 <div class="tag-info">
-                    <div class="tag-name">{{ transformTagName(item.name) }}</div>
+                    <div class="tag-name">{{ Utils.tagName2Display(item.name) }}</div>
                     <div class="tag-description" v-if="item.description">{{ item.description }}</div>
                 </div>
                 <div class="tag-actions">
@@ -68,22 +68,6 @@ const allTags = computed(() => {
 const selectedTagItem = ref<DatType.TagItem | null>(null);
 function selectTag(item: DatType.TagItem) {
     selectedTagItem.value = item;
-}
-
-// 添加标签名称转换函数
-function transformTagName(name: string): string {
-    // 检查是否是 sys_score1 到 sys_score10 的标签
-    const scoreMatch = name.match(/^sys_score(\d{1,2})$/);
-    if (scoreMatch) {
-        const score = parseInt(scoreMatch[1]);
-        // 确保分数在1-10范围内
-        if (score >= 1 && score <= 10) {
-            return `${score}☆`;
-        }
-    }
-
-    // 对于其他标签，可以保留原有的首字母大写或其他转换逻辑
-    return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 onBeforeMount(() => {

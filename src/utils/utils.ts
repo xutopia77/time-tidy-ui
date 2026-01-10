@@ -541,6 +541,19 @@ class Utils {
     static log_info_append = log_info_append
     static gen_size_str = gen_size_str;
     static dir_slt_update = dir_slt_update;
+    // 将标签名称转换为显示名称
+    static tagName2Display(name: string): string {
+        // 检查是否是 sys_score1 到 sys_score10 的标签
+        const scoreMatch = name.match(/^sys_score(\d{1,2})$/);
+        if (scoreMatch) {
+            const score = parseInt(scoreMatch[1]);
+            // 确保分数在1-10范围内
+            if (score >= 1 && score <= 10) {
+                return `${score}☆`;
+            }
+        }
+        return name;
+    }
 
     static message_notify(_req: DatTypes.MessageReq) {
         Utils.addToast(_req.content, _req.type)
