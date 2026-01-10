@@ -7,6 +7,7 @@
                 <TagOne theme="outline" size="18" fill="currentColor" />
                 <div class="tag-info">
                     <div class="tag-name">{{ transformTagName(item.name) }}</div>
+                    <div class="tag-description" v-if="item.description">{{ item.description }}</div>
                 </div>
                 <div class="tag-actions">
                     <button @click.stop="btn_showEditDialog(item)" class="xc-button xc-button-small">
@@ -36,6 +37,11 @@
                         <input id="tagColor" type="color" v-model="editingTag.color" />
                         <input type="text" v-model="editingTag.color" placeholder="#000000" maxlength="7" />
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="tagDescription">标签描述：</label>
+                    <textarea id="tagDescription" v-model="editingTag.description" placeholder="请输入标签描述"
+                        rows="3"></textarea>
                 </div>
                 <div class="dialog-actions">
                     <button @click="submitEdit" class="xc-button xc-button-primary">保存</button>
@@ -87,10 +93,11 @@ onBeforeMount(() => {
 // 控制编辑弹窗的显示与隐藏
 const isEditDialogVisible = ref(false);
 // 存储正在编辑的标签
-const editingTag = ref<DatType.TagItem>({ name: '', color: '', id: 0 });
+const editingTag = ref<DatType.TagItem>({ name: '', color: '#e6475e', id: 0, description: '' });
 
 // 显示编辑弹窗
 function btn_showEditDialog(item: DatType.TagItem) {
+    // 直接使用 item，因为 TagItem 类型已包含 description 字段
     editingTag.value = { ...item };
     isEditDialogVisible.value = true;
 }
@@ -102,6 +109,7 @@ function btn_deletetag(item: DatType.TagItem) {
 // 提交编辑
 function submitEdit() {
     try {
+        // 将编辑后的对象传递给后端
         Utils.tags_set(editingTag.value);
         isEditDialogVisible.value = false;
     } catch (error) {
@@ -137,10 +145,12 @@ function submitEdit() {
     border: 1.5px solid;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 120px;
-    max-width: 160px;
+    min-width: 100px;
+    max-width: 800px;
+    width: fit-content;
     position: relative;
     backdrop-filter: blur(10px);
+    box-sizing: border-box;
 }
 
 .tag-card:hover {
@@ -167,11 +177,22 @@ function submitEdit() {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    min-width: 0;
+    /* 使flex子项能够收缩 */
 }
 
 .tag-name {
     font-weight: 500;
     font-size: 13px;
+    color: var(--xc-text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tag-description {
+    font-size: 11px;
+    opacity: 0.7;
     color: var(--xc-text-color);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -284,6 +305,18 @@ function submitEdit() {
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 13px;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 6px 10px;
+    background-color: var(--xc-background-color);
+    color: var(--xc-text-color);
+    border: var(--xc-border);
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 13px;
+    resize: vertical;
 }
 
 .color-input-group {

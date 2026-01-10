@@ -89,6 +89,7 @@ export class TagItem {
     name = "";
     color = "#e6475e";
     id = 0;
+    description: string = "";
 }
 
 export class FileItemTag {
