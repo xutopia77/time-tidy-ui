@@ -21,16 +21,16 @@
         <div class="operate-contianer">
             <button @click="btnclk_set_file_level()" class="xc-button op-button">设置等级</button>
             <select v-model="sltLevel" class="xc-select pagination-slt">
-                <option value="level1">1☆</option>
-                <option value="level2">2☆</option>
-                <option value="level3">3☆</option>
-                <option value="level4">4☆</option>
-                <option value="level5">5☆</option>
-                <option value="level6">6☆</option>
-                <option value="level7">7☆</option>
-                <option value="level8">8☆</option>
-                <option value="level9">9☆</option>
-                <option value="level10">10☆</option>
+                <option value="sys_score1">1☆</option>
+                <option value="sys_score2">2☆</option>
+                <option value="sys_score3">3☆</option>
+                <option value="sys_score4">4☆</option>
+                <option value="sys_score5">5☆</option>
+                <option value="sys_score6">6☆</option>
+                <option value="sys_score7">7☆</option>
+                <option value="sys_score8">8☆</option>
+                <option value="sys_score9">9☆</option>
+                <option value="sys_score10">10☆</option>
             </select>
             <button @click="btnclk_operate_file" class="xc-button op-button">移动</button>
             <button @click="btnclk_operate_file" class="xc-button op-button">复制</button>
