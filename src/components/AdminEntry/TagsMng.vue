@@ -134,7 +134,7 @@ function submitEdit() {
     gap: 10px;
     align-content: flex-start;
     overflow-y: auto;
-    padding: 8px;
+    /* padding: 8px; */
 }
 
 .tag-card {

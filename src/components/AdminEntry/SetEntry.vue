@@ -268,7 +268,7 @@ onMounted(() => {
     width: 60%;
     height: 100%;
     margin: 0;
-    padding: 20px;
+    /* padding: 20px; */
     overflow-y: auto;
     background-color: var(--xc-background-color);
 }
