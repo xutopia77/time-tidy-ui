@@ -133,7 +133,7 @@ function btnclk_delete_file() {
     Utils.files_delete(req)
 }
 
-const sltLevel = ref("level3")
+const sltLevel = ref("sys_score3")
 
 function btnclk_set_file_level() {
     const req: DatType.FilesTagSetReq = {

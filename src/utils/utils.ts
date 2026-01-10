@@ -287,6 +287,12 @@ function tags_get() {
 }
 
 function tags_set(tag: DatTypes.TagItem) {
+    // 检查标签名称是否为 sys_score1 到 sys_score10
+    const scoreRegex = /^sys_score(10|[1-9])$/;
+    if (scoreRegex.test(tag.name)) {
+        Utils.message_notify({ content: `系统标签 ${tag.name} 不能被修改`, type: "error" });
+        return;
+    }
     appStore.allTags = [];
     axios.post(`${appStore.srvPrefix}/api/v1/tags_set`, JSON.stringify(tag))
         .then((response) => {
@@ -509,6 +515,12 @@ function dir_slt_update(treeItem: DatTypes.DirTreeItem | string) {
 
 async function tag_delete(_req: DatTypes.TagItem): Promise<DatTypes.Resp> {
     const resp = new DatTypes.Resp()
+    // 检查标签名称是否为 sys_score1 到 sys_score10
+    const scoreRegex = /^sys_score(10|[1-9])$/;
+    if (scoreRegex.test(_req.name)) {
+        Utils.message_notify({ content: `系统标签 ${_req.name} 不能被删除`, type: "error" });
+        return resp;
+    }
     await axios.post(`${appStore.srvPrefix}/api/v1/tags_delete`, JSON.stringify({ tagName: _req.name }))
         .then((response) => {
             const resp = response.data
