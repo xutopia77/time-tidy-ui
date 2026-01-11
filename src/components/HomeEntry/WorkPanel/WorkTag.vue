@@ -10,7 +10,7 @@
         }">
             {{ Utils.tagName2Display(tag.name) }}
             <button @click="btn_removeTag(tag)" class="delete-btn">
-                X
+                <Close theme="outline" size="14" :strokeWidth="3" />
             </button>
         </div>
     </div>
@@ -23,6 +23,7 @@ const appStore = useAppStore()
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 import '@/assets/common.css';
+import { Close } from '@icon-park/vue-next';
 // 新标签输入值
 const newTag = ref('');
 

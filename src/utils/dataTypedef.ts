@@ -83,11 +83,13 @@ export class FilePathChgResp {
     bNeedSure: boolean = false;
     items: FilePathChgRespItemInfo[] = [];
     remainFileIds: number[] = [];
+    successNum: number = 0;
+    failNum: number = 0;
 }
 
 export class TagItem {
     name = "";
-    color = "#e6475e";
+    color = "#4A6FA5";
     id = 0;
     description: string = "";
 }
@@ -95,7 +97,7 @@ export class TagItem {
 export class FileItemTag {
     id: number = 0;
     name: string = "";
-    color: string = "#e6475e";
+    color: string = "#4A6FA5";
     type: string = "";
     description: string = "";
     createdAt: string = "";

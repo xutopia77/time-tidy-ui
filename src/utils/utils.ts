@@ -70,10 +70,10 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
         fileItem.type = fileType;
         fileItem.uniqueHash = jRecord.unique_hash;
         if (fileItem.type == DatTypes.FileType.audio) {
-            fileItem.icon = '/assets/images/audio-file.svg'
+            fileItem.icon = `data:image/svg+xml;utf8,<?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 44H38C39.1046 44 40 43.1046 40 42V14H30V4H10C8.89543 4 8 4.89543 8 6V42C8 43.1046 8.89543 44 10 44Z" fill="none" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 4L40 14" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 31V28C26.2091 28 28 25.9853 28 23.5C28 21.0147 26.2091 19 24 19C21.7909 19 20 21.0147 20 23.5" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path fill-rule="evenodd" clip-rule="evenodd" d="M24 39C25.3807 39 26.5 37.8807 26.5 36.5C26.5 35.1193 25.3807 34 24 34C22.6193 34 21.5 35.1193 21.5 36.5C21.5 37.8807 22.6193 39 24 39Z" fill="%23333"/></svg>`;
         }
         else if (fileItem.type == DatTypes.FileType.other) {
-            fileItem.icon = '/assets/images/file-question.svg'
+            fileItem.icon = `data:image/svg+xml;utf8,<?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 44H38C39.1046 44 40 43.1046 40 42V14H30V4H10C8.89543 4 8 4.89543 8 6V42C8 43.1046 8.89543 44 10 44Z" fill="none" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 4L40 14" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 31V28C26.2091 28 28 25.9853 28 23.5C28 21.0147 26.2091 19 24 19C21.7909 19 20 21.0147 20 23.5" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path fill-rule="evenodd" clip-rule="evenodd" d="M24 39C25.3807 39 26.5 37.8807 26.5 36.5C26.5 35.1193 25.3807 34 24 34C22.6193 34 21.5 35.1193 21.5 36.5C21.5 37.8807 22.6193 39 24 39Z" fill="%23333"/></svg>`;
         }
         else {
             fileItem.icon = appStore.srvPrefix + "/static_thumb/" + fileItem.id + "_thumbnail.jpg";
@@ -326,7 +326,7 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
             switch (resp.code) {
                 case DatTypes.Code.Success: {
                     Utils.files_get(null);
-                    Utils.message_notify({ content: `文件操作成功`, type: 'success' })
+                    Utils.message_notify({ content: `${resp.data?.successNum}个文件操作成功`, type: 'success' })
                     break;
                 }
                 case DatTypes.Code.NeedSure: {
@@ -346,11 +346,12 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
                     break;
                 }
                 case DatTypes.Code.FileAlreadyExist: {
-                    Utils.message_notify({ content: `文件已存在`, type: 'success' })
+                    Utils.files_get(null);
+                    Utils.message_notify({ content: `${resp.data?.successNum}个文件操作成功,${resp.data?.failNum}个文件已存在`, type: 'warning' })
                     break;
                 }
                 default: {
-                    Utils.message_notify({ content: `文件操作失败 ${resp.status}`, type: "error" })
+                    Utils.message_notify({ content: `文件操作失败，已操作成功${resp.data?.successNum}个， ${resp.status}`, type: "error" })
                     break;
                 }
             }
