@@ -135,10 +135,23 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
                     if (jRecord.Type == 0) {
                         continue; // skip the root path
                     }
-                    const itemPath = "/" + jRecord.Path;
                     const dirItem = new DatTypes.DirItem();
-                    dirItem.id = jRecord.Id;
-                    dirItem.rootPathId = jRecord.RootPathId;
+                    dirItem.dir.id = jRecord.Id;
+                    dirItem.dir.path = jRecord.Path;
+                    dirItem.dir.name = jRecord.Name;
+                    dirItem.dir.rootPathId = jRecord.RootPathId;
+                    dirItem.dir.type = jRecord.Type;
+                    dirItem.dir.alias = jRecord.Alias;
+                    dirItem.dir.infoHash = jRecord.InfoHash;
+                    dirItem.dir.status = jRecord.Status;
+                    dirItem.dir.description = jRecord.Description;
+                    dirItem.dir.createdAt = jRecord.CreatedAt;
+                    dirItem.dir.updatedAt = jRecord.UpdatedAt;
+
+
+                    const itemPath = "/" + jRecord.Path;
+                    dirItem.id = dirItem.dir.id;
+                    dirItem.rootPathId = dirItem.dir.rootPathId;
                     dirItem.name = jRecord.Path;
                     dirItem.icon = '/assets/images/folders.svg'
                     dirItem.type = DatTypes.FileType.folder;
@@ -362,7 +375,6 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
             resp.status = error.message;
             Utils.message_notify({ content: `文件操作失败\n${error.message}`, type: 'success' })
         })
-    console.log("=======12312312312======")
     return resp;
 }
 
@@ -932,6 +944,28 @@ class Utils {
         }
     }
     static folder_get = folder_get
+    static async dirCreate(req: DatTypes.DirCreateReq) {
+        const resp = new DatTypes.Resp();
+        try {
+            const response = await axios.post(`${appStore.srvPrefix}/api/v1/dir_create`, JSON.stringify(req));
+            resp.code = response.data.code;
+            resp.status = response.data.status;
+
+            if (resp.code !== 0) {
+                Utils.message_notify({ content: `创建文件夹失败:${resp.status}`, type: "error" });
+            } else {
+                Utils.message_notify({ content: `文件夹创建成功`, type: 'success' });
+            }
+            await Utils.files_get(null);
+        } catch (error) {
+            console.error('Error creating directory:', error);
+            resp.code = -1;
+            resp.status = (error as Error).message || '创建文件夹时发生未知错误';
+            Utils.message_notify({ content: `创建文件夹错误:${(error as Error).message}`, type: "error" });
+        }
+
+        return resp;
+    }
 }
 
 export default Utils;

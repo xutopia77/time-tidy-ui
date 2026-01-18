@@ -64,6 +64,28 @@ export class DirTreeItem {
     children?: DirTreeItem[];
 }
 
+export class Dir {
+    id: number = 0;
+    path: string = "";
+    name: string = "";
+    rootPathId: number = 0;
+    type: number = 0;
+    alias: string = "";
+    infoHash: string = "";
+    status: number = 0;
+    description: string = "";
+    createdAt: string = "";
+    updatedAt: string = "";
+}
+
+
+export class DirCreateReq {
+    path: string = "";
+    type: number = 0;
+    description: string = "";
+    parentDirId: number = 0;
+}
+
 export class DirInfo {
     count: number = 0;      // 文件数量
     size: number = 0;       // 文件大小（字节）
@@ -134,6 +156,7 @@ export class DirItem {
     size?: number;
     tags: string[] = [];
     checked: boolean = false;
+    dir: Dir = new Dir();
 }
 
 export class AppPageCtrlItem {
