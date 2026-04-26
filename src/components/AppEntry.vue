@@ -190,7 +190,24 @@ function handleProjectUpdate(data: DatType.Resp<DatType.ProjectUpdateData>) {
 
 function handleLogUpdate(data: DatType.Resp<DatType.LogUpdateData>) {
     if (data.data && data.data.log) {
-        appStore.logInfo += data.data.log
+        appendLog(data.data.log)
+    }
+}
+
+const MAX_LOG_LINES = 100
+const MAX_LOG_SIZE = 1024 * 1024 // 1MB
+
+function appendLog(newLog: string) {
+    appStore.logInfo += newLog
+    
+    const lines = appStore.logInfo.split('\n')
+    
+    if (lines.length > MAX_LOG_LINES) {
+        appStore.logInfo = lines.slice(-MAX_LOG_LINES).join('\n')
+    }
+    
+    if (appStore.logInfo.length > MAX_LOG_SIZE) {
+        appStore.logInfo = appStore.logInfo.slice(-MAX_LOG_SIZE)
     }
 }
 

@@ -19,11 +19,12 @@ const logContent = computed(() => {
 <style scoped>
 .main-container {
     width: 100%;
-    height: 100%;
+    flex: 1;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 
 .log-textarea {
@@ -36,13 +37,11 @@ const logContent = computed(() => {
     outline: none;
     border-radius: 4px;
     resize: none;
-    width: calc(100% - 40px);
-    height: calc(100% - 40px);
+    min-height: 0;
 }
 
 .log-textarea:hover {
     background-color: var(--xc-background-color);
-    /* 设置鼠标悬停时的背景颜色 */
     border: var(--xc-border-hover);
 }
 </style>

@@ -106,14 +106,17 @@ const createNewFolder = async () => {
         return;
     }
 
+    if (!appStore.curSltDirTreeItem) {
+        Utils.message_notify({ content: '请先选择一个目录', type: 'error' });
+        return;
+    }
+
     try {
         const req = new DatType.DirCreateReq();
-        if (undefined != appStore.curSltDirTreeItem?.dirInfo.dir.rootPathId) {
-            req.parentDirId = appStore.curSltDirTreeItem?.dirInfo.dir.id;
-            req.path = appStore.curSltDirTreeItem?.dirInfo.dir.path + '/' + newFolderName.value.trim();
-            req.type = 1;
-            req.description = "";
-        }
+        req.parentDirId = appStore.curSltDirTreeItem.dirInfo.dir.id;
+        req.path = appStore.curSltDirTreeItem.dirInfo.dir.path + '/' + newFolderName.value.trim();
+        req.type = 1;
+        req.description = "";
         console.log('createNewFolder req:', req)
         await Utils.dirCreate(req);
     } catch (error) {

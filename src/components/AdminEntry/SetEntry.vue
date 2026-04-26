@@ -73,12 +73,14 @@
             <div class="settings-group">
                 <div class="button-group">
                     <button title="数据检查" @click="btnclk_detect_health()" class="xc-button">数据检查</button>
-                    <button title="清理日志" @click="btnclk_clean_log" class="xc-button">清空日志</button>
                 </div>
             </div>
         </div>
         <div class="set-log">
             <SetEntryLog />
+            <div class="log-actions">
+                <button title="清理日志" @click="btnclk_clean_log" class="xc-button">清空日志</button>
+            </div>
         </div>
     </div>
 </template>
@@ -314,6 +316,13 @@ onMounted(() => {
     height: 100%;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.log-actions {
+    padding: 10px;
+    text-align: right;
 }
 
 .settings-group {
