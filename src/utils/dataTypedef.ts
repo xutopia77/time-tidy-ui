@@ -10,6 +10,89 @@ export enum Code {
     FileAlreadyExist,                 // 6
 }
 
+// SSE 消息类型
+export enum SseMsgType {
+    SysStatus = 'sys_status',
+    FileUpdate = 'file_update',
+    TagUpdate = 'tag_update',
+    ProjectUpdate = 'project_update',
+    LogUpdate = 'log_update',
+    Heartbeat = 'heartbeat'
+}
+
+// 任务状态
+export enum TaskStatus {
+    Pending = 'pending',
+    Running = 'running',
+    Completed = 'completed',
+    Failed = 'failed'
+}
+
+// 任务命令类型
+export enum TaskCmd {
+    PrjSet = 'prj_set'
+}
+
+// 任务结果联合类型
+export type TaskResult = 
+    | Resp<PrjSetResp>
+    | Resp<unknown>
+
+// 任务信息
+export interface TaskInfo<T extends TaskResult = TaskResult> {
+    id: string;
+    cmd: TaskCmd;
+    status: TaskStatus;
+    startTime: string;
+    endTime: string;
+    error?: string;
+    result?: T;
+}
+
+// 系统状态响应
+export interface RespSysStatus<T extends TaskResult = TaskResult> {
+    busy: boolean;
+    status: string;
+    taskInfo: TaskInfo<T>;
+}
+
+// 文件更新数据
+export interface FileUpdateData {
+    files: File[];
+    dirs: DirItem[];
+    total?: number;
+}
+
+// 标签更新数据
+export interface TagUpdateData {
+    tags: TagItem[];
+}
+
+// 项目更新数据
+export interface ProjectUpdateData {
+    project: Prj;
+}
+
+// 日志更新数据
+export interface LogUpdateData {
+    log: string;
+}
+
+// SSE 消息数据联合类型
+export type SseMsgData = 
+    | Resp<RespSysStatus>
+    | Resp<FileUpdateData>
+    | Resp<TagUpdateData>
+    | Resp<ProjectUpdateData>
+    | Resp<LogUpdateData>
+
+// SSE 消息结构（泛型版本）
+export class SseMsg<T extends SseMsgData = SseMsgData> {
+    type: SseMsgType = SseMsgType.Heartbeat;
+    data: T | null = null;
+    timestamp: number = 0;
+}
+
 
 // ----------------------
 
@@ -259,17 +342,18 @@ export class PrjSetResp {
     bNeedGetFiles = false;
 }
 
-export class TaskInfo<T = string> {
-    resp?: T
-    doing: boolean = false;
-}
-
 export class SystemStatus {
     busy: boolean = false;
     status: string = '';
     logInfo: string = '';
-    curCmd: string = ''; // get in heartbeat, and set '' when get finish
-    curTask: TaskInfo = new TaskInfo();
+    curCmd: string = '';
+    curTask: TaskInfo = {
+        id: '',
+        cmd: TaskCmd.PrjSet,
+        status: TaskStatus.Pending,
+        startTime: '',
+        endTime: ''
+    };
 }
 
 export class HeartBeatResp {
@@ -294,7 +378,7 @@ export class FileDeleteReq {
     bRemoveToDtrash: boolean = true;
 }
 
-export class Resp<T = string> {
+export class Resp<T = unknown> {
     code: number = 0;
     status: string = '';
     doing: boolean = false;

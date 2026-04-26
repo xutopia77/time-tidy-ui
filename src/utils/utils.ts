@@ -664,7 +664,7 @@ class Utils {
         else {
             Utils.message_notify({ content: "设置完成", type: "success" })
             if (req.type.length > 0 && req.type[0] == DatTypes.PrjSetType.Open) {
-                await this.prj_info_get()
+                await Utils.prj_info_get()
             }
         }
     }
@@ -914,35 +914,6 @@ class Utils {
         await tags_get()
     }
 
-    static async heartbeat() {
-        const responseHttp = await axios.post(`${appStore.srvPrefix}/api/v1/heartbeat`)
-        const response: DatTypes.Resp<DatTypes.HeartBeatResp> = responseHttp.data
-
-        if (response.code != 0) {
-            console.log("heartbeat err ", response.status)
-            return
-        }
-        const resp = response.data
-        // console.log('resp:', resp, resp?.sysStatus.curCmd, resp?.sysStatus.curTask);
-        appStore.logInfo += resp?.sysStatus.logInfo
-        if (resp?.sysStatus.curTask != null) {
-            if (resp?.sysStatus.curCmd == 'prj_set') {
-                const cmdResp: DatTypes.Resp<DatTypes.PrjSetResp> = resp?.sysStatus.curTask.resp as unknown as DatTypes.Resp<DatTypes.PrjSetResp>;
-                if (cmdResp.code != 0) {
-                    Utils.message_notify({ content: `设置失败:${cmdResp.status}`, type: "error" })
-                }
-                else {
-                    if (cmdResp.data?.prj != null) {
-                        appStore.prj = cmdResp.data?.prj
-                    }
-                    Utils.message_notify({ content: `设置完成:${cmdResp.status}`, type: 'success' })
-                    if (cmdResp.data?.bNeedGetFiles == true) {
-                        await Utils.files_get()
-                    }
-                }
-            }
-        }
-    }
     static folder_get = folder_get
     static async dirCreate(req: DatTypes.DirCreateReq) {
         const resp = new DatTypes.Resp();

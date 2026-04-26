@@ -75,17 +75,121 @@ onBeforeMount(() => {
 })
 
 
-let timerId = 0
+let eventSource: EventSource | null = null
 
 onMounted(() => {
-    timerId = window.setInterval(Utils.heartbeat, 1000);
+    connectSSE()
 })
 
 onUnmounted(() => {
-    if (timerId) {
-        window.clearInterval(timerId);
+    if (eventSource) {
+        eventSource.close()
     }
-});
+})
+
+function connectSSE() {
+    const url = `${appStore.srvPrefix}/api/v1/events`
+    eventSource = new EventSource(url)
+    
+    eventSource.onopen = () => {
+        console.log('SSE connected')
+    }
+    
+    eventSource.onmessage = (event) => {
+        try {
+            const message: DatType.SseMsg = JSON.parse(event.data)
+            handleSSEMessage(message)
+        } catch (error) {
+            console.error('Failed to parse SSE message:', error)
+        }
+    }
+    
+    eventSource.onerror = (error) => {
+        console.error('SSE error:', error)
+        if (eventSource) {
+            eventSource.close()
+        }
+        setTimeout(() => {
+            connectSSE()
+        }, 3000)
+    }
+}
+
+function handleSSEMessage(message: DatType.SseMsg) {
+    switch (message.type) {
+        case DatType.SseMsgType.SysStatus:
+            handleSysStatus(message.data as DatType.Resp<DatType.RespSysStatus>)
+            break
+        case DatType.SseMsgType.FileUpdate:
+            handleFileUpdate(message.data as DatType.Resp<DatType.FileUpdateData>)
+            break
+        case DatType.SseMsgType.TagUpdate:
+            handleTagUpdate(message.data as DatType.Resp<DatType.TagUpdateData>)
+            break
+        case DatType.SseMsgType.ProjectUpdate:
+            handleProjectUpdate(message.data as DatType.Resp<DatType.ProjectUpdateData>)
+            break
+        case DatType.SseMsgType.LogUpdate:
+            handleLogUpdate(message.data as DatType.Resp<DatType.LogUpdateData>)
+            break
+        case DatType.SseMsgType.Heartbeat:
+            break
+        default:
+            console.log('Unknown SSE message type:', message.type)
+    }
+}
+
+function handleSysStatus(data: DatType.Resp<DatType.RespSysStatus>) {
+    console.log('handleSysStatus:', data)
+    
+    if (data.data && data.data.taskInfo && data.data.taskInfo.status === DatType.TaskStatus.Completed) {
+        if (data.data.taskInfo.cmd === DatType.TaskCmd.PrjSet) {
+            const taskResult = data.data.taskInfo.result as DatType.Resp<DatType.PrjSetResp>
+            console.log('taskResult:', taskResult)
+            
+            if (taskResult && taskResult.code === 0) {
+                Utils.message_notify({ 
+                    content: '设置完成', 
+                    type: 'success' 
+                })
+                
+                if (taskResult.data && taskResult.data.bNeedGetFiles) {
+                    Utils.files_get()
+                }
+            } else if (taskResult && taskResult.code !== 0) {
+                Utils.message_notify({ 
+                    content: `设置失败: ${taskResult.status}`, 
+                    type: 'error' 
+                })
+            }
+        }
+    }
+}
+
+function handleFileUpdate(data: DatType.Resp<DatType.FileUpdateData>) {
+    if (data.data && data.data.files && data.data.dirs) {
+        appStore.curFiles = data.data.files
+        appStore.curDirs = data.data.dirs
+    }
+}
+
+function handleTagUpdate(data: DatType.Resp<DatType.TagUpdateData>) {
+    if (data.data && data.data.tags) {
+        appStore.allTags = data.data.tags
+    }
+}
+
+function handleProjectUpdate(data: DatType.Resp<DatType.ProjectUpdateData>) {
+    if (data.data && data.data.project) {
+        appStore.prj = data.data.project
+    }
+}
+
+function handleLogUpdate(data: DatType.Resp<DatType.LogUpdateData>) {
+    if (data.data && data.data.log) {
+        appStore.logInfo += data.data.log
+    }
+}
 
 </script>
 
