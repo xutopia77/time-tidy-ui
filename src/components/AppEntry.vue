@@ -134,6 +134,9 @@ function handleSSEMessage(message: DatType.SseMsg) {
             break
         case DatType.SseMsgType.Heartbeat:
             break
+        case DatType.SseMsgType.Progress:
+            handleProgressUpdate(message.data as DatType.Resp<DatType.ProgressUpdateData>)
+            break
         default:
             console.log('Unknown SSE message type:', message.type)
     }
@@ -188,6 +191,23 @@ function handleProjectUpdate(data: DatType.Resp<DatType.ProjectUpdateData>) {
 function handleLogUpdate(data: DatType.Resp<DatType.LogUpdateData>) {
     if (data.data && data.data.log) {
         appStore.logInfo += data.data.log
+    }
+}
+
+function handleProgressUpdate(data: DatType.Resp<DatType.ProgressUpdateData>) {
+    if (data.data && data.data.progress) {
+        const progress = data.data.progress
+        switch (progress.step) {
+            case DatType.ProgressStep.Thumbnail:
+                appStore.progressThumbnail = progress
+                break
+            case DatType.ProgressStep.Exif:
+                appStore.progressExif = progress
+                break
+            case DatType.ProgressStep.Hash:
+                appStore.progressHash = progress
+                break
+        }
     }
 }
 

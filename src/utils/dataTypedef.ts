@@ -17,7 +17,31 @@ export enum SseMsgType {
     TagUpdate = 'tag_update',
     ProjectUpdate = 'project_update',
     LogUpdate = 'log_update',
-    Heartbeat = 'heartbeat'
+    Heartbeat = 'heartbeat',
+    Progress = 'progress'
+}
+
+// 进度步骤类型
+export enum ProgressStep {
+    Thumbnail = 'thumbnail',
+    Exif = 'exif',
+    Hash = 'hash',
+    Sync = 'sync'
+}
+
+// 进度数据
+export interface ProgressData {
+    step: ProgressStep
+    current: number
+    total: number
+    percent: number
+    status: string
+    isRunning: boolean
+}
+
+// 进度更新数据
+export interface ProgressUpdateData {
+    progress: ProgressData
 }
 
 // 任务状态
@@ -85,6 +109,7 @@ export type SseMsgData =
     | Resp<TagUpdateData>
     | Resp<ProjectUpdateData>
     | Resp<LogUpdateData>
+    | Resp<ProgressUpdateData>
 
 // SSE 消息结构（泛型版本）
 export class SseMsg<T extends SseMsgData = SseMsgData> {

@@ -35,6 +35,10 @@
                             <option value="full">生成缩略图(全量)</option>
                             <option value="incremental">生成缩略图(增量)</option>
                         </select>
+                        <span v-if="showThumbProgress" class="progress-text"
+                            :class="{ 'progress-complete': thumbProgress.percent === 100 }">
+                            {{ thumbProgress.percent }}%
+                        </span>
                     </div>
                     <div class="form-item select-item">
                         <label class="xc-label">元信息选项:</label>
@@ -43,6 +47,10 @@
                             <option value="full">提取元信息(全量)</option>
                             <option value="incremental">提取元信息(增量)</option>
                         </select>
+                        <span v-if="showExifProgress" class="progress-text"
+                            :class="{ 'progress-complete': exifProgress.percent === 100 }">
+                            {{ exifProgress.percent }}%
+                        </span>
                     </div>
                     <div class="form-item select-item">
                         <label class="xc-label">指纹选项:</label>
@@ -51,6 +59,10 @@
                             <option value="full">生成指纹(全量)</option>
                             <option value="incremental">生成指纹(增量)</option>
                         </select>
+                        <span v-if="showHashProgress" class="progress-text"
+                            :class="{ 'progress-complete': hashProgress.percent === 100 }">
+                            {{ hashProgress.percent }}%
+                        </span>
                     </div>
                 </div>
                 <div class="button-group">
@@ -72,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 // import axios from 'axios';
@@ -114,7 +126,31 @@ const selectedHashOption = ref('none')
 const bPrjSetSave = ref(true)
 const bPrjSetSync = ref(false)
 
+// 进度状态
+const thumbProgress = computed(() => appStore.progressThumbnail)
+const exifProgress = computed(() => appStore.progressExif)
+const hashProgress = computed(() => appStore.progressHash)
+
+// 是否显示进度（只有选择了对应选项且正在运行或刚完成时显示）
+const showThumbProgress = computed(() => {
+    return selectedThumbOption.value !== 'none' && thumbProgress.value.isRunning
+})
+const showExifProgress = computed(() => {
+    return selectedExifOption.value !== 'none' && exifProgress.value.isRunning
+})
+const showHashProgress = computed(() => {
+    return selectedHashOption.value !== 'none' && hashProgress.value.isRunning
+})
+
+// 重置进度
+function resetProgress() {
+    appStore.progressThumbnail = { step: DatType.ProgressStep.Thumbnail, current: 0, total: 0, percent: 0, status: '', isRunning: false }
+    appStore.progressExif = { step: DatType.ProgressStep.Exif, current: 0, total: 0, percent: 0, status: '', isRunning: false }
+    appStore.progressHash = { step: DatType.ProgressStep.Hash, current: 0, total: 0, percent: 0, status: '', isRunning: false }
+}
+
 async function btnclk_set(types: DatType.PrjSetType[] = []) {
+    resetProgress()
 
     if (types.length > 0 && types[0] == DatType.PrjSetType.Open) {
         // 选择一个 JSON 文件
@@ -319,6 +355,22 @@ onMounted(() => {
 .checkbox-item {
     margin-left: 8px;
     margin-bottom: 0;
+}
+
+.progress-text {
+    margin-left: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: var(--xc-primary-color, #4A6FA5);
+    color: white;
+    min-width: 40px;
+    text-align: center;
+}
+
+.progress-text.progress-complete {
+    background-color: var(--xc-success-color, #52c41a);
 }
 
 .button-group {

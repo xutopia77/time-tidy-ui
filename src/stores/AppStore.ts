@@ -65,6 +65,11 @@ export type AppStore = {
 
     // icon
     iconProps: DataTypes.IconProps,                          // 图标主题
+
+    // 进度状态
+    progressThumbnail: DataTypes.ProgressData,
+    progressExif: DataTypes.ProgressData,
+    progressHash: DataTypes.ProgressData,
 }
 
 export const useAppStore = defineStore('app', {
@@ -103,6 +108,11 @@ export const useAppStore = defineStore('app', {
         curPath: '/',
         // 
         iconProps: new DataTypes.IconProps,
+
+        // 进度状态
+        progressThumbnail: { step: DataTypes.ProgressStep.Thumbnail, current: 0, total: 0, percent: 0, status: '', isRunning: false },
+        progressExif: { step: DataTypes.ProgressStep.Exif, current: 0, total: 0, percent: 0, status: '', isRunning: false },
+        progressHash: { step: DataTypes.ProgressStep.Hash, current: 0, total: 0, percent: 0, status: '', isRunning: false },
 
     }),
     actions: {
