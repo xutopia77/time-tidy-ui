@@ -236,9 +236,6 @@ function handleProgressUpdate(data: DatType.Resp<DatType.ProgressUpdateData>) {
     margin: 0px;
     height: 100%;
     width: 100%;
-    /* position: relative; */
-    /* position: flex; */
-    /* 为子元素的绝对定位提供参考 */
 }
 
 .home-entry,
@@ -256,8 +253,7 @@ function handleProgressUpdate(data: DatType.Resp<DatType.ProgressUpdateData>) {
     padding: 0;
     margin: 0;
     display: flex;
-    flex-direction: column;
-    /* 垂直布局 */
+    flex-direction: row;
     height: 100%;
     width: 100%;
     z-index: 10;
@@ -280,26 +276,18 @@ function handleProgressUpdate(data: DatType.Resp<DatType.ProgressUpdateData>) {
 }
 
 .header-panel-section {
-    /* 可根据需要调整 HeaderPanel 的高度 */
     flex: 0 0 auto;
-    border-bottom: var(--xc-border-hover);
-    /* 添加底部边框 */
     box-sizing: border-box;
-    /* 将盒模型设置为 border-box */
-    height: 32px;
-    width: 100%;
-    padding: 0px;
-    margin: 0px;
-    background-color: var(--xc-background-color);
+    height: 100%;
 }
 
 .page-view {
     flex: 1;
-    width: 100%;
     margin: 0px;
     padding: 0px;
-    height: calc(100% - 32px);
+    height: 100%;
     background-color: var(--xc-background-color);
+    overflow-y: auto;
 }
 
 .fullscreen-overlay {

@@ -1,30 +1,38 @@
 <template>
-    <div class="header-panel">
-        <div class="header-panel-operate">
-            <WindmillTwo v-bind="iconProps" style="padding-right: 16px; padding-right: 16px;" />
-            <router-link class="no-underline-link" to="/">
-                <button class="xc-button" style="border: none;">
-                    <Home v-bind="iconProps" title="主页" />
-                </button>
+    <div class="sidebar-nav">
+        <div class="sidebar-logo">
+            <WindmillTwo v-bind="iconProps" size="28" />
+        </div>
+        
+        <div class="sidebar-menu">
+            <router-link class="menu-item" to="/" v-slot="{ isActive }">
+                <div class="menu-link" :class="{ 'active': isActive }">
+                    <Home v-bind="iconProps" size="22" />
+                    <span class="menu-text">主页</span>
+                </div>
             </router-link>
-            <router-link class="no-underline-link" to="/admin/PrjSet">
-                <button class="xc-button" style="border: none;">
-                    <System v-bind="iconProps" title="系统设置" />
-                </button>
+            
+            <router-link class="menu-item" to="/admin/PrjSet" v-slot="{ isActive }">
+                <div class="menu-link" :class="{ 'active': isActive }">
+                    <System v-bind="iconProps" size="22" />
+                    <span class="menu-text">设置</span>
+                </div>
             </router-link>
         </div>
-        <div class="header-panel-info">
-            <button @click="btn_show_resent_msg()" class="xc-button" style="border:none" title="查看最近消息提醒">
-                <Remind v-bind="iconProps" />
+        
+        <div class="sidebar-footer">
+            <button @click="btn_show_resent_msg()" class="menu-link notification-btn" title="查看最近消息提醒">
+                <Remind v-bind="iconProps" size="22" />
+                <span class="menu-text">消息</span>
             </button>
         </div>
     </div>
 </template>
+
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Home, System, WindmillTwo, Remind } from '@icon-park/vue-next'
 import '@/assets/common.css'
-// import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 const iconProps = computed(() => (appStore.iconProps))
@@ -32,37 +40,87 @@ const iconProps = computed(() => (appStore.iconProps))
 function btn_show_resent_msg() {
     appStore.bPageResentMsg = true;
 }
-
 </script>
+
 <style scoped>
-.no-underline-link {
-    text-decoration: none;
-    color: var(--xc-text-color);
-    padding-right: 16px;
-    padding-left: 16px;
-}
-
-.header-panel {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    margin: 0;
+.sidebar-nav {
+    width: var(--xc-sidebar-width);
+    min-width: var(--xc-sidebar-width);
+    height: 100vh;
+    background-color: var(--xc-background-color);
+    border-right: 1px solid var(--xc-border-color);
     display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    overflow: hidden;
 }
 
-.header-panel-operate {
-    width: 200px;
-    height: 100%;
-    padding: 0;
-    margin: 0;
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-lg) 0;
+    border-bottom: 1px solid var(--xc-border-color);
+}
+
+.sidebar-menu {
+    flex: 1;
+    padding: var(--xc-spacing-sm) 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.menu-item {
+    text-decoration: none;
+    display: block;
+    margin-bottom: var(--xc-spacing-xs);
+}
+
+.menu-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--xc-spacing-xs);
+    padding: var(--xc-spacing-md) var(--xc-spacing-sm);
+    margin: 0 var(--xc-spacing-xs);
+    border-radius: var(--xc-border-radius-md);
     color: var(--xc-text-color);
+    transition: all var(--xc-transition-normal);
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: calc(100% - var(--xc-spacing-sm));
+    max-width: calc(100% - var(--xc-spacing-sm));
+    text-align: center;
 }
 
-.header-panel-info {
-    width: calc(100% - 200px);
-    height: 100%;
-    padding: 0;
-    margin: 0;
-    text-align: right;
+.menu-link:hover {
+    background-color: var(--xc-background-color-hover);
+}
+
+.menu-link.active {
+    background-color: var(--xc-primary-color);
+    color: white;
+}
+
+.menu-text {
+    font-size: var(--xc-font-size-sm);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.sidebar-footer {
+    padding: var(--xc-spacing-sm) 0;
+    border-top: 1px solid var(--xc-border-color);
+}
+
+.notification-btn {
+    width: calc(100% - var(--xc-spacing-sm));
+    max-width: calc(100% - var(--xc-spacing-sm));
+    margin: 0 var(--xc-spacing-xs);
 }
 </style>
