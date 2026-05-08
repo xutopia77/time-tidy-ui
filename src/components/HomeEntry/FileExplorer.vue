@@ -234,88 +234,48 @@ document.addEventListener('keydown', handleEscKey);
     width: 100%;
     height: 100%;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .file-nav-header {
     padding: 0px;
     margin: 0px;
     width: 100%;
-    height: 32px;
-    /* background-color: aquamarine; */
-}
-
-.file-grid---delete {
-    padding: 0px;
-    margin: 0px;
-    /* display: flex;
-    flex-wrap: wrap; */
-
-    display: flex;
-    align-items: flex-start;
-    flex-wrap: wrap;
-
-    height: calc(100% - 32px - 32px);
-    /* background-color: bisque; */
-}
-
-
-
-.file-grid---1 {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2px;
-    /* margin-top: 20px; */
-    height: calc(100% - 32px - 32px);
-}
-
-.file-grid---2 {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, auto));
-    gap: 15px;
-    height: calc(100% - 32px - 32px);
-    padding: 10px;
+    height: var(--xc-normal-height);
+    flex-shrink: 0;
 }
 
 .file-content {
-    height: calc(100% - 32px - 32px);
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .file-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    /* height: calc(100% - 32px - 32px - 20px); */
-    padding: 10px;
+    gap: var(--xc-spacing-md);
+    padding: var(--xc-spacing-sm);
     align-content: flex-start;
-    /* overflow-y: auto; */
 }
-
-
-
-/* .file-grid hr {
-    display: block;
-    margin: 10px 0;
-    border: none;
-    border-top: 1px solid #ccc;
-    width: 100%;
-} */
-
 
 .file-footer {
     padding: 0px;
     margin: 0px;
     width: 100%;
-    height: 32px;
+    height: var(--xc-normal-height);
+    flex-shrink: 0;
 }
 
 .fab-container {
     position: absolute;
-    bottom: 52px;
-    right: 20px;
+    bottom: calc(var(--xc-spacing-xl) + var(--xc-normal-height));
+    right: var(--xc-spacing-xl);
     display: flex;
     flex-direction: column-reverse;
     align-items: flex-end;
-    gap: 10px;
+    gap: var(--xc-spacing-sm);
     z-index: 100;
 }
 
@@ -324,57 +284,57 @@ document.addEventListener('keydown', handleEscKey);
     height: 48px;
     border-radius: 50%;
     border: none;
-    background-color: var(--xc-primary-color, #4A6FA5);
+    background-color: var(--xc-primary-color);
     color: white;
-    font-size: 24px;
+    font-size: var(--xc-font-size-xl);
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+    box-shadow: var(--xc-shadow-md);
+    transition: all var(--xc-transition-normal);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .fab-button:hover {
-    background-color: var(--xc-primary-color-hover, #3d5a80);
+    background-color: var(--xc-primary-color-hover);
     transform: scale(1.1);
 }
 
 .fab-icon-rotate {
     display: inline-block;
     transform: rotate(45deg);
-    transition: transform 0.3s ease;
+    transition: transform var(--xc-transition-normal);
 }
 
 .fab-menu {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--xc-spacing-xs);
 }
 
 .fab-menu-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background-color: var(--xc-background-color-hover, #2a2a2a);
-    border-radius: 8px;
+    gap: var(--xc-spacing-xs);
+    padding: var(--xc-spacing-xs) var(--xc-spacing-md);
+    background-color: var(--xc-background-color-hover);
+    border-radius: var(--xc-border-radius-md);
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.2s ease;
+    box-shadow: var(--xc-shadow-sm);
+    transition: all var(--xc-transition-normal);
 }
 
 .fab-menu-item:hover {
-    background-color: var(--xc-primary-color, #4A6FA5);
+    background-color: var(--xc-primary-color);
     color: white;
 }
 
 .fab-menu-icon {
-    font-size: 16px;
+    font-size: var(--xc-font-size-md);
 }
 
 .fab-menu-text {
-    font-size: 14px;
+    font-size: var(--xc-font-size-md);
     white-space: nowrap;
 }
 
@@ -393,59 +353,61 @@ document.addEventListener('keydown', handleEscKey);
 
 .dialog-content {
     background-color: var(--xc-background-color);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: var(--xc-spacing-xl);
+    border-radius: var(--xc-border-radius-md);
+    box-shadow: var(--xc-shadow-lg);
     min-width: 300px;
-    max-width: 400px;
+    max-width: 500px;
 }
 
 .dialog-content h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
+    margin: 0 0 var(--xc-spacing-md) 0;
     color: var(--xc-text-color);
+    font-size: var(--xc-font-size-lg);
 }
 
 .current-path {
-    margin: 10px 0;
-    padding: 8px;
-    background-color: var(--xc-background-color-hover);
-    border-radius: 4px;
-    font-size: 14px;
+    margin: 0 0 var(--xc-spacing-md) 0;
     color: var(--xc-text-color-secondary);
-    word-break: break-all;
+    font-size: var(--xc-font-size-sm);
 }
 
 .folder-name-input {
     width: 100%;
-    padding: 8px 12px;
-    border: var(--xc-border);
-    border-radius: 4px;
+    padding: var(--xc-spacing-sm);
+    margin-bottom: var(--xc-spacing-md);
     background-color: var(--xc-input-bg-color);
+    border: 1px solid var(--xc-input-border-color);
+    border-radius: var(--xc-border-radius-sm);
     color: var(--xc-text-color);
-    margin-bottom: 15px;
-    box-sizing: border-box;
-    font-size: 14px;
+    font-size: var(--xc-font-size-md);
+    outline: none;
+    transition: border-color var(--xc-transition-normal);
 }
 
 .folder-name-input:focus {
-    outline: none;
-    border-color: var(--xc-primary-color);
+    border-color: var(--xc-input-border-color-focus);
 }
 
 .dialog-actions {
     display: flex;
-    gap: 10px;
     justify-content: flex-end;
+    gap: var(--xc-spacing-sm);
+}
+
+.confirm-btn,
+.cancel-btn {
+    padding: var(--xc-spacing-xs) var(--xc-spacing-md);
+    border-radius: var(--xc-border-radius-sm);
+    font-size: var(--xc-font-size-md);
+    cursor: pointer;
+    transition: all var(--xc-transition-normal);
 }
 
 .confirm-btn {
     background-color: var(--xc-primary-color);
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
 }
 
 .confirm-btn:hover:not(:disabled) {
@@ -454,16 +416,14 @@ document.addEventListener('keydown', handleEscKey);
 
 .confirm-btn:disabled {
     background-color: var(--xc-button-bg-color-disabled);
+    color: var(--xc-button-text-color-disabled);
     cursor: not-allowed;
 }
 
 .cancel-btn {
     background-color: var(--xc-button-bg-color);
-    color: var(--xc-text-color);
-    border: var(--xc-border);
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
+    color: var(--xc-button-text-color);
+    border: 1px solid var(--xc-border-color);
 }
 
 .cancel-btn:hover {

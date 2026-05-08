@@ -15,17 +15,17 @@ import '@/assets/common.css'
     padding: 0;
     margin: 0;
     width: 100%;
-    /* height: 100%; */
-    /* 不用再设置高度，在外面已经设置了 */
+    height: 100%;
     display: flex;
     flex-direction: row;
-    /* 水平布局 */
 }
 
 .file-explorer-section {
     margin: 0px;
     padding: 0px;
     height: 100%;
+    flex: 1;
+    overflow: hidden;
 }
 
 .work-panel-section {
@@ -36,5 +36,7 @@ import '@/assets/common.css'
     padding: 0px;
     height: 100%;
     border-left: var(--xc-border);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 </style>

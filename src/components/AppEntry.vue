@@ -1,7 +1,7 @@
 <template>
     <div class="app-entry">
+        <HeaderPanel class="header-panel-section" />
         <div class="home-entry">
-            <HeaderPanel class="header-panel-section" />
             <router-view class="page-view" />
         </div>
         <div class='image-view' v-if="appStore.bPageImgView" style="z-index: 100;">
@@ -236,58 +236,55 @@ function handleProgressUpdate(data: DatType.Resp<DatType.ProgressUpdateData>) {
     margin: 0px;
     height: 100%;
     width: 100%;
+    position: relative;
 }
 
-.home-entry,
+.header-panel-section {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    z-index: 100;
+}
+
+.home-entry {
+    margin-left: var(--xc-sidebar-width);
+    height: 100%;
+    width: calc(100% - var(--xc-sidebar-width));
+    z-index: 10;
+}
+
 .settings-panel,
 .image-view,
 .message-show {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
 }
 
-.home-entry {
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: row;
-    height: 100%;
-    width: 100%;
-    z-index: 10;
-}
-
 .settings-panel {
     padding: 0;
     margin: 0;
-    height: 100%;
-    width: 100%;
-    opacity: 1;
     background-color: var(--xc-background-color);
+    z-index: 10;
 }
 
 .image-view {
     padding: 0;
     margin: 0;
-    height: 100%;
-    width: 100%;
-}
-
-.header-panel-section {
-    flex: 0 0 auto;
-    box-sizing: border-box;
-    height: 100%;
+    z-index: 100;
 }
 
 .page-view {
-    flex: 1;
     margin: 0px;
     padding: 0px;
     height: 100%;
+    width: 100%;
     background-color: var(--xc-background-color);
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .fullscreen-overlay {
@@ -301,7 +298,7 @@ function handleProgressUpdate(data: DatType.Resp<DatType.ProgressUpdateData>) {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: var(--xc-spacing-xl);
     box-sizing: border-box;
 }
 

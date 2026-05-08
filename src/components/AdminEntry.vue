@@ -13,23 +13,25 @@ import AdminNav from '@/components/AdminEntry/AdminNav.vue';
     padding: 0;
     margin: 0;
     display: flex;
+    height: 100%;
+    width: 100%;
 }
 
 .nav-section {
     padding: 0;
     margin: 0px;
-    padding: 0px;
     height: 100%;
-    width: 32px;
+    width: var(--xc-normal-height);
     border-right: var(--xc-border);
+    flex-shrink: 0;
 }
 
 .content-section {
     padding: 0;
     margin: 0;
     height: 100%;
-    width: calc(100% - 32px);
+    flex: 1;
     overflow-y: auto;
-    /* 添加垂直滚动条 */
+    overflow-x: hidden;
 }
 </style>

@@ -88,27 +88,26 @@ const isPanelOpen = (panelName: PanelName) => {
 
 <style scoped>
 .work-panel {
-    padding: 2px;
+    padding: var(--xc-spacing-xs);
 }
 
 .collapse-panel {
-    margin-bottom: 10px;
+    margin-bottom: var(--xc-spacing-sm);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--xc-border-radius-sm);
     width: 100%;
     color: var(--xc-text-color);
     background-color: var(--xc-background-color);
 }
 
 .panel-header {
-    padding: 2px;
+    padding: var(--xc-spacing-xs);
     color: var(--xc-text-color);
     background-color: var(--xc-background-color);
     cursor: pointer;
     display: flex;
     justify-content: flex-start;
-    /* 修改为 flex-end 使内容靠右显示 */
-    /* align-items: center; */
+    transition: background-color var(--xc-transition-normal);
 }
 
 .panel-header:hover {
@@ -116,14 +115,14 @@ const isPanelOpen = (panelName: PanelName) => {
 }
 
 .panel-content {
-    padding: 10px;
+    padding: var(--xc-spacing-sm);
     border-top: var(--xc-border);
-    width: calc(100% - 20px);
+    width: calc(100% - var(--xc-spacing-lg));
     height: 100%;
     overflow: hidden;
 }
 
 .span-close-exp {
-    padding-right: 5px;
+    padding-right: var(--xc-spacing-xs);
 }
 </style>
