@@ -7,18 +7,14 @@
         <div class="sidebar-menu">
             <router-link class="menu-item" to="/" v-slot="{ isActive }">
                 <div class="menu-link" :class="{ 'active': isActive }">
-                    <div class="menu-icon-wrapper">
-                        <Home v-bind="iconProps" size="22" />
-                    </div>
+                    <Home v-bind="iconProps" size="22" />
                     <span class="menu-text">主页</span>
                 </div>
             </router-link>
             
             <router-link class="menu-item" to="/admin/PrjSet" v-slot="{ isActive }">
                 <div class="menu-link" :class="{ 'active': isActive }">
-                    <div class="menu-icon-wrapper">
-                        <System v-bind="iconProps" size="22" />
-                    </div>
+                    <System v-bind="iconProps" size="22" />
                     <span class="menu-text">设置</span>
                 </div>
             </router-link>
@@ -26,9 +22,7 @@
         
         <div class="sidebar-footer">
             <button @click="btn_show_resent_msg()" class="menu-link notification-btn" title="查看最近消息提醒">
-                <div class="menu-icon-wrapper">
-                    <Remind v-bind="iconProps" size="22" />
-                </div>
+                <Remind v-bind="iconProps" size="22" />
                 <span class="menu-text">消息</span>
             </button>
         </div>
@@ -102,7 +96,6 @@ function btn_show_resent_msg() {
     width: calc(100% - var(--xc-spacing-sm));
     max-width: calc(100% - var(--xc-spacing-sm));
     text-align: center;
-    position: relative;
 }
 
 .menu-link:hover {
@@ -110,32 +103,8 @@ function btn_show_resent_msg() {
 }
 
 .menu-link.active {
-    color: var(--xc-primary-color);
-}
-
-.menu-link.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 20px;
     background-color: var(--xc-primary-color);
-    border-radius: 0 2px 2px 0;
-}
-
-.menu-icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    border-radius: 50%;
-    transition: background-color var(--xc-transition-normal);
-}
-
-.menu-link.active .menu-icon-wrapper {
-    background-color: rgba(74, 111, 165, 0.15);
+    color: white;
 }
 
 .menu-text {
