@@ -147,22 +147,28 @@ const btnclk_handleClickItemMsg = () => {
 .xc-card-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
-    height: auto;
+    gap: 6px;
     margin-top: var(--xc-spacing-xs);
+    max-height: 60px;
+    overflow: hidden;
 }
 
 .xc-tag {
-    display: inline-block;
-    padding: 2px var(--xc-spacing-xs);
-    border-radius: var(--xc-border-radius-sm);
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 12px;
     font-size: var(--xc-font-size-xs);
     color: white;
     transition: all var(--xc-transition-fast);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .xc-tag:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 </style>

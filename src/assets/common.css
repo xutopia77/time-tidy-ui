@@ -115,7 +115,7 @@
     padding: 0px;
     margin: var(--xc-spacing-xs);
     color: var(--xc-text-color);
-    border: 1px solid var(--xc-border-color);
+    /* border: 1px solid var(--xc-border-color); */
     border-radius: var(--xc-border-radius-lg);
     text-align: center;
     position: relative;
@@ -126,7 +126,6 @@
 
 .xc-card:hover {
     background-color: var(--xc-background-color-hover);
-    border-color: var(--xc-border-hover);
     box-shadow: var(--xc-shadow-md);
     transform: translateY(-2px);
 }
