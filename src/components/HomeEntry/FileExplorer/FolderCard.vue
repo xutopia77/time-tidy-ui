@@ -10,7 +10,7 @@
         </div>
         <div class="xc-card-content" @click="btnclk_dir">
             <div class="xc-card-icon">
-                <FolderClose v-bind="iconProps" :size="cardWidth - 80" :strokeWidth=1 color="#333" />
+                <FolderClose :size="cardWidth - 80" :strokeWidth=1 color="#333" />
             </div>
             <div class="xc-card-desc">{{ item.name }}</div>
         </div>
@@ -25,7 +25,6 @@ const appStore = useAppStore()
 import '@/assets/common.css'
 import Utils from '@/utils/utils';
 import { FolderClose } from '@icon-park/vue-next'
-const iconProps = computed(() => (appStore.iconProps))
 
 const props = defineProps<{
     item: DatType.DirItem;

@@ -12,7 +12,7 @@
                     class="path-part"
                     :class="{ 'clickable': index < pathParts.length - 1 }"
                 >
-                    <HardDisk v-bind="iconProps" v-if="part.name == ''" size="16" />
+                    <HardDisk v-if="part.name == ''" size="16" />
                     <span v-else>{{ part.name }}</span>
                 </span>
                 <span v-if="index < pathParts.length - 1" class="path-separator">
@@ -33,8 +33,6 @@ import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 import { HardDisk } from '@icon-park/vue-next'
-
-const iconProps = computed(() => (appStore.iconProps))
 
 class PathPart {
     name: string = '';

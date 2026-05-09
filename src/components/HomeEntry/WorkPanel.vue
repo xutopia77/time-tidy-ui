@@ -5,9 +5,9 @@
         <!-- 文件基础信息折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('basicInfo')">
-                <Down v-bind="iconProps" v-if="isPanelOpen('basicInfo')" />
-                <Right v-bind="iconProps" v-if="!isPanelOpen('basicInfo')" />
-                <Info v-bind="iconProps" />
+                <Down v-if="isPanelOpen('basicInfo')" />
+                <Right v-if="!isPanelOpen('basicInfo')" />
+                <Info />
             </div>
             <div v-if="isPanelOpen('basicInfo')" class="panel-content">
                 <WorkInfo />
@@ -17,9 +17,9 @@
         <!-- 文件标签信息折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('tagInfo')">
-                <Down v-bind="iconProps" v-if="isPanelOpen('tagInfo')" />
-                <Right v-bind="iconProps" v-if="!isPanelOpen('tagInfo')" />
-                <TagOne v-bind="iconProps" />
+                <Down v-if="isPanelOpen('tagInfo')" />
+                <Right v-if="!isPanelOpen('tagInfo')" />
+                <TagOne />
             </div>
             <div v-if="isPanelOpen('tagInfo')" class="panel-content">
                 <WorkTag />
@@ -28,9 +28,9 @@
         <!-- 文件操作区域折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('operation')">
-                <Down v-bind="iconProps" v-if="isPanelOpen('operation')" />
-                <Right v-bind="iconProps" v-if="!isPanelOpen('operation')" />
-                <Setting v-bind="iconProps" />
+                <Down v-if="isPanelOpen('operation')" />
+                <Right v-if="!isPanelOpen('operation')" />
+                <Setting />
             </div>
             <div v-if="isPanelOpen('operation')" class="panel-content">
                 <WorkOperate />
@@ -39,9 +39,9 @@
         <!-- 文件夹面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('tree')">
-                <Down v-bind="iconProps" v-if="isPanelOpen('tree')" />
-                <Right v-bind="iconProps" v-if="!isPanelOpen('tree')" />
-                <FolderClose v-bind="iconProps" />
+                <Down v-if="isPanelOpen('tree')" />
+                <Right v-if="!isPanelOpen('tree')" />
+                <FolderClose />
             </div>
             <div v-if="isPanelOpen('tree')" class="panel-content">
                 <WorkTree />
@@ -51,16 +51,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import WorkTag from '@/components/HomeEntry/WorkPanel/WorkTag.vue';
 import WorkOperate from '@/components/HomeEntry/WorkPanel/WorkOperate.vue';
 import WorkInfo from '@/components/HomeEntry/WorkPanel/WorkInfo.vue';
 import WorkTree from '@/components/HomeEntry/WorkPanel/WorkTree.vue';
 import '@/assets/common.css';
 // import Utils from '@/utils/utils';
-import { useAppStore } from '@/stores/AppStore';
-const appStore = useAppStore()
-const iconProps = computed(() => (appStore.iconProps))
+// import { useAppStore } from '@/stores/AppStore';
+// const appStore = useAppStore()
+
 
 import { FolderClose, Down, Right, TagOne, Info, Setting } from '@icon-park/vue-next'
 // import Utils from '@/utils/utils';

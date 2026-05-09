@@ -5,10 +5,10 @@
             <div class="dir-item" :class="{ 'selected': curSltDirTreeItem?.dirInfo.id == item.dirInfo.id }">
                 <div v-if="!bShowDirIcon(item, 1) && !bShowDirIcon(item, 2)" class="icon-placeholder">
                 </div>
-                <Right v-bind="iconProps" size="18" v-if="bShowDirIcon(item, 1)" @click="btn_toggleExpand(item)" />
-                <Down v-bind="iconProps" size="18" v-if="bShowDirIcon(item, 2)" @click="btn_toggleExpand(item)" />
+                <Right size="18" v-if="bShowDirIcon(item, 1)" @click="btn_toggleExpand(item)" />
+                <Down size="18" v-if="bShowDirIcon(item, 2)" @click="btn_toggleExpand(item)" />
                 <div @click="btn_sltTreeItem(item)" class="no-wrap">
-                    <FolderClose v-bind="iconProps" :size="16" />
+                    <FolderClose :size="16" />
                     {{ item.name }}
                 </div>
             </div>
@@ -26,9 +26,6 @@ import '@/assets/common.css'
 import { FolderClose, Right, Down } from '@icon-park/vue-next'
 // import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
-import { useAppStore } from '@/stores/AppStore';
-const appStore = useAppStore()
-const iconProps = computed(() => (appStore.iconProps))
 
 const props = defineProps<{
     data: DatType.DirTreeItem[];

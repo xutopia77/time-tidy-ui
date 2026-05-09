@@ -13,6 +13,7 @@ import AdminNav from '@/components/AdminEntry/AdminNav.vue';
     padding: 0;
     margin: 0;
     display: flex;
+    flex-direction: column;
     height: 100%;
     width: 100%;
 }
@@ -20,17 +21,17 @@ import AdminNav from '@/components/AdminEntry/AdminNav.vue';
 .nav-section {
     padding: 0;
     margin: 0px;
-    height: 100%;
-    width: var(--xc-normal-height);
-    border-right: var(--xc-border);
+    height: calc(var(--xc-normal-height) + var(--xc-spacing-md));
+    width: 100%;
+    border-bottom: var(--xc-border);
     flex-shrink: 0;
 }
 
 .content-section {
     padding: 0;
     margin: 0;
-    height: 100%;
     flex: 1;
+    width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
 }

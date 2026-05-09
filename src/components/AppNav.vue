@@ -1,41 +1,46 @@
 <template>
     <div class="sidebar-nav">
         <div class="sidebar-logo">
-            <WindmillTwo v-bind="iconProps" size="28" />
+            <WindmillTwo size="28" />
         </div>
         
         <div class="sidebar-menu">
             <router-link class="menu-item" to="/" v-slot="{ isActive }">
                 <div class="menu-link" :class="{ 'active': isActive }">
-                    <Home v-bind="iconProps" size="22" />
-                    <span class="menu-text">主页</span>
+                    <Home size="22" />
+                    <span>主页</span>
+                </div>
+            </router-link>
+            
+            <router-link class="menu-item" to="/admin" v-slot="{ isActive }">
+                <div class="menu-link" :class="{ 'active': isActive }">
+                    <Dashboard size="22" />
+                    <span>管理</span>
                 </div>
             </router-link>
             
             <router-link class="menu-item" to="/admin/PrjSet" v-slot="{ isActive }">
                 <div class="menu-link" :class="{ 'active': isActive }">
-                    <System v-bind="iconProps" size="22" />
-                    <span class="menu-text">设置</span>
+                    <System size="22" />
+                    <span>设置</span>
                 </div>
             </router-link>
         </div>
         
         <div class="sidebar-footer">
             <button @click="btn_show_resent_msg()" class="menu-link notification-btn" title="查看最近消息提醒">
-                <Remind v-bind="iconProps" size="22" />
-                <span class="menu-text">消息</span>
+                <Remind size="22" />
+                <span>消息</span>
             </button>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { Home, System, WindmillTwo, Remind } from '@icon-park/vue-next'
+import { Home, System, WindmillTwo, Remind, Dashboard } from '@icon-park/vue-next'
 import '@/assets/common.css'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-const iconProps = computed(() => (appStore.iconProps))
 
 function btn_show_resent_msg() {
     appStore.bPageResentMsg = true;
@@ -76,7 +81,8 @@ function btn_show_resent_msg() {
 .menu-item {
     text-decoration: none;
     display: block;
-    margin-bottom: var(--xc-spacing-xs);
+    margin-bottom: var(--xc-spacing-xl);
+    width: 100%;
 }
 
 .menu-link {
@@ -85,7 +91,7 @@ function btn_show_resent_msg() {
     align-items: center;
     justify-content: center;
     gap: var(--xc-spacing-xs);
-    padding: var(--xc-spacing-md) var(--xc-spacing-sm);
+    /* padding: var(--xc-spacing-sm); */
     margin: 0 var(--xc-spacing-xs);
     border-radius: var(--xc-border-radius-md);
     color: var(--xc-text-color);
@@ -105,12 +111,6 @@ function btn_show_resent_msg() {
 .menu-link.active {
     background-color: var(--xc-primary-color);
     color: white;
-}
-
-.menu-text {
-    font-size: var(--xc-font-size-sm);
-    line-height: 1.2;
-    white-space: nowrap;
 }
 
 .sidebar-footer {
