@@ -174,7 +174,7 @@ interface SimilarityFile {
     create_time: string;
     type: string;
     extension: string;
-    tags: unknown[];
+    tags: DatType.FileItemTag[];
     selected: boolean;
 }
 
@@ -188,6 +188,24 @@ interface SimilarityGroup {
     files: SimilarityFile[];
 }
 
+interface SimilarityGroupApiResponse {
+    groupId: number;
+    hash: string;
+    fileCount: number;
+    totalSize: number;
+    createdAt: string;
+    files?: {
+        id: number;
+        name: string;
+        path: string;
+        size: number;
+        create_time: string;
+        type: string;
+        extension: string;
+        tags?: DatType.FileItemTag[];
+    }[];
+}
+
 const isDetecting = ref(false);
 const progress = ref(0);
 const showSettings = ref(false);
@@ -196,7 +214,7 @@ const currentPage = ref(1);
 const pageSize = ref(20);
 const totalGroups = ref(0);
 const totalFiles = ref(0);
-let progressTimer: any = null;
+let progressTimer: ReturnType<typeof setInterval> | null = null;
 
 const settings = ref({
     threshold: 90,
@@ -300,14 +318,14 @@ const loadSimilarityGroups = async (page = 1) => {
                 return;
             }
             
-            similarityGroups.value = data.groups.map((group: any) => ({
+            similarityGroups.value = data.groups.map((group: SimilarityGroupApiResponse) => ({
                 groupId: group.groupId,
                 hash: group.hash,
                 fileCount: group.fileCount,
                 totalSize: group.totalSize,
                 createdAt: group.createdAt,
                 selected: false,
-                files: (group.files || []).map((file: any) => ({
+                files: (group.files || []).map((file) => ({
                     id: file.id,
                     name: file.name,
                     path: file.path,
@@ -364,28 +382,22 @@ const deleteGroup = async (group: SimilarityGroup) => {
         return;
     }
 
-    try {
-        const response = await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_delete`, {
-            fileIds: selectedFiles.map(f => f.id)
-        });
-        
-        if (response.data.success) {
-            group.files = group.files.filter(f => !f.selected);
-            if (group.files.length === 0) {
-                const index = similarityGroups.value.indexOf(group);
-                if (index > -1) {
-                    similarityGroups.value.splice(index, 1);
-                    totalGroups.value--;
-                }
+    const req = new DatType.FileDeleteReq();
+    req.fileIds = selectedFiles.map(f => f.id);
+    req.bRemoveToDtrash = true;
+
+    const response = await Utils.files_delete(req);
+    
+    if (response.code === 0) {
+        group.files = group.files.filter(f => !f.selected);
+        if (group.files.length === 0) {
+            const index = similarityGroups.value.indexOf(group);
+            if (index > -1) {
+                similarityGroups.value.splice(index, 1);
+                totalGroups.value--;
             }
-            totalFiles.value -= selectedFiles.length;
-            Utils.addToast(response.data.message || '删除成功');
-        } else {
-            Utils.addToast(response.data.message || '删除失败');
         }
-    } catch (error) {
-        console.error('删除失败:', error);
-        Utils.addToast('删除失败');
+        totalFiles.value -= selectedFiles.length;
     }
 };
 
@@ -394,34 +406,28 @@ const deleteFile = async (file: SimilarityFile) => {
         return;
     }
 
-    try {
-        const response = await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_delete`, {
-            fileIds: [file.id]
+    const req = new DatType.FileDeleteReq();
+    req.fileIds = [file.id];
+    req.bRemoveToDtrash = true;
+
+    const response = await Utils.files_delete(req);
+    
+    if (response.code === 0) {
+        similarityGroups.value.forEach(group => {
+            const index = group.files.findIndex(f => f.id === file.id);
+            if (index > -1) {
+                group.files.splice(index, 1);
+                group.fileCount--;
+            }
+            if (group.files.length === 0) {
+                const groupIndex = similarityGroups.value.indexOf(group);
+                if (groupIndex > -1) {
+                    similarityGroups.value.splice(groupIndex, 1);
+                    totalGroups.value--;
+                }
+            }
         });
-        
-        if (response.data.success) {
-            similarityGroups.value.forEach(group => {
-                const index = group.files.findIndex(f => f.id === file.id);
-                if (index > -1) {
-                    group.files.splice(index, 1);
-                    group.fileCount--;
-                }
-                if (group.files.length === 0) {
-                    const groupIndex = similarityGroups.value.indexOf(group);
-                    if (groupIndex > -1) {
-                        similarityGroups.value.splice(groupIndex, 1);
-                        totalGroups.value--;
-                    }
-                }
-            });
-            totalFiles.value--;
-            Utils.addToast(response.data.message || '删除成功');
-        } else {
-            Utils.addToast(response.data.message || '删除失败');
-        }
-    } catch (error) {
-        console.error('删除失败:', error);
-        Utils.addToast('删除失败');
+        totalFiles.value--;
     }
 };
 

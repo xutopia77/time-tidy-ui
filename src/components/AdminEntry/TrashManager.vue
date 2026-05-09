@@ -124,6 +124,17 @@ interface TrashFile {
     checked: boolean;
 }
 
+interface TrashFileApiResponse {
+    id: number;
+    name: string;
+    path: string;
+    size: number;
+    create_time: string;
+    type: string;
+    extension: string;
+    root_path_id: number;
+}
+
 const trashFiles = ref<TrashFile[]>([]);
 const currentPage = ref(1);
 const pageSize = ref(50);
@@ -157,7 +168,7 @@ const loadTrashFiles = async (page = 1) => {
             const data = response.data.data;
             
             if (data.files && data.files.records) {
-                trashFiles.value = data.files.records.map((file: any) => ({
+                trashFiles.value = data.files.records.map((file: TrashFileApiResponse) => ({
                     id: file.id,
                     name: file.name,
                     path: file.path,
@@ -212,24 +223,14 @@ const restoreFile = async (file: TrashFile) => {
         return;
     }
 
-    try {
-        const response = await axios.post(`${appStore.srvPrefix}/api/v1/files_restore`, {
-            fileIds: [file.id]
-        });
-        
-        if (response.data.code === 0) {
-            const index = trashFiles.value.findIndex(f => f.id === file.id);
-            if (index > -1) {
-                trashFiles.value.splice(index, 1);
-                totalFiles.value--;
-            }
-            Utils.addToast('文件已恢复');
-        } else {
-            Utils.addToast(response.data.status || '恢复失败');
+    const response = await Utils.files_restore([file.id]);
+    
+    if (response.code === 0) {
+        const index = trashFiles.value.findIndex(f => f.id === file.id);
+        if (index > -1) {
+            trashFiles.value.splice(index, 1);
+            totalFiles.value--;
         }
-    } catch (error) {
-        console.error('恢复失败:', error);
-        Utils.addToast('恢复失败');
     }
 };
 
@@ -244,22 +245,12 @@ const restoreSelected = async () => {
         return;
     }
 
-    try {
-        const response = await axios.post(`${appStore.srvPrefix}/api/v1/files_restore`, {
-            fileIds: files.map(f => f.id)
-        });
-        
-        if (response.data.code === 0) {
-            const restoredIds = new Set(files.map(f => f.id));
-            trashFiles.value = trashFiles.value.filter(f => !restoredIds.has(f.id));
-            totalFiles.value -= files.length;
-            Utils.addToast(`已恢复 ${files.length} 个文件`);
-        } else {
-            Utils.addToast(response.data.status || '恢复失败');
-        }
-    } catch (error) {
-        console.error('恢复失败:', error);
-        Utils.addToast('恢复失败');
+    const response = await Utils.files_restore(files.map(f => f.id));
+    
+    if (response.code === 0) {
+        const restoredIds = new Set(files.map(f => f.id));
+        trashFiles.value = trashFiles.value.filter(f => !restoredIds.has(f.id));
+        totalFiles.value -= files.length;
     }
 };
 
@@ -268,25 +259,18 @@ const deleteFilePermanently = async (file: TrashFile) => {
         return;
     }
 
-    try {
-        const response = await axios.post(`${appStore.srvPrefix}/api/v1/files_delete`, {
-            fileIds: [file.id],
-            bRemoveToDtrash: false // Permanent delete
-        });
-        
-        if (response.data.code === 0) {
-            const index = trashFiles.value.findIndex(f => f.id === file.id);
-            if (index > -1) {
-                trashFiles.value.splice(index, 1);
-                totalFiles.value--;
-            }
-            Utils.addToast('已永久删除');
-        } else {
-            Utils.addToast(response.data.status || '删除失败');
+    const req = new DatType.FileDeleteReq();
+    req.fileIds = [file.id];
+    req.bRemoveToDtrash = false;
+
+    const response = await Utils.files_delete(req);
+    
+    if (response.code === 0) {
+        const index = trashFiles.value.findIndex(f => f.id === file.id);
+        if (index > -1) {
+            trashFiles.value.splice(index, 1);
+            totalFiles.value--;
         }
-    } catch (error) {
-        console.error('删除失败:', error);
-        Utils.addToast('删除失败');
     }
 };
 
@@ -301,22 +285,15 @@ const deleteSelectedPermanently = async () => {
         return;
     }
 
-    try {
-        const response = await axios.post(`${appStore.srvPrefix}/api/v1/files_delete`, {
-            fileIds: files.map(f => f.id),
-            bRemoveToDtrash: false // Permanent delete
-        });
-        
-        if (response.data.code === 0) {
-            trashFiles.value = trashFiles.value.filter(f => !f.checked);
-            totalFiles.value -= files.length;
-            Utils.addToast(`已永久删除 ${files.length} 个文件`);
-        } else {
-            Utils.addToast(response.data.status || '删除失败');
-        }
-    } catch (error) {
-        console.error('删除失败:', error);
-        Utils.addToast('删除失败');
+    const req = new DatType.FileDeleteReq();
+    req.fileIds = files.map(f => f.id);
+    req.bRemoveToDtrash = false;
+
+    const response = await Utils.files_delete(req);
+    
+    if (response.code === 0) {
+        trashFiles.value = trashFiles.value.filter(f => !f.checked);
+        totalFiles.value -= files.length;
     }
 };
 
@@ -326,34 +303,31 @@ const emptyTrash = async () => {
     }
 
     try {
-        // Get all trash file IDs first
         const req = new DatType.FilesGetReq();
         req.page = 0;
-        req.pageSize = 10000; // Get all files
-        req.statuss = [2];
+        req.pageSize = 10000;
+        req.statuses = [2];
 
         const response = await axios.post(`${appStore.srvPrefix}/api/v1/files_get`, req);
         
         if (response.data.code === 0 && response.data.data.files?.records) {
-            const allFileIds = response.data.data.files.records.map((f: any) => f.id);
+            const allFileIds = response.data.data.files.records.map((f: { id: number }) => f.id);
             
             if (allFileIds.length === 0) {
                 Utils.addToast('回收站已为空');
                 return;
             }
 
-            const deleteResponse = await axios.post(`${appStore.srvPrefix}/api/v1/files_delete`, {
-                fileIds: allFileIds,
-                bRemoveToDtrash: false
-            });
+            const deleteReq = new DatType.FileDeleteReq();
+            deleteReq.fileIds = allFileIds;
+            deleteReq.bRemoveToDtrash = false;
+
+            const deleteResponse = await Utils.files_delete(deleteReq);
             
-            if (deleteResponse.data.code === 0) {
+            if (deleteResponse.code === 0) {
                 trashFiles.value = [];
                 totalFiles.value = 0;
                 totalSize.value = 0;
-                Utils.addToast('回收站已清空');
-            } else {
-                Utils.addToast(deleteResponse.data.status || '清空失败');
             }
         }
     } catch (error) {

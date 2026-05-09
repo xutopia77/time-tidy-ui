@@ -378,23 +378,49 @@ async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.R
     return resp;
 }
 
-function files_delete(_req: DatTypes.FileDeleteReq): DatTypes.Resp {
-    const resp = new DatTypes.Resp()
-    axios.post(`${appStore.srvPrefix}/api/v1/files_delete`, JSON.stringify(_req))
-        .then((response) => {
-            console.log('file info:', response.data);
-            resp.code = response.data.code;
-            resp.status = response.data.status;
-            Utils.files_get(null);
-            Utils.message_notify({ content: `文件操作成功`, type: 'success' })
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-            resp.code = -1;
-            resp.status = error.message;
-            Utils.message_notify({ content: `文件操作失败\n${error.message}`, type: 'success' })
-        })
-    return resp;
+function files_delete(_req: DatTypes.FileDeleteReq): Promise<DatTypes.Resp> {
+    return new Promise((resolve) => {
+        const resp = new DatTypes.Resp();
+        axios.post(`${appStore.srvPrefix}/api/v1/files_delete`, JSON.stringify(_req))
+            .then((response) => {
+                console.log('file delete response:', response.data);
+                resp.code = response.data.code;
+                resp.status = response.data.status;
+                resp.data = response.data.data;
+                Utils.files_get(null);
+                Utils.message_notify({ content: `文件删除成功`, type: 'success' });
+                resolve(resp);
+            })
+            .catch((error) => {
+                console.error('Error deleting files:', error);
+                resp.code = -1;
+                resp.status = error.message;
+                Utils.message_notify({ content: `文件删除失败\n${error.message}`, type: 'error' });
+                resolve(resp);
+            });
+    });
+}
+
+function files_restore(fileIds: number[]): Promise<DatTypes.Resp> {
+    return new Promise((resolve) => {
+        const resp = new DatTypes.Resp();
+        axios.post(`${appStore.srvPrefix}/api/v1/files_restore`, JSON.stringify({ fileIds }))
+            .then((response) => {
+                console.log('file restore response:', response.data);
+                resp.code = response.data.code;
+                resp.status = response.data.status;
+                resp.data = response.data.data;
+                Utils.message_notify({ content: `文件恢复成功`, type: 'success' });
+                resolve(resp);
+            })
+            .catch((error) => {
+                console.error('Error restoring files:', error);
+                resp.code = -1;
+                resp.status = error.message;
+                Utils.message_notify({ content: `文件恢复失败\n${error.message}`, type: 'error' });
+                resolve(resp);
+            });
+    });
 }
 
 function project_health(): DatTypes.Resp {
@@ -837,6 +863,7 @@ class Utils {
     static tag_delete = tag_delete;
     static files_path_chg = files_path_chg;
     static files_delete = files_delete;
+    static files_restore = files_restore;
     static project_health = project_health;
 
     static async file_similarity_detect(): Promise<DatTypes.Resp> {
