@@ -46,7 +46,7 @@
             </div>
         </div>
 
-        <FileFooter class="file-footer" />
+        <FileOperationBar />
     </div>
 </template>
 
@@ -55,7 +55,7 @@ import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import FileNavHeader from '@/components/HomeEntry/FileExplorer/FileNavHeader.vue';
 import ImageCard from '@/components/HomeEntry/FileExplorer/ImageCard.vue';
 import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
-import FileFooter from '@/components/HomeEntry/FileExplorer/FileFooter.vue';
+import FileOperationBar from '@/components/HomeEntry/FileExplorer/FileOperationBar.vue';
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
@@ -236,14 +236,6 @@ document.addEventListener('keydown', handleEscKey);
     gap: var(--xc-spacing-md);
     padding: var(--xc-spacing-sm);
     align-content: flex-start;
-}
-
-.file-footer {
-    padding: 0px;
-    margin: 0px;
-    width: 100%;
-    height: var(--xc-normal-height);
-    flex-shrink: 0;
 }
 
 .fab-container {
