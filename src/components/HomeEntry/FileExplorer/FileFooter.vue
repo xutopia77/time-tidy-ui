@@ -1,27 +1,11 @@
 <template>
     <div class="footer-container">
-        <div class="pagination">
-            <button @click="btnclk_prevPage" :disabled="currentPage === 1" class="xc-button pagination-btn">上一页</button>
-            <span>第 {{ currentPage }} 页 / 共 {{ totalPages }} 页</span>
-            <button @click="btnclk_nextPage" :disabled="currentPage === totalPages"
-                class="xc-button pagination-btn">下一页</button>
-            <span>总数: {{ totalItems }}</span>
-            <label>
-                每页数量:
-                <select v-model="pageSize" @change="btnclk_chgePageSize" class="xc-select pagination-slt">
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                    <option value="200">200</option>
-                    <option value="500">500</option>
-                </select>
-            </label>
+        <div class="footer-info">
+            <span>{{ footerInfo }}</span>
         </div>
-        <div><span>{{ footerInfo }}</span></div>
-        <div class="operate-contianer">
+        <div class="operate-container">
             <button @click="btnclk_set_file_level()" class="xc-button op-button">设置等级</button>
-            <select v-model="sltLevel" class="xc-select pagination-slt">
+            <select v-model="sltLevel" class="xc-select op-select">
                 <option value="sys_score1">1☆</option>
                 <option value="sys_score2">2☆</option>
                 <option value="sys_score3">3☆</option>
@@ -44,51 +28,9 @@ import { computed, ref } from 'vue';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
-const appStore = useAppStore()
-import '@/assets/common.css'
 
-const totalItems = computed(() => {
-    return appStore.curFileTotal
-});
-
-const pageSize = computed({
-    get: () => {
-        return appStore.searchCon.pageSize;
-    },
-    set: (newValue) => {
-        appStore.searchCon.pageSize = Number(newValue);
-    }
-});
-
-const currentPage = computed(() => {
-    return appStore.searchCon.page
-});
-
-const totalPages = computed(() => {
-    const re = Math.ceil(appStore.curFileTotal / appStore.searchCon.pageSize)
-    return re === 0 ? 1 : re;
-});
-
-const btnclk_prevPage = () => {
-    if (appStore.searchCon.page > 1) {
-        appStore.searchCon.page--;
-    }
-    Utils.files_get(null)
-};
-
-const btnclk_nextPage = () => {
-    if (appStore.searchCon.page < totalPages.value) {
-        appStore.searchCon.page++;
-    }
-    Utils.files_get(null)
-};
-
-function btnclk_chgePageSize() {
-    appStore.searchCon.page = 1;
-    Utils.files_get(null)
-}
-
-// ------
+const appStore = useAppStore();
+import '@/assets/common.css';
 
 const footerInfo = computed(() => {
     if (appStore.curFiles == null) {
@@ -99,16 +41,15 @@ const footerInfo = computed(() => {
         if (file.checked) {
             checkedNum++;
         }
-    })
+    });
     if (checkedNum == 0) {
         return '';
     }
     return `选中数量: ${checkedNum}`;
-})
+});
 
-// ------
 function btnclk_operate_file() {
-    appStore.bPageFileTransfer = true
+    appStore.bPageFileTransfer = true;
 }
 
 function btnclk_delete_file() {
@@ -119,22 +60,22 @@ function btnclk_delete_file() {
     };
     for (const item of appStore.curFiles) {
         if (item.checked) {
-            req.fileIds.push(item.id)
+            req.fileIds.push(item.id);
         }
     }
     for (const item of appStore.curDirs) {
         if (item.checked) {
-            req.dirIds.push(item.id)
+            req.dirIds.push(item.id);
         }
     }
     if (req.fileIds.length == 0 && req.dirIds.length == 0) {
-        Utils.addToast('请选择要操作的文件')
+        Utils.addToast('请选择要操作的文件');
         return;
     }
-    Utils.files_delete(req)
+    Utils.files_delete(req);
 }
 
-const sltLevel = ref("sys_score3")
+const sltLevel = ref("sys_score3");
 
 function btnclk_set_file_level() {
     const req: DatType.FilesTagSetReq = {
@@ -142,47 +83,44 @@ function btnclk_set_file_level() {
         tagName: ''
     };
     if (sltLevel.value == '') {
-        Utils.addToast('请选择要设置的等级')
+        Utils.addToast('请选择要设置的等级');
     }
-    req.tagName = sltLevel.value
-    Utils.files_tag_set(req)
+    req.tagName = sltLevel.value;
+    Utils.files_tag_set(req);
 }
-
 </script>
 <style scoped>
 .footer-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 0px;
+    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
     color: var(--xc-text-color);
     background-color: var(--xc-background-color);
+    border-top: var(--xc-border);
+    gap: var(--xc-spacing-md);
 }
 
-.pagination {
+.footer-info {
+    font-size: var(--xc-font-size-sm);
+    color: var(--xc-text-color-secondary);
+}
+
+.operate-container {
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 0px;
-    color: var(--xc-text-color);
-    background-color: var(--xc-background-color);
+    gap: var(--xc-spacing-xs);
 }
 
-.pagination-btn {
-    margin: 0;
-    padding: 0px;
-    height: 20px;
-    font-size: small;
+.op-button {
+    height: var(--xc-normal-height);
+    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
+    font-size: var(--xc-font-size-sm);
 }
 
-.pagination-slt {
-    font-size: small;
-    padding: 0px;
-    margin: 0px;
-    height: 20px;
+.op-select {
+    height: var(--xc-normal-height);
+    font-size: var(--xc-font-size-sm);
+    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
 }
 </style>

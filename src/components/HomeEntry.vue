@@ -1,6 +1,9 @@
 <template>
     <div class="file-home">
-        <FileSearchBar class="file-search-bar-section" />
+        <div class="top-bar">
+            <FileSearchBar class="file-search-bar-section" />
+            <FilePagination class="file-pagination-section" />
+        </div>
         <div class="file-content-wrapper">
             <FileExplorer class="file-explorer-section" />
             <WorkPanel class="work-panel-section" />
@@ -9,6 +12,7 @@
 </template>
 <script setup lang="ts">
 import FileSearchBar from '@/components/HomeEntry/FileSearchBar.vue';
+import FilePagination from '@/components/HomeEntry/FileExplorer/FilePagination.vue';
 import FileExplorer from '@/components/HomeEntry/FileExplorer.vue';
 import WorkPanel from '@/components/HomeEntry/WorkPanel.vue';
 import '@/assets/common.css'
@@ -24,9 +28,23 @@ import '@/assets/common.css'
     flex-direction: column;
 }
 
-.file-search-bar-section {
+.top-bar {
+    display: flex;
+    align-items: stretch;
     flex-shrink: 0;
     width: 100%;
+    border-bottom: var(--xc-border);
+}
+
+.file-search-bar-section {
+    flex: 1;
+    border-bottom: none;
+}
+
+.file-pagination-section {
+    flex-shrink: 0;
+    border-bottom: none;
+    border-left: var(--xc-border);
 }
 
 .file-content-wrapper {
