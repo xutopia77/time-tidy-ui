@@ -19,6 +19,12 @@
             </div>
         </router-link>
 
+        <router-link class="no-underline-link" to="/admin/TrashManager"  v-slot="{ isActive }">
+            <div class="nav-item" :class="{'active': isActive}">
+                <span>回收站</span>
+            </div>
+        </router-link>
+
         <router-link class="no-underline-link" to="/admin/DbInfo"  v-slot="{ isActive }">
             <div class="nav-item" :class="{'active': isActive}">
                 <span>数据库</span>

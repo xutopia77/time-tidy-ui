@@ -174,7 +174,7 @@ interface SimilarityFile {
     create_time: string;
     type: string;
     extension: string;
-    tags: any[];
+    tags: unknown[];
     selected: boolean;
 }
 
