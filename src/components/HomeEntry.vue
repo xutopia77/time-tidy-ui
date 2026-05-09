@@ -2,6 +2,7 @@
     <div class="file-home">
         <div class="top-bar">
             <FileSearchBar class="file-search-bar-section" />
+            <PageSettingsButton class="page-settings-button" />
             <FilePagination class="file-pagination-section" />
         </div>
         <div class="file-content-wrapper">
@@ -12,6 +13,7 @@
 </template>
 <script setup lang="ts">
 import FileSearchBar from '@/components/HomeEntry/FileSearchBar.vue';
+import PageSettingsButton from '@/components/HomeEntry/PageSettingsButton.vue';
 import FilePagination from '@/components/HomeEntry/FileExplorer/FilePagination.vue';
 import FileExplorer from '@/components/HomeEntry/FileExplorer.vue';
 import WorkPanel from '@/components/HomeEntry/WorkPanel.vue';
@@ -39,6 +41,11 @@ import '@/assets/common.css'
 .file-search-bar-section {
     flex: 1;
     border-bottom: none;
+}
+
+.page-settings-button {
+    flex-shrink: 0;
+    margin: 0 var(--xc-spacing-xs);
 }
 
 .file-pagination-section {

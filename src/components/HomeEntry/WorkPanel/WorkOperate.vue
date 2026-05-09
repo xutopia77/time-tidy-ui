@@ -5,8 +5,6 @@
         <button @click="btnclk_delete_file" class="xc-button op-button">删除</button>
         <button @click="btnclk_similarity_file" class="xc-button op-button">{{ fileSimilarityBtnName }}</button>
         <button @click="btnclk_search_setting" class="xc-button op-button">搜索筛选</button>
-
-        <button @click="btnclk_page_set" class="xc-button op-button">界面设置</button>
     </div>
 </template>
 
@@ -61,12 +59,6 @@ function btnclk_search_setting() {
 function btnclk_file_transfer() {
     appStore.bPageFileTransfer = true
 }
-function btnclk_page_set() {
-    appStore.bPageSet = true
-}
-
-
-
 </script>
 
 <style scoped>

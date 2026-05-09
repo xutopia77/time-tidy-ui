@@ -14,17 +14,6 @@
             </div>
         </div>
 
-        <!-- 文件标签信息折叠面板 -->
-        <div class="collapse-panel">
-            <div class="panel-header" @click="togglePanel('tagInfo')">
-                <Down v-if="isPanelOpen('tagInfo')" />
-                <Right v-if="!isPanelOpen('tagInfo')" />
-                <TagOne />
-            </div>
-            <div v-if="isPanelOpen('tagInfo')" class="panel-content">
-                <WorkTag />
-            </div>
-        </div>
         <!-- 文件操作区域折叠面板 -->
         <div class="collapse-panel">
             <div class="panel-header" @click="togglePanel('operation')">
@@ -52,23 +41,15 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import WorkTag from '@/components/HomeEntry/WorkPanel/WorkTag.vue';
 import WorkOperate from '@/components/HomeEntry/WorkPanel/WorkOperate.vue';
 import WorkInfo from '@/components/HomeEntry/WorkPanel/WorkInfo.vue';
 import WorkTree from '@/components/HomeEntry/WorkPanel/WorkTree.vue';
 import '@/assets/common.css';
-// import Utils from '@/utils/utils';
-// import { useAppStore } from '@/stores/AppStore';
-// const appStore = useAppStore()
 
+import { FolderClose, Down, Right, Info, Setting } from '@icon-park/vue-next'
 
-import { FolderClose, Down, Right, TagOne, Info, Setting } from '@icon-park/vue-next'
-// import Utils from '@/utils/utils';
-
-// 管理每个折叠面板的展开状态
 const panelStates = ref({
     basicInfo: true,
-    tagInfo: true,
     operation: true,
     tree: true
 });

@@ -24,9 +24,9 @@
                         <h4 class="filter-section-title">文件类型</h4>
                         <div class="filter-options">
                             <button v-for="type in fileTypes" :key="type.value" 
-                                @click="selectedFileType = type.value"
+                                @click="toggleFileType(type.value)"
                                 class="filter-option-btn"
-                                :class="{ 'active': selectedFileType === type.value }">
+                                :class="{ 'active': isFileTypeSelected(type.value) }">
                                 {{ type.label }}
                             </button>
                         </div>
@@ -67,6 +67,35 @@
                             </button>
                         </div>
                     </div>
+                    
+                    <div class="filter-section">
+                        <h4 class="filter-section-title">
+                            文件标签 ({{ selectedTags.length }})
+                        </h4>
+                        <div class="tag-options-header">
+                            <label class="tag-option-label">
+                                <input type="checkbox" v-model="bReverseSltTag" class="tag-checkbox" />
+                                反选
+                            </label>
+                            <label class="tag-option-label">
+                                无标签:
+                                <select v-model="bNoTag" class="tag-select">
+                                    <option value="">全部</option>
+                                    <option value="false">有标签</option>
+                                    <option value="true">无标签</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="filter-options tag-options">
+                            <button v-for="tag in fileTags" :key="tag.name"
+                                @click="toggleTag(tag.name)"
+                                class="filter-option-btn tag-btn"
+                                :class="{ 'active': isTagSelected(tag.name) }"
+                                :style="isTagSelected(tag.name) ? { backgroundColor: tag.color, borderColor: tag.color } : {}">
+                                {{ Utils.tagName2Display(tag.name) }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -74,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, computed } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
@@ -83,14 +112,16 @@ const appStore = useAppStore();
 
 const showSearchPanel = ref(false);
 const searchKeyword = ref('');
-const selectedFileType = ref('');
+const selectedFileTypes = ref<string[]>([]);
+const selectedTags = ref<string[]>([]);
 const sortBy = ref('time');
 const sortOrder = ref('asc');
 const pathType = ref('curPath');
+const bReverseSltTag = ref(false);
+const bNoTag = ref('');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 
 const fileTypes = [
-    { value: '', label: '全部' },
     { value: 'image', label: '图片' },
     { value: 'video', label: '视频' },
     { value: 'audio', label: '音频' },
@@ -105,15 +136,25 @@ const sortOptions = [
     { value: 'type', label: '类型' }
 ];
 
+const fileTags = computed(() => {
+    const uniqueTags: DatType.FileItemTag[] = [];
+    for (const item of appStore.allTags) {
+        const tmpTag = new DatType.FileItemTag();
+        tmpTag.name = item.name;
+        tmpTag.color = item.color;
+        uniqueTags.push(tmpTag);
+    }
+    return uniqueTags;
+});
+
 watch(() => appStore.searchCon, (newVal) => {
     sortBy.value = newVal.sortBy;
     sortOrder.value = newVal.sortOrder;
     pathType.value = newVal.pathType;
-    if (newVal.types && newVal.types.length > 0) {
-        selectedFileType.value = newVal.types[0];
-    } else {
-        selectedFileType.value = '';
-    }
+    selectedFileTypes.value = newVal.types ? [...newVal.types] : [];
+    selectedTags.value = newVal.tags ? [...newVal.tags] : [];
+    bReverseSltTag.value = newVal.bReverseSltTag;
+    bNoTag.value = newVal.noTag;
 }, { immediate: true, deep: true });
 
 const openSearchPanel = async () => {
@@ -128,16 +169,40 @@ const closeSearchPanel = () => {
     showSearchPanel.value = false;
 };
 
+const toggleFileType = (typeValue: string) => {
+    const index = selectedFileTypes.value.indexOf(typeValue);
+    if (index === -1) {
+        selectedFileTypes.value.push(typeValue);
+    } else {
+        selectedFileTypes.value.splice(index, 1);
+    }
+};
+
+const isFileTypeSelected = (typeValue: string) => {
+    return selectedFileTypes.value.includes(typeValue);
+};
+
+const toggleTag = (tagName: string) => {
+    const index = selectedTags.value.indexOf(tagName);
+    if (index === -1) {
+        selectedTags.value.push(tagName);
+    } else {
+        selectedTags.value.splice(index, 1);
+    }
+};
+
+const isTagSelected = (tagName: string) => {
+    return selectedTags.value.includes(tagName);
+};
+
 const handleSearch = async () => {
     appStore.searchCon.sortBy = sortBy.value;
     appStore.searchCon.sortOrder = sortOrder.value;
     appStore.searchCon.pathType = pathType.value;
-    
-    if (selectedFileType.value) {
-        appStore.searchCon.types = [selectedFileType.value as DatType.FileType];
-    } else {
-        appStore.searchCon.types = [];
-    }
+    appStore.searchCon.types = selectedFileTypes.value as DatType.FileType[];
+    appStore.searchCon.tags = [...selectedTags.value];
+    appStore.searchCon.bReverseSltTag = bReverseSltTag.value;
+    appStore.searchCon.noTag = bNoTag.value;
     
     await Utils.files_get();
     closeSearchPanel();
@@ -381,6 +446,52 @@ const clearSearch = () => {
 .order-btn.active {
     background-color: var(--xc-primary-color);
     border-color: var(--xc-primary-color);
+    color: white;
+}
+
+.tag-options-header {
+    display: flex;
+    align-items: center;
+    gap: var(--xc-spacing-md);
+    margin-bottom: var(--xc-spacing-sm);
+    flex-wrap: wrap;
+}
+
+.tag-option-label {
+    display: flex;
+    align-items: center;
+    gap: var(--xc-spacing-xs);
+    font-size: var(--xc-font-size-sm);
+    color: var(--xc-text-color-secondary);
+    cursor: pointer;
+}
+
+.tag-checkbox {
+    cursor: pointer;
+}
+
+.tag-select {
+    height: 24px;
+    padding: 2px var(--xc-spacing-xs);
+    background-color: var(--xc-input-bg-color);
+    border: 1px solid var(--xc-input-border-color);
+    border-radius: var(--xc-border-radius-sm);
+    color: var(--xc-text-color);
+    font-size: var(--xc-font-size-xs);
+    outline: none;
+    cursor: pointer;
+}
+
+.tag-options {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.tag-btn {
+    position: relative;
+}
+
+.tag-btn.active {
     color: white;
 }
 </style>

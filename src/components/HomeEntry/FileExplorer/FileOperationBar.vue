@@ -28,6 +28,14 @@
                         </select>
                     </div>
                     
+                    <div class="tag-input-wrapper">
+                        <input v-model="newTag" @keyup.enter="btnclk_add_tag" placeholder="添加标签..."
+                            class="tag-input" list="tagSuggestions" @click.stop />
+                        <datalist id="tagSuggestions">
+                            <option v-for="tag in tagSuggestions" :key="tag" :value="tag"></option>
+                        </datalist>
+                    </div>
+                    
                     <button @click="btnclk_move_file" class="action-btn">
                         <span class="action-icon">📁</span>
                         <span class="action-text">移动</span>
@@ -80,6 +88,31 @@ const showBar = computed(() => {
 });
 
 const sltLevel = ref("sys_score3");
+const newTag = ref('');
+
+const tagSuggestions = computed(() => {
+    return appStore.allTags.map(tag => Utils.tagName2Display(tag.name));
+});
+
+const fileTags = computed(() => {
+    const fSlt: DatType.File[] = [];
+    for (const item of appStore.curFiles) {
+        if (item.checked)
+            fSlt.push(item);
+    }
+    if (fSlt.length > 0) {
+        const allTags: DatType.FileItemTag[] = [];
+        for (const item of fSlt) {
+            for (const tag of item.tags) {
+                if (!allTags.some(t => t.name === tag.name)) {
+                    allTags.push(tag);
+                }
+            }
+        }
+        return allTags;
+    }
+    return [];
+});
 
 const clearSelection = () => {
     if (appStore.curFiles) {
@@ -160,6 +193,55 @@ const btnclk_delete_file = () => {
     
     Utils.files_delete(req);
     clearSelection();
+};
+
+const btnclk_add_tag = () => {
+    if (!newTag.value.trim()) {
+        return;
+    }
+    
+    const req: DatType.FilesTagSetReq = {
+        fileIds: [],
+        tagName: newTag.value.trim()
+    };
+    
+    if (appStore.curFiles) {
+        appStore.curFiles.forEach((file) => {
+            if (file.checked) {
+                req.fileIds.push(file.id);
+            }
+        });
+    }
+    
+    if (req.fileIds.length === 0) {
+        Utils.addToast('请选择要操作的文件');
+        return;
+    }
+    
+    Utils.files_tag_set(req);
+    newTag.value = '';
+};
+
+const btnclk_remove_tag = (tag: DatType.FileItemTag) => {
+    const req: DatType.FilesTagSetReq = {
+        tagName: tag.name,
+        fileIds: []
+    };
+    
+    if (appStore.curFiles) {
+        appStore.curFiles.forEach((file) => {
+            if (file.checked) {
+                req.fileIds.push(file.id);
+            }
+        });
+    }
+    
+    if (req.fileIds.length === 0) {
+        Utils.addToast('请选择要操作的文件');
+        return;
+    }
+    
+    Utils.files_tag_delete(req);
 };
 </script>
 
@@ -281,6 +363,84 @@ const btnclk_delete_file = () => {
 
 .level-select:focus {
     border-color: var(--xc-input-border-color-focus);
+}
+
+.tag-input-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.tag-input {
+    width: 120px;
+    height: 32px;
+    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
+    background-color: var(--xc-input-bg-color);
+    border: 1px solid var(--xc-input-border-color);
+    border-radius: var(--xc-border-radius-sm);
+    color: var(--xc-text-color);
+    font-size: var(--xc-font-size-sm);
+    outline: none;
+    cursor: pointer;
+    transition: all var(--xc-transition-normal);
+}
+
+.tag-input:hover {
+    background-color: var(--xc-input-bg-color-hover);
+    border-color: var(--xc-border-color);
+}
+
+.tag-input:focus {
+    border-color: var(--xc-input-border-color-focus);
+}
+
+.tag-input::placeholder {
+    color: var(--xc-text-color-secondary);
+}
+
+.selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--xc-spacing-xs);
+    padding-left: var(--xc-spacing-lg);
+    border-left: 1px solid var(--xc-border-color);
+    max-width: 300px;
+    overflow-x: auto;
+}
+
+.selected-tag {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--xc-border-radius-sm);
+    font-size: var(--xc-font-size-xs);
+    color: white;
+    white-space: nowrap;
+}
+
+.tag-name {
+    line-height: 1;
+}
+
+.tag-delete-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color var(--xc-transition-fast);
+}
+
+.tag-delete-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .slide-up-enter-active,
