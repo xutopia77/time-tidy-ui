@@ -46,6 +46,8 @@
             </div>
         </div>
 
+        <FilePagination v-if="showPagination" class="file-pagination" />
+        
         <FileOperationBar />
     </div>
 </template>
@@ -56,6 +58,7 @@ import FileNavHeader from '@/components/HomeEntry/FileExplorer/FileNavHeader.vue
 import ImageCard from '@/components/HomeEntry/FileExplorer/ImageCard.vue';
 import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
 import FileOperationBar from '@/components/HomeEntry/FileExplorer/FileOperationBar.vue';
+import FilePagination from '@/components/HomeEntry/FileExplorer/FilePagination.vue';
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
@@ -71,6 +74,11 @@ watch([() => appStore.curFiles, () => appStore.fileShowType], () => {
 const dirs = computed(() => appStore.curDirs);
 
 const currentPath = computed(() => appStore.curPath);
+
+const showPagination = computed(() => {
+    const totalPages = Math.ceil(appStore.curFileTotal / appStore.searchCon.pageSize);
+    return totalPages > 1;
+});
 
 // 记录 Shift 键是否按下
 const isShiftPressed = ref(false);
@@ -236,6 +244,12 @@ document.addEventListener('keydown', handleEscKey);
     gap: var(--xc-spacing-md);
     padding: var(--xc-spacing-sm);
     align-content: flex-start;
+}
+
+.file-pagination {
+    flex-shrink: 0;
+    border-top: var(--xc-border);
+    border-bottom: none;
 }
 
 .fab-container {

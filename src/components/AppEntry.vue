@@ -30,7 +30,7 @@ import HeaderPanel from '@/components/AppNav.vue';
 import MessageToast from '@/components/MessageNotify/MessageToast.vue'
 import RecentMessagesPanel from '@/components/MessageNotify/RecentMessagesPanel.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
-import SearchSet from '@/components/HomeEntry/WorkPanel/SearchSet.vue'
+// import SearchSet from '@/components/HomeEntry/WorkPanel/SearchSet.vue'
 import FileTransfer from '@/components/HomeEntry/WorkPanel/FileTransfer.vue'
 import PageSet from '@/components/HomeEntry/WorkPanel/PageSet.vue'
 import '@/assets/common.css'

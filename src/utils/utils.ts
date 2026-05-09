@@ -288,9 +288,9 @@ function tags_get() {
                     continue;
                 }
                 const tagItem = new DatTypes.TagItem();
-                tagItem.name = item.Name;
-                tagItem.color = item.Color == '' ? tagItem.color : item.Color;
-                tagItem.id = item.ID;
+                tagItem.name = item.name;
+                tagItem.color = item.color == '' ? tagItem.color : item.color;
+                tagItem.id = item.id;
                 appStore.allTags.push(tagItem);
             }
         })

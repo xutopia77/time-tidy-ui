@@ -7,18 +7,6 @@ const pageCtrlInit: DataTypes.AppPageCtrl = {
     home: { idx: 50, bShow: true },
 };
 
-// const fileSearchConditionInit: DataTypes.FileSearchCondition = {
-//     sortBy: '', // '', name, size, time, type
-//     sortOrder: 'asc', // asc, desc
-//     pathType: 'curPath', // curPath, allPath
-//     page: 1,
-//     pageSize: 50,
-//     tags: [], // tags
-//     noTag: '',
-//     bReverseSltTag: false,
-// };
-
-
 // 定义消息类型
 export interface ToastMessage {
     id: number
@@ -73,8 +61,8 @@ export const useAppStore = defineStore('app', {
     state: (): AppStore => ({
         platform: DataTypes.PlatformType.browser,
         envMode: DataTypes.EnvModeType.pro,
-        cardWidth: 220, // 卡片宽度
-        cardHeight: 220, // 卡片高度
+        cardWidth: 216, // 卡片宽度
+        cardHeight: 216, // 卡片高度
         // 
         srvPrefix: 'http://127.0.0.1:38080', // debug，electron
         // srvPrefix: '', // release

@@ -3,20 +3,16 @@
         <div class="top-bar">
             <FileSearchBar class="file-search-bar-section" />
             <PageSettingsButton class="page-settings-button" />
-            <FilePagination class="file-pagination-section" />
         </div>
         <div class="file-content-wrapper">
             <FileExplorer class="file-explorer-section" />
-            <WorkPanel class="work-panel-section" />
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import FileSearchBar from '@/components/HomeEntry/FileSearchBar.vue';
 import PageSettingsButton from '@/components/HomeEntry/PageSettingsButton.vue';
-import FilePagination from '@/components/HomeEntry/FileExplorer/FilePagination.vue';
 import FileExplorer from '@/components/HomeEntry/FileExplorer.vue';
-import WorkPanel from '@/components/HomeEntry/WorkPanel.vue';
 import '@/assets/common.css'
 </script>
 
@@ -48,12 +44,6 @@ import '@/assets/common.css'
     margin: 0 var(--xc-spacing-xs);
 }
 
-.file-pagination-section {
-    flex-shrink: 0;
-    border-bottom: none;
-    border-left: var(--xc-border);
-}
-
 .file-content-wrapper {
     flex: 1;
     display: flex;
@@ -68,17 +58,5 @@ import '@/assets/common.css'
     height: 100%;
     flex: 1;
     overflow: hidden;
-}
-
-.work-panel-section {
-    max-width: 400px;
-    min-width: 200px;
-    width: 20%;
-    margin: 0px;
-    padding: 0px;
-    height: 100%;
-    border-left: var(--xc-border);
-    overflow-y: auto;
-    overflow-x: hidden;
 }
 </style>
