@@ -224,6 +224,9 @@ function handleProgressUpdate(data: DatType.Resp<DatType.ProgressUpdateData>) {
             case DatType.ProgressStep.Hash:
                 appStore.progressHash = progress
                 break
+            case DatType.ProgressStep.Similarity:
+                appStore.progressSimilarity = progress
+                break
         }
     }
 }

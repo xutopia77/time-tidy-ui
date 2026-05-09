@@ -8,7 +8,7 @@
                 </div>
                 <div class="form-item">
                     <label class="xc-label">仓库路径:</label>
-                    <input type="text" v-model="repoPath[0].path" placeholder="输入仓库路径"
+                    <input type="text" v-model="repoPath.path" placeholder="输入仓库路径"
                         class="xc-input-text text-base-path" />
                 </div>
                 <div class="button-group">
@@ -111,11 +111,9 @@ function btnclk_clean_log() {
 }
 
 // ------------------------------------
-const repoPath = ref<DatType.Repo[]>([{ path: '' }, { path: '' }, { path: '' }])
+const repoPath = ref<DatType.Repo>(new DatType.Repo())
 watch(() => appStore.prj.repo, () => {
-    for (let i = 0; i < appStore.prj.repo.length; i++) {
-        repoPath.value[i] = appStore.prj.repo[i]
-    }
+    repoPath.value = appStore.prj.repo
 })
 
 // ------------------------------------
@@ -237,17 +235,15 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
         }
     }
 
-    for (const repo of repoPath.value) {
-        repo.path = Utils.convertToLinuxPath(repo.path)
-    }
+    repoPath.value.path = Utils.convertToLinuxPath(repoPath.value.path)
     const req: DatType.PrjSetReq = new DatType.PrjSetReq()
     if (types.length > 0) {
         req.type = types
         if (types.length == 1) {
             if (DatType.PrjSetType.Create == types[0]) {
                 req.prj.path = Utils.convertToLinuxPath(prjPath.value)
-                for (const repo of repoPath.value) {
-                    if (repo.path != '') { req.prj.repo.push(repo) }
+                if (repoPath.value.path != '') {
+                    req.prj.repo = repoPath.value
                 }
             } else if (DatType.PrjSetType.Open == types[0]) {
                 req.prj.path = Utils.convertToLinuxPath(prjPath.value)
@@ -276,8 +272,8 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
             req.type.push(DatType.PrjSetType.GenHashIncre)
         }
         req.prj.path = Utils.convertToLinuxPath(prjPath.value)
-        for (const repo of repoPath.value) {
-            if (repo.path != '') { req.prj.repo.push(repo) }
+        if (repoPath.value.path != '') {
+            req.prj.repo = repoPath.value
         }
     }
     Utils.project_set(req)
@@ -285,9 +281,7 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
 
 onMounted(() => {
     prjPath.value = appStore.prj.path == null ? "" : appStore.prj.path
-    for (let i = 0; i < appStore.prj.repo.length; i++) {
-        repoPath.value[i] = appStore.prj.repo[i]
-    }
+    repoPath.value = appStore.prj.repo
 })
 
 </script>

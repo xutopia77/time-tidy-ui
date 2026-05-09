@@ -55,6 +55,7 @@ export type AppStore = {
     progressThumbnail: DataTypes.ProgressData,
     progressExif: DataTypes.ProgressData,
     progressHash: DataTypes.ProgressData,
+    progressSimilarity: DataTypes.ProgressData,
 }
 
 export const useAppStore = defineStore('app', {
@@ -96,6 +97,7 @@ export const useAppStore = defineStore('app', {
         progressThumbnail: { step: DataTypes.ProgressStep.Thumbnail, current: 0, total: 0, percent: 0, status: '', isRunning: false },
         progressExif: { step: DataTypes.ProgressStep.Exif, current: 0, total: 0, percent: 0, status: '', isRunning: false },
         progressHash: { step: DataTypes.ProgressStep.Hash, current: 0, total: 0, percent: 0, status: '', isRunning: false },
+        progressSimilarity: { step: DataTypes.ProgressStep.Similarity, current: 0, total: 0, percent: 0, status: '', isRunning: false },
 
     }),
     actions: {

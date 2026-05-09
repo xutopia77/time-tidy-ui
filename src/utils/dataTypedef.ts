@@ -26,7 +26,8 @@ export enum ProgressStep {
     Thumbnail = 'thumbnail',
     Exif = 'exif',
     Hash = 'hash',
-    Sync = 'sync'
+    Sync = 'sync',
+    Similarity = 'similarity'
 }
 
 // 进度数据
@@ -354,7 +355,7 @@ export class Prj {
     path: string = '';
     thumbPath: string = '';
     dbPath: string = '';
-    repo: Repo[] = []
+    repo: Repo = new Repo();
 }
 
 export class PrjSetReq {

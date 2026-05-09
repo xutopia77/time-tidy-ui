@@ -156,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
@@ -206,15 +206,16 @@ interface SimilarityGroupApiResponse {
     }[];
 }
 
-const isDetecting = ref(false);
-const progress = ref(0);
 const showSettings = ref(false);
 const similarityGroups = ref<SimilarityGroup[]>([]);
 const currentPage = ref(1);
 const pageSize = ref(20);
 const totalGroups = ref(0);
 const totalFiles = ref(0);
-let progressTimer: ReturnType<typeof setInterval> | null = null;
+
+const progressSimilarity = computed(() => appStore.progressSimilarity);
+const isDetecting = computed(() => progressSimilarity.value.isRunning);
+const progress = computed(() => progressSimilarity.value.percent);
 
 const settings = ref({
     threshold: 90,
@@ -237,10 +238,12 @@ const statusClass = computed(() => {
     return 'idle';
 });
 
+// todo-fix 缩略图生成规则统一使用utils模块中的接口
 const getThumbnailUrl = (fileId: number) => {
     return `${appStore.srvPrefix}/static_thumb/${fileId}_thumbnail.jpg`;
 };
 
+// todo-fix 文件大小显示字符规则统一使用utils模块中的接口
 const formatSize = (size: number) => {
     if (size < 1024) return size + ' B';
     if (size < 1024 * 1024) return (size / 1024).toFixed(2) + ' KB';
@@ -248,58 +251,29 @@ const formatSize = (size: number) => {
 };
 
 const startDetection = async () => {
-    isDetecting.value = true;
-    progress.value = 0;
     similarityGroups.value = [];
 
     try {
+        // todo-fix api请求，以及请求后端处理函数 全部统一放到utils模块中处理
         const response = await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_detect`, {});
-        if (response.data.success) {
-            pollProgress();
-        } else {
+        if (!response.data.success) {
             Utils.addToast(response.data.message || '检测启动失败');
-            isDetecting.value = false;
         }
     } catch (error) {
         console.error('检测失败:', error);
         Utils.addToast('检测失败，请重试');
-        isDetecting.value = false;
     }
 };
 
-const pollProgress = () => {
-    if (progressTimer) {
-        clearInterval(progressTimer);
+watch(() => progressSimilarity.value.isRunning, async (isRunning, wasRunning) => {
+    if (wasRunning && !isRunning && progressSimilarity.value.status === 'completed') {
+        await loadSimilarityGroups();
     }
-
-    progressTimer = setInterval(async () => {
-        try {
-            const response = await axios.get(`${appStore.srvPrefix}/api/v1/file_similarity_progress`);
-            if (response.data.success) {
-                const data = response.data.data;
-                
-                progress.value = data.progress;
-                statusText.value = data.status === 'running' ? '检测中' : 
-                                   data.status === 'completed' ? '已完成' : '未检测';
-                
-                if (!data.isDetecting) {
-                    clearInterval(progressTimer);
-                    progressTimer = null;
-                    isDetecting.value = false;
-                    await loadSimilarityGroups();
-                }
-            }
-        } catch (error) {
-            console.error('获取进度失败:', error);
-            clearInterval(progressTimer);
-            progressTimer = null;
-            isDetecting.value = false;
-        }
-    }, 500);
-};
+});
 
 const loadSimilarityGroups = async (page = 1) => {
     try {
+        // todo-fix api请求，以及请求后端处理函数 全部统一放到utils模块中处理
         const response = await axios.get(`${appStore.srvPrefix}/api/v1/file_similarity_get`, {
             params: {
                 page: page,
