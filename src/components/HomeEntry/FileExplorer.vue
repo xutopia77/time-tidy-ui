@@ -1,25 +1,3 @@
-<!-- <template>
-    <div class="file-explorer">
-        <FileNavHeader class="file-nav-header" />
-
-        <div class="file-content xc-scrollbar">
-            <div class="file-grid">
-                <template v-for="(item) in items" :key="item.id">
-                    <ImageCard :item="item" />
-                </template>
-            </div>
-            <span style="color: aliceblue;">asdasdas</span>
-            <hr />
-            <div class="file-grid">
-                <template v-for="item in dirs" :key="item.id">
-                    <FolderCard :item="item" />
-                </template>
-            </div>
-        </div>
-        <FileFooter class="file-footer" />
-    </div>
-</template> -->
-
 <template>
     <div class="file-explorer">
         <FileNavHeader class="file-nav-header" />

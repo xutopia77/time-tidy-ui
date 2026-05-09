@@ -82,9 +82,9 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
         if (jRecord.tags != null) {
             for (const x of jRecord.tags) {
                 const tag = new DatTypes.FileItemTag();
-                tag.name = x.Name
-                tag.color = x.Color == '' ? tag.color : x.Color
-                tag.type = x.Type == '' ? tag.type : x.Type
+                tag.name = x.name
+                tag.color = x.color == '' ? tag.color : x.color
+                tag.type = x.type == '' ? tag.type : x.type
                 tag.description = x.Description == '' ? tag.description : x.Description
                 if (tag.name == '') {
                     continue;
@@ -136,29 +136,29 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
                         continue; // skip the root path
                     }
                     const dirItem = new DatTypes.DirItem();
-                    dirItem.dir.id = jRecord.Id;
-                    dirItem.dir.path = jRecord.Path;
-                    dirItem.dir.name = jRecord.Name;
-                    dirItem.dir.rootPathId = jRecord.RootPathId;
-                    dirItem.dir.type = jRecord.Type;
-                    dirItem.dir.alias = jRecord.Alias;
-                    dirItem.dir.infoHash = jRecord.InfoHash;
-                    dirItem.dir.status = jRecord.Status;
-                    dirItem.dir.description = jRecord.Description;
-                    dirItem.dir.createdAt = jRecord.CreatedAt;
-                    dirItem.dir.updatedAt = jRecord.UpdatedAt;
+                    dirItem.dir.id = jRecord.id;
+                    dirItem.dir.path = jRecord.path;
+                    dirItem.dir.name = jRecord.name;
+                    dirItem.dir.rootPathId = jRecord.rootPathId;
+                    dirItem.dir.type = jRecord.type;
+                    dirItem.dir.alias = jRecord.alias;  
+                    dirItem.dir.infoHash = jRecord.infoHash;
+                    dirItem.dir.status = jRecord.status;
+                    dirItem.dir.description = jRecord.description;
+                    dirItem.dir.createdAt = jRecord.createdAt;
+                    dirItem.dir.updatedAt = jRecord.updatedAt;  
 
 
-                    const itemPath = "/" + jRecord.Path;
+                    const itemPath = "/" + jRecord.path;    
                     dirItem.id = dirItem.dir.id;
                     dirItem.rootPathId = dirItem.dir.rootPathId;
-                    dirItem.name = jRecord.Path;
+                    dirItem.name = jRecord.name;    
                     dirItem.icon = '/assets/images/folders.svg'
                     dirItem.type = DatTypes.FileType.folder;
 
                     dirItem.path = itemPath;
-                    if (jRecord.Tags != null) {
-                        dirItem.tags = jRecord.Tags
+                    if (jRecord.tags != null) {
+                        dirItem.tags = jRecord.tags
                     }
                     dirs.push(dirItem);
                 }
@@ -173,7 +173,7 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
                     if (jRecord.Type == 0) {
                         continue; // skip the root path
                     }
-                    const itemPath = "/" + jRecord.Path;
+                    const itemPath = "/" + jRecord.path;
                     const iteamPaths = itemPath.split('/');
                     const curPaths = appStore.curPath === "/" ? [''] : appStore.curPath.split('/');
                     // console.log(`itemPath:${itemPath},------ iteamPaths:[${iteamPaths}],------ curPaths:[${curPaths}],${iteamPaths.length}, ${curPaths.length}`);
@@ -200,15 +200,15 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
                     }
                     const curName = iteamPaths[i]
                     const dirItem = new DatTypes.DirItem();
-                    dirItem.id = jRecord.ID;
-                    dirItem.rootPathId = jRecord.RootPathId;
-                    // dirItem.name = jRecord.Path;
+                    dirItem.id = jRecord.id;
+                    dirItem.rootPathId = jRecord.rootPathId;
+                    // dirItem.name = jRecord.path;
                     dirItem.name = curName
                     dirItem.icon = '/assets/images/folders.svg'
                     dirItem.type = DatTypes.FileType.folder;
                     dirItem.path = itemPath;
-                    if (jRecord.Tags != null) {
-                        dirItem.tags = jRecord.Tags
+                    if (jRecord.tags != null) {
+                        dirItem.tags = jRecord.tags
                     }
                     dirs.push(dirItem);
                 }
