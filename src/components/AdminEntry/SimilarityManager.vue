@@ -66,15 +66,15 @@
                         <input type="checkbox" v-model="file.selected" class="file-checkbox" />
                         <div class="file-thumbnail-container">
                             <img :src="getThumbnailUrl(file.id)" :alt="file.name" class="file-thumbnail" />
-                            <div class="similarity-badge" :class="getSimilarityClass(file.similarity)">
-                                {{ file.similarity }}%
+                            <div class="similarity-badge high">
+                                100%
                             </div>
                         </div>
                         <div class="file-info">
                             <div class="file-name" :title="file.name">{{ file.name }}</div>
                             <div class="file-meta">
                                 <span>{{ formatSize(file.size) }}</span>
-                                <span>{{ file.createTime }}</span>
+                                <span>{{ file.create_time }}</span>
                             </div>
                             <div class="file-path" :title="file.path">{{ file.path }}</div>
                         </div>
@@ -91,6 +91,21 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div v-if="totalGroups > 0" class="pagination-section">
+            <div class="pagination-info">
+                共 {{ totalGroups }} 组，{{ totalFiles }} 个文件
+            </div>
+            <div class="pagination-controls">
+                <button @click="prevPage" :disabled="currentPage === 1" class="pagination-btn">
+                    上一页
+                </button>
+                <span class="pagination-current">第 {{ currentPage }} 页</span>
+                <button @click="nextPage" :disabled="currentPage * pageSize >= totalGroups" class="pagination-btn">
+                    下一页
+                </button>
             </div>
         </div>
 
@@ -145,6 +160,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
+import axios from 'axios';
 import '@/assets/common.css';
 import { FileDoc, Refresh, Setting, ViewList, Local, Delete } from '@icon-park/vue-next';
 
@@ -155,13 +171,19 @@ interface SimilarityFile {
     name: string;
     path: string;
     size: number;
-    createTime: string;
-    similarity: number;
+    create_time: string;
+    type: string;
+    extension: string;
+    tags: any[];
     selected: boolean;
-    thumbnail?: string;
 }
 
 interface SimilarityGroup {
+    groupId: number;
+    hash: string;
+    fileCount: number;
+    totalSize: number;
+    createdAt: string;
     selected: boolean;
     files: SimilarityFile[];
 }
@@ -170,6 +192,11 @@ const isDetecting = ref(false);
 const progress = ref(0);
 const showSettings = ref(false);
 const similarityGroups = ref<SimilarityGroup[]>([]);
+const currentPage = ref(1);
+const pageSize = ref(20);
+const totalGroups = ref(0);
+const totalFiles = ref(0);
+let progressTimer: any = null;
 
 const settings = ref({
     threshold: 90,
@@ -192,10 +219,6 @@ const statusClass = computed(() => {
     return 'idle';
 });
 
-const totalFiles = computed(() => {
-    return similarityGroups.value.reduce((sum, group) => sum + group.files.length, 0);
-});
-
 const getThumbnailUrl = (fileId: number) => {
     return `${appStore.srvPrefix}/static_thumb/${fileId}_thumbnail.jpg`;
 };
@@ -206,49 +229,104 @@ const formatSize = (size: number) => {
     return (size / (1024 * 1024)).toFixed(2) + ' MB';
 };
 
-const getSimilarityClass = (similarity: number) => {
-    if (similarity >= 95) return 'high';
-    if (similarity >= 80) return 'medium';
-    return 'low';
-};
-
 const startDetection = async () => {
     isDetecting.value = true;
     progress.value = 0;
+    similarityGroups.value = [];
 
     try {
-        const response = await Utils.post('/api/v1/file_similarity_detect', {});
-        if (response.data) {
-            await loadSimilarityGroups();
+        const response = await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_detect`, {});
+        if (response.data.success) {
+            pollProgress();
+        } else {
+            Utils.addToast(response.data.message || '检测启动失败');
+            isDetecting.value = false;
         }
     } catch (error) {
         console.error('检测失败:', error);
         Utils.addToast('检测失败，请重试');
-    } finally {
         isDetecting.value = false;
-        progress.value = 100;
     }
 };
 
-const loadSimilarityGroups = async () => {
+const pollProgress = () => {
+    if (progressTimer) {
+        clearInterval(progressTimer);
+    }
+
+    progressTimer = setInterval(async () => {
+        try {
+            const response = await axios.get(`${appStore.srvPrefix}/api/v1/file_similarity_progress`);
+            if (response.data.success) {
+                const data = response.data.data;
+                
+                progress.value = data.progress;
+                statusText.value = data.status === 'running' ? '检测中' : 
+                                   data.status === 'completed' ? '已完成' : '未检测';
+                
+                if (!data.isDetecting) {
+                    clearInterval(progressTimer);
+                    progressTimer = null;
+                    isDetecting.value = false;
+                    await loadSimilarityGroups();
+                }
+            }
+        } catch (error) {
+            console.error('获取进度失败:', error);
+            clearInterval(progressTimer);
+            progressTimer = null;
+            isDetecting.value = false;
+        }
+    }, 500);
+};
+
+const loadSimilarityGroups = async (page = 1) => {
     try {
-        const response = await Utils.get('/api/v1/file_similarity_get');
-        if (response.data) {
-            similarityGroups.value = response.data.map((group: any[]) => ({
+        const response = await axios.get(`${appStore.srvPrefix}/api/v1/file_similarity_get`, {
+            params: {
+                page: page,
+                pageSize: pageSize.value
+            }
+        });
+        
+        if (response.data.success) {
+            const data = response.data.data;
+            
+            if (!data || !data.groups) {
+                similarityGroups.value = [];
+                totalGroups.value = 0;
+                totalFiles.value = 0;
+                currentPage.value = 1;
+                return;
+            }
+            
+            similarityGroups.value = data.groups.map((group: any) => ({
+                groupId: group.groupId,
+                hash: group.hash,
+                fileCount: group.fileCount,
+                totalSize: group.totalSize,
+                createdAt: group.createdAt,
                 selected: false,
-                files: group.map((file: any) => ({
+                files: (group.files || []).map((file: any) => ({
                     id: file.id,
                     name: file.name,
                     path: file.path,
                     size: file.size,
-                    createTime: file.create_time,
-                    similarity: 100,
+                    create_time: file.create_time,
+                    type: file.type,
+                    extension: file.extension,
+                    tags: file.tags || [],
                     selected: false
                 }))
             }));
+            
+            totalGroups.value = data.total || 0;
+            totalFiles.value = data.totalFiles || 0;
+            currentPage.value = data.page || 1;
         }
     } catch (error) {
-        console.error('加载相似文件失败:', error);
+        console.error('加载失败:', error);
+        Utils.addToast('加载相似文件失败');
     }
 };
 
@@ -267,7 +345,7 @@ const selectAllInGroup = (group: SimilarityGroup) => {
 const keepBestInGroup = (group: SimilarityGroup) => {
     const sortedFiles = [...group.files].sort((a, b) => {
         if (a.size !== b.size) return b.size - a.size;
-        return new Date(b.createTime).getTime() - new Date(a.createTime).getTime();
+        return new Date(b.create_time).getTime() - new Date(a.create_time).getTime();
     });
 
     group.files.forEach(file => {
@@ -287,22 +365,24 @@ const deleteGroup = async (group: SimilarityGroup) => {
     }
 
     try {
-        const req: DatType.FileDeleteReq = {
-            fileIds: selectedFiles.map(f => f.id),
-            dirIds: [],
-            bRemoveToDtrash: true
-        };
-        await Utils.files_delete(req);
+        const response = await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_delete`, {
+            fileIds: selectedFiles.map(f => f.id)
+        });
         
-        group.files = group.files.filter(f => !f.selected);
-        if (group.files.length === 0) {
-            const index = similarityGroups.value.indexOf(group);
-            if (index > -1) {
-                similarityGroups.value.splice(index, 1);
+        if (response.data.success) {
+            group.files = group.files.filter(f => !f.selected);
+            if (group.files.length === 0) {
+                const index = similarityGroups.value.indexOf(group);
+                if (index > -1) {
+                    similarityGroups.value.splice(index, 1);
+                    totalGroups.value--;
+                }
             }
+            totalFiles.value -= selectedFiles.length;
+            Utils.addToast(response.data.message || '删除成功');
+        } else {
+            Utils.addToast(response.data.message || '删除失败');
         }
-        
-        Utils.addToast('删除成功');
     } catch (error) {
         console.error('删除失败:', error);
         Utils.addToast('删除失败');
@@ -315,27 +395,30 @@ const deleteFile = async (file: SimilarityFile) => {
     }
 
     try {
-        const req: DatType.FileDeleteReq = {
-            fileIds: [file.id],
-            dirIds: [],
-            bRemoveToDtrash: true
-        };
-        await Utils.files_delete(req);
-        
-        similarityGroups.value.forEach(group => {
-            const index = group.files.findIndex(f => f.id === file.id);
-            if (index > -1) {
-                group.files.splice(index, 1);
-            }
-            if (group.files.length === 0) {
-                const groupIndex = similarityGroups.value.indexOf(group);
-                if (groupIndex > -1) {
-                    similarityGroups.value.splice(groupIndex, 1);
-                }
-            }
+        const response = await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_delete`, {
+            fileIds: [file.id]
         });
         
-        Utils.addToast('删除成功');
+        if (response.data.success) {
+            similarityGroups.value.forEach(group => {
+                const index = group.files.findIndex(f => f.id === file.id);
+                if (index > -1) {
+                    group.files.splice(index, 1);
+                    group.fileCount--;
+                }
+                if (group.files.length === 0) {
+                    const groupIndex = similarityGroups.value.indexOf(group);
+                    if (groupIndex > -1) {
+                        similarityGroups.value.splice(groupIndex, 1);
+                        totalGroups.value--;
+                    }
+                }
+            });
+            totalFiles.value--;
+            Utils.addToast(response.data.message || '删除成功');
+        } else {
+            Utils.addToast(response.data.message || '删除失败');
+        }
     } catch (error) {
         console.error('删除失败:', error);
         Utils.addToast('删除失败');
@@ -353,6 +436,18 @@ const locateFile = (file: SimilarityFile) => {
 const applySettings = () => {
     showSettings.value = false;
     Utils.addToast('设置已保存');
+};
+
+const prevPage = () => {
+    if (currentPage.value > 1) {
+        loadSimilarityGroups(currentPage.value - 1);
+    }
+};
+
+const nextPage = () => {
+    if (currentPage.value * pageSize.value < totalGroups.value) {
+        loadSimilarityGroups(currentPage.value + 1);
+    }
 };
 
 onMounted(() => {
@@ -873,5 +968,51 @@ onMounted(() => {
 
 .btn-primary:hover {
     background-color: var(--xc-primary-color-hover);
+}
+
+.pagination-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--xc-spacing-lg);
+    border-top: var(--xc-border);
+    background-color: var(--xc-background-color);
+}
+
+.pagination-info {
+    font-size: var(--xc-font-size-sm);
+    color: var(--xc-text-color-secondary);
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--xc-spacing-md);
+}
+
+.pagination-btn {
+    padding: var(--xc-spacing-xs) var(--xc-spacing-md);
+    background-color: var(--xc-button-bg-color);
+    border: 1px solid var(--xc-border-color);
+    border-radius: var(--xc-border-radius-md);
+    color: var(--xc-text-color);
+    font-size: var(--xc-font-size-sm);
+    cursor: pointer;
+    transition: all var(--xc-transition-fast);
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background-color: var(--xc-button-bg-color-hover);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-current {
+    font-size: var(--xc-font-size-sm);
+    color: var(--xc-text-color);
+    font-weight: 500;
 }
 </style>
