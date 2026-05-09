@@ -1,13 +1,13 @@
 <template>
     <div class="settings-page">
         <div class="page-header">
-            <h1>外观</h1>
-            <p class="page-desc">自定义应用的视觉样式</p>
+            <h1>基本设置</h1>
+            <p class="page-desc">程序的基本设置</p>
         </div>
 
         <div class="settings-section">
             <div class="section-header">
-                <Palette size="20" />
+                <Theme size="20" />
                 <h2>主题</h2>
             </div>
             
@@ -32,72 +32,21 @@
 
         <div class="settings-section">
             <div class="section-header">
-                <Type size="20" />
-                <h2>字体</h2>
+                <Earth size="20" />
+                <h2>语言</h2>
             </div>
             
             <div class="settings-card">
                 <div class="form-item">
-                    <label class="form-label">字体大小</label>
+                    <label class="form-label">界面语言</label>
                     <div class="form-control">
-                        <select class="select-field" v-model="form.fontSize">
-                            <option value="small">小</option>
-                            <option value="medium">中</option>
-                            <option value="large">大</option>
-                            <option value="extra-large">特大</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-item">
-                    <label class="form-label">字体</label>
-                    <div class="form-control">
-                        <select class="select-field" v-model="form.fontFamily">
-                            <option value="system">系统字体</option>
-                            <option value="sans-serif">无衬线字体</option>
-                            <option value="serif">衬线字体</option>
-                            <option value="monospace">等宽字体</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="settings-section">
-            <div class="section-header">
-                <Ladder size="20" />
-                <h2>界面</h2>
-            </div>
-            
-            <div class="settings-card">
-                <div class="form-item toggle-item">
-                    <div class="toggle-label">
-                        <span>显示侧边栏</span>
-                        <span class="toggle-desc">在主界面显示导航侧边栏</span>
-                    </div>
-                    <div class="toggle-switch" :class="{ 'active': form.showSidebar }" @click="form.showSidebar = !form.showSidebar">
-                        <div class="toggle-thumb"></div>
-                    </div>
-                </div>
-
-                <div class="form-item toggle-item">
-                    <div class="toggle-label">
-                        <span>紧凑模式</span>
-                        <span class="toggle-desc">减少界面元素间距</span>
-                    </div>
-                    <div class="toggle-switch" :class="{ 'active': form.compactMode }" @click="form.compactMode = !form.compactMode">
-                        <div class="toggle-thumb"></div>
-                    </div>
-                </div>
-
-                <div class="form-item">
-                    <label class="form-label">动画效果</label>
-                    <div class="form-control">
-                        <select class="select-field" v-model="form.animationSpeed">
-                            <option value="off">关闭</option>
-                            <option value="slow">慢</option>
-                            <option value="normal">正常</option>
-                            <option value="fast">快</option>
+                        <select class="select-field" v-model="form.language">
+                            <option value="zh-CN">简体中文</option>
+                            <option value="zh-TW">繁體中文</option>
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="ja-JP">日本語</option>
+                            <option value="ko-KR">한국어</option>
                         </select>
                     </div>
                 </div>
@@ -113,7 +62,7 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
-import {  Ladder } from '@icon-park/vue-next';
+import { Theme, Earth } from '@icon-park/vue-next';
 import '@/assets/common.css';
 
 const selectedTheme = ref('dark');
@@ -125,11 +74,7 @@ const themes = [
 ];
 
 const form = reactive({
-    fontSize: 'medium',
-    fontFamily: 'system',
-    showSidebar: true,
-    compactMode: false,
-    animationSpeed: 'normal'
+    language: 'zh-CN'
 });
 </script>
 
@@ -255,58 +200,6 @@ const form = reactive({
 .theme-option span {
     font-size: var(--xc-font-size-sm);
     color: var(--xc-text-color);
-}
-
-.toggle-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.toggle-label {
-    display: flex;
-    flex-direction: column;
-}
-
-.toggle-label span:first-child {
-    font-size: var(--xc-font-size-md);
-    font-weight: 500;
-    color: var(--xc-text-color);
-}
-
-.toggle-desc {
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color-secondary);
-    margin-top: 2px;
-}
-
-.toggle-switch {
-    width: 44px;
-    height: 24px;
-    background-color: var(--xc-border-color);
-    border-radius: 12px;
-    position: relative;
-    cursor: pointer;
-    transition: background-color var(--xc-transition-normal);
-}
-
-.toggle-switch.active {
-    background-color: var(--xc-primary-color);
-}
-
-.toggle-thumb {
-    width: 20px;
-    height: 20px;
-    background-color: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    transition: transform var(--xc-transition-normal);
-}
-
-.toggle-switch.active .toggle-thumb {
-    transform: translateX(20px);
 }
 
 .settings-actions {

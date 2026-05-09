@@ -22,8 +22,6 @@
         <div class="settings-content">
             <div class="content-wrapper">
                 <GeneralSettings v-if="activeSection === 'general'" />
-                <StorageSettings v-if="activeSection === 'storage'" />
-                <ShortcutsSettings v-if="activeSection === 'shortcuts'" />
                 <AboutSettings v-if="activeSection === 'about'" />
             </div>
         </div>
@@ -32,10 +30,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { User, HardDisk, Keyboard, Info } from '@icon-park/vue-next';
+import { User, Info } from '@icon-park/vue-next';
 import GeneralSettings from './SettingsEntry/GeneralSettings.vue';
-import StorageSettings from './SettingsEntry/StorageSettings.vue';
-import ShortcutsSettings from './SettingsEntry/ShortcutsSettings.vue';
 import AboutSettings from './SettingsEntry/AboutSettings.vue';
 import '@/assets/common.css';
 
@@ -43,8 +39,6 @@ const activeSection = ref('general');
 
 const menuItems = [
     { id: 'general', label: '基本设置', icon: User },
-    { id: 'storage', label: '存储', icon: HardDisk },
-    { id: 'shortcuts', label: '快捷键', icon: Keyboard },
     { id: 'about', label: '关于', icon: Info },
 ];
 </script>
