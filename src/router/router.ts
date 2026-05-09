@@ -21,6 +21,7 @@ const routes: RouteRecordRaw[] = [
         component: AdminEntry,
         children: [
             { path: 'TagsMng', component: () => import('@/components/AdminEntry/TagsMng.vue') },
+            { path: 'SimilarityManager', component: () => import('@/components/AdminEntry/SimilarityManager.vue') },
             { path: 'DbInfo', component: () => import('@/components/AdminEntry/DbInfo.vue') },
             { path: 'OtherMisc', component: () => import('@/components/AdminEntry/OtherMisc.vue') },
             { path: 'PrjSet', component: () => import('@/components/AdminEntry/SetEntry.vue') },

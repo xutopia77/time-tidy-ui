@@ -1,8 +1,9 @@
 <template>
     <div class="file-search-bar">
-        <div class="search-trigger" @click="openSearchPanel" :class="{ 'has-keyword': searchKeyword }">
+        <div class="search-trigger" @click="openSearchPanel" :class="{ 'has-filters': hasActiveFilters }">
             <span class="search-icon">🔍</span>
-            <span class="search-placeholder">{{ searchKeyword || '搜索文件...' }}</span>
+            <span class="search-placeholder">{{ searchSummary }}</span>
+            <span v-if="hasActiveFilters" class="filter-badge">{{ activeFiltersCount }}</span>
         </div>
         
         <div v-if="showSearchPanel" class="search-panel-overlay" @click="closeSearchPanel">
@@ -16,6 +17,9 @@
                     </div>
                     <button @click="handleSearch" class="search-btn-large">
                         搜索
+                    </button>
+                    <button v-if="hasActiveFilters" @click="clearAllFilters" class="clear-all-btn">
+                        清除条件
                     </button>
                 </div>
                 
@@ -147,6 +151,75 @@ const fileTags = computed(() => {
     return uniqueTags;
 });
 
+const hasActiveFilters = computed(() => {
+    return !!(
+        searchKeyword.value ||
+        selectedFileTypes.value.length > 0 ||
+        selectedTags.value.length > 0 ||
+        bReverseSltTag.value ||
+        bNoTag.value ||
+        sortBy.value !== 'time' ||
+        sortOrder.value !== 'asc' ||
+        pathType.value !== 'curPath'
+    );
+});
+
+const activeFiltersCount = computed(() => {
+    let count = 0;
+    if (searchKeyword.value) count++;
+    if (selectedFileTypes.value.length > 0) count++;
+    if (selectedTags.value.length > 0) count++;
+    if (bReverseSltTag.value) count++;
+    if (bNoTag.value) count++;
+    if (sortBy.value !== 'time') count++;
+    if (sortOrder.value !== 'asc') count++;
+    if (pathType.value !== 'curPath') count++;
+    return count;
+});
+
+const searchSummary = computed(() => {
+    if (!hasActiveFilters.value) {
+        return '搜索文件...';
+    }
+    
+    const parts: string[] = [];
+    
+    if (searchKeyword.value) {
+        parts.push(`"${searchKeyword.value}"`);
+    }
+    
+    if (selectedFileTypes.value.length > 0) {
+        const typeLabels = selectedFileTypes.value.map(type => {
+            const found = fileTypes.find(t => t.value === type);
+            return found ? found.label : type;
+        });
+        parts.push(typeLabels.join(', '));
+    }
+    
+    if (selectedTags.value.length > 0) {
+        parts.push(`${selectedTags.value.length}个标签`);
+    }
+    
+    if (bNoTag.value === 'true') {
+        parts.push('无标签');
+    } else if (bNoTag.value === 'false') {
+        parts.push('有标签');
+    }
+    
+    if (pathType.value === 'allPath') {
+        parts.push('全部文件');
+    }
+    
+    if (sortBy.value !== 'time') {
+        const sortLabel = sortOptions.find(s => s.value === sortBy.value);
+        if (sortLabel) {
+            parts.push(`按${sortLabel.label}排序`);
+        }
+    }
+    
+    return parts.length > 0 ? parts.join(' · ') : '搜索文件...';
+});
+
 watch(() => appStore.searchCon, (newVal) => {
     sortBy.value = newVal.sortBy;
     sortOrder.value = newVal.sortOrder;
@@ -214,6 +287,27 @@ const clearSearch = () => {
         searchInputRef.value.focus();
     }
 };
+
+const clearAllFilters = () => {
+    searchKeyword.value = '';
+    selectedFileTypes.value = [];
+    selectedTags.value = [];
+    bReverseSltTag.value = false;
+    bNoTag.value = '';
+    sortBy.value = 'time';
+    sortOrder.value = 'asc';
+    pathType.value = 'curPath';
+    
+    appStore.searchCon.sortBy = 'time';
+    appStore.searchCon.sortOrder = 'asc';
+    appStore.searchCon.pathType = 'curPath';
+    appStore.searchCon.types = [];
+    appStore.searchCon.tags = [];
+    appStore.searchCon.bReverseSltTag = false;
+    appStore.searchCon.noTag = '';
+    
+    Utils.files_get();
+};
 </script>
 
 <style scoped>
@@ -242,7 +336,7 @@ const clearSearch = () => {
     border-color: var(--xc-border-color);
 }
 
-.search-trigger.has-keyword {
+.search-trigger.has-filters {
     border-color: var(--xc-primary-color);
     background-color: rgba(74, 111, 165, 0.05);
 }
@@ -253,6 +347,7 @@ const clearSearch = () => {
 }
 
 .search-placeholder {
+    flex: 1;
     font-size: var(--xc-font-size-sm);
     color: var(--xc-text-color-secondary);
     white-space: nowrap;
@@ -260,8 +355,23 @@ const clearSearch = () => {
     text-overflow: ellipsis;
 }
 
-.search-trigger.has-keyword .search-placeholder {
+.search-trigger.has-filters .search-placeholder {
     color: var(--xc-text-color);
+}
+
+.filter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background-color: var(--xc-primary-color);
+    color: white;
+    font-size: var(--xc-font-size-xs);
+    font-weight: 600;
+    border-radius: 10px;
+    flex-shrink: 0;
 }
 
 .search-panel-overlay {
@@ -372,6 +482,25 @@ const clearSearch = () => {
 
 .search-btn-large:hover {
     background-color: var(--xc-primary-color-hover);
+}
+
+.clear-all-btn {
+    height: 40px;
+    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
+    background-color: transparent;
+    color: var(--xc-text-color-secondary);
+    border: 1px solid var(--xc-border-color);
+    border-radius: var(--xc-border-radius-md);
+    cursor: pointer;
+    font-size: var(--xc-font-size-sm);
+    transition: all var(--xc-transition-normal);
+    white-space: nowrap;
+}
+
+.clear-all-btn:hover {
+    background-color: var(--xc-background-color-hover);
+    color: var(--xc-text-color);
+    border-color: var(--xc-border-hover);
 }
 
 .search-panel-filters {
