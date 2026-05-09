@@ -42,8 +42,6 @@ import '@/assets/common.css';
 }
 
 .nav-item {
-    background-color: var(--xc-background-color);
-    border: none;
     border-radius: var(--xc-border-radius-sm);
     height: calc(var(--xc-normal-height) + var(--xc-spacing-sm));
     display: flex;
@@ -66,10 +64,6 @@ import '@/assets/common.css';
 }
 
 .no-underline-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     text-decoration: none;
 }
-
 </style>
