@@ -1,10 +1,7 @@
 <template>
-    <div class="xc-card" :style="{
-        backgroundColor: isChecked ? 'var(--xc-background-color-hover)' : 'transparent',
+    <div class="xc-card" :class="{ 'checked': isChecked }" :style="{
         width: `${cardWidth}px`
-        // 移除 height 设置，让高度自适应
     }">
-        <!-- 左上角的 checkbox -->
         <div class="xc-card-checkbox-container">
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" class="xc-checkbox" />
         </div>
@@ -15,15 +12,15 @@
                 <img :src="item.icon" alt="icon" />
             </div>
             <div class="xc-card-desc" @click="btnclk_handleClickItemMsg">
-                <p class="xc-card-name">{{ item.name }}</p>
-                <p class="xc-card-name"><span style="color: #6c4d4d;">{{ Utils.gen_size_str(item.size) }}</span> <span
-                        style="color: #22586f;">{{ item.time }}</span>
-                </p>
-                <p class="xc-card-name"></p>
-                <div class="xc-card-tags">
-                    <div v-for="(tag, index) in item.tags" :key="index" class="xc-tag" :style="{
+                <p class="xc-card-name xc-card-filename">{{ item.name }}</p>
+                <div class="xc-card-meta">
+                    <span class="xc-card-size">{{ Utils.gen_size_str(item.size) }}</span>
+                    <span class="xc-card-time">{{ item.time }}</span>
+                </div>
+                <div class="xc-card-tags" v-if="item.tags && item.tags.length > 0">
+                    <span v-for="(tag, index) in item.tags" :key="index" class="xc-tag" :style="{
                         backgroundColor: tag.color
-                    }">{{ Utils.tagName2Display(tag.name) }}</div>
+                    }">{{ Utils.tagName2Display(tag.name) }}</span>
                 </div>
             </div>
         </div>
@@ -81,25 +78,91 @@ const btnclk_handleClickItemMsg = () => {
 
 <style scoped>
 .xc-card {
-    /* 让高度自适应内容 */
     height: auto;
+}
+
+.xc-card.checked {
+    border-color: var(--xc-primary-color);
+    background-color: rgba(74, 111, 165, 0.1);
 }
 
 .xc-card-content {
-    /* 让内容区域高度自适应 */
     height: auto;
 }
 
+.xc-card-icon {
+    position: relative;
+}
+
+.xc-card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--xc-transition-fast);
+    border-radius: var(--xc-border-radius-sm);
+}
+
+.xc-card:hover .xc-card-overlay {
+    opacity: 1;
+}
+
+.xc-card-overlay-icon {
+    font-size: 24px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
 .xc-card-desc {
-    /* 让描述区域高度自适应 */
     height: auto;
+    padding: var(--xc-spacing-sm);
+}
+
+.xc-card-filename {
+    font-weight: 500;
+    margin-bottom: var(--xc-spacing-xs);
+    color: var(--xc-text-color);
+}
+
+.xc-card-meta {
+    display: flex;
+    gap: var(--xc-spacing-sm);
+    margin-bottom: var(--xc-spacing-xs);
+    font-size: var(--xc-font-size-xs);
+}
+
+.xc-card-size {
+    color: var(--xc-text-color-secondary);
+}
+
+.xc-card-time {
+    color: var(--xc-text-color-secondary);
 }
 
 .xc-card-tags {
     display: flex;
     flex-wrap: wrap;
-    /* 允许标签换行 */
-    /* 让标签区域高度自适应 */
+    gap: 4px;
     height: auto;
+    margin-top: var(--xc-spacing-xs);
+}
+
+.xc-tag {
+    display: inline-block;
+    padding: 2px var(--xc-spacing-xs);
+    border-radius: var(--xc-border-radius-sm);
+    font-size: var(--xc-font-size-xs);
+    color: white;
+    transition: all var(--xc-transition-fast);
+}
+
+.xc-tag:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 </style>

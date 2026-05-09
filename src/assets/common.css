@@ -115,36 +115,54 @@
     padding: 0px;
     margin: var(--xc-spacing-xs);
     color: var(--xc-text-color);
-    border: none;
-    border-radius: var(--xc-border-radius-md);
+    border: 1px solid var(--xc-border-color);
+    border-radius: var(--xc-border-radius-lg);
     text-align: center;
     position: relative;
-    transition: all var(--xc-transition-slow);
+    transition: all var(--xc-transition-normal);
+    background-color: var(--xc-background-color);
+    overflow: hidden;
 }
 
 .xc-card:hover {
     background-color: var(--xc-background-color-hover);
-    border: var(--xc-border-hover);
+    border-color: var(--xc-border-hover);
+    box-shadow: var(--xc-shadow-md);
+    transform: translateY(-2px);
 }
 
 .xc-card-checkbox-container {
     position: absolute;
-    top: 0px;
-    left: 0px;
-    z-index: 1;
+    top: var(--xc-spacing-sm);
+    left: var(--xc-spacing-sm);
+    z-index: 2;
+    opacity: 0;
+    transition: opacity var(--xc-transition-fast);
+}
+
+.xc-card:hover .xc-card-checkbox-container,
+.xc-card.checked .xc-card-checkbox-container {
+    opacity: 1;
 }
 
 .xc-card-content {
     cursor: pointer;
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .xc-card-icon {
-    width: calc(100% - var(--xc-spacing-xs));
-    height: calc(100% - var(--xc-card-desc-height) - var(--xc-spacing-xs));
-    padding: var(--xc-spacing-xs);
+    width: 100%;
+    height: calc(100% - var(--xc-card-desc-height));
+    padding: var(--xc-spacing-sm);
     margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
 
 .xc-card-icon img {
@@ -152,40 +170,59 @@
     height: 100%;
     margin: 0px;
     object-fit: contain;
+    border-radius: var(--xc-border-radius-sm);
+    transition: transform var(--xc-transition-normal);
+}
+
+.xc-card:hover .xc-card-icon img {
+    transform: scale(1.02);
 }
 
 .xc-card-desc {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: small;
+    font-size: var(--xc-font-size-sm);
     height: var(--xc-card-desc-height);
     width: 100%;
+    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.02));
 }
 
 .xc-card-name {
-    padding: 0px;
+    padding: 2px 0px;
     margin: 0px;
-    font-size: small;
+    font-size: var(--xc-font-size-sm);
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .xc-card-tags {
-    padding: 0px;
+    padding: 2px 0px;
     margin: 0px;
-    font-size: small;
-    height: 20px;
+    font-size: var(--xc-font-size-xs);
+    height: auto;
     width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
 }
 
 .xc-card-tags span {
-    padding-left: 2px;
-    padding-right: 2px;
-    margin: 2px;
-    border-radius: 4px;
-    height: 20px;
+    padding: 2px var(--xc-spacing-xs);
+    margin: 0;
+    border-radius: var(--xc-border-radius-sm);
+    height: auto;
     cursor: pointer;
     color: var(--xc-text-color);
-    background-color: var(--xc-background-color);
+    background-color: var(--xc-group-color);
+    transition: all var(--xc-transition-fast);
+}
+
+.xc-card-tags span:hover {
+    background-color: var(--xc-primary-color);
+    color: white;
 }
 
 /* ==================================== select */
@@ -219,46 +256,42 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    width: 16px;
-    height: 16px;
-    background-color: #333;
-    /* 背景色 */
-    border: 1px solid #555;
-    /* 边框颜色和宽度 */
-    border-radius: 3px;
-    /* 圆角 */
+    width: 18px;
+    height: 18px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
     cursor: pointer;
     position: relative;
     outline: none;
+    transition: all var(--xc-transition-fast);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .xc-checkbox:hover {
-    border-color: #777;
-    /* 鼠标悬停时边框颜色 */
+    border-color: var(--xc-primary-color);
+    transform: scale(1.1);
 }
 
 .xc-checkbox:checked {
-    background-color: #4a90e2;
-    /* 选中时的背景色 */
-    border-color: #4a90e2;
-    /* 选中时的边框颜色 */
+    background-color: var(--xc-primary-color);
+    border-color: var(--xc-primary-color);
 }
 
 .xc-checkbox:checked::after {
     content: '';
     position: absolute;
-    left: 4px;
-    top: 1px;
-    width: 4px;
-    height: 8px;
-    border: solid #fff;
+    left: 5px;
+    top: 2px;
+    width: 5px;
+    height: 9px;
+    border: solid white;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }
 
 .xc-checkbox:focus {
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
-    /* 获得焦点时的阴影效果 */
+    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.3);
 }
 
 /* ==================================== label */

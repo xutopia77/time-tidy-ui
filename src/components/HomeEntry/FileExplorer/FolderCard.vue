@@ -1,10 +1,8 @@
 <template>
-    <div class="xc-card" :style="{
-        backgroundColor: isChecked ? 'var(--xc-background-color-hover)' : 'transparent',
+    <div class="xc-card" :class="{ 'checked': isChecked }" :style="{
         width: `${cardWidth}px`,
         height: `${cardHeight}px`
     }">
-        <!-- 左上角的 checkbox -->
         <div class="xc-card-checkbox-container">
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" class="xc-checkbox" />
         </div>
@@ -12,7 +10,9 @@
             <div class="xc-card-icon">
                 <FolderClose :size="cardWidth - 80" :strokeWidth=1 color="#333" />
             </div>
-            <div class="xc-card-desc">{{ item.name }}</div>
+            <div class="xc-card-desc">
+                <p class="xc-card-name xc-card-foldername">{{ item.name }}</p>
+            </div>
         </div>
     </div>
 </template>
@@ -58,4 +58,36 @@ function btnclk_dir() {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.xc-card.checked {
+    border-color: var(--xc-primary-color);
+    background-color: rgba(74, 111, 165, 0.1);
+}
+
+.xc-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--xc-transition-normal);
+}
+
+.xc-card:hover .xc-card-icon {
+    transform: scale(1.05);
+}
+
+.xc-card-desc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--xc-spacing-sm);
+}
+
+.xc-card-foldername {
+    font-weight: 500;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+</style>
