@@ -19,7 +19,7 @@
                 </div>
             </router-link>
             
-            <router-link class="menu-item" to="/admin/PrjSet" v-slot="{ isActive }">
+            <router-link class="menu-item" to="/settings" v-slot="{ isActive }">
                 <div class="menu-link" :class="{ 'active': isActive }">
                     <System size="22" />
                     <span>设置</span>
