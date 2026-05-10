@@ -32,7 +32,7 @@
             </div>
             <div class="status-item">
                 <span class="status-label">占用空间:</span>
-                <span class="status-value">{{ formatSize(totalSize) }}</span>
+                <span class="status-value">{{ Utils.gen_size_str(totalSize) }}</span>
             </div>
             <div class="status-item">
                 <span class="status-label">已选中:</span>
@@ -55,7 +55,7 @@
                     </div>
                     <div class="file-thumbnail-container" @click="previewFile(file)">
                         <img v-if="file.type === 'image' || file.type === 'video'" 
-                            :src="getThumbnailUrl(file.id)" :alt="file.name" class="file-thumbnail" />
+                            :src="Utils.get_thumbnail_url(file.id)" :alt="file.name" class="file-thumbnail" />
                         <div v-else class="file-icon-container">
                             <FileDoc theme="outline" size="48" fill="currentColor" />
                         </div>
@@ -64,7 +64,7 @@
                     <div class="file-info">
                         <div class="file-name" :title="file.name">{{ file.name }}</div>
                         <div class="file-meta">
-                            <span>{{ formatSize(file.size) }}</span>
+                            <span>{{ Utils.gen_size_str(file.size) }}</span>
                             <span>{{ file.create_time }}</span>
                         </div>
                         <div class="file-path" :title="file.path">{{ file.path }}</div>
@@ -106,7 +106,6 @@ import { ref, computed, onMounted } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
-import axios from 'axios';
 import '@/assets/common.css';
 import { DeleteThemes, Refresh, Undo, Delete, Clear, ViewList, FileDoc } from '@icon-park/vue-next';
 
@@ -145,16 +144,6 @@ const selectedFiles = computed(() => {
     return trashFiles.value.filter(f => f.checked);
 });
 
-const getThumbnailUrl = (fileId: number) => {
-    return `${appStore.srvPrefix}/static_thumb/${fileId}_thumbnail.jpg`;
-};
-
-const formatSize = (size: number) => {
-    if (size < 1024) return size + ' B';
-    if (size < 1024 * 1024) return (size / 1024).toFixed(2) + ' KB';
-    return (size / (1024 * 1024)).toFixed(2) + ' MB';
-};
-
 const loadTrashFiles = async (page = 1) => {
     try {
         const req = new DatType.FilesGetReq();
@@ -162,10 +151,10 @@ const loadTrashFiles = async (page = 1) => {
         req.pageSize = pageSize.value;
         req.statuss = [2]; // FileStatus_Trash = 2
 
-        const response = await axios.post(`${appStore.srvPrefix}/api/v1/files_get`, req);
+        const response = await Utils.files_get(req, false);
         
-        if (response.data.code === 0) {
-            const data = response.data.data;
+        if (response.code === 0 && response.data) {
+            const data = response.data;
             
             if (data.files && data.files.records) {
                 trashFiles.value = data.files.records.map((file: TrashFileApiResponse) => ({
@@ -188,7 +177,7 @@ const loadTrashFiles = async (page = 1) => {
             calculateTotalSize();
             currentPage.value = page;
         } else {
-            Utils.addToast(response.data.status || '加载回收站失败');
+            Utils.addToast(response.status || '加载回收站失败');
         }
     } catch (error) {
         console.error('加载回收站失败:', error);
@@ -308,10 +297,10 @@ const emptyTrash = async () => {
         req.pageSize = 10000;
         req.statuses = [2];
 
-        const response = await axios.post(`${appStore.srvPrefix}/api/v1/files_get`, req);
+        const response = await Utils.files_get(req, false);
         
-        if (response.data.code === 0 && response.data.data.files?.records) {
-            const allFileIds = response.data.data.files.records.map((f: { id: number }) => f.id);
+        if (response.code === 0 && response.data?.files?.records) {
+            const allFileIds = response.data.files.records.map((f: { id: number }) => f.id);
             
             if (allFileIds.length === 0) {
                 Utils.addToast('回收站已为空');

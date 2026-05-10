@@ -326,6 +326,7 @@ export class FilesGetReq {
 export class FilesTagSetReq {
     fileIds: number[] = [];
     tagName: string = "";
+    tagColor?: string = "";
 }
 
 

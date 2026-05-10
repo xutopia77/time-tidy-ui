@@ -3,6 +3,28 @@ import type { AppStore } from '@/stores/AppStore'
 let appStore: AppStore
 import * as DatTypes from '@/utils/dataTypedef'
 
+const TAG_COLORS = [
+    '#FF6B6B',
+    '#4ECDC4',
+    '#45B7D1',
+    '#FFA07A',
+    '#98D8C8',
+    '#F7DC6F',
+    '#BB8FCE',
+    '#85C1E2',
+    '#F8B500',
+    '#00CED1'
+];
+
+let tagColorIndex = 0;
+let isLoadingTags = false;
+
+function get_next_tag_color(): string {
+    const color = TAG_COLORS[tagColorIndex % TAG_COLORS.length];
+    tagColorIndex++;
+    return color;
+}
+
 function get_dir_trees() {
     const allDirs = appStore.curAllDirs;
     const dirTree: DatTypes.DirTreeItem[] = [];
@@ -272,19 +294,22 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
 
 
 function tags_get() {
+    if (isLoadingTags) {
+        return;
+    }
+    isLoadingTags = true;
+    
     appStore.allTags = [];
     axios.post(`${appStore.srvPrefix}/api/v1/tags_get`)
         .then((response) => {
             console.log('tag info:', response.data);
             const resp = response.data;
             if (resp.code != 0) {
-                Utils.message_notify({ content: `获取标签失败:${resp.status}`, type: 'success' })
+                Utils.message_notify({ content: `获取标签失败:${resp.status}`, type: 'error' })
                 return;
             }
-            // const tagsColors = ["#6577bf", "#e8cb95", "#e4775e", "#c9cde7", "#34ce72", "#d3adf7", "#4ac0f2"]
-            // const idx = 0;
             for (const item of resp.data) {
-                if (item.TagName == "") {
+                if (!item.name || item.name == "") {
                     continue;
                 }
                 const tagItem = new DatTypes.TagItem();
@@ -296,23 +321,33 @@ function tags_get() {
         })
         .catch((error) => {
             console.error('Error fetching project info:', error);
+        })
+        .finally(() => {
+            isLoadingTags = false;
         });
 }
 
 function tags_set(tag: DatTypes.TagItem) {
-    // 检查标签名称是否为 sys_score1 到 sys_score10
     const scoreRegex = /^sys_score(10|[1-9])$/;
     if (scoreRegex.test(tag.name)) {
         Utils.message_notify({ content: `系统标签 ${tag.name} 不能被修改`, type: "error" });
         return;
     }
-    appStore.allTags = [];
-    axios.post(`${appStore.srvPrefix}/api/v1/tags_set`, JSON.stringify(tag))
+    
+    const req = {
+        tags: [{
+            id: tag.id,
+            name: tag.name,
+            color: tag.color
+        }]
+    };
+    
+    axios.post(`${appStore.srvPrefix}/api/v1/tags_set`, JSON.stringify(req))
         .then((response) => {
             console.log('tag info:', response.data);
             const resp = response.data;
             if (resp.code != 0) {
-                Utils.message_notify({ content: `获取标签失败:${resp.status}`, type: 'success' })
+                Utils.message_notify({ content: `标签设置失败:${resp.status}`, type: 'error' })
                 return;
             }
             Utils.tags_get()
@@ -495,6 +530,10 @@ function gen_size_str(size: number): string {
     }
 }
 
+function get_thumbnail_url(fileId: number): string {
+    return `${appStore.srvPrefix}/static_thumb/${fileId}_thumbnail.jpg`;
+}
+
 function folder_get(folder: string) {
     const reqDat = {
         folder: folder
@@ -591,6 +630,7 @@ class Utils {
     static page_show = page_show;
     static log_info_append = log_info_append
     static gen_size_str = gen_size_str;
+    static get_thumbnail_url = get_thumbnail_url;
     static dir_slt_update = dir_slt_update;
     // 将标签名称转换为显示名称
     static tagName2Display(name: string): string {
@@ -696,11 +736,11 @@ class Utils {
         }
     }
     static convertToLinuxPath(path: string): string {
-        // 替换所有反斜杠为正斜杠, 转换为linux的风格
         return path.replace(/\\/g, '/');
     }
     static dictionary_get = dictionary_get;
-    static async files_get(_req: DatTypes.FilesGetReq | null = null) {
+    static async files_get(_req: DatTypes.FilesGetReq | null = null, bUpdateStore: boolean = true): Promise<DatTypes.Resp> {
+        const resp = new DatTypes.Resp()
         const req: DatTypes.FilesGetReq = {
             pageSize: appStore.searchCon.pageSize,
             page: appStore.searchCon.page - 1,
@@ -745,16 +785,28 @@ class Utils {
         await axios.post(`${appStore.srvPrefix}/api/v1/files_get`, JSON.stringify(req))
             .then((response) => {
                 console.log('file info:', response.data);
-                const resp: DatTypes.Resp = convert_to_file_item(JSON.stringify(response.data))
-                if (resp.code === 0) {
-                    get_dir_trees()
+                if (bUpdateStore) {
+                    const result: DatTypes.Resp = convert_to_file_item(JSON.stringify(response.data))
+                    resp.code = result.code;
+                    resp.status = result.status;
+                    resp.data = result.data;
+                    if (resp.code === 0) {
+                        get_dir_trees()
+                    } else {
+                        console.error('Error converting file items:', resp.status);
+                    }
                 } else {
-                    console.error('Error converting file items:', resp.status);
+                    resp.code = response.data.code;
+                    resp.status = response.data.status || '';
+                    resp.data = response.data.data;
                 }
             })
             .catch((error) => {
                 console.error('Error fetching project info:', error);
+                resp.code = -1;
+                resp.status = error.message;
             });
+        return resp;
     }
 
     static cancle_file_checked() {
@@ -780,6 +832,15 @@ class Utils {
             }
             else {
                 _req.fileIds.push(appStore.curSltFile.id)
+            }
+        }
+
+        if (!_req.tagColor || _req.tagColor === '') {
+            const existingTag = appStore.allTags.find(tag => tag.name === _req.tagName);
+            if (existingTag) {
+                _req.tagColor = existingTag.color;
+            } else {
+                _req.tagColor = get_next_tag_color();
             }
         }
 
@@ -871,16 +932,11 @@ class Utils {
         await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_detect`)
             .then((response) => {
                 console.log('file info:', response.data);
-                resp.code = response.data.code;
-                resp.status = response.data.status;
+                resp.code = response.data.success ? 0 : -1;
+                resp.status = response.data.message || '';
+                resp.data = response.data;
                 if (resp.code != 0) {
-                    Utils.message_notify({ content: `文件操作失败:${resp.status}`, type: "error" })
-                }
-                else if (resp.doing) {
-                    Utils.message_notify({ content: `文件操作中`, type: "warning" })
-                }
-                else {
-                    Utils.message_notify({ content: `文件操作成功`, type: 'success' })
+                    Utils.message_notify({ content: `检测启动失败:${resp.status}`, type: "error" })
                 }
             })
             .catch((error) => {
@@ -893,23 +949,22 @@ class Utils {
         return resp;
     }
 
-    static async file_similarity_get(): Promise<DatTypes.Resp> {
+    static async file_similarity_get(page: number = 1, pageSize: number = 20): Promise<DatTypes.Resp> {
         const resp = new DatTypes.Resp()
-        await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_get`)
+        await axios.get(`${appStore.srvPrefix}/api/v1/file_similarity_get`, {
+            params: {
+                page: page,
+                pageSize: pageSize
+            }
+        })
             .then((response) => {
                 console.log('file info:', response.data);
-
-                const resp = convert_to_file_item(JSON.stringify(response.data), "file_similarity_get")
+                resp.code = response.data.success ? 0 : -1;
+                resp.status = response.data.message || '';
+                resp.data = response.data.data;
                 if (resp.code != 0) {
                     Utils.message_notify({ content: `文件操作失败:${resp.status}`, type: "error" })
                 }
-                else if (resp.doing) {
-                    Utils.message_notify({ content: `文件操作中`, type: "warning" })
-                }
-                else {
-                    Utils.message_notify({ content: `文件操作成功`, type: 'success' })
-                }
-                return resp
             })
             .catch((error) => {
                 console.error('Error fetching project info:', error);

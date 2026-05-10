@@ -65,7 +65,7 @@
                         :class="{ 'selected': file.selected }">
                         <input type="checkbox" v-model="file.selected" class="file-checkbox" />
                         <div class="file-thumbnail-container">
-                            <img :src="getThumbnailUrl(file.id)" :alt="file.name" class="file-thumbnail" />
+                            <img :src="Utils.get_thumbnail_url(file.id)" :alt="file.name" class="file-thumbnail" />
                             <div class="similarity-badge high">
                                 100%
                             </div>
@@ -73,7 +73,7 @@
                         <div class="file-info">
                             <div class="file-name" :title="file.name">{{ file.name }}</div>
                             <div class="file-meta">
-                                <span>{{ formatSize(file.size) }}</span>
+                                <span>{{ Utils.gen_size_str(file.size) }}</span>
                                 <span>{{ file.create_time }}</span>
                             </div>
                             <div class="file-path" :title="file.path">{{ file.path }}</div>
@@ -160,7 +160,6 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
-import axios from 'axios';
 import '@/assets/common.css';
 import { FileDoc, Refresh, Setting, ViewList, Local, Delete } from '@icon-park/vue-next';
 
@@ -238,30 +237,12 @@ const statusClass = computed(() => {
     return 'idle';
 });
 
-// todo-fix 缩略图生成规则统一使用utils模块中的接口
-const getThumbnailUrl = (fileId: number) => {
-    return `${appStore.srvPrefix}/static_thumb/${fileId}_thumbnail.jpg`;
-};
-
-// todo-fix 文件大小显示字符规则统一使用utils模块中的接口
-const formatSize = (size: number) => {
-    if (size < 1024) return size + ' B';
-    if (size < 1024 * 1024) return (size / 1024).toFixed(2) + ' KB';
-    return (size / (1024 * 1024)).toFixed(2) + ' MB';
-};
-
 const startDetection = async () => {
     similarityGroups.value = [];
 
-    try {
-        // todo-fix api请求，以及请求后端处理函数 全部统一放到utils模块中处理
-        const response = await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_detect`, {});
-        if (!response.data.success) {
-            Utils.addToast(response.data.message || '检测启动失败');
-        }
-    } catch (error) {
-        console.error('检测失败:', error);
-        Utils.addToast('检测失败，请重试');
+    const response = await Utils.file_similarity_detect();
+    if (response.code !== 0) {
+        Utils.addToast(response.status || '检测启动失败');
     }
 };
 
@@ -273,16 +254,10 @@ watch(() => progressSimilarity.value.isRunning, async (isRunning, wasRunning) =>
 
 const loadSimilarityGroups = async (page = 1) => {
     try {
-        // todo-fix api请求，以及请求后端处理函数 全部统一放到utils模块中处理
-        const response = await axios.get(`${appStore.srvPrefix}/api/v1/file_similarity_get`, {
-            params: {
-                page: page,
-                pageSize: pageSize.value
-            }
-        });
+        const response = await Utils.file_similarity_get(page, pageSize.value);
         
-        if (response.data.success) {
-            const data = response.data.data;
+        if (response.code === 0 && response.data) {
+            const data = response.data;
             
             if (!data || !data.groups) {
                 similarityGroups.value = [];
