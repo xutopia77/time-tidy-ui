@@ -1,0 +1,13 @@
+# Test results
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Screenshots and videos
+test-results/**/
+*.png
+*.webm
+
+# Coverage reports
+coverage/
+.nyc_output/

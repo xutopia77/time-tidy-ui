@@ -1,0 +1,535 @@
+/**
+ * 主页Page Object
+ * 
+ * 本文件实现了主页的Page Object Model，封装了主页的元素定位和操作方法。
+ * 主页是用户进入应用后看到的第一个页面，包含导航菜单、文件浏览器、搜索功能等。
+ * 
+ * Page Object Model优势：
+ * 1. 可维护性：页面变化只需修改Page Object，不影响测试用例
+ * 2. 可重用性：多个测试可以重用同一个Page Object
+ * 3. 可读性：测试代码更易读，像自然语言描述
+ * 4. 稳定性：封装了等待和重试逻辑，提高测试稳定性
+ * 
+ * 设计原则：
+ * - 元素定位器集中管理：所有定位器在构造函数中定义
+ * - 方法语义化：方法名清晰表达操作意图
+ * - 包含验证：方法内部包含必要的验证逻辑
+ * 
+ * @example
+ * // 在测试中使用
+ * test('should navigate to management', async ({ page }) => {
+ *   const homePage = new HomePage(page)
+ *   await homePage.goto()
+ *   await homePage.openManagement()
+ * })
+ */
+
+import { Page, Locator, expect } from '@playwright/test'
+
+/**
+ * 主页Page Object类
+ * 
+ * 封装了主页的所有元素和操作，提供简洁的接口供测试使用
+ * 
+ * @example
+ * const homePage = new HomePage(page)
+ * await homePage.goto()
+ * await homePage.openManagement()
+ */
+export class HomePage {
+  // ==================== 页面元素定义 ====================
+  
+  /**
+   * Page对象引用
+   * 用于执行页面级别的操作，如导航、等待等
+   */
+  readonly page: Page
+  
+  /**
+   * 导航菜单
+   * 侧边栏导航菜单，包含主页、管理、设置等入口
+   */
+  readonly navMenu: Locator
+  
+  /**
+   * 管理按钮
+   * 点击后进入管理界面，包含标签管理、回收站、相似度检测等功能
+   */
+  readonly managementButton: Locator
+  
+  /**
+   * 设置按钮
+   * 点击后进入设置界面，配置应用参数
+   */
+  readonly settingsButton: Locator
+  
+  /**
+   * 文件浏览器
+   * 主页中央区域，显示当前仓库的文件列表
+   */
+  readonly fileExplorer: Locator
+  
+  /**
+   * 搜索触发器
+   * 点击后展开搜索面板
+   */
+  readonly searchTrigger: Locator
+  
+  /**
+   * 搜索输入框
+   * 用于输入搜索关键词
+   */
+  readonly searchInput: Locator
+  
+  /**
+   * 文件卡片列表
+   * 所有文件卡片的容器
+   */
+  readonly fileCards: Locator
+  
+  /**
+   * 文件夹卡片列表
+   * 所有文件夹卡片的容器
+   */
+  readonly folderCards: Locator
+  
+  /**
+   * 操作栏
+   * 选择文件后显示的操作栏
+   */
+  readonly operationBar: Locator
+  
+  /**
+   * 标签输入框
+   * 用于添加标签
+   */
+  readonly tagInput: Locator
+
+  // ==================== 构造函数 ====================
+  
+  /**
+   * 构造函数：初始化所有页面元素定位器
+   * 
+   * @param page - Playwright的Page对象，由测试框架自动注入
+   * 
+   * 定位器说明：
+   * - 使用CSS选择器和文本选择器组合
+   * - 选择器应该稳定，不易受UI变化影响
+   * - 避免使用脆弱的选择器（如nth-child、复杂的DOM结构）
+   * 
+   * @example
+   * // Playwright会自动注入page对象
+   * test('test', async ({ page }) => {
+   *   const homePage = new HomePage(page)
+   * })
+   */
+  constructor(page: Page) {
+    this.page = page
+    
+    // 导航菜单：侧边栏导航区域
+    this.navMenu = page.locator('.sidebar-nav')
+    
+    // 管理按钮：包含"管理"文本的菜单项
+    this.managementButton = page.locator('.menu-item:has-text("管理")')
+    
+    // 设置按钮：包含"设置"文本的菜单项
+    this.settingsButton = page.locator('.menu-item:has-text("设置")')
+    
+    // 文件浏览器：文件列表展示区域
+    this.fileExplorer = page.locator('.file-explorer-section')
+    
+    // 搜索触发器：搜索按钮或图标
+    this.searchTrigger = page.locator('.search-trigger')
+    
+    // 搜索输入框：搜索面板中的输入框
+    this.searchInput = page.locator('.search-input-large')
+    
+    // 文件卡片列表：所有文件卡片
+    this.fileCards = page.locator('.xc-card').filter({ hasNot: page.locator('.xc-card-foldername') })
+    
+    // 文件夹卡片列表：所有文件夹卡片
+    this.folderCards = page.locator('.xc-card').filter({ has: page.locator('.xc-card-foldername') })
+    
+    // 操作栏：选择文件后显示的操作栏
+    this.operationBar = page.locator('.operation-bar')
+    
+    // 标签输入框：添加标签的输入框
+    this.tagInput = page.locator('.tag-input')
+  }
+
+  // ==================== 页面操作方法 ====================
+  
+  /**
+   * 导航到主页
+   * 
+   * 访问应用根路径，并等待导航菜单加载完成
+   * 这是测试的起点，应该在beforeEach或测试开始时调用
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.goto()
+   * 
+   * @remarks
+   * - 使用expect断言确保页面加载成功
+   * - Playwright会自动等待元素可见
+   * - 如果页面加载失败，测试会自动失败
+   */
+  async goto() {
+    // 导航到根路径
+    await this.page.goto('/')
+    
+    // 验证导航菜单已加载，确保页面加载成功
+    await expect(this.navMenu).toBeVisible()
+  }
+
+  /**
+   * 打开管理界面
+   * 
+   * 点击管理按钮，进入管理界面
+   * 管理界面包含标签管理、回收站、相似度检测等功能模块
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.goto()
+   * await homePage.openManagement()
+   * 
+   * @remarks
+   * - 点击后会导航到管理界面
+   * - 不包含验证逻辑，由调用者根据需要验证
+   */
+  async openManagement() {
+    await this.managementButton.click()
+  }
+
+  /**
+   * 打开设置界面
+   * 
+   * 点击设置按钮，进入设置界面
+   * 设置界面可以配置应用参数，如仓库路径、界面主题等
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.goto()
+   * await homePage.openSettings()
+   */
+  async openSettings() {
+    await this.settingsButton.click()
+  }
+
+  /**
+   * 搜索文件
+   * 
+   * 执行文件搜索操作，包括打开搜索面板、输入关键词、提交搜索
+   * 
+   * @param query - 搜索关键词
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.searchFiles('vacation')
+   * 
+   * @remarks
+   * - 搜索操作包含多个步骤，确保每个步骤都完成
+   * - 使用waitForSelector等待搜索面板展开
+   * - 使用keyboard.press('Enter')提交搜索，模拟真实用户操作
+   */
+  async searchFiles(query: string) {
+    // 步骤1: 点击搜索触发器，打开搜索面板
+    await this.searchTrigger.click()
+    
+    // 步骤2: 等待搜索面板展开
+    await this.page.waitForSelector('.search-panel', { state: 'visible' })
+    
+    // 步骤3: 在搜索框中输入关键词
+    await this.searchInput.fill(query)
+    
+    // 步骤4: 按Enter键提交搜索
+    await this.page.keyboard.press('Enter')
+  }
+
+  // ==================== 文件操作方法 ====================
+  
+  /**
+   * 选择文件
+   * 
+   * 通过索引选择文件卡片，勾选复选框
+   * 
+   * @param index - 文件索引，从0开始
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectFile(0)  // 选择第一个文件
+   * 
+   * @remarks
+   * - 选择后会显示操作栏
+   * - 文件卡片会显示选中状态
+   */
+  async selectFile(index: number = 0) {
+    const fileCard = this.fileCards.nth(index)
+    
+    // 找到复选框并勾选
+    const checkbox = fileCard.locator('.xc-checkbox')
+    await checkbox.check()
+    
+    // 验证操作栏已显示
+    await expect(this.operationBar).toBeVisible()
+  }
+
+  /**
+   * 选择多个文件
+   * 
+   * 通过索引数组选择多个文件卡片
+   * 
+   * @param indices - 文件索引数组
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectMultipleFiles([0, 1, 2])  // 选择前三个文件
+   */
+  async selectMultipleFiles(indices: number[]) {
+    for (const index of indices) {
+      await this.selectFile(index)
+    }
+  }
+
+  /**
+   * 取消选择文件
+   * 
+   * 取消所有已选择的文件
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.clearSelection()
+   */
+  async clearSelection() {
+    // 点击操作栏中的"取消选择"按钮
+    await this.operationBar.locator('.clear-btn').click()
+    
+    // 验证操作栏已隐藏
+    await expect(this.operationBar).not.toBeVisible()
+  }
+
+  /**
+   * 添加标签到选中的文件
+   * 
+   * 在操作栏的标签输入框中输入标签名称并提交
+   * 
+   * @param tagName - 标签名称
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectFile(0)
+   * await homePage.addTagToSelectedFiles('important')
+   * 
+   * @remarks
+   * - 必须先选择文件，否则操作栏不会显示
+   * - 标签名称会自动添加到选中的文件
+   */
+  async addTagToSelectedFiles(tagName: string) {
+    // 确保操作栏可见
+    await expect(this.operationBar).toBeVisible()
+    
+    // 在标签输入框中输入标签名称
+    await this.tagInput.fill(tagName)
+    
+    // 按Enter键提交
+    await this.page.keyboard.press('Enter')
+    
+    // 等待标签添加完成（等待输入框清空）
+    await expect(this.tagInput).toHaveValue('')
+  }
+
+  /**
+   * 移除选中文件的标签
+   * 
+   * 点击操作栏中显示的标签来移除
+   * 
+   * @param tagName - 标签名称
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectFile(0)
+   * await homePage.removeTagFromSelectedFiles('important')
+   * 
+   * @remarks
+   * - 必须先选择文件，且文件有该标签
+   * - 点击标签后会移除该标签
+   */
+  async removeTagFromSelectedFiles(tagName: string) {
+    // 确保操作栏可见
+    await expect(this.operationBar).toBeVisible()
+    
+    // 找到操作栏中的标签并点击
+    const tag = this.operationBar.locator(`.xc-tag:has-text("${tagName}")`)
+    await tag.click()
+    
+    // 等待标签移除完成
+    await expect(tag).not.toBeVisible()
+  }
+
+  /**
+   * 验证文件是否有指定标签
+   * 
+   * 检查文件卡片上是否显示指定标签
+   * 
+   * @param fileIndex - 文件索引
+   * @param tagName - 标签名称
+   * @returns Promise<boolean> - 是否有该标签
+   * 
+   * @example
+   * const hasTag = await homePage.verifyFileHasTag(0, 'important')
+   * expect(hasTag).toBe(true)
+   */
+  async verifyFileHasTag(fileIndex: number, tagName: string): Promise<boolean> {
+    const fileCard = this.fileCards.nth(fileIndex)
+    const tag = fileCard.locator(`.xc-tag:has-text("${tagName}")`)
+    return await tag.isVisible()
+  }
+
+  /**
+   * 获取文件的标签列表
+   * 
+   * 获取文件卡片上显示的所有标签名称
+   * 
+   * @param fileIndex - 文件索引
+   * @returns Promise<string[]> - 标签名称数组
+   * 
+   * @example
+   * const tags = await homePage.getFileTags(0)
+   * expect(tags).toContain('important')
+   */
+  async getFileTags(fileIndex: number): Promise<string[]> {
+    const fileCard = this.fileCards.nth(fileIndex)
+    const tags = fileCard.locator('.xc-tag')
+    const count = await tags.count()
+    
+    const tagNames: string[] = []
+    for (let i = 0; i < count; i++) {
+      const tagText = await tags.nth(i).textContent()
+      if (tagText) {
+        tagNames.push(tagText.trim())
+      }
+    }
+    
+    return tagNames
+  }
+
+  /**
+   * 获取文件数量
+   * 
+   * 获取当前页面显示的文件卡片数量
+   * 
+   * @returns Promise<number> - 文件数量
+   * 
+   * @example
+   * const count = await homePage.getFileCount()
+   * expect(count).toBeGreaterThan(0)
+   */
+  async getFileCount(): Promise<number> {
+    return await this.fileCards.count()
+  }
+
+  /**
+   * 等待文件加载完成
+   * 
+   * 等待文件列表加载完成，至少有一个文件显示
+   * 
+   * @param timeout - 超时时间，默认10秒
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.waitForFilesToLoad()
+   */
+  async waitForFilesToLoad(timeout: number = 10000) {
+    await expect(this.fileCards.first()).toBeVisible({ timeout })
+  }
+
+  // ==================== 文件夹导航方法 ====================
+  
+  /**
+   * 进入文件夹
+   * 
+   * 通过文件夹名称或索引点击进入文件夹
+   * 
+   * @param folderNameOrIndex - 文件夹名称或索引（从0开始）
+   * @returns Promise<void>
+   * 
+   * @example
+   * // 通过名称进入文件夹
+   * await homePage.enterFolder('Photos')
+   * 
+   * // 通过索引进入第一个文件夹
+   * await homePage.enterFolder(0)
+   * 
+   * @remarks
+   * - 进入文件夹后会显示该文件夹内的文件
+   * - 如果文件夹不存在，测试会失败
+   */
+  async enterFolder(folderNameOrIndex: string | number) {
+    let folderCard: Locator
+    
+    if (typeof folderNameOrIndex === 'string') {
+      // 通过名称查找文件夹
+      folderCard = this.folderCards.filter({ hasText: folderNameOrIndex }).first()
+    } else {
+      // 通过索引查找文件夹
+      folderCard = this.folderCards.nth(folderNameOrIndex)
+    }
+    
+    // 点击文件夹卡片进入
+    await folderCard.click()
+    
+    // 等待页面加载完成
+    await this.page.waitForTimeout(500)
+  }
+
+  /**
+   * 获取文件夹数量
+   * 
+   * 获取当前页面显示的文件夹卡片数量
+   * 
+   * @returns Promise<number> - 文件夹数量
+   * 
+   * @example
+   * const count = await homePage.getFolderCount()
+   * expect(count).toBeGreaterThan(0)
+   */
+  async getFolderCount(): Promise<number> {
+    return await this.folderCards.count()
+  }
+
+  /**
+   * 验证当前路径
+   * 
+   * 验证当前所在的路径是否正确
+   * 
+   * @param expectedPath - 预期的路径名称
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.enterFolder('Photos')
+   * await homePage.verifyCurrentPath('Photos')
+   */
+  async verifyCurrentPath(expectedPath: string) {
+    const pathDisplay = this.page.locator('.path-display')
+    await expect(pathDisplay).toContainText(expectedPath)
+  }
+
+  /**
+   * 等待文件夹加载完成
+   * 
+   * 等待文件夹列表加载完成，至少有一个文件夹显示
+   * 
+   * @param timeout - 超时时间，默认10秒
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.waitForFoldersToLoad()
+   */
+  async waitForFoldersToLoad(timeout: number = 10000) {
+    await expect(this.folderCards.first()).toBeVisible({ timeout })
+  }
+}

@@ -173,12 +173,8 @@ function submitEdit() {
         return;
     }
 
-    try {
-        Utils.tags_set(editingTag.value);
-        closeDialog();
-    } catch (error) {
-        console.error('保存标签失败:', error);
-    }
+    Utils.tags_set(editingTag.value);
+    closeDialog();
 }
 </script>
 

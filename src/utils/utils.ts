@@ -327,7 +327,7 @@ function tags_get() {
         });
 }
 
-function tags_set(tag: DatTypes.TagItem) {
+async function tags_set(tag: DatTypes.TagItem): Promise<void> {
     const scoreRegex = /^sys_score(10|[1-9])$/;
     if (scoreRegex.test(tag.name)) {
         Utils.message_notify({ content: `系统标签 ${tag.name} 不能被修改`, type: "error" });
@@ -338,11 +338,12 @@ function tags_set(tag: DatTypes.TagItem) {
         tags: [{
             id: tag.id,
             name: tag.name,
-            color: tag.color
+            color: tag.color,
+            description: tag.description || ''
         }]
     };
     
-    axios.post(`${appStore.srvPrefix}/api/v1/tags_set`, JSON.stringify(req))
+    await axios.post(`${appStore.srvPrefix}/api/v1/tags_set`, JSON.stringify(req))
         .then((response) => {
             console.log('tag info:', response.data);
             const resp = response.data;
