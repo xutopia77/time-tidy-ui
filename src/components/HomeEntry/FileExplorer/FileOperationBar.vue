@@ -20,11 +20,6 @@
                             <option value="sys_score3">3☆</option>
                             <option value="sys_score4">4☆</option>
                             <option value="sys_score5">5☆</option>
-                            <option value="sys_score6">6☆</option>
-                            <option value="sys_score7">7☆</option>
-                            <option value="sys_score8">8☆</option>
-                            <option value="sys_score9">9☆</option>
-                            <option value="sys_score10">10☆</option>
                         </select>
                     </div>
                     
@@ -338,7 +333,7 @@ const btnclk_remove_tag = (tag: DatType.FileItemTag) => {
     transform: translateX(-50%);
     z-index: 1000;
     min-width: 400px;
-    max-width: 90vw;
+    max-width: 96vw;
 }
 
 .operation-bar-content {
@@ -346,7 +341,7 @@ const btnclk_remove_tag = (tag: DatType.FileItemTag) => {
     border: 1px solid var(--xc-border-color);
     border-radius: var(--xc-border-radius-lg);
     box-shadow: var(--xc-shadow-lg);
-    padding: var(--xc-spacing-md) var(--xc-spacing-lg);
+    padding: var(--xc-spacing-sm) var(--xc-spacing-sm);
     display: flex;
     align-items: center;
     gap: var(--xc-spacing-lg);

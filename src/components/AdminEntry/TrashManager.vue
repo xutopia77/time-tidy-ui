@@ -6,7 +6,7 @@
                 <h2>回收站管理</h2>
             </div>
             <div class="header-actions">
-                <button @click="loadTrashFiles" class="action-btn">
+                <button @click="loadTrashFiles()" class="action-btn">
                     <Refresh theme="outline" size="16" :strokeWidth="3" />
                     <span>刷新</span>
                 </button>
@@ -59,7 +59,6 @@
                         <div v-else class="file-icon-container">
                             <FileDoc theme="outline" size="48" fill="currentColor" />
                         </div>
-                        <div class="file-type-badge">{{ file.extension }}</div>
                     </div>
                     <div class="file-info">
                         <div class="file-name" :title="file.name">{{ file.name }}</div>
@@ -111,30 +110,7 @@ import { DeleteThemes, Refresh, Undo, Delete, Clear, ViewList, FileDoc } from '@
 
 const appStore = useAppStore();
 
-interface TrashFile {
-    id: number;
-    name: string;
-    path: string;
-    size: number;
-    create_time: string;
-    type: string;
-    extension: string;
-    root_path_id: number;
-    checked: boolean;
-}
-
-interface TrashFileApiResponse {
-    id: number;
-    name: string;
-    path: string;
-    size: number;
-    create_time: string;
-    type: string;
-    extension: string;
-    root_path_id: number;
-}
-
-const trashFiles = ref<TrashFile[]>([]);
+const trashFiles = ref<DatType.File[]>([]);
 const currentPage = ref(1);
 const pageSize = ref(50);
 const totalFiles = ref(0);
@@ -154,18 +130,11 @@ const loadTrashFiles = async (page = 1) => {
         const response = await Utils.files_get(req, false);
         
         if (response.code === 0 && response.data) {
-            const data = response.data;
+            const data = response.data as { files?: { records?: DatType.File[]; total?: number } };
             
             if (data.files && data.files.records) {
-                trashFiles.value = data.files.records.map((file: TrashFileApiResponse) => ({
-                    id: file.id,
-                    name: file.name,
-                    path: file.path,
-                    size: file.size,
-                    create_time: file.create_time,
-                    type: file.type,
-                    extension: file.extension,
-                    root_path_id: file.root_path_id,
+                trashFiles.value = data.files.records.map((file: DatType.File) => ({
+                    ...file,
                     checked: false
                 }));
                 totalFiles.value = data.files.total || 0;
@@ -193,21 +162,13 @@ const updateSelection = () => {
     // Selection is automatically updated through computed property
 };
 
-const previewFile = (file: TrashFile) => {
-    const fileItem = new DatType.File();
-    fileItem.id = file.id;
-    fileItem.name = file.name;
-    fileItem.path = file.path;
-    fileItem.type = file.type as DatType.FileType;
-    fileItem.rootPathId = file.root_path_id;
-    fileItem.size = file.size;
-    
-    appStore.curSltFile = fileItem;
-    appStore.curFiles = [fileItem];
+const previewFile = (file: DatType.File) => {
+    appStore.curSltFile = file;
+    appStore.curFiles = [file];
     appStore.bPageImgView = true;
 };
 
-const restoreFile = async (file: TrashFile) => {
+const restoreFile = async (file: DatType.File) => {
     if (!confirm(`确定要恢复文件 "${file.name}" 吗？`)) {
         return;
     }
@@ -215,11 +176,8 @@ const restoreFile = async (file: TrashFile) => {
     const response = await Utils.files_restore([file.id]);
     
     if (response.code === 0) {
-        const index = trashFiles.value.findIndex(f => f.id === file.id);
-        if (index > -1) {
-            trashFiles.value.splice(index, 1);
-            totalFiles.value--;
-        }
+        await loadTrashFiles(currentPage.value);
+        Utils.addToast('文件恢复成功');
     }
 };
 
@@ -237,13 +195,12 @@ const restoreSelected = async () => {
     const response = await Utils.files_restore(files.map(f => f.id));
     
     if (response.code === 0) {
-        const restoredIds = new Set(files.map(f => f.id));
-        trashFiles.value = trashFiles.value.filter(f => !restoredIds.has(f.id));
-        totalFiles.value -= files.length;
+        await loadTrashFiles(currentPage.value);
+        Utils.addToast(`成功恢复 ${files.length} 个文件`);
     }
 };
 
-const deleteFilePermanently = async (file: TrashFile) => {
+const deleteFilePermanently = async (file: DatType.File) => {
     if (!confirm(`确定要永久删除文件 "${file.name}" 吗？此操作不可恢复！`)) {
         return;
     }
@@ -255,11 +212,8 @@ const deleteFilePermanently = async (file: TrashFile) => {
     const response = await Utils.files_delete(req);
     
     if (response.code === 0) {
-        const index = trashFiles.value.findIndex(f => f.id === file.id);
-        if (index > -1) {
-            trashFiles.value.splice(index, 1);
-            totalFiles.value--;
-        }
+        await loadTrashFiles(currentPage.value);
+        Utils.addToast('文件已永久删除');
     }
 };
 
@@ -281,8 +235,8 @@ const deleteSelectedPermanently = async () => {
     const response = await Utils.files_delete(req);
     
     if (response.code === 0) {
-        trashFiles.value = trashFiles.value.filter(f => !f.checked);
-        totalFiles.value -= files.length;
+        await loadTrashFiles(currentPage.value);
+        Utils.addToast(`成功删除 ${files.length} 个文件`);
     }
 };
 
@@ -295,12 +249,13 @@ const emptyTrash = async () => {
         const req = new DatType.FilesGetReq();
         req.page = 0;
         req.pageSize = 10000;
-        req.statuses = [2];
+        req.statuss = [2];
 
         const response = await Utils.files_get(req, false);
         
-        if (response.code === 0 && response.data?.files?.records) {
-            const allFileIds = response.data.files.records.map((f: { id: number }) => f.id);
+        if (response.code === 0 && response.data) {
+            const data = response.data as { files?: { records?: DatType.File[] } };
+            const allFileIds = data.files?.records?.map((f: DatType.File) => f.id) || [];
             
             if (allFileIds.length === 0) {
                 Utils.addToast('回收站已为空');
@@ -314,9 +269,8 @@ const emptyTrash = async () => {
             const deleteResponse = await Utils.files_delete(deleteReq);
             
             if (deleteResponse.code === 0) {
-                trashFiles.value = [];
-                totalFiles.value = 0;
-                totalSize.value = 0;
+                await loadTrashFiles(1);
+                Utils.addToast('回收站已清空');
             }
         }
     } catch (error) {
@@ -540,17 +494,6 @@ onMounted(() => {
 
 .file-icon-container {
     color: var(--xc-text-color-secondary);
-}
-
-.file-type-badge {
-    position: absolute;
-    bottom: var(--xc-spacing-xs);
-    right: var(--xc-spacing-xs);
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    font-size: var(--xc-font-size-xs);
-    padding: 2px 6px;
-    border-radius: var(--xc-border-radius-sm);
 }
 
 .file-info {

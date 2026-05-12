@@ -248,6 +248,11 @@ export class File {
     time: string = "";
     checked: boolean = false;
     uniqueHash: string = "";
+    extension: string = "";
+    create_time: string = "";
+    status: number = 0;
+    origin: string = "";
+    description: string = "";
 }
 
 export class FileCatalog {
