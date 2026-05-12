@@ -18,6 +18,9 @@
                     <button @click="handleSearch" class="search-btn-large">
                         搜索
                     </button>
+                    <button @click="handleCancel" class="cancel-btn">
+                        取消
+                    </button>
                     <button v-if="hasActiveFilters" @click="clearAllFilters" class="clear-all-btn">
                         清除条件
                     </button>
@@ -308,6 +311,11 @@ const clearAllFilters = () => {
     
     Utils.files_get();
 };
+
+const handleCancel = () => {
+    clearAllFilters();
+    closeSearchPanel();
+};
 </script>
 
 <style scoped>
@@ -482,6 +490,26 @@ const clearAllFilters = () => {
 
 .search-btn-large:hover {
     background-color: var(--xc-primary-color-hover);
+}
+
+.cancel-btn {
+    height: 40px;
+    padding: var(--xc-spacing-sm) var(--xc-spacing-lg);
+    background-color: transparent;
+    color: var(--xc-text-color-secondary);
+    border: 1px solid var(--xc-border-color);
+    border-radius: var(--xc-border-radius-md);
+    cursor: pointer;
+    font-size: var(--xc-font-size-md);
+    font-weight: 500;
+    transition: all var(--xc-transition-normal);
+    white-space: nowrap;
+}
+
+.cancel-btn:hover {
+    background-color: var(--xc-background-color-hover);
+    color: var(--xc-text-color);
+    border-color: var(--xc-border-hover);
 }
 
 .clear-all-btn {
