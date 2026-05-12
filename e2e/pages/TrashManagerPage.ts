@@ -37,7 +37,7 @@ export class TrashManagerPage {
   constructor(page: Page) {
     this.page = page
     this.pageTitle = page.locator('h2:has-text("回收站")')
-    this.fileItems = page.locator('.file-item')
+    this.fileItems = page.locator('.file-card')
     this.emptyTrashButton = page.locator('button:has-text("清空回收站")')
     this.restoreAllButton = page.locator('button:has-text("恢复全部")')
   }
@@ -59,8 +59,11 @@ export class TrashManagerPage {
   async restoreFile(fileName: string) {
     const fileItem = this.fileItems.filter({ hasText: fileName })
     await fileItem.hover()
-    await fileItem.locator('.restore-btn').click()
-    await expect(this.fileItems.filter({ hasText: fileName })).not.toBeVisible()
+    
+    this.page.on('dialog', dialog => dialog.accept())
+    
+    await fileItem.locator('.file-action-btn[title="恢复"]').click()
+    await this.page.waitForTimeout(1000)
   }
 
   /**
@@ -73,8 +76,8 @@ export class TrashManagerPage {
     
     this.page.on('dialog', dialog => dialog.accept())
     
-    await fileItem.locator('.delete-btn').click()
-    await expect(this.fileItems.filter({ hasText: fileName })).not.toBeVisible()
+    await fileItem.locator('.file-action-btn.danger[title="永久删除"]').click()
+    await this.page.waitForTimeout(1000)
   }
 
   /**

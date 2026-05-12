@@ -497,6 +497,66 @@ export class HomePage {
   }
 
   /**
+   * 删除选中的文件
+   * 
+   * 点击操作栏中的"删除"按钮，将文件移入回收站
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectFile(0)
+   * await homePage.deleteSelectedFiles()
+   * 
+   * @remarks
+   * - 必须先选择文件，否则操作栏不会显示
+   * - 文件会被移入回收站，可以恢复
+   */
+  async deleteSelectedFiles() {
+    await expect(this.operationBar).toBeVisible()
+    
+    const deleteBtn = this.operationBar.locator('.action-btn.danger:has-text("删除")')
+    await deleteBtn.click()
+    
+    await this.page.waitForTimeout(500)
+  }
+
+  /**
+   * 获取文件名称
+   * 
+   * 通过索引获取文件卡片的名称
+   * 
+   * @param index - 文件索引，从0开始
+   * @returns Promise<string> - 文件名称
+   * 
+   * @example
+   * const fileName = await homePage.getFileName(0)
+   * console.log(fileName)
+   */
+  async getFileName(index: number = 0): Promise<string> {
+    const fileCard = this.fileCards.nth(index)
+    const nameElement = fileCard.locator('.xc-card-filename')
+    return await nameElement.textContent() || ''
+  }
+
+  /**
+   * 获取文件ID
+   * 
+   * 通过索引获取文件卡片的ID
+   * 
+   * @param index - 文件索引，从0开始
+   * @returns Promise<number> - 文件ID
+   * 
+   * @example
+   * const fileId = await homePage.getFileId(0)
+   * console.log(fileId)
+   */
+  async getFileId(index: number = 0): Promise<number> {
+    const fileCard = this.fileCards.nth(index)
+    const id = await fileCard.getAttribute('data-file-id')
+    return parseInt(id || '0')
+  }
+
+  /**
    * 等待文件加载完成
    * 
    * 等待文件列表加载完成，至少有一个文件显示
