@@ -4,7 +4,7 @@
             <div class="operation-bar-content">
                 <div class="selection-info">
                     <span class="selection-count">{{ checkedCount }} 项已选中</span>
-                    <button @click="clearSelection" class="clear-btn">取消选择</button>
+                    <button @click="clearSelection" class="clear-btn">取消</button>
                 </div>
                 
                 <div class="operation-actions">
@@ -36,6 +36,11 @@
                         </datalist>
                     </div>
                     
+                    <button @click="btnclk_delete_tag" class="action-btn">
+                        <span class="action-icon">🏷️</span>
+                        <span class="action-text">删除标签</span>
+                    </button>
+                    
                     <button @click="btnclk_move_file" class="action-btn">
                         <span class="action-icon">📁</span>
                         <span class="action-text">移动</span>
@@ -54,6 +59,37 @@
             </div>
         </div>
     </Transition>
+
+    <!-- Delete Tag Dialog -->
+    <div v-if="showDeleteTagDialog" class="dialog-overlay" @click="closeDeleteTagDialog">
+        <div class="dialog-content" @click.stop>
+            <h3>删除文件标签</h3>
+            <p class="dialog-desc">选择要从选中文件中删除的标签：</p>
+            
+            <div v-if="fileTags.length === 0" class="no-tags-message">
+                选中的文件没有标签
+            </div>
+            
+            <div v-else class="tag-list">
+                <div v-for="tag in fileTags" :key="tag.name" class="tag-item">
+                    <label class="tag-checkbox">
+                        <input type="checkbox" v-model="selectedTagsForDeletion" :value="tag.name" />
+                        <span class="tag-label">
+                            <span class="tag-color" :style="{ backgroundColor: tag.color || '#999' }"></span>
+                            <span class="tag-name">{{ Utils.tagName2Display(tag.name) }}</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="dialog-actions">
+                <button @click="confirmDeleteTags" class="confirm-btn" :disabled="selectedTagsForDeletion.length === 0">
+                    确定删除
+                </button>
+                <button @click="closeDeleteTagDialog" class="cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -89,6 +125,8 @@ const showBar = computed(() => {
 
 const sltLevel = ref("sys_score3");
 const newTag = ref('');
+const showDeleteTagDialog = ref(false);
+const selectedTagsForDeletion = ref<string[]>([]);
 
 const tagSuggestions = computed(() => {
     return appStore.allTags.map(tag => Utils.tagName2Display(tag.name));
@@ -153,6 +191,53 @@ const btnclk_set_file_level = () => {
     
     req.tagName = sltLevel.value;
     Utils.files_tag_set(req);
+};
+
+const btnclk_delete_tag = () => {
+    selectedTagsForDeletion.value = [];
+    showDeleteTagDialog.value = true;
+};
+
+const closeDeleteTagDialog = () => {
+    showDeleteTagDialog.value = false;
+    selectedTagsForDeletion.value = [];
+};
+
+const confirmDeleteTags = () => {
+    if (selectedTagsForDeletion.value.length === 0) {
+        Utils.addToast('请选择要删除的标签');
+        return;
+    }
+    
+    const fileIds: number[] = [];
+    if (appStore.curFiles) {
+        appStore.curFiles.forEach((file) => {
+            if (file.checked) {
+                fileIds.push(file.id);
+            }
+        });
+    }
+    
+    if (fileIds.length === 0) {
+        Utils.addToast('请选择要操作的文件');
+        return;
+    }
+    
+    // Delete each selected tag
+    for (const tagName of selectedTagsForDeletion.value) {
+        const req: DatType.FilesTagDeleteReq = {
+            tagName: tagName,
+            fileIds: fileIds
+        };
+        Utils.files_tag_delete(req);
+    }
+    
+    Utils.message_notify({ 
+        content: `已删除 ${selectedTagsForDeletion.value.length} 个标签`, 
+        type: 'success' 
+    });
+    
+    closeDeleteTagDialog();
 };
 
 const btnclk_move_file = () => {
@@ -346,23 +431,12 @@ const btnclk_remove_tag = (tag: DatType.FileItemTag) => {
 .level-select {
     height: 32px;
     padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
-    background-color: var(--xc-input-bg-color);
-    border: 1px solid var(--xc-input-border-color);
+    border: 1px solid var(--xc-border-color);
     border-radius: var(--xc-border-radius-sm);
+    background-color: var(--xc-background-color);
     color: var(--xc-text-color);
     font-size: var(--xc-font-size-sm);
-    outline: none;
     cursor: pointer;
-    transition: all var(--xc-transition-normal);
-}
-
-.level-select:hover {
-    background-color: var(--xc-input-bg-color-hover);
-    border-color: var(--xc-border-color);
-}
-
-.level-select:focus {
-    border-color: var(--xc-input-border-color-focus);
 }
 
 .tag-input-wrapper {
@@ -371,78 +445,155 @@ const btnclk_remove_tag = (tag: DatType.FileItemTag) => {
 }
 
 .tag-input {
-    width: 120px;
     height: 32px;
     padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
-    background-color: var(--xc-input-bg-color);
-    border: 1px solid var(--xc-input-border-color);
+    border: 1px solid var(--xc-border-color);
     border-radius: var(--xc-border-radius-sm);
+    background-color: var(--xc-background-color);
     color: var(--xc-text-color);
     font-size: var(--xc-font-size-sm);
-    outline: none;
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
-}
-
-.tag-input:hover {
-    background-color: var(--xc-input-bg-color-hover);
-    border-color: var(--xc-border-color);
+    min-width: 120px;
 }
 
 .tag-input:focus {
-    border-color: var(--xc-input-border-color-focus);
+    outline: none;
+    border-color: var(--xc-primary-color);
 }
 
-.tag-input::placeholder {
-    color: var(--xc-text-color-secondary);
-}
-
-.selected-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--xc-spacing-xs);
-    padding-left: var(--xc-spacing-lg);
-    border-left: 1px solid var(--xc-border-color);
-    max-width: 300px;
-    overflow-x: auto;
-}
-
-.selected-tag {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: var(--xc-border-radius-sm);
-    font-size: var(--xc-font-size-xs);
-    color: white;
-    white-space: nowrap;
-}
-
-.tag-name {
-    line-height: 1;
-}
-
-.tag-delete-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 16px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0;
-    width: 16px;
-    height: 16px;
+/* Dialog Styles */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2000;
+}
+
+.dialog-content {
+    background-color: var(--xc-background-color);
+    border-radius: var(--xc-border-radius-lg);
+    padding: var(--xc-spacing-xl);
+    min-width: 400px;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--xc-shadow-lg);
+}
+
+.dialog-content h3 {
+    margin: 0 0 var(--xc-spacing-md) 0;
+    font-size: var(--xc-font-size-lg);
+    color: var(--xc-text-color);
+}
+
+.dialog-desc {
+    margin: 0 0 var(--xc-spacing-md) 0;
+    font-size: var(--xc-font-size-md);
+    color: var(--xc-text-color-secondary);
+}
+
+.no-tags-message {
+    padding: var(--xc-spacing-xl);
+    text-align: center;
+    color: var(--xc-text-color-secondary);
+    font-size: var(--xc-font-size-md);
+}
+
+.tag-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--xc-spacing-sm);
+    margin-bottom: var(--xc-spacing-lg);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.tag-item {
+    padding: var(--xc-spacing-sm);
+    border: 1px solid var(--xc-border-color);
+    border-radius: var(--xc-border-radius-sm);
+    transition: all var(--xc-transition-fast);
+}
+
+.tag-item:hover {
+    background-color: var(--xc-background-color-hover);
+}
+
+.tag-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.tag-checkbox input[type="checkbox"] {
+    margin-right: var(--xc-spacing-sm);
+    cursor: pointer;
+}
+
+.tag-label {
+    display: flex;
+    align-items: center;
+    gap: var(--xc-spacing-sm);
+}
+
+.tag-color {
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    transition: background-color var(--xc-transition-fast);
+    display: inline-block;
 }
 
-.tag-delete-btn:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+.tag-name {
+    font-size: var(--xc-font-size-md);
+    color: var(--xc-text-color);
 }
 
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--xc-spacing-sm);
+}
+
+.confirm-btn,
+.cancel-btn {
+    padding: var(--xc-spacing-sm) var(--xc-spacing-lg);
+    border-radius: var(--xc-border-radius-sm);
+    font-size: var(--xc-font-size-md);
+    cursor: pointer;
+    transition: all var(--xc-transition-fast);
+}
+
+.confirm-btn {
+    background-color: var(--xc-primary-color);
+    color: white;
+    border: none;
+}
+
+.confirm-btn:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.confirm-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cancel-btn {
+    background-color: transparent;
+    color: var(--xc-text-color);
+    border: 1px solid var(--xc-border-color);
+}
+
+.cancel-btn:hover {
+    background-color: var(--xc-background-color-hover);
+}
+
+/* Transition */
 .slide-up-enter-active,
 .slide-up-leave-active {
     transition: all 0.3s ease;
@@ -450,7 +601,7 @@ const btnclk_remove_tag = (tag: DatType.FileItemTag) => {
 
 .slide-up-enter-from,
 .slide-up-leave-to {
-    transform: translateX(-50%) translateY(100px);
+    transform: translateX(-50%) translateY(100%);
     opacity: 0;
 }
 </style>

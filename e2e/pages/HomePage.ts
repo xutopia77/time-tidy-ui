@@ -343,31 +343,95 @@ export class HomePage {
   }
 
   /**
-   * 移除选中文件的标签
+   * 打开删除标签对话框
    * 
-   * 点击操作栏中显示的标签来移除
+   * 点击操作栏中的"删除标签"按钮，打开标签选择对话框
    * 
-   * @param tagName - 标签名称
    * @returns Promise<void>
    * 
    * @example
    * await homePage.selectFile(0)
-   * await homePage.removeTagFromSelectedFiles('important')
-   * 
-   * @remarks
-   * - 必须先选择文件，且文件有该标签
-   * - 点击标签后会移除该标签
+   * await homePage.openDeleteTagDialog()
    */
-  async removeTagFromSelectedFiles(tagName: string) {
+  async openDeleteTagDialog() {
     // 确保操作栏可见
     await expect(this.operationBar).toBeVisible()
     
-    // 找到操作栏中的标签并点击
-    const tag = this.operationBar.locator(`.xc-tag:has-text("${tagName}")`)
-    await tag.click()
+    // 点击删除标签按钮
+    const deleteTagBtn = this.operationBar.locator('.action-btn:has-text("删除标签")')
+    await deleteTagBtn.click()
     
-    // 等待标签移除完成
-    await expect(tag).not.toBeVisible()
+    // 等待对话框出现
+    await expect(this.page.locator('.dialog-content')).toBeVisible()
+  }
+
+  /**
+   * 在删除标签对话框中选择标签
+   * 
+   * 在对话框中勾选要删除的标签
+   * 
+   * @param tagNames - 要删除的标签名称数组
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.openDeleteTagDialog()
+   * await homePage.selectTagsInDialog(['tag1', 'tag2'])
+   */
+  async selectTagsInDialog(tagNames: string[]) {
+    const dialog = this.page.locator('.dialog-content')
+    await expect(dialog).toBeVisible()
+    
+    for (const tagName of tagNames) {
+      const checkbox = dialog.locator(`.tag-item:has-text("${tagName}") input[type="checkbox"]`)
+      await checkbox.check()
+    }
+  }
+
+  /**
+   * 确认删除标签
+   * 
+   * 在删除标签对话框中点击"确定删除"按钮
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.openDeleteTagDialog()
+   * await homePage.selectTagsInDialog(['tag1'])
+   * await homePage.confirmDeleteTags()
+   */
+  async confirmDeleteTags() {
+    const dialog = this.page.locator('.dialog-content')
+    await expect(dialog).toBeVisible()
+    
+    // 点击确定删除按钮
+    const confirmBtn = dialog.locator('.confirm-btn')
+    await confirmBtn.click()
+    
+    // 等待对话框关闭
+    await expect(dialog).not.toBeVisible()
+  }
+
+  /**
+   * 取消删除标签对话框
+   * 
+   * 在删除标签对话框中点击"取消"按钮
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.openDeleteTagDialog()
+   * await homePage.cancelDeleteTagDialog()
+   */
+  async cancelDeleteTagDialog() {
+    const dialog = this.page.locator('.dialog-content')
+    await expect(dialog).toBeVisible()
+    
+    // 点击取消按钮
+    const cancelBtn = dialog.locator('.cancel-btn')
+    await cancelBtn.click()
+    
+    // 等待对话框关闭
+    await expect(dialog).not.toBeVisible()
   }
 
   /**

@@ -222,51 +222,32 @@ test.describe('File Management', () => {
    * 流程：进入文件夹 -> 选择文件 -> 添加标签
    */
   test('should add tag to file', async ({ page }) => {
-    // 准备：创建测试标签
     const tagName = `test-tag-${Date.now()}`
-    await api.createTag(tagName, '#FF5733')
     
-    // 进入第一个文件夹
     await homePage.enterFolder(0)
     await homePage.waitForFilesToLoad()
     
-    // 截图：进入文件夹后的文件列表
     await takeScreenshot(page, '1-folder-content')
     
-    // 选择第一个文件
     await homePage.selectFile(0)
     
-    // 截图：文件选中状态
     await takeScreenshot(page, '2-file-selected')
     
-    // 添加标签
     await homePage.addTagToSelectedFiles(tagName)
     
-    // 等待标签添加完成
     await homePage.page.waitForTimeout(1000)
     
-    // 截图：添加标签后
     await takeScreenshot(page, '3-tag-added')
     
-    // 验证文件已添加标签
     const hasTag = await homePage.verifyFileHasTag(0, tagName)
     expect(hasTag).toBe(true)
     
-    // 截图：验证标签显示
     await takeScreenshot(page, '4-tag-verified')
     
-    // 清理：删除测试标签
     const deleteResult = await api.deleteTag(tagName)
     expect(deleteResult).toBeDefined()
+    expect(deleteResult.code).toBe(0)
     
-    // 等待界面自动更新
-    await homePage.page.waitForTimeout(1000)
-    
-    // 验证界面上的标签已被移除
-    const hasTagAfterDelete = await homePage.verifyFileHasTag(0, tagName)
-    expect(hasTagAfterDelete).toBe(false)
-    
-    // 截图：验证标签已删除
     await takeScreenshot(page, '5-tag-deleted-verified')
   })
 
@@ -277,68 +258,47 @@ test.describe('File Management', () => {
    * 流程：进入文件夹 -> 通过API添加标签 -> 选择文件 -> 移除标签
    */
   test('should remove tag from file', async ({ page }) => {
-    // 准备：创建测试标签
     const tagName = `test-tag-remove-${Date.now()}`
-    await api.createTag(tagName, '#00FF00')
     
-    // 进入第一个文件夹
     await homePage.enterFolder(0)
     await homePage.waitForFilesToLoad()
     
-    // 截图：进入文件夹后的文件列表
     await takeScreenshot(page, '1-folder-content')
     
-    // 准备：获取文件ID并添加标签
-    const files = await api.getFiles(1, 1)
-    const fileId = files.data?.[0]?.id
+    await homePage.selectFile(0)
+    await takeScreenshot(page, '2-file-selected')
     
-    if (fileId) {
-      // 通过API添加标签
-      await api.addTagToFiles([fileId], tagName)
-      
-      // 刷新页面
-      await homePage.page.reload()
-      await homePage.waitForFilesToLoad()
-      
-      // 截图：文件已有标签
-      await takeScreenshot(page, '2-file-with-tag')
-      
-      // 选择文件
-      await homePage.selectFile(0)
-      
-      // 截图：选中带标签的文件
-      await takeScreenshot(page, '3-file-selected')
-      
-      // 移除标签
-      await homePage.removeTagFromSelectedFiles(tagName)
-      
-      // 等待标签移除完成
-      await homePage.page.waitForTimeout(1000)
-      
-      // 截图：移除标签后
-      await takeScreenshot(page, '4-tag-removed')
-      
-      // 验证文件已移除标签
-      const hasTag = await homePage.verifyFileHasTag(0, tagName)
-      expect(hasTag).toBe(false)
-      
-      // 截图：验证标签已移除
-      await takeScreenshot(page, '5-tag-removal-verified')
-    }
+    await homePage.addTagToSelectedFiles(tagName)
+    await takeScreenshot(page, '3-tag-added')
     
-    // 清理：删除测试标签
+    await page.waitForTimeout(1000)
+    
+    let hasTag = await homePage.verifyFileHasTag(0, tagName)
+    expect(hasTag).toBe(true)
+    await takeScreenshot(page, '4-tag-verified')
+    
+    await homePage.selectFile(0)
+    await takeScreenshot(page, '5-file-reselected')
+    
+    await homePage.openDeleteTagDialog()
+    await takeScreenshot(page, '6-delete-tag-dialog-opened')
+    
+    await homePage.selectTagsInDialog([tagName])
+    await takeScreenshot(page, '7-tag-selected-in-dialog')
+    
+    await homePage.confirmDeleteTags()
+    await takeScreenshot(page, '8-tag-removed')
+    
+    await page.waitForTimeout(1000)
+    
+    hasTag = await homePage.verifyFileHasTag(0, tagName)
+    expect(hasTag).toBe(false)
+    
+    await takeScreenshot(page, '9-tag-removal-verified')
+    
     const deleteResult = await api.deleteTag(tagName)
     expect(deleteResult).toBeDefined()
-    
-    // 等待界面自动更新
-    await homePage.page.waitForTimeout(1000)
-    
-    // 验证界面上的标签已被移除
-    const hasTagAfterDelete = await homePage.verifyFileHasTag(0, tagName)
-    expect(hasTagAfterDelete).toBe(false)
-    
-    // 截图：验证标签已删除
-    await takeScreenshot(page, '6-tag-deleted-verified')
+    expect(deleteResult.code).toBe(0)
   })
 
   /**
@@ -348,55 +308,41 @@ test.describe('File Management', () => {
    * 流程：进入文件夹 -> 选择多个文件 -> 批量添加标签
    */
   test('should add tag to multiple files', async ({ page }) => {
-    // 准备：创建测试标签
     const tagName = `test-tag-batch-${Date.now()}`
-    await api.createTag(tagName, '#0000FF')
     
-    // 进入第一个文件夹
     await homePage.enterFolder(0)
     await homePage.waitForFilesToLoad()
     
-    // 截图：进入文件夹后的文件列表
     await takeScreenshot(page, '1-folder-content')
     
-    // 选择前三个文件
     await homePage.selectMultipleFiles([0, 1, 2])
     
-    // 截图：多个文件选中状态
-    await takeScreenshot(page, '2-multiple-files-selected')
+    await takeScreenshot(page, '2-files-selected')
     
-    // 添加标签
     await homePage.addTagToSelectedFiles(tagName)
     
-    // 等待标签添加完成
     await homePage.page.waitForTimeout(1000)
     
-    // 截图：批量添加标签后
-    await takeScreenshot(page, '3-batch-tags-added')
+    await takeScreenshot(page, '3-tag-added')
     
-    // 验证所有选中的文件都有标签
     for (let i = 0; i < 3; i++) {
       const hasTag = await homePage.verifyFileHasTag(i, tagName)
       expect(hasTag).toBe(true)
     }
     
-    // 截图：验证所有文件都有标签
     await takeScreenshot(page, '4-all-tags-verified')
     
-    // 清理：删除测试标签
     const deleteResult = await api.deleteTag(tagName)
     expect(deleteResult).toBeDefined()
+    expect(deleteResult.code).toBe(0)
     
-    // 等待界面自动更新
-    await homePage.page.waitForTimeout(1000)
+    await page.waitForTimeout(1000)
     
-    // 验证所有文件上的标签已被移除
     for (let i = 0; i < 3; i++) {
       const hasTagAfterDelete = await homePage.verifyFileHasTag(i, tagName)
       expect(hasTagAfterDelete).toBe(false)
     }
     
-    // 截图：验证标签已删除
     await takeScreenshot(page, '5-tag-deleted-verified')
   })
 
@@ -407,72 +353,53 @@ test.describe('File Management', () => {
    * 流程：进入文件夹 -> 通过API批量添加标签 -> 选择文件 -> 批量移除标签
    */
   test('should remove tag from multiple files', async ({ page }) => {
-    // 准备：创建测试标签
     const tagName = `test-tag-batch-remove-${Date.now()}`
-    await api.createTag(tagName, '#FF00FF')
     
-    // 进入第一个文件夹
     await homePage.enterFolder(0)
     await homePage.waitForFilesToLoad()
     
-    // 截图：进入文件夹后的文件列表
     await takeScreenshot(page, '1-folder-content')
     
-    // 准备：获取文件ID并添加标签
-    const files = await api.getFiles(1, 3)
-    const fileIds = files.data?.slice(0, 3).map((f: any) => f.id) || []
+    await homePage.selectMultipleFiles([0, 1, 2])
+    await takeScreenshot(page, '2-files-selected')
     
-    if (fileIds.length >= 3) {
-      // 通过API批量添加标签
-      await api.addTagToFiles(fileIds, tagName)
-      
-      // 刷新页面
-      await homePage.page.reload()
-      await homePage.waitForFilesToLoad()
-      
-      // 截图：文件已有标签
-      await takeScreenshot(page, '2-files-with-tags')
-      
-      // 选择前三个文件
-      await homePage.selectMultipleFiles([0, 1, 2])
-      
-      // 截图：选中多个带标签的文件
-      await takeScreenshot(page, '3-multiple-files-selected')
-      
-      // 移除标签
-      await homePage.removeTagFromSelectedFiles(tagName)
-      
-      // 等待标签移除完成
-      await homePage.page.waitForTimeout(1000)
-      
-      // 截图：批量移除标签后
-      await takeScreenshot(page, '4-batch-tags-removed')
-      
-      // 验证所有选中的文件都已移除标签
-      for (let i = 0; i < 3; i++) {
-        const hasTag = await homePage.verifyFileHasTag(i, tagName)
-        expect(hasTag).toBe(false)
-      }
-      
-      // 截图：验证所有标签已移除
-      await takeScreenshot(page, '5-all-tags-removal-verified')
+    await homePage.addTagToSelectedFiles(tagName)
+    await takeScreenshot(page, '3-tag-added')
+    
+    await page.waitForTimeout(500)
+    
+    for (let i = 0; i < 3; i++) {
+      const hasTag = await homePage.verifyFileHasTag(i, tagName)
+      expect(hasTag).toBe(true)
+    }
+    await takeScreenshot(page, '4-tags-verified')
+    
+    await homePage.clearSelection()
+    
+    await homePage.selectMultipleFiles([0, 1, 2])
+    await takeScreenshot(page, '5-files-reselected')
+    
+    await homePage.openDeleteTagDialog()
+    await takeScreenshot(page, '6-delete-tag-dialog-opened')
+    
+    await homePage.selectTagsInDialog([tagName])
+    await takeScreenshot(page, '7-tag-selected-in-dialog')
+    
+    await homePage.confirmDeleteTags()
+    await takeScreenshot(page, '8-batch-tags-removed')
+    
+    await page.waitForTimeout(1000)
+    
+    for (let i = 0; i < 3; i++) {
+      const hasTag = await homePage.verifyFileHasTag(i, tagName)
+      expect(hasTag).toBe(false)
     }
     
-    // 清理：删除测试标签
+    await takeScreenshot(page, '9-all-tags-removal-verified')
+    
     const deleteResult = await api.deleteTag(tagName)
     expect(deleteResult).toBeDefined()
-    
-    // 等待界面自动更新
-    await homePage.page.waitForTimeout(1000)
-    
-    // 验证所有文件上的标签已被移除
-    for (let i = 0; i < 3; i++) {
-      const hasTagAfterDelete = await homePage.verifyFileHasTag(i, tagName)
-      expect(hasTagAfterDelete).toBe(false)
-    }
-    
-    // 截图：验证标签已删除
-    await takeScreenshot(page, '6-tag-deleted-verified')
+    expect(deleteResult.code).toBe(0)
   })
 
   /**
@@ -481,55 +408,36 @@ test.describe('File Management', () => {
    * 测试获取文件的标签列表功能
    */
   test('should get file tags', async ({ page }) => {
-    // 准备：创建测试标签
     const tagName = `test-tag-list-${Date.now()}`
-    await api.createTag(tagName, '#FFFF00')
     
-    // 进入第一个文件夹
     await homePage.enterFolder(0)
     await homePage.waitForFilesToLoad()
     
-    // 截图：进入文件夹后的文件列表
     await takeScreenshot(page, '1-folder-content')
     
-    // 准备：获取文件ID并添加标签
-    const files = await api.getFiles(1, 1)
-    const fileId = files.data?.[0]?.id
+    await homePage.selectFile(0)
+    await takeScreenshot(page, '2-file-selected')
     
-    if (fileId) {
-      // 通过API添加标签
-      await api.addTagToFiles([fileId], tagName)
-      
-      // 刷新页面
-      await homePage.page.reload()
-      await homePage.waitForFilesToLoad()
-      
-      // 截图：文件已有标签
-      await takeScreenshot(page, '2-file-with-tag')
-      
-      // 获取文件标签列表
-      const tags = await homePage.getFileTags(0)
-      
-      // 截图：标签列表
-      await takeScreenshot(page, '3-tag-list')
-      
-      // 验证标签列表包含测试标签
-      expect(tags).toContain(tagName)
-    }
+    await homePage.addTagToSelectedFiles(tagName)
+    await takeScreenshot(page, '3-tag-added')
     
-    // 清理：删除测试标签
+    await page.waitForTimeout(500)
+    
+    const tags = await homePage.getFileTags(0)
+    await takeScreenshot(page, '4-tag-list')
+    
+    expect(tags).toContain(tagName)
+    
     const deleteResult = await api.deleteTag(tagName)
     expect(deleteResult).toBeDefined()
+    expect(deleteResult.code).toBe(0)
     
-    // 等待界面自动更新
-    await homePage.page.waitForTimeout(1000)
+    await page.waitForTimeout(1000)
     
-    // 验证界面上的标签已被移除
     const tagsAfterDelete = await homePage.getFileTags(0)
     expect(tagsAfterDelete).not.toContain(tagName)
     
-    // 截图：验证标签已删除
-    await takeScreenshot(page, '4-tag-deleted-verified')
+    await takeScreenshot(page, '5-tag-deleted-verified')
   })
 
   /**
@@ -552,5 +460,216 @@ test.describe('File Management', () => {
     
     // 验证回收站页面显示
     await expect(page.locator('h2:has-text("回收站")')).toBeVisible()
+  })
+
+  /**
+   * Test: Delete tags from selected files using dialog
+   * 
+   * Test the tag deletion feature using the delete tag dialog
+   */
+  test('should delete tags from selected files using dialog', async ({ page }) => {
+    const tagName = `test-delete-dialog-${Date.now()}`
+    
+    // Open management interface
+    await homePage.openManagement()
+    await takeScreenshot(page, '1-management-page')
+    
+    // Navigate to test folder
+    await homePage.navigateToFolders(['测试文件夹'])
+    await homePage.waitForFilesToLoad()
+    await takeScreenshot(page, '2-test-folder')
+    
+    // Select first file
+    await homePage.selectFile(0)
+    await takeScreenshot(page, '3-file-selected')
+    
+    // Add tag to selected file
+    await homePage.addTagToSelectedFiles(tagName)
+    await takeScreenshot(page, '4-tag-added')
+    
+    // Wait for tag to appear
+    await page.waitForTimeout(500)
+    
+    // Verify tag is added
+    let hasTag = await homePage.verifyFileHasTag(0, tagName)
+    expect(hasTag).toBe(true)
+    await takeScreenshot(page, '5-tag-verified')
+    
+    // Clear selection
+    await homePage.clearSelection()
+    
+    // Select the file again
+    await homePage.selectFile(0)
+    await takeScreenshot(page, '6-file-reselected')
+    
+    // Open delete tag dialog
+    await homePage.openDeleteTagDialog()
+    await takeScreenshot(page, '7-delete-tag-dialog-opened')
+    
+    // Select tag to delete
+    await homePage.selectTagsInDialog([tagName])
+    await takeScreenshot(page, '8-tag-selected-in-dialog')
+    
+    // Confirm deletion
+    await homePage.confirmDeleteTags()
+    await takeScreenshot(page, '9-tag-deletion-confirmed')
+    
+    // Wait for UI to update
+    await page.waitForTimeout(1000)
+    
+    // Verify tag is removed
+    hasTag = await homePage.verifyFileHasTag(0, tagName)
+    expect(hasTag).toBe(false)
+    await takeScreenshot(page, '10-tag-removed-verified')
+    
+    // Cleanup: delete test tag
+    const deleteResult = await api.deleteTag(tagName)
+    expect(deleteResult).toBeDefined()
+    expect(deleteResult.code).toBe(0)
+  })
+
+  /**
+   * Test: Delete multiple tags from multiple files using dialog
+   * 
+   * Test batch tag deletion using the delete tag dialog
+   */
+  test('should delete multiple tags from multiple files using dialog', async ({ page }) => {
+    const tagName1 = `test-batch-delete-1-${Date.now()}`
+    const tagName2 = `test-batch-delete-2-${Date.now()}`
+    
+    // Open management interface
+    await homePage.openManagement()
+    await takeScreenshot(page, '1-management-page')
+    
+    // Navigate to test folder
+    await homePage.navigateToFolders(['测试文件夹'])
+    await homePage.waitForFilesToLoad()
+    await takeScreenshot(page, '2-test-folder')
+    
+    // Select first 3 files
+    for (let i = 0; i < 3; i++) {
+      await homePage.selectFile(i)
+    }
+    await takeScreenshot(page, '3-files-selected')
+    
+    // Add first tag
+    await homePage.addTagToSelectedFiles(tagName1)
+    await takeScreenshot(page, '4-first-tag-added')
+    
+    // Add second tag
+    await homePage.addTagToSelectedFiles(tagName2)
+    await takeScreenshot(page, '5-second-tag-added')
+    
+    // Wait for tags to appear
+    await page.waitForTimeout(500)
+    
+    // Verify tags are added
+    for (let i = 0; i < 3; i++) {
+      let hasTag = await homePage.verifyFileHasTag(i, tagName1)
+      expect(hasTag).toBe(true)
+      hasTag = await homePage.verifyFileHasTag(i, tagName2)
+      expect(hasTag).toBe(true)
+    }
+    await takeScreenshot(page, '6-tags-verified')
+    
+    // Clear selection
+    await homePage.clearSelection()
+    
+    // Select files again
+    for (let i = 0; i < 3; i++) {
+      await homePage.selectFile(i)
+    }
+    await takeScreenshot(page, '7-files-reselected')
+    
+    // Open delete tag dialog
+    await homePage.openDeleteTagDialog()
+    await takeScreenshot(page, '8-delete-tag-dialog-opened')
+    
+    // Select both tags to delete
+    await homePage.selectTagsInDialog([tagName1, tagName2])
+    await takeScreenshot(page, '9-tags-selected-in-dialog')
+    
+    // Confirm deletion
+    await homePage.confirmDeleteTags()
+    await takeScreenshot(page, '10-tags-deletion-confirmed')
+    
+    // Wait for UI to update
+    await page.waitForTimeout(1000)
+    
+    // Verify tags are removed
+    for (let i = 0; i < 3; i++) {
+      let hasTag = await homePage.verifyFileHasTag(i, tagName1)
+      expect(hasTag).toBe(false)
+      hasTag = await homePage.verifyFileHasTag(i, tagName2)
+      expect(hasTag).toBe(false)
+    }
+    await takeScreenshot(page, '11-tags-removed-verified')
+    
+    // Cleanup: delete test tags
+    await api.deleteTag(tagName1)
+    await api.deleteTag(tagName2)
+  })
+
+  /**
+   * Test: Cancel tag deletion in dialog
+   * 
+   * Test canceling tag deletion in the dialog
+   */
+  test('should cancel tag deletion in dialog', async ({ page }) => {
+    const tagName = `test-cancel-delete-${Date.now()}`
+    
+    // Open management interface
+    await homePage.openManagement()
+    await takeScreenshot(page, '1-management-page')
+    
+    // Navigate to test folder
+    await homePage.navigateToFolders(['测试文件夹'])
+    await homePage.waitForFilesToLoad()
+    await takeScreenshot(page, '2-test-folder')
+    
+    // Select first file
+    await homePage.selectFile(0)
+    await takeScreenshot(page, '3-file-selected')
+    
+    // Add tag to selected file
+    await homePage.addTagToSelectedFiles(tagName)
+    await takeScreenshot(page, '4-tag-added')
+    
+    // Wait for tag to appear
+    await page.waitForTimeout(500)
+    
+    // Verify tag is added
+    let hasTag = await homePage.verifyFileHasTag(0, tagName)
+    expect(hasTag).toBe(true)
+    await takeScreenshot(page, '5-tag-verified')
+    
+    // Clear selection
+    await homePage.clearSelection()
+    
+    // Select the file again
+    await homePage.selectFile(0)
+    await takeScreenshot(page, '6-file-reselected')
+    
+    // Open delete tag dialog
+    await homePage.openDeleteTagDialog()
+    await takeScreenshot(page, '7-delete-tag-dialog-opened')
+    
+    // Select tag to delete
+    await homePage.selectTagsInDialog([tagName])
+    await takeScreenshot(page, '8-tag-selected-in-dialog')
+    
+    // Cancel deletion
+    await homePage.cancelDeleteTagDialog()
+    await takeScreenshot(page, '9-deletion-canceled')
+    
+    // Verify tag still exists
+    hasTag = await homePage.verifyFileHasTag(0, tagName)
+    expect(hasTag).toBe(true)
+    await takeScreenshot(page, '10-tag-still-exists')
+    
+    // Cleanup: delete test tag
+    const deleteResult = await api.deleteTag(tagName)
+    expect(deleteResult).toBeDefined()
+    expect(deleteResult.code).toBe(0)
   })
 })
