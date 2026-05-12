@@ -4,20 +4,83 @@
             <div class="overlay" @click="close"></div>
             <div class="viewer-container">
                 <button class="nav-btn prev" @click="prevImage" :disabled="currentIndex === 0">
-                    &lt;
+                    ‹
                 </button>
-                <!-- 添加鼠标事件处理移动 -->
-                <img :src="currentImageUrl" alt="preview" class="preview-image" :style="imageStyle"
-                    @mousedown="startDrag" @mousemove="drag" @mouseup="endDrag" @mouseleave="endDrag" />
+                
+                <img 
+                    :src="currentImageUrl" 
+                    alt="preview" 
+                    class="preview-image" 
+                    :style="imageStyle"
+                    @mousedown="startDrag" 
+                    @mousemove="drag" 
+                    @mouseup="endDrag" 
+                    @mouseleave="endDrag"
+                    @wheel="handleWheel"
+                    @dblclick="handleDoubleClick"
+                />
+                
                 <button class="nav-btn next" @click="nextImage" :disabled="currentIndex === imageList.length - 1">
-                    &gt;
+                    ›
                 </button>
+                
                 <button class="close-btn" @click="close">×</button>
-                <div class="control-buttons">
-                    <button @click="zoomIn">放大</button>
-                    <button @click="zoomOut">缩小</button>
-                    <button @click="rotateLeft">左转</button>
-                    <button @click="rotateRight">右转</button>
+                
+                <div class="image-info">
+                    <span class="image-counter">{{ currentIndex + 1 }} / {{ imageList.length }}</span>
+                    <span class="image-name">{{ currentImage?.name }}</span>
+                </div>
+                
+                <div class="control-toolbar">
+                    <div class="toolbar-group">
+                        <button @click="zoomOut" class="toolbar-btn" title="缩小 (-)">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M19 13H5v-2h14v2z"/>
+                            </svg>
+                        </button>
+                        <span class="zoom-display">{{ Math.round(scale * 100) }}%</span>
+                        <button @click="zoomIn" class="toolbar-btn" title="放大 (+)">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="toolbar-divider"></div>
+                    
+                    <div class="toolbar-group">
+                        <button @click="fitToScreen" class="toolbar-btn" title="适应屏幕 (F)">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M3 5v4h2V5h4V3H5c-1.1 0-2 .9-2 2zm2 10H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm14 4h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zm0-16h-4v2h4v4h2V5c0-1.1-.9-2-2-2z"/>
+                            </svg>
+                        </button>
+                        <button @click="resetImageState" class="toolbar-btn" title="原始大小 (0)">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="toolbar-divider"></div>
+                    
+                    <div class="toolbar-group">
+                        <button @click="rotateLeft" class="toolbar-btn" title="左旋转 (Shift+R)">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M7.11 8.53L5.7 7.11C4.8 8.27 4.24 9.61 4.07 11h2.02c.14-.87.49-1.72 1.02-2.47zM6.09 13H4.07c.17 1.39.72 2.73 1.62 3.89l1.41-1.42c-.52-.75-.87-1.59-1.01-2.47zm1.01 5.32c1.16.9 2.51 1.44 3.9 1.61V17.9c-.87-.15-1.71-.49-2.46-1.03L7.1 18.32zM13 4.07V1L8.45 5.55 13 10V6.09c2.84.48 5 2.94 5 5.91s-2.16 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93s-3.05-7.44-7-7.93z"/>
+                            </svg>
+                        </button>
+                        <button @click="rotateRight" class="toolbar-btn" title="右旋转 (R)">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M15.55 5.55L11 1v3.07C7.06 4.56 4 7.92 4 12s3.05 7.44 7 7.93v-2.02c-2.84-.48-5-2.94-5-5.91s2.16-5.43 5-5.91V10l4.55-4.45zM19.93 11c-.17-1.39-.72-2.73-1.62-3.89l-1.42 1.42c.54.75.88 1.6 1.02 2.47h2.02zM13 17.9v2.02c1.39-.17 2.74-.71 3.9-1.61l-1.44-1.44c-.75.54-1.59.89-2.46 1.03zm3.89-2.42l1.42 1.41c.9-1.16 1.45-2.5 1.62-3.89h-2.02c-.14.87-.48 1.72-1.02 2.48z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="keyboard-hints">
+                    <span>← → 切换</span>
+                    <span>+/- 缩放</span>
+                    <span>ESC 关闭</span>
                 </div>
             </div>
         </div>
@@ -25,18 +88,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAppStore } from '@/stores/AppStore'
-// import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef';
+
 const appStore = useAppStore()
 
-// 控制 ImageViewer 是否显示
 const isVisible = ref(false)
-
-// 获取当前图片列表
-// const imageList = computed(() => appStore.curFiles)
-// const imageList = computed(() => appStore.curFiles.filter(file => file.type === 'file'))
 
 const imageList = computed(() => appStore.curFiles.filter(file => {
     let bfile = false;
@@ -52,13 +110,11 @@ const imageList = computed(() => appStore.curFiles.filter(file => {
     return bfile;
 }))
 
-// 获取当前选中图片的索引
 const currentIndex = computed(() => {
     const index = imageList.value.findIndex(file => file.id === appStore.curSltFile?.id)
     return index !== -1 ? index : 0
 })
 
-// 获取当前图片
 const currentImage = computed(() => imageList.value[currentIndex.value])
 
 const currentImageUrl = computed(() => {
@@ -72,7 +128,6 @@ const rotation = ref(0)
 const positionX = ref(0)
 const positionY = ref(0)
 
-// 新增拖拽状态和起始位置
 const isDragging = ref(false)
 const startX = ref(0)
 const startY = ref(0)
@@ -82,11 +137,11 @@ const initialPositionY = ref(0)
 const imageStyle = computed(() => {
     return {
         transform: `translate(${positionX.value}px, ${positionY.value}px) scale(${scale.value}) rotate(${rotation.value}deg)`,
-        transformOrigin: 'center'
+        transformOrigin: 'center',
+        transition: isDragging.value ? 'none' : 'transform 0.3s ease-out'
     }
 })
 
-// 重置图片状态
 const resetImageState = () => {
     scale.value = 1
     rotation.value = 0
@@ -94,48 +149,85 @@ const resetImageState = () => {
     positionY.value = 0
 }
 
-// 关闭图片预览
 const close = () => {
     isVisible.value = false
     appStore.bPageImgView = false
-    resetImageState() // 重置图片状态
+    resetImageState()
 }
 
-// 切换到上一张图片
 const prevImage = () => {
     if (currentIndex.value > 0) {
         appStore.curSltFile = imageList.value[currentIndex.value - 1]
-        resetImageState() // 重置图片状态
-    }
-}
-// 切换到下一张图片
-const nextImage = () => {
-    if (currentIndex.value < imageList.value.length - 1) {
-        appStore.curSltFile = imageList.value[currentIndex.value + 1]
-        resetImageState() // 重置图片状态
+        resetImageState()
     }
 }
 
-// 放大图片，添加缩放范围限制
+const nextImage = () => {
+    if (currentIndex.value < imageList.value.length - 1) {
+        appStore.curSltFile = imageList.value[currentIndex.value + 1]
+        resetImageState()
+    }
+}
+
 const zoomIn = () => {
     const newScale = scale.value * 1.2
-    scale.value = Math.min(newScale, 5) // 最大缩放 5 倍
+    scale.value = Math.min(newScale, 10)
 }
-// 缩小图片，添加缩放范围限制
+
 const zoomOut = () => {
     const newScale = scale.value / 1.2
-    scale.value = Math.max(newScale, 0.5) // 最小缩放 0.5 倍
+    scale.value = Math.max(newScale, 0.1)
 }
-// 左转图片，让旋转角度规整
+
 const rotateLeft = () => {
     rotation.value = (rotation.value - 90 + 360) % 360
 }
-// 右转图片，让旋转角度规整
+
 const rotateRight = () => {
     rotation.value = (rotation.value + 90) % 360
 }
 
-// 开始拖拽
+const fitToScreen = () => {
+    const img = new Image()
+    img.src = currentImageUrl.value
+    img.onload = () => {
+        const screenWidth = window.innerWidth * 0.9
+        const screenHeight = window.innerHeight * 0.9
+        const scaleX = screenWidth / img.width
+        const scaleY = screenHeight / img.height
+        scale.value = Math.min(scaleX, scaleY, 1)
+        positionX.value = 0
+        positionY.value = 0
+    }
+}
+
+const handleWheel = (event: WheelEvent) => {
+    event.preventDefault()
+    const delta = event.deltaY > 0 ? 0.9 : 1.1
+    const newScale = Math.min(Math.max(scale.value * delta, 0.1), 10)
+    
+    const imgElement = event.target as HTMLImageElement
+    const rect = imgElement.getBoundingClientRect()
+    const mouseX = event.clientX - rect.left - rect.width / 2
+    const mouseY = event.clientY - rect.top - rect.height / 2
+    
+    const scaleRatio = newScale / scale.value
+    positionX.value = mouseX - (mouseX - positionX.value) * scaleRatio
+    positionY.value = mouseY - (mouseY - positionY.value) * scaleRatio
+    
+    scale.value = newScale
+}
+
+const handleDoubleClick = () => {
+    if (scale.value === 1) {
+        scale.value = 2
+    } else {
+        scale.value = 1
+        positionX.value = 0
+        positionY.value = 0
+    }
+}
+
 const startDrag = (event: MouseEvent) => {
     isDragging.value = true
     startX.value = event.clientX
@@ -144,7 +236,6 @@ const startDrag = (event: MouseEvent) => {
     initialPositionY.value = positionY.value
 }
 
-// 拖拽过程
 const drag = (event: MouseEvent) => {
     if (isDragging.value) {
         const deltaX = event.clientX - startX.value
@@ -154,11 +245,51 @@ const drag = (event: MouseEvent) => {
     }
 }
 
-// 结束拖拽
 const endDrag = () => {
     isDragging.value = false
 }
 
+const handleKeyDown = (event: KeyboardEvent) => {
+    switch (event.key) {
+        case 'ArrowLeft':
+            prevImage()
+            break
+        case 'ArrowRight':
+            nextImage()
+            break
+        case 'Escape':
+            close()
+            break
+        case '+':
+        case '=':
+            zoomIn()
+            break
+        case '-':
+            zoomOut()
+            break
+        case '0':
+            resetImageState()
+            break
+        case 'f':
+        case 'F':
+            fitToScreen()
+            break
+        case 'r':
+            rotateRight()
+            break
+        case 'R':
+            rotateLeft()
+            break
+    }
+}
+
+onMounted(() => {
+    window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeyDown)
+})
 </script>
 
 <style scoped>
@@ -185,7 +316,7 @@ const endDrag = () => {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.9);
 }
 
 .viewer-container {
@@ -200,8 +331,8 @@ const endDrag = () => {
     max-width: 90%;
     max-height: 90%;
     user-select: none;
-    /* 防止拖拽时选中文本 */
     cursor: grab;
+    transition: transform 0.3s ease-out;
 }
 
 .preview-image:active {
@@ -212,54 +343,159 @@ const endDrag = () => {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(255, 255, 255, 0.1);
     color: white;
-    border: none;
-    font-size: 24px;
-    padding: 10px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 32px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
     cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .prev {
-    left: 20px;
+    left: 30px;
 }
 
 .next {
-    right: 20px;
+    right: 30px;
 }
 
 .close-btn {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(255, 255, 255, 0.1);
     color: white;
-    border: none;
-    font-size: 24px;
-    width: 30px;
-    height: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 32px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
     cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .nav-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.3;
     cursor: not-allowed;
 }
 
-.control-buttons {
+.image-info {
     position: absolute;
-    bottom: 20px;
+    top: 20px;
+    left: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.image-counter {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.image-name {
+    opacity: 0.8;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.control-toolbar {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 12px 20px;
+    border-radius: 12px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.toolbar-btn {
+    background-color: transparent;
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.toolbar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-btn:active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.zoom-display {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 50px;
+    text-align: center;
+}
+
+.keyboard-hints {
+    position: absolute;
+    bottom: 100px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 10px;
+    gap: 16px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
 }
 
-.control-buttons button {
+.keyboard-hints span {
     background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 </style>
