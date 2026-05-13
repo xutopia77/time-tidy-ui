@@ -82,16 +82,30 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
             return null;
         }
 
-        fileItem.id = jRecord.id;
-        fileItem.rootPathId = jRecord.root_path_id;
-        fileItem.name = jRecord.name;
-        fileItem.path = jRecord.path;
-        fileItem.fullpath = jRecord.full_path;
-        fileItem.size = jRecord.size;
-        fileItem.time = jRecord.create_time
-        fileItem.type = fileType;
-        fileItem.uniqueHash = jRecord.unique_hash;
-        if (fileItem.type == DatTypes.FileType.audio) {
+		fileItem.id = jRecord.id;
+		fileItem.rootPathId = jRecord.root_path_id;
+		fileItem.name = jRecord.name;
+		fileItem.path = jRecord.path;
+		fileItem.fullpath = jRecord.full_path;
+		fileItem.size = jRecord.size;
+		fileItem.time = jRecord.create_time
+		fileItem.type = fileType;
+		fileItem.uniqueHash = jRecord.unique_hash;
+		fileItem.extension = jRecord.extension || '';
+		fileItem.origin = jRecord.origin || '';
+		fileItem.description = jRecord.description || '';
+		
+		// Media metadata fields
+		fileItem.duration = jRecord.duration || 0;
+		fileItem.width = jRecord.width || 0;
+		fileItem.height = jRecord.height || 0;
+		
+		// GPS location fields
+		fileItem.latitude = jRecord.latitude || 0;
+		fileItem.longitude = jRecord.longitude || 0;
+		fileItem.altitude = jRecord.altitude || 0;
+		
+		if (fileItem.type == DatTypes.FileType.audio) {
             fileItem.icon = `data:image/svg+xml;utf8,<?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 44H38C39.1046 44 40 43.1046 40 42V14H30V4H10C8.89543 4 8 4.89543 8 6V42C8 43.1046 8.89543 44 10 44Z" fill="none" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 4L40 14" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 31V28C26.2091 28 28 25.9853 28 23.5C28 21.0147 26.2091 19 24 19C21.7909 19 20 21.0147 20 23.5" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path fill-rule="evenodd" clip-rule="evenodd" d="M24 39C25.3807 39 26.5 37.8807 26.5 36.5C26.5 35.1193 25.3807 34 24 34C22.6193 34 21.5 35.1193 21.5 36.5C21.5 37.8807 22.6193 39 24 39Z" fill="%23333"/></svg>`;
         }
         else if (fileItem.type == DatTypes.FileType.other) {
@@ -740,48 +754,81 @@ class Utils {
         return path.replace(/\\/g, '/');
     }
     static dictionary_get = dictionary_get;
-    static async files_get(_req: DatTypes.FilesGetReq | null = null, bUpdateStore: boolean = true): Promise<DatTypes.Resp> {
-        const resp = new DatTypes.Resp()
-        const req: DatTypes.FilesGetReq = {
-            pageSize: appStore.searchCon.pageSize,
-            page: appStore.searchCon.page - 1,
-            tags: appStore.searchCon.tags,
-            noTag: appStore.searchCon.noTag,
-            bReverseTag: appStore.searchCon.bReverseSltTag,
-            types: appStore.searchCon.types,
-            dirs: [appStore.curPath.substring(1)],
-            statuss: [],
-            origins: [],
-            startTime: '',
-            endTime: '',
-            sortBy: appStore.searchCon.sortBy,
-            sortOrder: appStore.searchCon.sortOrder,
-            fileId: 0,
-            id: 0,
-            bFilterModel: false,
-        }
-        if (appStore.searchCon.pathType == "allPath") {
-            req.dirs = [];
-        }
+	static async files_get(_req: DatTypes.FilesGetReq | null = null, bUpdateStore: boolean = true): Promise<DatTypes.Resp> {
+		const resp = new DatTypes.Resp()
+		const req: DatTypes.FilesGetReq = {
+			pageSize: appStore.searchCon.pageSize,
+			page: appStore.searchCon.page - 1,
+			tags: appStore.searchCon.tags,
+			noTag: appStore.searchCon.noTag,
+			bReverseTag: appStore.searchCon.bReverseSltTag,
+			types: appStore.searchCon.types,
+			dirs: [appStore.curPath.substring(1)],
+			statuss: [],
+			origins: [],
+			startTime: '',
+			endTime: '',
+			sortBy: appStore.searchCon.sortBy,
+			sortOrder: appStore.searchCon.sortOrder,
+			fileId: 0,
+			id: 0,
+			bFilterModel: false,
+			// New query fields
+			keyword: null,
+			minSize: null,
+			maxSize: null,
+			hasGPS: null,
+			minLat: null,
+			maxLat: null,
+			minLon: null,
+			maxLon: null,
+			minDuration: null,
+			maxDuration: null,
+			minWidth: null,
+			maxWidth: null,
+			minHeight: null,
+			maxHeight: null,
+			extensions: null,
+		}
+		if (appStore.searchCon.pathType == "allPath") {
+			req.dirs = [];
+		}
 
-        if (_req != null) {
-            if (_req.pageSize != null) { req.pageSize = _req.pageSize; }
-            if (_req.page != null) { req.page = _req.page; }
-            if (_req.tags != null) { req.tags = _req.tags; }
-            if (_req.noTag != null) { req.noTag = _req.noTag; }
-            if (_req.bReverseTag != null) { req.bReverseTag = _req.bReverseTag; }
-            if (_req.types != null) { req.types = _req.types; }
-            if (_req.dirs != null) { req.dirs = _req.dirs; }
-            if (_req.statuss != null) { req.statuss = _req.statuss; }
-            if (_req.origins != null) { req.origins = _req.origins; }
-            if (_req.startTime != null) { req.startTime = _req.startTime; }
-            if (_req.endTime != null) { req.endTime = _req.endTime; }
-            if (_req.sortOrder != null) { req.sortOrder = _req.sortOrder; }
-            if (_req.sortBy != null) { req.sortBy = _req.sortBy; }
+		if (_req != null) {
+			if (_req.pageSize != null) { req.pageSize = _req.pageSize; }
+			if (_req.page != null) { req.page = _req.page; }
+			if (_req.tags != null) { req.tags = _req.tags; }
+			if (_req.noTag != null) { req.noTag = _req.noTag; }
+			if (_req.bReverseTag != null) { req.bReverseTag = _req.bReverseTag; }
+			if (_req.types != null) { req.types = _req.types; }
+			if (_req.dirs != null) { req.dirs = _req.dirs; }
+			if (_req.statuss != null) { req.statuss = _req.statuss; }
+			if (_req.origins != null) { req.origins = _req.origins; }
+			if (_req.startTime != null) { req.startTime = _req.startTime; }
+			if (_req.endTime != null) { req.endTime = _req.endTime; }
+			if (_req.sortOrder != null) { req.sortOrder = _req.sortOrder; }
+			if (_req.sortBy != null) { req.sortBy = _req.sortBy; }
 
-            if (_req.id != null) { req.id = _req.id; }
-            if (_req.bFilterModel != null) { req.bFilterModel = _req.bFilterModel; }
-        }
+			if (_req.id != null) { req.id = _req.id; }
+			if (_req.bFilterModel != null) { req.bFilterModel = _req.bFilterModel; }
+
+			// New query fields
+			if (_req.keyword != null) { req.keyword = _req.keyword; }
+			if (_req.minSize != null) { req.minSize = _req.minSize; }
+			if (_req.maxSize != null) { req.maxSize = _req.maxSize; }
+			if (_req.hasGPS != null) { req.hasGPS = _req.hasGPS; }
+			if (_req.minLat != null) { req.minLat = _req.minLat; }
+			if (_req.maxLat != null) { req.maxLat = _req.maxLat; }
+			if (_req.minLon != null) { req.minLon = _req.minLon; }
+			if (_req.maxLon != null) { req.maxLon = _req.maxLon; }
+			if (_req.minDuration != null) { req.minDuration = _req.minDuration; }
+			if (_req.maxDuration != null) { req.maxDuration = _req.maxDuration; }
+			if (_req.minWidth != null) { req.minWidth = _req.minWidth; }
+			if (_req.maxWidth != null) { req.maxWidth = _req.maxWidth; }
+			if (_req.minHeight != null) { req.minHeight = _req.minHeight; }
+			if (_req.maxHeight != null) { req.maxHeight = _req.maxHeight; }
+			if (_req.extensions != null) { req.extensions = _req.extensions; }
+		}
 
         await axios.post(`${appStore.srvPrefix}/api/v1/files_get`, JSON.stringify(req))
             .then((response) => {

@@ -236,23 +236,33 @@ export class FileItemTag {
 }
 
 export class File {
-    id: number = 0;
-    rootPathId: number = 0;
-    name: string = "";
-    type: FileType = FileType.image;
-    path: string = "";
-    fullpath = "";
-    icon: string = "";
-    tags: FileItemTag[] = [];
-    size: number = 0;
-    time: string = "";
-    checked: boolean = false;
-    uniqueHash: string = "";
-    extension: string = "";
-    create_time: string = "";
-    status: number = 0;
-    origin: string = "";
-    description: string = "";
+	id: number = 0;
+	rootPathId: number = 0;
+	name: string = "";
+	type: FileType = FileType.image;
+	path: string = "";
+	fullpath = "";
+	icon: string = "";
+	tags: FileItemTag[] = [];
+	size: number = 0;
+	time: string = "";
+	checked: boolean = false;
+	uniqueHash: string = "";
+	extension: string = "";
+	create_time: string = "";
+	status: number = 0;
+	origin: string = "";
+	description: string = "";
+	
+	// Media metadata fields
+	duration: number = 0;      // Duration (video/audio, milliseconds)
+	width: number = 0;         // Width (image/video)
+	height: number = 0;        // Height (image/video)
+	
+	// GPS location fields
+	latitude: number = 0;      // Latitude
+	longitude: number = 0;     // Longitude
+	altitude: number = 0;      // Altitude
 }
 
 export class FileCatalog {
@@ -309,23 +319,40 @@ export class MessageReq {
 
 
 export class FilesGetReq {
-    pageSize: number | null = 10;
-    page: number | null = 0;
-    tags: string[] | null = [];
-    noTag: 'true' | 'false' | '' = '';
-    bReverseTag: boolean = false; // 反向选择标签
-    types: FileType[] | null = null;
-    dirs: string[] | null = [];
-    statuss: number[] | null = null;
-    origins: string[] | null = [];
-    startTime: string | null = null;
-    endTime: string | null = null;
-    sortBy: string | null = null;
-    sortOrder: string | null = null; // asc, desc
-    fileId: number | null = null;
+	pageSize: number | null = 10;
+	page: number | null = 0;
+	tags: string[] | null = [];
+	noTag: 'true' | 'false' | '' = '';
+	bReverseTag: boolean = false; // 反向选择标签
+	types: FileType[] | null = null;
+	dirs: string[] | null = [];
+	statuss: number[] | null = null;
+	origins: string[] | null = [];
+	startTime: string | null = null;
+	endTime: string | null = null;
+	sortBy: string | null = null;
+	sortOrder: string | null = null; // asc, desc
+	fileId: number | null = null;
 
-    id: number | null = null;
-    bFilterModel: boolean | null = null;
+	id: number | null = null;
+	bFilterModel: boolean | null = null;
+
+	// New query fields
+	keyword: string | null = null;       // Keyword search (file name or path)
+	minSize: number | null = null;       // Minimum file size (bytes)
+	maxSize: number | null = null;       // Maximum file size (bytes)
+	hasGPS: boolean | null = null;       // Has GPS information
+	minLat: number | null = null;        // Minimum latitude
+	maxLat: number | null = null;        // Maximum latitude
+	minLon: number | null = null;        // Minimum longitude
+	maxLon: number | null = null;        // Maximum longitude
+	minDuration: number | null = null;   // Minimum duration (milliseconds)
+	maxDuration: number | null = null;   // Maximum duration (milliseconds)
+	minWidth: number | null = null;      // Minimum width
+	maxWidth: number | null = null;      // Maximum width
+	minHeight: number | null = null;     // Minimum height
+	maxHeight: number | null = null;     // Maximum height
+	extensions: string[] | null = null;  // File extension list
 }
 
 export class FilesTagSetReq {
