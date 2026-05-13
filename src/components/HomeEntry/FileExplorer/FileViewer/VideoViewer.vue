@@ -60,11 +60,16 @@ const currentImageUrl = computed(() => {
         return '';
     }
     const img = imageList.value[currentIndex.value]
-    if (!img || !img.fullpath) {
+    if (!img) {
         return '';
     }
-    console.log('currentImageUrl', img.fullpath)
-    return img.fullpath
+    
+    if (appStore.platform === DatType.PlatformType.electron) {
+        return `file:///${img.fullpath}`;
+    } else {
+        const filePath = img.path + "/" + img.name;
+        return `${appStore.srvPrefix}/static_file/${filePath}?rootPathId=${img.rootPathId}&fileId=${img.id}`;
+    }
 })
 </script>
 

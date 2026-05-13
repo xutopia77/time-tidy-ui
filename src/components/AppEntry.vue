@@ -51,7 +51,7 @@ onBeforeMount(() => {
     // const isProd = import.meta.env.MODE === 'production';
     appStore.envMode = isDev ? DatType.EnvModeType.dev : DatType.EnvModeType.pro
     console.log(`env: navigator.userAgent: ${navigator.userAgent}; MODE : ${import.meta.env.MODE}; `);
-    if (navigator.userAgent.includes('time_capsule')) {
+    if (navigator.userAgent.includes('time-tidy')) {
         console.log('当前在Electron中运行');
         appStore.platform = DatType.PlatformType.electron;
     }

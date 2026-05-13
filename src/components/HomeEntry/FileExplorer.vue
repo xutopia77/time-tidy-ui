@@ -14,7 +14,7 @@
                     </template>
                 </div>
             </template>
-            <div class="file-grid">
+            <div class="file-grid" v-if="!isAllPathSearch">
                 <template v-for="item in dirs" :key="item.id">
                     <FolderCard :item="item" />
                 </template>
@@ -74,6 +74,8 @@ watch([() => appStore.curFiles, () => appStore.fileShowType], () => {
 const dirs = computed(() => appStore.curDirs);
 
 const currentPath = computed(() => appStore.curPath);
+
+const isAllPathSearch = computed(() => appStore.searchCon.pathType === 'allPath');
 
 const showPagination = computed(() => {
     const totalPages = Math.ceil(appStore.curFileTotal / appStore.searchCon.pageSize);

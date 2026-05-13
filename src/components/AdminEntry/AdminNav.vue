@@ -30,12 +30,6 @@
                 <span>数据库</span>
             </div>
         </router-link>
-
-        <router-link class="no-underline-link" to="/admin/OtherMisc"  v-slot="{ isActive }">
-            <div class="nav-item" :class="{'active': isActive}">    
-                <span>其他</span>
-            </div>
-        </router-link>
     </div>
 </template>
 <script setup lang="ts">

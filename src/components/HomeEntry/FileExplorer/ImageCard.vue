@@ -17,6 +17,9 @@
                     <span class="xc-card-size">{{ Utils.gen_size_str(item.size) }}</span>
                     <span class="xc-card-time">{{ item.time }}</span>
                 </div>
+                <div v-if="showFilePath" class="xc-card-path" :title="item.path">
+                    {{ item.path }}
+                </div>
                 <div class="xc-card-tags" v-if="item.tags && item.tags.length > 0">
                     <span v-for="(tag, index) in item.tags" :key="index" class="xc-tag" :style="{
                         backgroundColor: tag.color
@@ -42,6 +45,10 @@ const cardWidth = computed(() => {
 });
 const cardHeight = computed(() => {
     return appStore.cardWidth;
+});
+
+const showFilePath = computed(() => {
+    return appStore.searchCon.pathType === 'allPath';
 });
 
 const isChecked = ref(false);
@@ -142,6 +149,16 @@ const btnclk_handleClickItemMsg = () => {
 
 .xc-card-time {
     color: var(--xc-text-color-secondary);
+}
+
+.xc-card-path {
+    font-size: var(--xc-font-size-xs);
+    color: var(--xc-text-color-secondary);
+    margin-bottom: var(--xc-spacing-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.8;
 }
 
 .xc-card-tags {

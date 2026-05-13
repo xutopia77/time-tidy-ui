@@ -119,8 +119,16 @@ const currentImage = computed(() => imageList.value[currentIndex.value])
 
 const currentImageUrl = computed(() => {
     const img = imageList.value[currentIndex.value]
-    const filePath = img.path + "/" + img.name;
-    return `${appStore.srvPrefix}/static_file/${filePath}?rootPathId=${img.rootPathId}&fileId=${img.id}`
+    if (!img) {
+        return '';
+    }
+    
+    if (appStore.platform === DatType.PlatformType.electron) {
+        return `file:///${img.fullpath}`;
+    } else {
+        const filePath = img.path + "/" + img.name;
+        return `${appStore.srvPrefix}/static_file/${filePath}?rootPathId=${img.rootPathId}&fileId=${img.id}`;
+    }
 })
 
 const scale = ref(1)
