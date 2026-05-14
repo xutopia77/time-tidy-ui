@@ -611,6 +611,24 @@ export class HomePage {
   }
 
   /**
+   * Navigate through multiple folders
+   * 
+   * Navigate through a sequence of folders by entering them one by one
+   * 
+   * @param folderNames - Array of folder names to navigate through
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.navigateToFolders(['测试文件夹', '子文件夹'])
+   */
+  async navigateToFolders(folderNames: string[]): Promise<void> {
+    for (const folderName of folderNames) {
+      await this.enterFolder(folderName)
+      await this.waitForFilesToLoad()
+    }
+  }
+
+  /**
    * 获取文件夹数量
    * 
    * 获取当前页面显示的文件夹卡片数量

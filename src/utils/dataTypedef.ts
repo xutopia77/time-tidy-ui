@@ -224,6 +224,7 @@ export class TagItem {
     color = "#4A6FA5";
     id = 0;
     description: string = "";
+    fileCount: number = 0;
 }
 
 export class FileItemTag {

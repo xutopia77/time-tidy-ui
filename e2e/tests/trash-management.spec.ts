@@ -199,7 +199,7 @@ test.describe('Trash Management', () => {
     await page.screenshot({ path: 'test-results/trash/empty-4-verified.png', fullPage: true })
   })
 
-  test('should verify trash file count matches database', async ({ page, request }) => {
+  test('should verify trash file count matches database', async ({ page, request: _request }) => {
     await trashPage.goto()
     await page.waitForTimeout(500)
     await page.screenshot({ path: 'test-results/trash/verify-1-trash-page.png', fullPage: true })

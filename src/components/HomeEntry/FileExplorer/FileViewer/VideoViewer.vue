@@ -47,6 +47,12 @@ import { ref, computed, watch } from 'vue'
 import { useAppStore } from '@/stores/AppStore'
 import * as DatType from '@/utils/dataTypedef';
 
+declare global {
+    interface HTMLVideoElement {
+        videoTracks?: any[];
+    }
+}
+
 const appStore = useAppStore()
 
 // Control ImageViewer visibility

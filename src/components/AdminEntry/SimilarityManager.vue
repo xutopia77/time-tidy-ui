@@ -205,6 +205,13 @@ interface SimilarityGroupApiResponse {
     }[];
 }
 
+interface SimilarityGetResponse {
+    groups: SimilarityGroupApiResponse[];
+    total: number;
+    totalFiles: number;
+    page: number;
+}
+
 const showSettings = ref(false);
 const similarityGroups = ref<SimilarityGroup[]>([]);
 const currentPage = ref(1);
@@ -257,7 +264,7 @@ const loadSimilarityGroups = async (page = 1) => {
         const response = await Utils.file_similarity_get(page, pageSize.value);
         
         if (response.code === 0 && response.data) {
-            const data = response.data;
+            const data = response.data as SimilarityGetResponse;
             
             if (!data || !data.groups) {
                 similarityGroups.value = [];

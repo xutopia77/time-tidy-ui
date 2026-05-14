@@ -134,7 +134,7 @@ onBeforeMount(() => {
 
 const isEditDialogVisible = ref(false);
 const isNewTag = ref(false);
-const editingTag = ref<DatType.TagItem>({ name: '', color: '#e6475e', id: 0, description: '' });
+const editingTag = ref<DatType.TagItem>({ name: '', color: '#e6475e', id: 0, description: '', fileCount: 0 });
 
 const colorPresets = [
     '#e6475e', '#f5a623', '#f8e71c', '#7ed321', '#4a90e2',
@@ -143,7 +143,7 @@ const colorPresets = [
 
 function btn_showAddDialog() {
     isNewTag.value = true;
-    editingTag.value = { name: '', color: '#e6475e', id: 0, description: '' };
+    editingTag.value = { name: '', color: '#e6475e', id: 0, description: '', fileCount: 0 };
     isEditDialogVisible.value = true;
 }
 

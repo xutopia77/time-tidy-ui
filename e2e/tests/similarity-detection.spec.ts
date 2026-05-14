@@ -71,7 +71,7 @@ test.describe('Similarity Detection', () => {
    * 
    * 测试删除相似文件的完整流程
    */
-  test('should delete similar files', async ({ page }) => {
+  test('should delete similar files', async ({ page: _page }) => {
     // 启动检测并等待完成
     await similarityPage.startDetectionAndWaitForComplete(120000)
     

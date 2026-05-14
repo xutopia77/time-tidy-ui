@@ -242,7 +242,7 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
         fileIds: [],
         dirIds: [],
         distPath: selectedPath,
-        distRootPathId: selectedPathItem.value.rootPathId,
+        distRootPathId: 0,
         srcRootPathId: 0,
         type: 'move',
         bNeedSure: bNeedSure,
@@ -253,7 +253,6 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
     for (const item of appStore.curFiles) {
         if (item.checked) {
             req.fileIds.push(item.id)
-            req.srcRootPathId = item.rootPathId
         }
     }
 
@@ -282,7 +281,6 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
                 return { ...respOp, code: DatType.Code.Err };
             }
             req.dirIds.push(item.id)
-            req.srcRootPathId = item.rootPathId
         }
     }
     if (req.fileIds.length == 0 && req.dirIds.length == 0) {

@@ -40,8 +40,6 @@ test.describe('File Management', () => {
   let homePage: HomePage
   // API Helper实例，用于数据管理
   let api: ApiHelpers
-  // 当前测试名称，用于截图命名
-  let currentTestName: string = ''
 
   /**
    * 测试后置钩子

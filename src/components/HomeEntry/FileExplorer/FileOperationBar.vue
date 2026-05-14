@@ -220,7 +220,7 @@ const confirmDeleteTags = () => {
     
     // Delete each selected tag
     for (const tagName of selectedTagsForDeletion.value) {
-        const req: DatType.FilesTagDeleteReq = {
+        const req: DatType.FilesTagSetReq = {
             tagName: tagName,
             fileIds: fileIds
         };
