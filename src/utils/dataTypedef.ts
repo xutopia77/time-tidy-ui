@@ -27,7 +27,8 @@ export enum ProgressStep {
     Exif = 'exif',
     Hash = 'hash',
     Sync = 'sync',
-    Similarity = 'similarity'
+    Similarity = 'similarity',
+    FileMove = 'file_move'
 }
 
 // 进度数据

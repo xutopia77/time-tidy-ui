@@ -227,6 +227,9 @@ function handleProgressUpdate(data: DatType.Resp<DatType.ProgressUpdateData>) {
             case DatType.ProgressStep.Similarity:
                 appStore.progressSimilarity = progress
                 break
+            case DatType.ProgressStep.FileMove:
+                appStore.progressFileMove = progress
+                break
         }
     }
 }
