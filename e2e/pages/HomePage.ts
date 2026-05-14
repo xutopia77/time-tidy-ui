@@ -454,13 +454,61 @@ export class HomePage {
   }
 
   /**
+   * Delete tag from selected files
+   *
+   * Opens the delete tag dialog and removes the specified tag from all selected files
+   *
+   * @param tagName - Tag name to delete (supports partial match)
+   * @returns Promise<void>
+   *
+   * @example
+   * await homePage.selectMultipleFiles([0, 1, 2])
+   * await homePage.deleteTagFromSelectedFiles('test-tag-')
+   *
+   * @remarks
+   * - Must select files first, otherwise the operation bar won't show
+   * - The dialog will be opened, tag will be selected, and delete confirmed
+   */
+  async deleteTagFromSelectedFiles(tagName: string) {
+    // Ensure operation bar is visible
+    await expect(this.operationBar).toBeVisible()
+
+    // Click delete tag button to open dialog
+    const deleteTagBtn = this.operationBar.locator('.action-btn:has-text("删除标签")')
+    await deleteTagBtn.click()
+
+    // Wait for dialog to appear
+    const dialogOverlay = this.page.locator('.dialog-overlay')
+    await expect(dialogOverlay).toBeVisible({ timeout: 5000 })
+    await this.page.waitForTimeout(300)
+
+    // Find and check the tag checkbox using partial text match
+    // The checkbox is inside a label with class "tag-checkbox" that contains the tag name
+    const tagCheckbox = dialogOverlay.locator('.tag-checkbox', {
+      hasText: tagName
+    }).locator('input[type="checkbox"]')
+
+    // Wait for checkbox to be visible and check it
+    await expect(tagCheckbox).toBeVisible({ timeout: 5000 })
+    await tagCheckbox.check({ timeout: 5000 })
+
+    // Click confirm button
+    const confirmBtn = dialogOverlay.locator('button:has-text("确定删除")')
+    await confirmBtn.click()
+
+    // Wait for operation to complete and dialog to close
+    await expect(dialogOverlay).not.toBeVisible({ timeout: 5000 })
+    await this.page.waitForTimeout(500)
+  }
+
+  /**
    * 获取文件的标签列表
-   * 
+   *
    * 获取文件卡片上显示的所有标签名称
-   * 
+   *
    * @param fileIndex - 文件索引
    * @returns Promise<string[]> - 标签名称数组
-   * 
+   *
    * @example
    * const tags = await homePage.getFileTags(0)
    * expect(tags).toContain('important')

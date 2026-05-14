@@ -71,7 +71,7 @@ test.describe('Similarity Detection', () => {
    * 
    * 测试删除相似文件的完整流程
    */
-  test('should delete similar files', async ({ page: _page }) => {
+  test('should delete similar files', async ({ page: page }) => {
     // 启动检测并等待完成
     await similarityPage.startDetectionAndWaitForComplete(120000)
     
@@ -80,6 +80,8 @@ test.describe('Similarity Detection', () => {
     if (initialCount > 0) {
       // 删除第一组相似文件
       await similarityPage.deleteSimilarFiles(0)
+      
+      await page.waitForTimeout(1000)
       
       // 验证组被删除或更新
       const newCount = await similarityPage.getGroupCount()

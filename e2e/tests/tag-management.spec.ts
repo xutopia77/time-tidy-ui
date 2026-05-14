@@ -1,14 +1,19 @@
 /**
- * 标签管理测试套件
+/**
+ * Test suite for tag management
  * 
- * 本文件包含标签管理功能的所有E2E测试用例，覆盖标签的创建、编辑、删除等核心功能。
+ * This file contains all E2E tests for tag management features, covering
+ * core functionalities like tag creation, deletion, editing, and system tag protection.
  * 
- * 测试覆盖：
- * 1. 页面显示测试：验证页面元素是否正确显示
- * 2. 创建标签测试：测试标签创建功能
- * 3. 删除标签测试：测试标签删除功能，包括确认对话框
- * 4. 编辑标签测试：测试标签编辑功能
- * 5. 系统标签保护测试：验证系统标签不可删除
+ * Test Coverage:
+ * 1. Page display test: Verify that the tag management page elements are correctly displayed
+ * 2. Create tag test: Test the tag creation process
+ * 3. Delete tag test: Test tag deletion with confirmation dialog
+ * 4. Edit tag test: Test tag editing functionality
+ * 5. System tag protection test: Verify that system tags cannot be deleted or edited
+ * 4. Edit tag test: Test tag editing functionality
+ * 5. System tag protection test: Verify that system tags cannot be deleted or edited 
+ * 6. Test that system tags cannot be deleted or edited
  * 
  * 测试策略：
  * - 使用Page Object Model封装页面操作
@@ -26,7 +31,7 @@ import { TagManagementPage } from '../pages/TagManagementPage'
 import { ApiHelpers } from '../utils/api-helpers'
 
 /**
- * 标签管理测试套件
+ * Test suite for tag management
  */
 test.describe('Tag Management', () => {
   // Page Object实例，用于操作页面
@@ -35,7 +40,7 @@ test.describe('Tag Management', () => {
   let api: ApiHelpers
 
   /**
-   * 测试前置钩子
+   * Test setup hook
    * 
    * 在每个测试前执行：
    * 1. 初始化Page Object
