@@ -1,5 +1,6 @@
-import axios from 'axios';
 import type { AppStore } from '@/stores/AppStore'
+import { initApiClient } from '@/utils/apiClient';
+import { ApiService } from '@/utils/apiService';
 let appStore: AppStore
 import * as DatTypes from '@/utils/dataTypedef'
 
@@ -307,38 +308,32 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
 
 
 
-function tags_get() {
+async function tags_get() {
     if (isLoadingTags) {
         return;
     }
     isLoadingTags = true;
     
     appStore.allTags = [];
-    axios.post(`${appStore.srvPrefix}/api/v1/tags_get`)
-        .then((response) => {
-            console.log('tag info:', response.data);
-            const resp = response.data;
-            if (resp.code != 0) {
-                Utils.message_notify({ content: `获取标签失败:${resp.status}`, type: 'error' })
-                return;
+    try {
+        const resp = await ApiService.tagsGet();
+        console.log('tag info:', resp);
+        
+        for (const item of resp.data) {
+            if (!item.name || item.name == "") {
+                continue;
             }
-            for (const item of resp.data) {
-                if (!item.name || item.name == "") {
-                    continue;
-                }
-                const tagItem = new DatTypes.TagItem();
-                tagItem.name = item.name;
-                tagItem.color = item.color == '' ? tagItem.color : item.color;
-                tagItem.id = item.id;
-                appStore.allTags.push(tagItem);
-            }
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-        })
-        .finally(() => {
-            isLoadingTags = false;
-        });
+            const tagItem = new DatTypes.TagItem();
+            tagItem.name = item.name;
+            tagItem.color = item.color == '' ? tagItem.color : item.color;
+            tagItem.id = item.id;
+            appStore.allTags.push(tagItem);
+        }
+    } catch (error) {
+        console.error('Error fetching tags:', error);
+    } finally {
+        isLoadingTags = false;
+    }
 }
 
 async function tags_set(tag: DatTypes.TagItem): Promise<void> {
@@ -357,138 +352,97 @@ async function tags_set(tag: DatTypes.TagItem): Promise<void> {
         }]
     };
     
-    await axios.post(`${appStore.srvPrefix}/api/v1/tags_set`, JSON.stringify(req))
-        .then((response) => {
-            console.log('tag info:', response.data);
-            const resp = response.data;
-            if (resp.code != 0) {
-                Utils.message_notify({ content: `标签设置失败:${resp.status}`, type: 'error' })
-                return;
-            }
-            Utils.tags_get()
-            Utils.message_notify({ content: `标签设置成功`, type: 'success' })
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-        });
+    try {
+        const resp = await ApiService.tagsSet(req);
+        console.log('tag info:', resp);
+        Utils.tags_get()
+        Utils.message_notify({ content: `标签设置成功`, type: 'success' })
+    } catch (error) {
+        console.error('Error setting tag:', error);
+    }
 }
 
 async function files_path_chg(_req: DatTypes.FilePathChgReq): Promise<DatTypes.Resp<DatTypes.FilePathChgResp>> {
-    const resp = new DatTypes.Resp<DatTypes.FilePathChgResp>()
-    resp.data = new DatTypes.FilePathChgResp()
-
     _req.distPath = _req.distPath.substring(1);
 
-    await axios.post(`${appStore.srvPrefix}/api/v1/files_path_chg`, JSON.stringify(_req))
-        .then((response) => {
-
-            resp.code = response.data.code;
-            resp.status = response.data.status;
-            resp.data = response.data.data;
-            console.log('file info:', response.data, "get resp:", resp);
-            switch (resp.code) {
-                case DatTypes.Code.Success: {
-                    Utils.files_get(null);
-                    Utils.message_notify({ content: `${resp.data?.successNum}个文件操作成功`, type: 'success' })
-                    break;
-                }
-                case DatTypes.Code.NeedSure: {
-                    const respDat = response.data.data
-                    if (respDat != null) {
-                        if (respDat.dirInfos != null) {
-                            for (const item of respDat.dirInfos) {
-                                const dirInfo = new DatTypes.DirInfo();
-                                dirInfo.count = item.count;
-                                dirInfo.size = item.size;
-                                dirInfo.dirCount = item.dirCount;
-                                resp.data?.dirInfos.push(dirInfo);
-                            }
-                        }
-                    }
-                    Utils.message_notify({ content: `文件操作需要确认`, type: 'success' })
-                    break;
-                }
-                case DatTypes.Code.FileAlreadyExist: {
-                    Utils.files_get(null);
-                    Utils.message_notify({ content: `${resp.data?.successNum}个文件操作成功,${resp.data?.failNum}个文件已存在`, type: 'warning' })
-                    break;
-                }
-                default: {
-                    Utils.message_notify({ content: `文件操作失败，已操作成功${resp.data?.successNum}个， ${resp.status}`, type: "error" })
-                    break;
-                }
-            }
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-            resp.code = -1;
-            resp.status = error.message;
-            Utils.message_notify({ content: `文件操作失败\n${error.message}`, type: 'success' })
-        })
-    return resp;
-}
-
-function files_delete(_req: DatTypes.FileDeleteReq): Promise<DatTypes.Resp> {
-    return new Promise((resolve) => {
-        const resp = new DatTypes.Resp();
-        axios.post(`${appStore.srvPrefix}/api/v1/files_delete`, JSON.stringify(_req))
-            .then((response) => {
-                console.log('file delete response:', response.data);
-                resp.code = response.data.code;
-                resp.status = response.data.status;
-                resp.data = response.data.data;
+    try {
+        const response = await ApiService.filesPathChg(_req);
+        console.log('file info:', response);
+        
+        switch (response.code) {
+            case DatTypes.Code.Success: {
                 Utils.files_get(null);
-                Utils.message_notify({ content: `文件删除成功`, type: 'success' });
-                resolve(resp);
-            })
-            .catch((error) => {
-                console.error('Error deleting files:', error);
-                resp.code = -1;
-                resp.status = error.message;
-                Utils.message_notify({ content: `文件删除失败\n${error.message}`, type: 'error' });
-                resolve(resp);
-            });
-    });
+                Utils.message_notify({ content: `${response.data?.successNum}个文件操作成功`, type: 'success' })
+                break;
+            }
+            case DatTypes.Code.NeedSure: {
+                Utils.message_notify({ content: `文件操作需要确认`, type: 'success' })
+                break;
+            }
+            case DatTypes.Code.FileAlreadyExist: {
+                Utils.files_get(null);
+                Utils.message_notify({ content: `${response.data?.successNum}个文件操作成功,${response.data?.failNum}个文件已存在`, type: 'warning' })
+                break;
+            }
+            default: {
+                Utils.message_notify({ content: `文件操作失败，已操作成功${response.data?.successNum}个， ${response.status}`, type: "error" })
+                break;
+            }
+        }
+        return response;
+    } catch (error) {
+        console.error('Error fetching project info:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        Utils.message_notify({ content: `文件操作失败\n${errorMsg}`, type: 'error' })
+        return { code: -1, status: errorMsg, doing: false };
+    }
 }
 
-function files_restore(fileIds: number[]): Promise<DatTypes.Resp> {
-    return new Promise((resolve) => {
-        const resp = new DatTypes.Resp();
-        axios.post(`${appStore.srvPrefix}/api/v1/files_restore`, JSON.stringify({ fileIds }))
-            .then((response) => {
-                console.log('file restore response:', response.data);
-                resp.code = response.data.code;
-                resp.status = response.data.status;
-                resp.data = response.data.data;
-                Utils.message_notify({ content: `文件恢复成功`, type: 'success' });
-                resolve(resp);
-            })
-            .catch((error) => {
-                console.error('Error restoring files:', error);
-                resp.code = -1;
-                resp.status = error.message;
-                Utils.message_notify({ content: `文件恢复失败\n${error.message}`, type: 'error' });
-                resolve(resp);
-            });
-    });
+async function files_delete(_req: DatTypes.FileDeleteReq): Promise<DatTypes.Resp> {
+    try {
+        const response = await ApiService.filesDelete(_req);
+        console.log('file delete response:', response);
+        Utils.files_get(null);
+        Utils.message_notify({ content: `文件删除成功`, type: 'success' });
+        return response;
+    } catch (error) {
+        console.error('Error deleting files:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        Utils.message_notify({ content: `文件删除失败\n${errorMsg}`, type: 'error' });
+        return { code: -1, status: errorMsg, doing: false };
+    }
 }
 
-function project_health(): DatTypes.Resp {
-    const resp = new DatTypes.Resp()
+async function files_restore(fileIds: number[]): Promise<DatTypes.Resp> {
+    try {
+        const req = new DatTypes.FileRestoreReq();
+        req.fileIds = fileIds;
+        const response = await ApiService.filesRestore(req);
+        console.log('file restore response:', response);
+        Utils.message_notify({ content: `文件恢复成功`, type: 'success' });
+        return response;
+    } catch (error) {
+        console.error('Error restoring files:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        Utils.message_notify({ content: `文件恢复失败\n${errorMsg}`, type: 'error' });
+        return { code: -1, status: errorMsg, doing: false };
+    }
+}
+
+async function project_health(): Promise<DatTypes.Resp> {
     Utils.log_info_append("------开始数据健康度检查\n");
-    axios.post(`${appStore.srvPrefix}/api/v1/project_health`, JSON.stringify({ type: 2 }))
-        .then((response) => {
-            resp.code = response.data.code;
-            resp.status = response.data.status;
-            Utils.files_get(null);
-            Utils.message_notify({ content: `数据健康度检查成功`, type: 'success' })
-        })
-        .catch((error) => {
-            resp.code = -1;
-            resp.status = error.message;
-            Utils.message_notify({ content: `数据健康度检查失败\n${error.message}`, type: 'success' })
-        })
-    return resp;
+    try {
+        const req = new DatTypes.FileHealthGetReq();
+        req.type = 2;
+        const response = await ApiService.projectHealth(req);
+        Utils.files_get(null);
+        Utils.message_notify({ content: `数据健康度检查成功`, type: 'success' })
+        return response;
+    } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        Utils.message_notify({ content: `数据健康度检查失败\n${errorMsg}`, type: 'error' })
+        return { code: -1, status: errorMsg, doing: false };
+    }
 }
 
 function page_show(_req: DatTypes.AppPageCtrlReq): DatTypes.Resp {
@@ -516,21 +470,12 @@ function log_info_append(cont: string) {
 }
 
 async function dictionary_get() {
-    await axios.post(`${appStore.srvPrefix}/api/v1/dictionary_get`)
-        .then((response) => {
-            const resp = response.data
-            if (resp.code != 0) {
-                console.log("dictionary get err ", resp.status)
-            }
-            else {
-                // appStore.prj = resp.data;
-                // console.log('Project info:', appStore.prj);
-                console.log('dictionary info:', resp.data);
-            }
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-        });
+    try {
+        const resp = await ApiService.dictionaryGet();
+        console.log('dictionary info:', resp.data);
+    } catch (error) {
+        console.error('Error fetching dictionary:', error);
+    }
 }
 
 function gen_size_str(size: number): string {
@@ -549,19 +494,6 @@ function get_thumbnail_url(fileId: number): string {
     return `${appStore.srvPrefix}/static_thumb/${fileId}_thumbnail.jpg`;
 }
 
-function folder_get(folder: string) {
-    const reqDat = {
-        folder: folder
-    }
-    axios.post(`${appStore.srvPrefix}/api/v1/folder`, JSON.stringify(reqDat))
-        .then((response) => {
-            appStore.curFiles = response.data;
-            console.log('file info:', response.data);
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-        });
-}
 
 function dir_slt_update(treeItem: DatTypes.DirTreeItem | string) {
     if (typeof treeItem === 'string') {
@@ -608,32 +540,24 @@ function dir_slt_update(treeItem: DatTypes.DirTreeItem | string) {
 
 async function tag_delete(_req: DatTypes.TagItem): Promise<DatTypes.Resp> {
     const resp = new DatTypes.Resp()
-    // 检查标签名称是否为 sys_score1 到 sys_score10
     const scoreRegex = /^sys_score(10|[1-9])$/;
     if (scoreRegex.test(_req.name)) {
         Utils.message_notify({ content: `系统标签 ${_req.name} 不能被删除`, type: "error" });
         return resp;
     }
-    await axios.post(`${appStore.srvPrefix}/api/v1/tags_delete`, JSON.stringify({ tagName: _req.name }))
-        .then((response) => {
-            const resp = response.data
-            if (resp.code != 0) {
-                console.log("dictionary get err ", resp.status)
-                Utils.message_notify({ content: `删除标签失败:${resp.status}`, type: "error" })
-            }
-            else {
-                // appStore.prj = resp.data;
-                // console.log('Project info:', appStore.prj);
-                console.log('dictionary info:', resp.data);
-                Utils.message_notify({ content: `删除标签成功`, type: 'success' })
-            }
-            Utils.tags_get()
-            Utils.files_get(null)
-        })
-        .catch((error) => {
-            console.error('Error fetching project info:', error);
-            Utils.message_notify({ content: `程序错误:${error}`, type: "error" })
-        });
+    
+    try {
+        const req = new DatTypes.TagsDeleteReq();
+        req.tagName = _req.name;
+        const response = await ApiService.tagsDelete(req);
+        console.log('tag delete response:', response);
+        Utils.message_notify({ content: `删除标签成功`, type: 'success' })
+        Utils.tags_get()
+        Utils.files_get(null)
+    } catch (error) {
+        console.error('Error deleting tag:', error);
+        Utils.message_notify({ content: `程序错误:${error}`, type: "error" })
+    }
     return resp
 }
 
@@ -641,7 +565,10 @@ async function tag_delete(_req: DatTypes.TagItem): Promise<DatTypes.Resp> {
 class Utils {
     constructor() { }
     // ------
-    static appstore_set(store: AppStore) { appStore = store; }
+    static appstore_set(store: AppStore) { 
+        appStore = store;
+        initApiClient(store);
+    }
     static page_show = page_show;
     static log_info_append = log_info_append
     static gen_size_str = gen_size_str;
@@ -734,20 +661,20 @@ class Utils {
     // ------
     static async project_set(req: DatTypes.PrjSetReq) {
         Utils.log_info_append("------开始设置项目\n");
-        const response = await axios.post(`${appStore.srvPrefix}/api/v1/project_set`, JSON.stringify(req))
-        const resp: DatTypes.Resp<DatTypes.PrjSetResp> = response.data
-        if (resp.code != 0) {
-            Utils.addToast(resp.status, "error")
-            return
-        }
-        if (resp.doing) {
-            Utils.addToast("设置中", "info")
-        }
-        else {
-            Utils.message_notify({ content: "设置完成", type: "success" })
-            if (req.type.length > 0 && req.type[0] == DatTypes.PrjSetType.Open) {
-                await Utils.prj_info_get()
+        try {
+            const resp = await ApiService.projectSet(req);
+            
+            if (resp.doing) {
+                Utils.addToast("设置中", "info")
             }
+            else {
+                Utils.message_notify({ content: "设置完成", type: "success" })
+                if (req.type.length > 0 && req.type[0] == DatTypes.PrjSetType.Open) {
+                    await Utils.prj_info_get()
+                }
+            }
+        } catch (error) {
+            console.error('Error setting project:', error);
         }
     }
     static convertToLinuxPath(path: string): string {
@@ -755,7 +682,6 @@ class Utils {
     }
     static dictionary_get = dictionary_get;
 	static async files_get(_req: DatTypes.FilesGetReq | null = null, bUpdateStore: boolean = true): Promise<DatTypes.Resp> {
-		const resp = new DatTypes.Resp()
 		const req: DatTypes.FilesGetReq = {
 			pageSize: appStore.searchCon.pageSize,
 			page: appStore.searchCon.page - 1,
@@ -773,7 +699,6 @@ class Utils {
 			fileId: 0,
 			id: 0,
 			bFilterModel: false,
-			// New query fields
 			keyword: null,
 			minSize: null,
 			maxSize: null,
@@ -812,7 +737,6 @@ class Utils {
 			if (_req.id != null) { req.id = _req.id; }
 			if (_req.bFilterModel != null) { req.bFilterModel = _req.bFilterModel; }
 
-			// New query fields
 			if (_req.keyword != null) { req.keyword = _req.keyword; }
 			if (_req.minSize != null) { req.minSize = _req.minSize; }
 			if (_req.maxSize != null) { req.maxSize = _req.maxSize; }
@@ -830,32 +754,26 @@ class Utils {
 			if (_req.extensions != null) { req.extensions = _req.extensions; }
 		}
 
-        await axios.post(`${appStore.srvPrefix}/api/v1/files_get`, JSON.stringify(req))
-            .then((response) => {
-                console.log('file info:', response.data);
-                if (bUpdateStore) {
-                    const result: DatTypes.Resp = convert_to_file_item(JSON.stringify(response.data))
-                    resp.code = result.code;
-                    resp.status = result.status;
-                    resp.data = result.data;
-                    if (resp.code === 0) {
-                        get_dir_trees()
-                    } else {
-                        console.error('Error converting file items:', resp.status);
-                    }
-                } else {
-                    resp.code = response.data.code;
-                    resp.status = response.data.status || '';
-                    resp.data = response.data.data;
-                }
-            })
-            .catch((error) => {
-                console.error('Error fetching project info:', error);
-                resp.code = -1;
-                resp.status = error.message;
-            });
-        return resp;
-    }
+		try {
+			const response = await ApiService.filesGet(req);
+			console.log('file info:', response);
+			if (bUpdateStore) {
+				const result: DatTypes.Resp = convert_to_file_item(JSON.stringify(response))
+				if (result.code === 0) {
+					get_dir_trees()
+				} else {
+					console.error('Error converting file items:', result.status);
+				}
+				return result;
+			} else {
+				return response;
+			}
+		} catch (error) {
+			console.error('Error fetching files:', error);
+			const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+			return { code: -1, status: errorMsg, doing: false };
+		}
+	}
 
     static cancle_file_checked() {
         for (const item of appStore.curFiles) {
@@ -866,7 +784,6 @@ class Utils {
     static tags_get = tags_get;
     static tags_set = tags_set;
     static async files_tag_set(_req: DatTypes.FilesTagSetReq): Promise<DatTypes.Resp> {
-        const resp = new DatTypes.Resp()
         _req.fileIds = []
         for (const item of appStore.curFiles) {
             if (item.checked)
@@ -874,9 +791,7 @@ class Utils {
         }
         if (_req.fileIds.length == 0) {
             if (appStore.curSltFile == null) {
-                resp.code = -1;
-                resp.status = `no file selected`;
-                return resp;
+                return { code: -1, status: `no file selected`, doing: false };
             }
             else {
                 _req.fileIds.push(appStore.curSltFile.id)
@@ -892,35 +807,26 @@ class Utils {
             }
         }
 
-        await axios.post(`${appStore.srvPrefix}/api/v1/files_tag_set`, JSON.stringify(_req))
-            .then((response) => {
-                console.log('file info:', response.data);
-                resp.code = response.data.code;
-                resp.status = response.data.status;
-                if (resp.code != 0) {
-                    Utils.message_notify({ content: `文件操作失败:${resp.status}`, type: "error" })
-                    return resp;
-                }
-                else if (resp.doing) {
-                    Utils.message_notify({ content: `文件操作中`, type: "warning" })
-                    return resp
-                }
-                this.cancle_file_checked()
-                Utils.message_notify({ content: `文件操作成功`, type: 'success' })
-                Utils.tags_get()
-                Utils.files_get(null);
-            })
-            .catch((error) => {
-                console.error('Error fetching project info:', error);
-                resp.code = -1;
-                resp.status = error.message;
+        try {
+            const response = await ApiService.filesTagSet(_req);
+            console.log('file info:', response);
+            if (response.doing) {
+                Utils.message_notify({ content: `文件操作中`, type: "warning" })
+                return response;
             }
-            );
-        return resp;
+            this.cancle_file_checked()
+            Utils.message_notify({ content: `文件操作成功`, type: 'success' })
+            Utils.tags_get()
+            Utils.files_get(null);
+            return response;
+        } catch (error) {
+            console.error('Error setting file tags:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            return { code: -1, status: errorMsg, doing: false };
+        }
     }
 
-    static files_tag_delete(_req: DatTypes.FilesTagSetReq): DatTypes.Resp {
-        const resp = new DatTypes.Resp()
+    static async files_tag_delete(_req: DatTypes.FilesTagSetReq): Promise<DatTypes.Resp> {
         _req.fileIds = []
         for (const item of appStore.curFiles) {
             if (item.checked)
@@ -928,45 +834,33 @@ class Utils {
         }
         if (_req.fileIds.length == 0) {
             if (appStore.curSltFile == null) {
-                resp.code = -1;
-                resp.status = `no file selected`;
-                return resp;
+                return { code: -1, status: `no file selected`, doing: false };
             }
             else {
                 _req.fileIds.push(appStore.curSltFile.id)
             }
         }
         if (_req.fileIds.length == 0) {
-            resp.code = -1;
-            resp.status = `no file selected`;
             Utils.message_notify({ content: `no file selected`, type: "error" })
-            return resp;
+            return { code: -1, status: `no file selected`, doing: false };
         }
 
-        axios.post(`${appStore.srvPrefix}/api/v1/files_tag_delete`, JSON.stringify(_req))
-            .then((response) => {
-                console.log('file info:', response.data);
-                resp.code = response.data.code;
-                resp.status = response.data.status;
-                if (resp.code != 0) {
-                    Utils.message_notify({ content: `文件操作失败:${resp.status}`, type: "error" })
-                    return resp;
-                }
-                else if (resp.doing) {
-                    Utils.message_notify({ content: `文件操作中`, type: "warning" })
-                    return resp
-                }
-                this.cancle_file_checked()
-                Utils.message_notify({ content: `文件操作成功`, type: 'success' })
-                Utils.files_get(null);
-            })
-            .catch((error) => {
-                console.error('Error fetching project info:', error);
-                resp.code = -1;
-                resp.status = error.message;
+        try {
+            const response = await ApiService.filesTagDelete(_req);
+            console.log('file info:', response);
+            if (response.doing) {
+                Utils.message_notify({ content: `文件操作中`, type: "warning" })
+                return response;
             }
-            );
-        return resp;
+            this.cancle_file_checked()
+            Utils.message_notify({ content: `文件操作成功`, type: 'success' })
+            Utils.files_get(null);
+            return response;
+        } catch (error) {
+            console.error('Error deleting file tags:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            return { code: -1, status: errorMsg, doing: false };
+        }
     }
 
     static tag_delete = tag_delete;
@@ -976,97 +870,54 @@ class Utils {
     static project_health = project_health;
 
     static async file_similarity_detect(): Promise<DatTypes.Resp> {
-        const resp = new DatTypes.Resp()
-        await axios.post(`${appStore.srvPrefix}/api/v1/file_similarity_detect`)
-            .then((response) => {
-                console.log('file info:', response.data);
-                resp.code = response.data.success ? 0 : -1;
-                resp.status = response.data.message || '';
-                resp.data = response.data;
-                if (resp.code != 0) {
-                    Utils.message_notify({ content: `检测启动失败:${resp.status}`, type: "error" })
-                }
-            })
-            .catch((error) => {
-                console.error('Error fetching project info:', error);
-                resp.code = -1;
-                resp.status = error.message;
-                Utils.message_notify({ content: `程序错误:${error}`, type: "error" })
-            }
-            );
-        return resp;
+        try {
+            const response = await ApiService.fileSimilarityDetect();
+            console.log('file info:', response);
+            return response;
+        } catch (error) {
+            console.error('Error detecting file similarity:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            Utils.message_notify({ content: `程序错误:${errorMsg}`, type: "error" })
+            return { code: -1, status: errorMsg, doing: false };
+        }
     }
 
     static async file_similarity_get(page: number = 1, pageSize: number = 20): Promise<DatTypes.Resp> {
-        const resp = new DatTypes.Resp()
-        await axios.get(`${appStore.srvPrefix}/api/v1/file_similarity_get`, {
-            params: {
-                page: page,
-                pageSize: pageSize
-            }
-        })
-            .then((response) => {
-                console.log('file info:', response.data);
-                resp.code = response.data.success ? 0 : -1;
-                resp.status = response.data.message || '';
-                resp.data = response.data.data;
-                if (resp.code != 0) {
-                    Utils.message_notify({ content: `文件操作失败:${resp.status}`, type: "error" })
-                }
-            })
-            .catch((error) => {
-                console.error('Error fetching project info:', error);
-                resp.code = -1;
-                resp.status = error.message;
-                Utils.message_notify({ content: `程序错误:${error}`, type: "error" })
-            }
-            );
-        return resp;
+        try {
+            const response = await ApiService.fileSimilarityGet(page, pageSize);
+            console.log('file info:', response);
+            return response;
+        } catch (error) {
+            console.error('Error getting file similarity:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            return { code: -1, status: errorMsg, doing: false };
+        }
     }
 
     static async prj_info_get() {
-        await axios.post(`${appStore.srvPrefix}/api/v1/project`)
-            .then((response) => {
-                const resp = response.data
-                if (resp.code != 0) {
-                    console.log("project info get err ", resp.status)
-                }
-                else {
-                    appStore.prj = resp.data;
-                    console.log('Project info:', appStore.prj);
-
-                }
-            })
-            .catch((error) => {
-                console.error('Error fetching project info:', error);
-            });
+        try {
+            const resp = await ApiService.projectGet();
+            appStore.prj = resp.data;
+            console.log('Project info:', appStore.prj);
+        } catch (error) {
+            console.error('Error fetching project info:', error);
+        }
         await Utils.files_get(null)
         await dictionary_get()
         await tags_get()
     }
 
-    static folder_get = folder_get
     static async dirCreate(req: DatTypes.DirCreateReq) {
-        const resp = new DatTypes.Resp();
         try {
-            const response = await axios.post(`${appStore.srvPrefix}/api/v1/dir_create`, JSON.stringify(req));
-            resp.code = response.data.code;
-            resp.status = response.data.status;
-
-            if (resp.code !== 0) {
-                Utils.message_notify({ content: `创建文件夹失败:${resp.status}`, type: "error" });
-            } else {
-                Utils.message_notify({ content: `文件夹创建成功`, type: 'success' });
-            }
+            const response = await ApiService.dirCreate(req);
+            Utils.message_notify({ content: `文件夹创建成功`, type: 'success' });
             await Utils.files_get(null);
+            return response;
         } catch (error) {
             console.error('Error creating directory:', error);
-            resp.code = -1;
-            resp.status = (error as Error).message || '创建文件夹时发生未知错误';
-            Utils.message_notify({ content: `创建文件夹错误:${(error as Error).message}`, type: "error" });
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            return { code: -1, status: errorMsg, doing: false };
         }
-
-        return resp;
     }
 }
 

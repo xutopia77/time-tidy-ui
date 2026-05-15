@@ -442,7 +442,156 @@ export class FileDeleteReq {
 export class Resp<T = unknown> {
     code: number = 0;
     status: string = '';
-    doing: boolean = false;
+    doing?: boolean = false;
     data?: T;
+}
+
+// ==================== API Request Types ====================
+
+export class TagUpdate {
+    id: number = 0;
+    name: string = '';
+    color: string = '';
+    description: string = '';
+}
+
+export class TagsSetReq {
+    tags: TagUpdate[] = [];
+}
+
+export class TagsDeleteReq {
+    tagName: string = '';
+}
+
+export class FileTagSetReq {
+    fileIds: number[] = [];
+    tagName: string = '';
+    tagColor?: string = '';
+}
+
+export class FileTagDeleteReq {
+    fileIds: number[] = [];
+    tagName: string = '';
+}
+
+export class FileRestoreReq {
+    fileIds: number[] = [];
+}
+
+export class FileSimilarityGetReq {
+    page: number = 1;
+    pageSize: number = 20;
+}
+
+export class FileSimilarityDeleteReq {
+    fileIds: number[] = [];
+}
+
+export class FileHealthGetReq {
+    type: number = 1;
+    page: number = 0;
+    pageSize: number = 0;
+}
+
+// ==================== API Response Types ====================
+
+export class FileTagSetResp {
+    bneedReloadTags: boolean = false;
+}
+
+export class QueryResult<T> {
+    records: T[] = [];
+    total: number = 0;
+    page: number = 0;
+    pageSize: number = 0;
+}
+
+export class FileView {
+    id: number = 0;
+    rootPathId: number = 0;
+    name: string = '';
+    type: FileType = FileType.image;
+    path: string = '';
+    size: number = 0;
+    time: string = '';
+    uniqueHash: string = '';
+    extension: string = '';
+    createTime: string = '';
+    status: number = 0;
+    origin: string = '';
+    description: string = '';
+    duration: number = 0;
+    width: number = 0;
+    height: number = 0;
+    latitude: number = 0;
+    longitude: number = 0;
+    altitude: number = 0;
+    tags: FileItemTag[] = [];
+}
+
+export class FileDir {
+    id: number = 0;
+    rootPathId: number = 0;
+    path: string = '';
+    name: string = '';
+    type: number = 0;
+    alias: string = '';
+    infoHash: string = '';
+    status: number = 0;
+    description: string = '';
+    createdAt: string = '';
+    updatedAt: string = '';
+}
+
+export class FilesGetResp {
+    files: QueryResult<FileView> = new QueryResult<FileView>();
+    dirs: QueryResult<FileDir> = new QueryResult<FileDir>();
+}
+
+export class SimilarityItem {
+    file: FileView = new FileView();
+    similarity: FileSimilarity = new FileSimilarity();
+}
+
+export class SimilarFileInfo {
+    file: FileView = new FileView();
+    similarity: SimilarityItem[] = [];
+}
+
+export class FileSimilarity {
+    id: number = 0;
+    file1Id: number = 0;
+    file2Id: number = 0;
+    similarity: number = 0;
+    createdAt: string = '';
+}
+
+export class SimilarityGroupView {
+    groupId: number = 0;
+    hash: string = '';
+    fileCount: number = 0;
+    totalSize: number = 0;
+    createdAt: string = '';
+    files: FileView[] = [];
+}
+
+export class SimilarityGetResp {
+    groups: SimilarityGroupView[] = [];
+    total: number = 0;
+    totalFiles: number = 0;
+    page: number = 0;
+    pageSize: number = 0;
+}
+
+export class DirCreateResp {
+    id: number = 0;
+    path: string = '';
+}
+
+export class DictionaryResp {
+    operationType: Record<string, any> = {};
+    operationLogLevel: Record<string, any> = {};
+    operationLogType: Record<string, any> = {};
+    respCode: Record<string, any> = {};
 }
 
