@@ -142,6 +142,9 @@ watch(() => items.value.map(item => item.checked), (newCheckedStates, oldValue) 
 onMounted(() => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    
+    // Reload files when returning to home page
+    Utils.files_get();
 });
 
 onUnmounted(() => {
