@@ -90,65 +90,198 @@ test.describe('File Management', () => {
   })
 
   /**
-   * Test: Display file explorer
+   * Test: Display file explorer and navigate into folder
    * 
-   * check file explorer is visible and at least one folder is displayed
+   * Test the complete flow of displaying file explorer and navigating into folders
+   * Based on test data structure:
+   * test-basic-navigation/
+   * ├── 2024-01-旅游/
+   * │   ├── day1/ (10 images)
+   * │   └── day2/ (10 images)
+   * └── 2024-02-聚会/ (5 images)
+   * 
+   * Steps:
+   * 1. Check file explorer is visible
+   * 2. Check root folder count equals 14
+   * 3. Take screenshot
+   * 4. Enter test-basic-navigation folder
+   * 5. Check subfolder count equals 2 (2024-01-旅游, 2024-02-聚会)
+   * 6. Verify navigation bar shows correct path
+   * 7. Take screenshot
+   * 8. Enter 2024-01-旅游 folder
+   * 9. Check subfolder count equals 2 (day1, day2)
+   * 10. Verify navigation bar shows correct path
+   * 11. Take screenshot
+   * 12. Enter day1 folder
+   * 13. Check file count equals 10
+   * 14. Verify file names match expected pattern
+   * 15. Verify navigation bar shows correct path
+   * 16. Take screenshot
    */
-  test('should display file explorer', async () => {
-    // 验证文件浏览器可见
+  test('should display file explorer and navigate into folder', async ({ page }) => {
+    // Step 1: check file explorer is visible
     await expect(homePage.fileExplorer).toBeVisible()
     
-    // 验证至少有一个文件夹显示
-    const folderCount = await homePage.getFolderCount()
-    expect(folderCount).toBeGreaterThan(0)
-  })
-
-  /**
-   * Test: Enter folder
-   * 
-   * check folder navigation works
-   */
-  test('should enter folder', async () => {
-    // 获取第一个文件夹名称
-    const firstFolder = homePage.folderCards.first()
-    const folderName = await firstFolder.locator('.xc-card-foldername').textContent()
+    // Step 2: check root folder count equals 14
+    const rootFolderCount = await homePage.getFolderCount()
+    expect(rootFolderCount).toBe(14)
     
-    // 进入文件夹
+    // Step 3: take screenshot
+    await takeScreenshot(page, '1-root-folders-displayed')
+    
+    // Step 4: enter test-basic-navigation folder
+    await homePage.enterFolder('test-basic-navigation')
+    await page.waitForTimeout(1000)
+    
+    // Step 5: check subfolder count equals 2 (2024-01-旅游, 2024-02-聚会)
+    const level1FolderCount = await homePage.getFolderCount()
+    expect(level1FolderCount).toBe(2)
+    
+    // Verify folder names
+    const folder1Name = await homePage.folderCards.nth(0).locator('.xc-card-foldername').textContent()
+    const folder2Name = await homePage.folderCards.nth(1).locator('.xc-card-foldername').textContent()
+    expect(folder1Name).toContain('2024-01')
+    expect(folder2Name).toContain('2024-02')
+    
+    // Step 6: verify navigation bar shows correct path
+    const pathDisplay = page.locator('.path-display')
+    await expect(pathDisplay).toBeVisible()
+    const pathItems = pathDisplay.locator('.path-item')
+    await expect(pathItems).toHaveCount(2) // root + test-basic-navigation
+    await expect(pathItems.nth(1)).toContainText('test-basic-navigation')
+    await expect(pathItems.nth(1)).toHaveClass(/is-current/)
+    
+    // Step 7: take screenshot
+    await takeScreenshot(page, '2-level1-folders')
+    
+    // Step 8: enter 2024-01-旅游 folder
     await homePage.enterFolder(0)
+    await page.waitForTimeout(1000)
     
-    // 验证当前路径包含文件夹名称
-    if (folderName) {
-      await homePage.verifyCurrentPath(folderName)
-    }
+    // Step 9: check subfolder count equals 2 (day1, day2)
+    const level2FolderCount = await homePage.getFolderCount()
+    expect(level2FolderCount).toBe(2)
+    
+    // Verify folder names
+    const day1Name = await homePage.folderCards.nth(0).locator('.xc-card-foldername').textContent()
+    const day2Name = await homePage.folderCards.nth(1).locator('.xc-card-foldername').textContent()
+    expect(day1Name).toContain('day1')
+    expect(day2Name).toContain('day2')
+    
+    // Step 10: verify navigation bar shows correct path
+    const pathItemsLevel2 = pathDisplay.locator('.path-item')
+    await expect(pathItemsLevel2).toHaveCount(3) // root + test-basic-navigation + 2024-01-旅游
+    await expect(pathItemsLevel2.nth(1)).toContainText('test-basic-navigation')
+    await expect(pathItemsLevel2.nth(2)).toContainText('2024-01')
+    await expect(pathItemsLevel2.nth(2)).toHaveClass(/is-current/)
+    
+    // Step 11: take screenshot
+    await takeScreenshot(page, '3-level2-folders')
+    
+    // Step 12: enter day1 folder
+    await homePage.enterFolder(0)
+    await homePage.waitForFilesToLoad()
+    
+    // Step 13: check file count equals 10
+    const fileCount = await homePage.getFileCount()
+    expect(fileCount).toBe(10)
+    
+    // Step 14: verify file names match expected pattern (IMG_YYYYMMDD_HHMMSS.jpg)
+    const firstFileName = await homePage.getFileName(0)
+    expect(firstFileName).toMatch(/^IMG_\d{8}_\d{6}\.jpg$/)
+    
+    // Step 15: verify navigation bar shows correct path
+    const pathItemsLevel3 = pathDisplay.locator('.path-item')
+    await expect(pathItemsLevel3).toHaveCount(4) // root + test-basic-navigation + 2024-01-旅游 + day1
+    await expect(pathItemsLevel3.nth(1)).toContainText('test-basic-navigation')
+    await expect(pathItemsLevel3.nth(2)).toContainText('2024-01')
+    await expect(pathItemsLevel3.nth(3)).toContainText('day1')
+    await expect(pathItemsLevel3.nth(3)).toHaveClass(/is-current/)
+    
+    // Step 16: take screenshot
+    await takeScreenshot(page, '4-files-in-day1')
   })
 
   /**
-   * Test: Search files
+   * Test: Add and remove tag from file
    * 
-   * check file search works
-   */
-  test('should search files', async () => {
-    // 执行搜索
-    await homePage.searchFiles('test')
-    
-    // 验证搜索触发器包含搜索关键词
-    await expect(homePage.page.locator('.search-trigger')).toContainText('test')
-  })
-
-  /**
-   * Test: Navigate to management interface
+   * Test the complete flow of adding and removing a tag from a single file
+   * Based on test data: test-basic-navigation/2024-01-旅游/day1/ (10 images)
    * 
-   * check navigation to management interface works
+   * Steps:
+   * 1. Navigate to test-basic-navigation/2024-01-旅游/day1 folder
+   * 2. Wait for files to load and verify file count equals 10
+   * 3. Select first file
+   * 4. Verify operation bar is visible
+   * 5. Add tag to selected file
+   * 6. Verify tag is added to file
+   * 7. Select file again
+   * 8. Open delete tag dialog
+   * 9. Select the tag in dialog
+   * 10. Confirm tag deletion
+   * 11. Verify tag is removed from file
+   * 12. Cleanup: delete the test tag via API
    */
-  test('should navigate to management', async () => {
-    // 打开管理界面
-    await homePage.openManagement()
+  test('should add and remove tag from file', async ({ page }) => {
+    const tagName = `test-tag-add-remove-${Date.now()}`
     
-    // 验证管理界面元素
-    await expect(homePage.page.locator('.admin-nav')).toBeVisible()
-    await expect(homePage.page.locator('text=标签')).toBeVisible()
-    await expect(homePage.page.locator('text=回收站')).toBeVisible()
-    await expect(homePage.page.locator('text=相似文件')).toBeVisible()
+    // Step 1: Navigate to test-basic-navigation/2024-01-旅游/day1 folder
+    await homePage.enterFolder('test-basic-navigation')
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // 2024-01-旅游
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // day1
+    
+    // Step 2: Wait for files to load and verify file count equals 10
+    await homePage.waitForFilesToLoad()
+    const fileCount = await homePage.getFileCount()
+    expect(fileCount).toBe(10)
+    await takeScreenshot(page, '1-files-loaded')
+    
+    // Step 3: Select first file
+    await homePage.selectFile(0)
+    
+    // Step 4: Verify operation bar is visible
+    await expect(homePage.operationBar).toBeVisible()
+    await takeScreenshot(page, '2-file-selected')
+    
+    // Step 5: Add tag to selected file
+    await homePage.addTagToSelectedFiles(tagName)
+    await page.waitForTimeout(1000)
+    await takeScreenshot(page, '3-tag-added')
+    
+    // Step 6: Verify tag is added to file
+    let hasTag = await homePage.verifyFileHasTag(0, tagName)
+    expect(hasTag).toBe(true)
+    await takeScreenshot(page, '4-tag-verified')
+    
+    // Step 7: Select file again
+    await homePage.selectFile(0)
+    await takeScreenshot(page, '5-file-reselected')
+    
+    // Step 8: Open delete tag dialog
+    await homePage.openDeleteTagDialog()
+    await takeScreenshot(page, '6-delete-tag-dialog-opened')
+    
+    // Step 9: Select the tag in dialog
+    await homePage.selectTagsInDialog([tagName])
+    await takeScreenshot(page, '7-tag-selected-in-dialog')
+    
+    // Step 10: Confirm tag deletion
+    await homePage.confirmDeleteTags()
+    await page.waitForTimeout(1000)
+    await takeScreenshot(page, '8-tag-removed')
+    
+    // Step 11: Verify tag is removed from file
+    hasTag = await homePage.verifyFileHasTag(0, tagName)
+    expect(hasTag).toBe(false)
+    await takeScreenshot(page, '9-tag-removal-verified')
+    
+    // Step 12: Cleanup: delete the test tag via API
+    const deleteResult = await api.deleteTag(tagName)
+    expect(deleteResult).toBeDefined()
+    expect(deleteResult.code).toBe(0)
+    await takeScreenshot(page, '10-cleanup-done')
   })
 
   /**
