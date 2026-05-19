@@ -1,28 +1,43 @@
 <template>
-    <div class="file-explorer">
+    <div class="file-explorer" :class="{ 'sidebar-open': sidebarOpen }">
         <FileNavHeader class="file-nav-header" />
 
-        <div class="file-content xc-scrollbar">
-            <template v-for="catalog in fileCatalog" :key="catalog.name">
-                <div v-if="catalog.name.length">
-                    <span style="color: aliceblue;">{{ catalog.name }}</span>
-                    <hr>
-                </div>
-                <div class="file-grid">
-                    <template v-for="(item) in catalog.files" :key="item.id">
-                        <ImageCard :item="item" />
+        <div class="main-content">
+            <div class="file-content xc-scrollbar">
+                <template v-for="catalog in fileCatalog" :key="catalog.name">
+                    <div v-if="catalog.name.length">
+                        <span style="color: aliceblue;">{{ catalog.name }}</span>
+                        <hr>
+                    </div>
+                    <div class="file-grid">
+                        <template v-for="(item) in catalog.files" :key="item.id">
+                            <ImageCard :item="item" />
+                        </template>
+                    </div>
+                </template>
+                <div class="file-grid" v-if="!isAllPathSearch">
+                    <template v-for="item in dirs" :key="item.id">
+                        <FolderCard :item="item" />
                     </template>
                 </div>
-            </template>
-            <div class="file-grid" v-if="!isAllPathSearch">
-                <template v-for="item in dirs" :key="item.id">
-                    <FolderCard :item="item" />
-                </template>
             </div>
+
+            <FileSidebar 
+                :visible="sidebarOpen"
+                :selected-files="selectedFiles"
+                :dirs="dirs"
+                :is-all-path-search="isAllPathSearch"
+                @close="sidebarOpen = false"
+                @enter-folder="enterFolder"
+            />
         </div>
 
-        <div class="fab-container">
+        <div class="fab-container" :class="{ 'fab-sidebar-open': sidebarOpen }">
             <div v-if="fabMenuOpen" class="fab-menu">
+                <div class="fab-menu-item" @click="toggleSidebar">
+                    <span class="fab-menu-icon">{{ sidebarOpen ? '◀' : '▶' }}</span>
+                    <span class="fab-menu-text">{{ sidebarOpen ? '收起面板' : '展开面板' }}</span>
+                </div>
                 <div class="fab-menu-item" @click="openCreateFolderDialog">
                     <span class="fab-menu-icon">📁</span>
                     <span class="fab-menu-text">创建文件夹</span>
@@ -59,6 +74,7 @@ import ImageCard from '@/components/HomeEntry/FileExplorer/ImageCard.vue';
 import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
 import FileOperationBar from '@/components/HomeEntry/FileExplorer/FileOperationBar.vue';
 import FilePagination from '@/components/HomeEntry/FileExplorer/FilePagination.vue';
+import FileSidebar from '@/components/HomeEntry/FileExplorer/FileSidebar/FileSidebar.vue';
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
@@ -82,12 +98,24 @@ const showPagination = computed(() => {
     return totalPages > 1;
 });
 
-// 记录 Shift 键是否按下
+const selectedFiles = computed(() => {
+    return items.value.filter(item => item.checked);
+});
+
+const sidebarOpen = ref(false);
+
+function toggleSidebar() {
+    fabMenuOpen.value = false;
+    sidebarOpen.value = !sidebarOpen.value;
+}
+
+function enterFolder(dir: DatType.DirItem) {
+    Utils.dir_slt_update(dir.path);
+}
+
 const isShiftPressed = ref(false);
-// 记录首次点击的 ImageCard 索引
 const firstCheckedIndex = ref<number | null>(null);
 
-// 监听 Shift 键按下和释放
 const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Shift') {
         isShiftPressed.value = true;
@@ -101,39 +129,31 @@ const handleKeyUp = (event: KeyboardEvent) => {
     }
 };
 
-// 监听 appStore.curFiles 中 checked 状态的变化
 watch(() => items.value.map(item => item.checked), (newCheckedStates, oldValue) => {
     const changedIndex = newCheckedStates.findIndex((checked, index) => {
-        // 找到状态改变的项
         return oldValue[index] !== checked;
     });
 
     const isChecked = newCheckedStates[changedIndex];
     if (changedIndex == -1) {
-        // console.log('没有发现变化', changedIndex)
         return
     }
 
     if (!isShiftPressed.value) {
-        // console.log('变化值', changedIndex, "没有按下Shift键", isChecked)
         firstCheckedIndex.value = null
         return
     }
     if (firstCheckedIndex.value === null) {
-        // console.log('变化值', changedIndex, "按下Shift键，没有首个值, 设置首个值")
         firstCheckedIndex.value = changedIndex;
         return
     }
 
     if (firstCheckedIndex.value === changedIndex) {
-        // console.log('变化值', changedIndex, "按下Shift键，值相等")
         return
     }
 
     const start = Math.min(firstCheckedIndex.value, changedIndex);
     const end = Math.max(firstCheckedIndex.value, changedIndex);
-    // console.log('变化值', changedIndex, "按下Shift键，值相等，区间", start, end, "新值", isChecked)
-    // console.log("======", newCheckedStates)
     for (let i = start; i <= end; i++) {
         items.value[i].checked = isChecked;
     }
@@ -143,7 +163,6 @@ onMounted(() => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     
-    // Reload files when returning to home page
     Utils.files_get();
 });
 
@@ -211,6 +230,8 @@ const handleEscKey = (event: KeyboardEvent) => {
             closeCreateFolderDialog();
         } else if (fabMenuOpen.value) {
             fabMenuOpen.value = false;
+        } else if (sidebarOpen.value) {
+            sidebarOpen.value = false;
         }
     }
 };
@@ -237,10 +258,21 @@ document.addEventListener('keydown', handleEscKey);
     flex-shrink: 0;
 }
 
+.main-content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
 .file-content {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
+    transition: margin-right var(--xc-transition-normal);
+}
+
+.sidebar-open .file-content {
+    margin-right: 0;
 }
 
 .file-grid {
@@ -266,6 +298,11 @@ document.addEventListener('keydown', handleEscKey);
     align-items: flex-end;
     gap: var(--xc-spacing-sm);
     z-index: 100;
+    transition: right var(--xc-transition-normal);
+}
+
+.fab-sidebar-open {
+    right: calc(var(--xc-spacing-xl) + 280px);
 }
 
 .fab-button {
