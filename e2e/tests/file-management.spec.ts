@@ -1,5 +1,5 @@
 /**
- * 文件管理测试套件
+ * file manage test suite
  * 
  * 本文件包含文件管理功能的所有E2E测试用例，覆盖文件的导航、选择、打标签、移除标签等核心功能。
  * 
@@ -116,7 +116,8 @@ test.describe('File Management', () => {
    * 13. Check file count equals 10
    * 14. Verify file names match expected pattern
    * 15. Verify navigation bar shows correct path
-   * 16. Take screenshot
+   * 16. Select first file and verify operation bar is visible
+   * 17. Take screenshot
    */
   test('should display file explorer and navigate into folder', async ({ page }) => {
     // Step 1: check file explorer is visible
@@ -198,8 +199,13 @@ test.describe('File Management', () => {
     await expect(pathItemsLevel3.nth(3)).toContainText('day1')
     await expect(pathItemsLevel3.nth(3)).toHaveClass(/is-current/)
     
-    // Step 16: take screenshot
-    await takeScreenshot(page, '4-files-in-day1')
+    // Step 16: select first file and verify operation bar is visible
+    await homePage.selectFile(0)
+    await expect(homePage.operationBar).toBeVisible()
+    await expect(homePage.operationBar).toContainText('已选中')
+    
+    // Step 17: take screenshot
+    await takeScreenshot(page, '4-file-selected-with-operation-bar')
   })
 
   /**
@@ -285,46 +291,17 @@ test.describe('File Management', () => {
   })
 
   /**
-   * Test: Select file
-   * 
-   * check file selection works and operation bar is visible
-   */
-  test('should select file and show operation bar', async ({ page }) => {
-    // enter first folder
-    await homePage.enterFolder(0)
-    
-    // 等待文件加载
-    await homePage.waitForFilesToLoad()
-    
-    // 截图：进入文件夹后的文件列表
-    await takeScreenshot(page, '1-folder-content')
-    
-    // 选择第一个文件
-    await homePage.selectFile(0)
-    
-    // 截图：选择文件后显示操作栏
-    await takeScreenshot(page, '2-file-selected')
-    
-    await homePage.waitForFilesToLoad()
-
-    // 验证操作栏已显示
-    await expect(homePage.operationBar).toBeVisible()
-    
-    // 验证操作栏显示选中数量
-    await expect(homePage.operationBar).toContainText('已选中')
-    
-    await takeScreenshot(page, '3-operation-bar')
-  
-  })
-
-  /**
    * 测试：取消选择文件
    * 
    * 测试取消文件选择功能
    */
   test('should clear file selection', async ({ page }) => {
-    // 进入第一个文件夹
-    await homePage.enterFolder(0)
+    // Navigate to test-basic-navigation/2024-01-旅游/day1 folder
+    await homePage.enterFolder('test-basic-navigation')
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // 2024-01-旅游
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // day1
     await homePage.waitForFilesToLoad()
     
     // 选择文件
@@ -353,7 +330,12 @@ test.describe('File Management', () => {
   test('should add tag to file', async ({ page }) => {
     const tagName = `test-tag-${Date.now()}`
     
-    await homePage.enterFolder(0)
+    // Navigate to test-basic-navigation/2024-01-旅游/day1 folder
+    await homePage.enterFolder('test-basic-navigation')
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // 2024-01-旅游
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // day1
     await homePage.waitForFilesToLoad()
     
     await takeScreenshot(page, '1-folder-content')
@@ -389,7 +371,12 @@ test.describe('File Management', () => {
   test('should remove tag from file', async ({ page }) => {
     const tagName = `test-tag-remove-${Date.now()}`
     
-    await homePage.enterFolder(0)
+    // Navigate to test-basic-navigation/2024-01-旅游/day1 folder
+    await homePage.enterFolder('test-basic-navigation')
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // 2024-01-旅游
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // day1
     await homePage.waitForFilesToLoad()
     
     await takeScreenshot(page, '1-folder-content')
@@ -439,7 +426,12 @@ test.describe('File Management', () => {
   test('should add tag to multiple files', async ({ page }) => {
     const tagName = `test-tag-batch-${Date.now()}`
     
-    await homePage.enterFolder(0)
+    // Navigate to test-basic-navigation/2024-01-旅游/day1 folder
+    await homePage.enterFolder('test-basic-navigation')
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // 2024-01-旅游
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // day1
     await homePage.waitForFilesToLoad()
     
     await takeScreenshot(page, '1-folder-content')
@@ -497,7 +489,12 @@ test.describe('File Management', () => {
   test('should add and remove tag from multiple files', async ({ page }) => {
     const tagName = `test-tag-batch-remove-${Date.now()}`
     
-    await homePage.enterFolder(0)
+    // Navigate to test-basic-navigation/2024-01-旅游/day1 folder
+    await homePage.enterFolder('test-basic-navigation')
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // 2024-01-旅游
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // day1
     await homePage.waitForFilesToLoad()
     
     await takeScreenshot(page, '1-folder-content')
@@ -564,7 +561,12 @@ test.describe('File Management', () => {
   test('should cancel tag deletion in dialog', async ({ page }) => {
     const tagName = `test-cancel-delete-${Date.now()}`
     
-    await homePage.enterFolder(0)
+    // Navigate to test-basic-navigation/2024-01-旅游/day1 folder
+    await homePage.enterFolder('test-basic-navigation')
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // 2024-01-旅游
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder(0) // day1
     await homePage.waitForFilesToLoad()
     await takeScreenshot(page, '1-cancel-delete-dialog')
     
