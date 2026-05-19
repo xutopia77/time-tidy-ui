@@ -32,6 +32,10 @@ function get_dir_trees() {
     appStore.DirTrees = []
     // 遍历所有目录项
     for (const dir of allDirs) {
+        if( dir.dir.type != DatTypes.DirType.Normal ) { 
+            console.info(`Unknown dir type: ${dir.dir.type}, skipping dir ${dir.path}`);    
+            continue; 
+        }
         // 分割路径，过滤掉空字符串
         const pathParts = dir.path.split('/').filter(part => part);
         let currentLevel = dirTree;

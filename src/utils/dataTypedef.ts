@@ -174,12 +174,20 @@ export class DirTreeItem {
     children?: DirTreeItem[];
 }
 
+export enum DirType {
+    Root = 0,
+    Normal = 1,
+    Unknown = 2,
+}
+
+
+
 export class Dir {
     id: number = 0;
     path: string = "";
     name: string = "";
     rootPathId: number = 0;
-    type: number = 0;
+    type: DirType = DirType.Normal;
     alias: string = "";
     infoHash: string = "";
     status: number = 0;
@@ -191,7 +199,7 @@ export class Dir {
 
 export class DirCreateReq {
     path: string = "";
-    type: number = 0;
+    type: DirType = DirType.Normal;
     description: string = "";
     parentDirId: number = 0;
 }
