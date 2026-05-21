@@ -1,11 +1,11 @@
 <template>
-    <div class="sidebar-section" v-if="selectedFiles.length > 0">
+    <div class="sidebar-section">
         <h4 class="section-title">
             <span class="section-icon">📷</span>
             文件信息
-            <span class="section-count">({{ selectedFiles.length }})</span>
+            <span class="section-count" v-if="selectedFiles.length > 0">({{ selectedFiles.length }})</span>
         </h4>
-        <div class="section-content">
+        <div class="section-content" v-if="selectedFiles.length > 0">
             <template v-if="selectedFiles.length === 1">
                 <div class="info-item">
                     <span class="info-label">文件名</span>
@@ -38,6 +38,9 @@
                     <span class="info-value">{{ formatFileSize(totalSelectedSize) }}</span>
                 </div>
             </template>
+        </div>
+        <div class="section-content" v-else>
+            <div class="empty-hint">选择文件查看详细信息</div>
         </div>
     </div>
 </template>
@@ -117,5 +120,12 @@ function formatDuration(ms: number): string {
     font-size: var(--xc-font-size-md);
     color: var(--xc-text-color);
     word-break: break-all;
+}
+
+.empty-hint {
+    font-size: var(--xc-font-size-sm);
+    color: var(--xc-text-color-secondary);
+    text-align: center;
+    padding: var(--xc-spacing-sm) 0;
 }
 </style>

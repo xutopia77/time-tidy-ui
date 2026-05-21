@@ -12,7 +12,7 @@
                 </div>
             </router-link>
             
-            <router-link class="menu-item" to="/admin" v-slot="{ isActive }">
+            <router-link class="menu-item" to="/admin/PrjSet" v-slot="{ isActive }">
                 <div class="menu-link" :class="{ 'active': isActive }">
                     <Dashboard size="22" />
                     <span>管理</span>

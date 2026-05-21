@@ -100,7 +100,7 @@ const totalFolderCount = computed(() => {
     width: 100%;
 }
 
-.folder-tree-section :deep(.folder-list) {
+.folder-tree > :deep(ul.folder-list) {
     padding-left: 0;
 }
 

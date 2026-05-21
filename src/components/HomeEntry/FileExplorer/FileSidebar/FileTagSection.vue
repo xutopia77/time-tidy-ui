@@ -1,10 +1,10 @@
 <template>
-    <div class="sidebar-section" v-if="selectedFiles.length > 0 && selectedFiles[0].tags.length > 0">
+    <div class="sidebar-section">
         <h4 class="section-title">
             <span class="section-icon">🏷️</span>
             标签信息
         </h4>
-        <div class="section-content">
+        <div class="section-content" v-if="selectedFiles.length > 0 && selectedFiles[0].tags.length > 0">
             <div class="tag-list">
                 <span 
                     v-for="tag in selectedFiles[0].tags" 
@@ -15,6 +15,9 @@
                     {{ tag.name }}
                 </span>
             </div>
+        </div>
+        <div class="section-content" v-else>
+            <div class="empty-hint">选择文件查看标签信息</div>
         </div>
     </div>
 </template>
@@ -64,5 +67,12 @@ defineProps<{
     border-radius: var(--xc-border-radius-sm);
     font-size: var(--xc-font-size-sm);
     color: white;
+}
+
+.empty-hint {
+    font-size: var(--xc-font-size-sm);
+    color: var(--xc-text-color-secondary);
+    text-align: center;
+    padding: var(--xc-spacing-sm) 0;
 }
 </style>

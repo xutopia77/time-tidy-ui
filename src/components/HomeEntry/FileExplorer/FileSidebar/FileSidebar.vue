@@ -15,12 +15,6 @@
                 :is-all-path-search="isAllPathSearch"
                 @enter-folder="$emit('enter-folder', $event)"
             />
-
-            <div class="sidebar-section empty-state" v-if="selectedFiles.length === 0 && dirs.length === 0">
-                <div class="empty-icon">📋</div>
-                <div class="empty-text">暂无信息</div>
-                <div class="empty-hint">选择文件或进入文件夹查看详情</div>
-            </div>
         </div>
     </transition>
 </template>
@@ -100,31 +94,5 @@ defineEmits<{
 .sidebar-close-btn:hover {
     background-color: var(--xc-background-color-hover);
     color: var(--xc-text-color);
-}
-
-.sidebar-section {
-    padding: var(--xc-spacing-md);
-    border-bottom: var(--xc-border);
-}
-
-.empty-state {
-    text-align: center;
-    padding: var(--xc-spacing-xl);
-}
-
-.empty-icon {
-    font-size: 48px;
-    margin-bottom: var(--xc-spacing-md);
-}
-
-.empty-text {
-    font-size: var(--xc-font-size-lg);
-    color: var(--xc-text-color);
-    margin-bottom: var(--xc-spacing-xs);
-}
-
-.empty-hint {
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color-secondary);
 }
 </style>
