@@ -105,6 +105,75 @@ export class HomePage {
    */
   readonly tagInput: Locator
 
+  /**
+   * 浮动操作按钮（FAB）
+   * 点击后显示新建文件夹、展开面板等选项
+   */
+  readonly fab: Locator
+
+  /**
+   * 浮动操作栏
+   * FAB点击后显示的操作选项
+   */
+  readonly fabMenu: Locator
+
+  /**
+   * 新建文件夹按钮
+   * FAB菜单中的新建文件夹选项
+   */
+  readonly newFolderButton: Locator
+
+  /**
+   * 展开面板按钮
+   * FAB菜单中的展开信息面板选项
+   */
+  readonly expandPanelButton: Locator
+
+  /**
+   * 信息面板（Info Sidebar）
+   * 右侧信息面板，包含文件信息、标签信息、文件夹列表
+   */
+  readonly infoSidebar: Locator
+
+  /**
+   * 文件信息区域
+   * 信息面板中的文件信息Section
+   */
+  readonly fileInfoSection: Locator
+
+  /**
+   * 标签信息区域
+   * 信息面板中的标签信息Section
+   */
+  readonly tagInfoSection: Locator
+
+  /**
+   * 文件夹列表区域
+   * 信息面板中的文件夹列表Section
+   */
+  readonly folderListSection: Locator
+
+  /**
+   * 搜索面板
+   * 搜索功能面板
+   */
+  readonly searchPanel: Locator
+
+  /**
+   * 搜索面板取消按钮
+   */
+  readonly searchCancelButton: Locator
+
+  /**
+   * 搜索面板清空按钮
+   */
+  readonly searchClearButton: Locator
+
+  /**
+   * 新建文件夹对话框
+   */
+  readonly newFolderDialog: Locator
+
   // ==================== 构造函数 ====================
   
   /**
@@ -155,6 +224,42 @@ export class HomePage {
     
     // 标签输入框：添加标签的输入框
     this.tagInput = page.locator('.tag-input')
+
+    // 浮动操作按钮（FAB）
+    this.fab = page.locator('.fab-button')
+
+    // 浮动操作栏
+    this.fabMenu = page.locator('.fab-menu')
+
+    // 新建文件夹按钮
+    this.newFolderButton = this.fabMenu.locator('.fab-menu-item:has-text("创建文件夹")')
+
+    // 展开面板按钮
+    this.expandPanelButton = this.fabMenu.locator('.fab-menu-item:has-text("展开面板")')
+
+    // 信息面板（Info Sidebar）
+    this.infoSidebar = page.locator('.info-sidebar')
+
+    // 文件信息区域
+    this.fileInfoSection = this.infoSidebar.locator('.sidebar-section').filter({ hasText: '文件信息' })
+
+    // 标签信息区域
+    this.tagInfoSection = this.infoSidebar.locator('.sidebar-section').filter({ hasText: '标签信息' })
+
+    // 文件夹列表区域
+    this.folderListSection = this.infoSidebar.locator('.folder-tree-section')
+
+    // 搜索面板
+    this.searchPanel = page.locator('.search-panel')
+
+    // 搜索面板取消按钮
+    this.searchCancelButton = this.searchPanel.locator('.cancel-btn')
+
+    // 搜索面板清空按钮
+    this.searchClearButton = this.searchPanel.locator('.clear-all-btn')
+
+    // 新建文件夹对话框
+    this.newFolderDialog = page.locator('.dialog-overlay').filter({ hasText: '创建新文件夹' })
   }
 
   // ==================== 页面操作方法 ====================
@@ -721,5 +826,356 @@ export class HomePage {
    */
   async waitForFoldersToLoad(timeout: number = 10000) {
     await expect(this.folderCards.first()).toBeVisible({ timeout })
+  }
+
+  // ==================== FAB操作方法 ====================
+
+  /**
+   * 点击浮动操作按钮（FAB）
+   * 
+   * 点击FAB按钮，显示浮动操作菜单
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.clickFab()
+   */
+  async clickFab() {
+    await this.fab.click()
+    await expect(this.fabMenu).toBeVisible()
+  }
+
+  /**
+   * 打开新建文件夹对话框
+   * 
+   * 通过FAB菜单打开新建文件夹对话框
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.clickFab()
+   * await homePage.openNewFolderDialog()
+   */
+  async openNewFolderDialog() {
+    await this.clickFab()
+    await this.newFolderButton.click()
+    await expect(this.newFolderDialog).toBeVisible()
+  }
+
+  /**
+   * 展开信息面板
+   * 
+   * 通过FAB菜单展开右侧信息面板
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.clickFab()
+   * await homePage.expandInfoSidebar()
+   */
+  async expandInfoSidebar() {
+    await this.clickFab()
+    await this.expandPanelButton.click()
+    await expect(this.infoSidebar).toBeVisible()
+  }
+
+  /**
+   * 关闭信息面板
+   * 
+   * 点击信息面板的关闭按钮
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.closeInfoSidebar()
+   */
+  async closeInfoSidebar() {
+    const closeBtn = this.infoSidebar.locator('.sidebar-close-btn')
+    await closeBtn.click()
+    await expect(this.infoSidebar).not.toBeVisible()
+  }
+
+  /**
+   * 点击文件夹树项
+   * 
+   * 在信息面板的文件夹列表中点击指定索引的文件夹
+   * 
+   * @param index - 文件夹索引
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.clickFolderTreeItem(0)
+   */
+  async clickFolderTreeItem(index: number) {
+    const folderItem = this.folderListSection.locator('.dir-item').nth(index)
+    await folderItem.click()
+  }
+
+  /**
+   * 折叠文件夹树节点
+   * 
+   * 点击文件夹树项的折叠按钮
+   * 
+   * @param index - 文件夹索引
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.collapseFolderTreeNode(0)
+   */
+  async collapseFolderTreeNode(index: number) {
+    const dirItem = this.folderListSection.locator('.dir-item-group').nth(index).locator('.dir-item')
+    const collapseIcon = dirItem.locator('svg').first()
+    await collapseIcon.click()
+  }
+
+  /**
+   * 展开文件夹树节点
+   * 
+   * 点击文件夹树项的展开按钮
+   * 
+   * @param index - 文件夹索引
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.expandFolderTreeNode(0)
+   */
+  async expandFolderTreeNode(index: number) {
+    const dirItem = this.folderListSection.locator('.dir-item-group').nth(index).locator('.dir-item')
+    const expandIcon = dirItem.locator('svg').first()
+    await expandIcon.click()
+  }
+
+  /**
+   * 获取文件夹总数
+   * 
+   * 从信息面板文件夹列表头部获取文件夹总数
+   * 
+   * @returns Promise<number> - 文件夹总数
+   * 
+   * @example
+   * const count = await homePage.getFolderTotalCount()
+   */
+  async getFolderTotalCount(): Promise<number> {
+    const header = this.folderListSection.locator('.section-title')
+    const text = await header.textContent() || ''
+    const match = text.match(/(\d+)/)
+    return match ? parseInt(match[1]) : 0
+  }
+
+  // ==================== 搜索面板操作方法 ====================
+
+  /**
+   * 打开搜索面板
+   * 
+   * 点击搜索触发器打开搜索面板
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.openSearchPanel()
+   */
+  async openSearchPanel() {
+    await this.searchTrigger.click()
+    await expect(this.searchPanel).toBeVisible()
+  }
+
+  /**
+   * 关闭搜索面板
+   * 
+   * 点击取消按钮关闭搜索面板
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.closeSearchPanel()
+   */
+  async closeSearchPanel() {
+    await this.searchCancelButton.click()
+    await expect(this.searchPanel).not.toBeVisible()
+  }
+
+  /**
+   * 清空所有搜索条件
+   * 
+   * 点击清空按钮重置所有搜索条件
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.clearAllSearchFilters()
+   */
+  async clearAllSearchFilters() {
+    await this.searchClearButton.click()
+  }
+
+  /**
+   * 设置搜索关键词
+   * 
+   * 在搜索输入框中输入关键词
+   * 
+   * @param keyword - 搜索关键词
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.setSearchKeyword('vacation')
+   */
+  async setSearchKeyword(keyword: string) {
+    await this.searchInput.fill(keyword)
+  }
+
+  /**
+   * 选择文件类型过滤器
+   * 
+   * 在搜索面板中选择文件类型
+   * 
+   * @param fileType - 文件类型（图片、视频、音频、文本、其他）
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectFileType('图片')
+   */
+  async selectFileType(fileType: string) {
+    const typeOption = this.searchPanel.locator('.filter-option-btn').filter({ hasText: fileType })
+    await typeOption.click()
+  }
+
+  /**
+   * 选择排序方式
+   * 
+   * 在搜索面板中选择排序方式
+   * 
+   * @param sortBy - 排序方式（时间、大小、名称）
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectSortBy('时间')
+   */
+  async selectSortBy(sortBy: string) {
+    const sortSection = this.searchPanel.locator('.filter-section').filter({ hasText: '排序方式' })
+    const sortOption = sortSection.locator('.filter-option-btn').filter({ hasText: sortBy })
+    await sortOption.click()
+  }
+
+  /**
+   * 选择排序顺序
+   * 
+   * 在搜索面板中选择升序或降序
+   * 
+   * @param order - 排序顺序（升序、降序）
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectSortOrder('升序')
+   */
+  async selectSortOrder(order: string) {
+    const orderBtn = this.searchPanel.locator('.order-btn').filter({ hasText: order })
+    await orderBtn.click()
+  }
+
+  /**
+   * 选择搜索范围
+   * 
+   * 在搜索面板中选择搜索范围
+   * 
+   * @param scope - 搜索范围（当前目录、全部文件）
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectSearchScope('当前目录')
+   */
+  async selectSearchScope(scope: string) {
+    const scopeSection = this.searchPanel.locator('.filter-section').filter({ hasText: '搜索范围' })
+    const scopeOption = scopeSection.locator('.filter-option-btn').filter({ hasText: scope })
+    await scopeOption.click()
+  }
+
+  /**
+   * 设置文件大小范围
+   * 
+   * 在搜索面板中设置文件大小范围
+   * 
+   * @param minSize - 最小文件大小（MB）
+   * @param maxSize - 最大文件大小（MB）
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.setFileSizeRange(1, 10)
+   */
+  async setFileSizeRange(minSize: number, maxSize: number) {
+    const sizeSection = this.searchPanel.locator('.filter-section').filter({ hasText: '文件大小' })
+    const inputs = sizeSection.locator('.range-input')
+    await inputs.nth(0).fill(minSize.toString())
+    await inputs.nth(1).fill(maxSize.toString())
+  }
+
+  /**
+   * 设置视频时长范围
+   * 
+   * 在搜索面板中设置视频时长范围
+   * 
+   * @param minDuration - 最小时长（分钟）
+   * @param maxDuration - 最大时长（分钟）
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.setVideoDurationRange(60, 300)
+   */
+  async setVideoDurationRange(minDuration: number, maxDuration: number) {
+    const durationSection = this.searchPanel.locator('.filter-section').filter({ hasText: '视频时长' })
+    const inputs = durationSection.locator('.range-input')
+    await inputs.nth(0).fill(minDuration.toString())
+    await inputs.nth(1).fill(maxDuration.toString())
+  }
+
+  /**
+   * 设置图片/视频尺寸
+   * 
+   * 在搜索面板中设置图片或视频的宽高
+   * 
+   * @param width - 宽度
+   * @param height - 高度
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.setMediaDimensions(1920, 1080)
+   */
+  async setMediaDimensions(width: number, height: number) {
+    const dimensionSection = this.searchPanel.locator('.filter-section').filter({ hasText: '图片/视频尺寸' })
+    const inputs = dimensionSection.locator('.range-input')
+    await inputs.nth(0).fill(width.toString())
+    await inputs.nth(1).fill(height.toString())
+  }
+
+  /**
+   * 切换反向选择
+   * 
+   * 在搜索面板中切换反向选择复选框
+   * 
+   * @param checked - 是否选中
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.toggleInverseSelect(true)
+   */
+  async toggleInverseSelect(checked: boolean) {
+    const checkbox = this.searchPanel.locator('.tag-checkbox')
+    if (checked) {
+      await checkbox.check()
+    } else {
+      await checkbox.uncheck()
+    }
+  }
+
+  /**
+   * 验证搜索面板输入框是否为空
+   * 
+   * @returns Promise<boolean>
+   * 
+   * @example
+   * const isEmpty = await homePage.isSearchInputEmpty()
+   */
+  async isSearchInputEmpty(): Promise<boolean> {
+    const value = await this.searchInput.inputValue()
+    return value === ''
   }
 }

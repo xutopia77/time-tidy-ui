@@ -100,26 +100,16 @@ test.describe('File Management', () => {
    * │   └── day2/ (10 images)
    * └── 2024-02-聚会/ (5 images)
    * 
-   * Steps:
-   * 1. Check file explorer is visible
-   * 2. Check root folder count equals 14
-   * 3. Take screenshot
-   * 4. Enter test-basic-navigation folder
-   * 5. Check subfolder count equals 2 (2024-01-旅游, 2024-02-聚会)
-   * 6. Verify navigation bar shows correct path
-   * 7. Take screenshot
-   * 8. Enter 2024-01-旅游 folder
-   * 9. Check subfolder count equals 2 (day1, day2)
-   * 10. Verify navigation bar shows correct path
-   * 11. Take screenshot
-   * 12. Enter day1 folder
-   * 13. Check file count equals 10
-   * 14. Verify file names match expected pattern
-   * 15. Verify navigation bar shows correct path
-   * 16. Select first file and verify operation bar is visible
-   * 17. Take screenshot
+   * Test Parts:
+   * Part 1: File browsing and navigation verification
+   * Part 2: FAB and Info Sidebar verification
+   * Part 3: Search Panel UI completeness verification
+   * Part 4: Search condition state management verification
+   * Part 5: Search Panel cancel operation verification
    */
   test('should display file explorer and navigate into folder', async ({ page }) => {
+    // ==================== Part 1: File Browsing and Navigation ====================
+    
     // Step 1: check file explorer is visible
     await expect(homePage.fileExplorer).toBeVisible()
     
@@ -152,14 +142,23 @@ test.describe('File Management', () => {
     await expect(pathItems.nth(1)).toContainText('test-basic-navigation')
     await expect(pathItems.nth(1)).toHaveClass(/is-current/)
     
-    // Step 7: take screenshot
-    await takeScreenshot(page, '2-level1-folders')
+    // Step 7: select folder and verify operation bar
+    await homePage.folderCards.nth(0).locator('.xc-checkbox').check()
+    await expect(homePage.operationBar).toBeVisible()
+    await expect(homePage.operationBar).toContainText('已选中')
     
-    // Step 8: enter 2024-01-旅游 folder
+    // Step 8: take screenshot
+    await takeScreenshot(page, '2-level1-folders-with-operation-bar')
+    
+    // Step 9: click cancel button to hide operation bar
+    await homePage.clearSelection()
+    await expect(homePage.operationBar).not.toBeVisible()
+    
+    // Step 10: enter 2024-01-旅游 folder
     await homePage.enterFolder(0)
     await page.waitForTimeout(1000)
     
-    // Step 9: check subfolder count equals 2 (day1, day2)
+    // Step 11: check subfolder count equals 2 (day1, day2)
     const level2FolderCount = await homePage.getFolderCount()
     expect(level2FolderCount).toBe(2)
     
@@ -169,29 +168,29 @@ test.describe('File Management', () => {
     expect(day1Name).toContain('day1')
     expect(day2Name).toContain('day2')
     
-    // Step 10: verify navigation bar shows correct path
+    // Step 12: verify navigation bar shows correct path
     const pathItemsLevel2 = pathDisplay.locator('.path-item')
     await expect(pathItemsLevel2).toHaveCount(3) // root + test-basic-navigation + 2024-01-旅游
     await expect(pathItemsLevel2.nth(1)).toContainText('test-basic-navigation')
     await expect(pathItemsLevel2.nth(2)).toContainText('2024-01')
     await expect(pathItemsLevel2.nth(2)).toHaveClass(/is-current/)
     
-    // Step 11: take screenshot
+    // Step 13: take screenshot
     await takeScreenshot(page, '3-level2-folders')
     
-    // Step 12: enter day1 folder
+    // Step 14: enter day1 folder
     await homePage.enterFolder(0)
     await homePage.waitForFilesToLoad()
     
-    // Step 13: check file count equals 10
+    // Step 15: check file count equals 10
     const fileCount = await homePage.getFileCount()
     expect(fileCount).toBe(10)
     
-    // Step 14: verify file names match expected pattern (IMG_YYYYMMDD_HHMMSS.jpg)
+    // Step 16: verify file names match expected pattern (IMG_YYYYMMDD_HHMMSS.jpg)
     const firstFileName = await homePage.getFileName(0)
     expect(firstFileName).toMatch(/^IMG_\d{8}_\d{6}\.jpg$/)
     
-    // Step 15: verify navigation bar shows correct path
+    // Step 17: verify navigation bar shows correct path
     const pathItemsLevel3 = pathDisplay.locator('.path-item')
     await expect(pathItemsLevel3).toHaveCount(4) // root + test-basic-navigation + 2024-01-旅游 + day1
     await expect(pathItemsLevel3.nth(1)).toContainText('test-basic-navigation')
@@ -199,13 +198,202 @@ test.describe('File Management', () => {
     await expect(pathItemsLevel3.nth(3)).toContainText('day1')
     await expect(pathItemsLevel3.nth(3)).toHaveClass(/is-current/)
     
-    // Step 16: select first file and verify operation bar is visible
+    // Step 18: select first file and verify operation bar is visible
     await homePage.selectFile(0)
     await expect(homePage.operationBar).toBeVisible()
     await expect(homePage.operationBar).toContainText('已选中')
     
-    // Step 17: take screenshot
+    // Step 19: take screenshot
     await takeScreenshot(page, '4-file-selected-with-operation-bar')
+    
+    // ==================== Part 2: FAB and Info Sidebar ====================
+    
+    // 先清除文件选择状态，以便验证信息面板的空状态提示
+    await homePage.clearSelection()
+    await page.waitForTimeout(300)
+    
+    // Step 1: click FAB button
+    await homePage.clickFab()
+    await takeScreenshot(page, '5-fab-menu-displayed')
+    
+    // Step 2: click new folder button to open dialog
+    await homePage.newFolderButton.click()
+    await expect(homePage.newFolderDialog).toBeVisible()
+    await takeScreenshot(page, '6-new-folder-dialog')
+    
+    // Step 3: click cancel button to close dialog
+    const cancelBtn = homePage.newFolderDialog.locator('.cancel-btn')
+    await cancelBtn.click()
+    await expect(homePage.newFolderDialog).not.toBeVisible()
+    
+    // Step 4: click FAB again and expand info sidebar
+    await homePage.clickFab()
+    await homePage.expandPanelButton.click()
+    await expect(homePage.infoSidebar).toBeVisible()
+    await takeScreenshot(page, '7-info-sidebar-displayed')
+    
+    // Step 5: verify info sidebar has three sections
+    await expect(homePage.fileInfoSection).toBeVisible()
+    await expect(homePage.tagInfoSection).toBeVisible()
+    await expect(homePage.folderListSection).toBeVisible()
+    
+    // Step 6: verify file info section default state (no file selected)
+    await expect(homePage.fileInfoSection).toContainText('选择文件查看详细信息')
+    
+    // Step 7: verify tag info section default state (no file selected)
+    await expect(homePage.tagInfoSection).toContainText('选择文件查看标签信息')
+    
+    // Step 8: verify folder list section shows folder count
+    const folderTotalCount = await homePage.getFolderTotalCount()
+    expect(folderTotalCount).toBe(56)
+    await takeScreenshot(page, '8-info-sidebar-sections')
+    
+    // Step 9: click collapse button on first folder tree item
+    await homePage.collapseFolderTreeNode(0)
+    await page.waitForTimeout(300)
+    await takeScreenshot(page, '9-folder-tree-collapsed')
+    
+    // Step 10: click expand button on first folder tree item
+    await homePage.expandFolderTreeNode(0)
+    await page.waitForTimeout(300)
+    await takeScreenshot(page, '10-folder-tree-expanded')
+    
+    // Step 11: click first folder in tree to navigate
+    await homePage.clickFolderTreeItem(0)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '11-folder-tree-navigation')
+    
+    // Step 12: close info sidebar
+    await homePage.closeInfoSidebar()
+    await takeScreenshot(page, '12-info-sidebar-closed')
+    
+    // ==================== Part 3: Search Panel UI Completeness ====================
+    
+    // Step 1: open search panel
+    await homePage.openSearchPanel()
+    await takeScreenshot(page, '13-search-panel-opened')
+    
+    // Step 2: verify search input is visible
+    await expect(homePage.searchInput).toBeVisible()
+    
+    // Step 3: verify search and cancel buttons
+    await expect(homePage.searchPanel.locator('.search-btn-large')).toBeVisible()
+    await expect(homePage.searchCancelButton).toBeVisible()
+    
+    // Step 4: verify file type filter options
+    const fileTypeSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '文件类型' })
+    await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '图片' })).toBeVisible()
+    await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '视频' })).toBeVisible()
+    await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '音频' })).toBeVisible()
+    await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '文本' })).toBeVisible()
+    await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '其他' })).toBeVisible()
+    
+    // Step 5: verify sort options
+    const sortSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '排序方式' })
+    await expect(sortSection.locator('.filter-option-btn').filter({ hasText: '时间' })).toBeVisible()
+    await expect(sortSection.locator('.filter-option-btn').filter({ hasText: '大小' })).toBeVisible()
+    await expect(sortSection.locator('.filter-option-btn').filter({ hasText: '名称' })).toBeVisible()
+    
+    // Step 6: verify sort order buttons
+    await expect(homePage.searchPanel.locator('.order-btn').filter({ hasText: '升序' })).toBeVisible()
+    await expect(homePage.searchPanel.locator('.order-btn').filter({ hasText: '降序' })).toBeVisible()
+    
+    // Step 7: verify search scope options
+    const scopeSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '搜索范围' })
+    await expect(scopeSection.locator('.filter-option-btn').filter({ hasText: '当前目录' })).toBeVisible()
+    await expect(scopeSection.locator('.filter-option-btn').filter({ hasText: '全部文件' })).toBeVisible()
+    
+    // Step 8: verify file size input
+    const sizeSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '文件大小' })
+    await expect(sizeSection.locator('.range-input').first()).toBeVisible()
+    
+    // Step 9: verify video duration input
+    const durationSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '视频时长' })
+    await expect(durationSection.locator('.range-input').first()).toBeVisible()
+    
+    // Step 10: verify media dimensions input
+    const dimensionSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '图片/视频尺寸' })
+    await expect(dimensionSection.locator('.range-input').first()).toBeVisible()
+    
+    // Step 11: verify tag selection area
+    const tagSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '文件标签' })
+    await expect(tagSection).toBeVisible()
+    
+    // Step 12: verify inverse select checkbox
+    await expect(homePage.searchPanel.locator('.tag-checkbox')).toBeVisible()
+    
+    // Step 13: take screenshot
+    await takeScreenshot(page, '14-search-panel-ui-complete')
+    
+    // ==================== Part 4: Search Condition State Management ====================
+    
+    // Step 1: input search keyword
+    await homePage.setSearchKeyword('test-keyword')
+    await takeScreenshot(page, '15-search-keyword-entered')
+    
+    // Step 2: select multiple search conditions
+    await homePage.selectFileType('图片')
+    await homePage.selectSortBy('时间')
+    await homePage.selectSortOrder('升序')
+    await homePage.selectSearchScope('当前目录')
+    
+    // Step 3: set file size range
+    await homePage.setFileSizeRange(1, 10)
+    
+    // Step 4: set video duration range
+    await homePage.setVideoDurationRange(60, 300)
+    
+    // Step 5: set media dimensions
+    await homePage.setMediaDimensions(1920, 1080)
+    
+    // Step 6: take screenshot
+    await takeScreenshot(page, '16-search-conditions-set')
+    
+    // Step 7: click clear all filters button
+    await homePage.clearAllSearchFilters()
+    await page.waitForTimeout(300)
+    
+    // Step 8: verify conditions are cleared
+    const isInputEmpty = await homePage.isSearchInputEmpty()
+    expect(isInputEmpty).toBe(true)
+    
+    // Step 9: verify search panel is still visible
+    await expect(homePage.searchPanel).toBeVisible()
+    
+    // Step 10: take screenshot
+    await takeScreenshot(page, '17-search-conditions-cleared')
+    
+    // ==================== Part 5: Search Panel Cancel Operation ====================
+    
+    // Step 1: input search keyword
+    await homePage.setSearchKeyword('cancel-test')
+    
+    // Step 2: select multiple search conditions
+    await homePage.selectFileType('视频')
+    await homePage.selectSortBy('大小')
+    
+    // Step 3: take screenshot
+    await takeScreenshot(page, '18-search-conditions-before-cancel')
+    
+    // Step 4: click cancel button to close panel
+    await homePage.closeSearchPanel()
+    
+    // Step 5: verify panel is closed
+    await expect(homePage.searchPanel).not.toBeVisible()
+    
+    // Step 6: take screenshot
+    await takeScreenshot(page, '19-search-panel-closed')
+    
+    // Step 7: open search panel again
+    await homePage.openSearchPanel()
+    
+    // Step 8: verify conditions state (should be reset or persisted based on business logic)
+    const isInputEmptyAfterReopen = await homePage.isSearchInputEmpty()
+    // Note: Based on typical UX patterns, conditions should be reset
+    expect(isInputEmptyAfterReopen).toBe(true)
+    
+    // Step 9: take screenshot
+    await takeScreenshot(page, '20-search-panel-reopened')
   })
 
   /**
