@@ -340,6 +340,40 @@ export class TagManagementPage {
   async getTagCount() {
     return await this.tagCards.count()
   }
+
+  /**
+   * 验证标签是否存在
+   * 
+   * 检查标签列表中是否包含指定名称的标签
+   * 
+   * @param tagName - 标签名称
+   * @returns Promise<boolean> - 标签是否存在
+   * 
+   * @example
+   * const exists = await tagPage.verifyTagExists('test-tag')
+   * expect(exists).toBe(true)
+   */
+  async verifyTagExists(tagName: string): Promise<boolean> {
+    const tagCard = this.tagCards.filter({ hasText: tagName })
+    return await tagCard.isVisible()
+  }
+
+  /**
+   * 等待标签出现
+   * 
+   * 等待指定标签在列表中出现
+   * 
+   * @param tagName - 标签名称
+   * @param timeout - 超时时间（毫秒），默认10秒
+   * @returns Promise<void>
+   * 
+   * @example
+   * await tagPage.waitForTag('test-tag')
+   */
+  async waitForTag(tagName: string, timeout: number = 10000) {
+    const tagCard = this.tagCards.filter({ hasText: tagName })
+    await tagCard.waitFor({ state: 'visible', timeout })
+  }
 }
 
 /**

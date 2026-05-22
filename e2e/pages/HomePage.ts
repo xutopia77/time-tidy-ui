@@ -410,10 +410,18 @@ export class HomePage {
    * await homePage.clearSelection()
    */
   async clearSelection() {
-    // 点击操作栏中的"取消选择"按钮
-    await this.operationBar.locator('.clear-btn').click()
+    // Check if operation bar is visible
+    const isVisible = await this.operationBar.isVisible()
+    if (!isVisible) {
+      // Operation bar is not visible, no files are selected
+      return
+    }
     
-    // 验证操作栏已隐藏
+    // Click the "取消" button in the operation bar
+    const cancelBtn = this.operationBar.locator('button:has-text("取消")')
+    await cancelBtn.click()
+    
+    // Verify operation bar is hidden
     await expect(this.operationBar).not.toBeVisible()
   }
 
@@ -671,6 +679,74 @@ export class HomePage {
     await deleteBtn.click()
     
     await this.page.waitForTimeout(500)
+  }
+
+  /**
+   * 设置文件等级
+   * 
+   * 为选中的文件设置等级（1-5星）
+   * 
+   * @param level - 等级（1-5）
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectFile(0)
+   * await homePage.setFileLevel(3)
+   * 
+   * @remarks
+   * - 必须先选择文件，否则操作栏不会显示
+   * - 等级会覆盖之前的等级
+   */
+  async setFileLevel(level: number) {
+    await expect(this.operationBar).toBeVisible()
+    
+    // Step 1: Select level from dropdown
+    const levelSelect = this.operationBar.locator('.level-select')
+    await levelSelect.selectOption(`sys_score${level}`)
+    
+    // Step 2: Click set level button to confirm
+    const setLevelBtn = this.operationBar.locator('.action-btn:has-text("设置等级")')
+    await setLevelBtn.click()
+    
+    await this.page.waitForTimeout(500)
+  }
+
+  /**
+   * 验证文件是否有指定等级
+   * 
+   * 检查文件卡片上是否显示指定等级
+   * 
+   * @param fileIndex - 文件索引
+   * @param level - 等级（1-5）
+   * @returns Promise<boolean> - 是否有该等级
+   * 
+   * @example
+   * const hasLevel = await homePage.verifyFileHasLevel(0, 3)
+   * expect(hasLevel).toBe(true)
+   */
+  async verifyFileHasLevel(fileIndex: number, level: number): Promise<boolean> {
+    const fileCard = this.fileCards.nth(fileIndex)
+    const levelTag = fileCard.locator(`.xc-tag:has-text("${level}☆")`)
+    return await levelTag.isVisible()
+  }
+
+  /**
+   * 验证文件是否有指定等级标签
+   * 
+   * 检查文件卡片上是否显示指定等级标签（sys_score格式）
+   * 
+   * @param fileIndex - 文件索引
+   * @param level - 等级（1-5）
+   * @returns Promise<boolean> - 是否有该等级标签
+   * 
+   * @example
+   * const hasLevel = await homePage.verifyFileHasLevelTag(0, 3)
+   * expect(hasLevel).toBe(true)
+   */
+  async verifyFileHasLevelTag(fileIndex: number, level: number): Promise<boolean> {
+    const fileCard = this.fileCards.nth(fileIndex)
+    const levelTag = fileCard.locator('.xc-tag').filter({ hasText: `${level}☆` })
+    return await levelTag.isVisible()
   }
 
   /**

@@ -33,11 +33,14 @@
 
 import { test, expect, Page } from '@playwright/test'
 import { HomePage } from '../pages/HomePage'
+import { TagManagementPage } from '../pages/TagManagementPage'
 import { ApiHelpers } from '../utils/api-helpers'
 
 test.describe('File Management', () => {
   // Page Object实例，用于操作页面
   let homePage: HomePage
+  // Tag Management Page Object
+  let tagManagementPage: TagManagementPage
   // API Helper实例，用于数据管理
   let api: ApiHelpers
 
@@ -79,6 +82,9 @@ test.describe('File Management', () => {
     // 初始化Page Object，page由Playwright自动注入
     homePage = new HomePage(page)
     
+    // 初始化Tag Management Page Object
+    tagManagementPage = new TagManagementPage(page)
+    
     // 初始化API Helper，request由Playwright自动注入
     api = new ApiHelpers(request)
     
@@ -113,9 +119,9 @@ test.describe('File Management', () => {
     // Step 1: check file explorer is visible
     await expect(homePage.fileExplorer).toBeVisible()
     
-    // Step 2: check root folder count equals 14
+    // Step 2: check root folder count equals 15
     const rootFolderCount = await homePage.getFolderCount()
-    expect(rootFolderCount).toBe(14)
+    expect(rootFolderCount).toBe(15)
     
     // Step 3: take screenshot
     await takeScreenshot(page, '1-root-folders-displayed')
@@ -396,86 +402,293 @@ test.describe('File Management', () => {
     await takeScreenshot(page, '20-search-panel-reopened')
   })
 
-  /**
-   * Test: Add and remove tag from file
-   * 
-   * Test the complete flow of adding and removing a tag from a single file
-   * Based on test data: test-basic-navigation/2024-01-旅游/day1/ (10 images)
-   * 
-   * Steps:
-   * 1. Navigate to test-basic-navigation/2024-01-旅游/day1 folder
-   * 2. Wait for files to load and verify file count equals 10
-   * 3. Select first file
-   * 4. Verify operation bar is visible
-   * 5. Add tag to selected file
-   * 6. Verify tag is added to file
-   * 7. Select file again
-   * 8. Open delete tag dialog
-   * 9. Select the tag in dialog
-   * 10. Confirm tag deletion
-   * 11. Verify tag is removed from file
-   * 12. Cleanup: delete the test tag via API
-   */
+
   test('should add and remove tag from file', async ({ page }) => {
-    const tagName = `test-tag-add-remove-${Date.now()}`
+    const tag1 = `工作-${Date.now()}`
+    const tag2 = `工作1-${Date.now()}`
+    const tag3 = `工作2-${Date.now()}`
     
-    // Step 1: Navigate to test-basic-navigation/2024-01-旅游/day1 folder
-    await homePage.enterFolder('test-basic-navigation')
-    await page.waitForTimeout(1000)
-    await homePage.enterFolder(0) // 2024-01-旅游
-    await page.waitForTimeout(1000)
-    await homePage.enterFolder(0) // day1
+    // ==================== Part 1: File Rating and Tag Basic Operations ====================
     
-    // Step 2: Wait for files to load and verify file count equals 10
+    // Step 1: Navigate to test-tags/工作/ folder
+    await homePage.enterFolder('test-tags')
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder('工作')
+    await page.waitForTimeout(1000)
+    
+    // Step 2: Wait for files to load and verify file count equals 6
     await homePage.waitForFilesToLoad()
     const fileCount = await homePage.getFileCount()
-    expect(fileCount).toBe(10)
+    expect(fileCount).toBe(6)
     await takeScreenshot(page, '1-files-loaded')
     
-    // Step 3: Select first file
+    // Step 3: Select first file and set level to 1
     await homePage.selectFile(0)
-    
-    // Step 4: Verify operation bar is visible
     await expect(homePage.operationBar).toBeVisible()
-    await takeScreenshot(page, '2-file-selected')
+    await homePage.setFileLevel(1)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '2-file1-level1-set')
     
-    // Step 5: Add tag to selected file
-    await homePage.addTagToSelectedFiles(tagName)
-    await page.waitForTimeout(1000)
-    await takeScreenshot(page, '3-tag-added')
+    // Step 4: Verify level 1 is displayed
+    let hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
+    expect(hasLevel).toBe(true)
+    await takeScreenshot(page, '3-file1-level1-verified')
     
-    // Step 6: Verify tag is added to file
-    let hasTag = await homePage.verifyFileHasTag(0, tagName)
-    expect(hasTag).toBe(true)
-    await takeScreenshot(page, '4-tag-verified')
+    // Step 5: Select second file and set level to 3
+    await homePage.selectFile(1)
+    await homePage.setFileLevel(3)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '4-file2-level3-set')
     
-    // Step 7: Select file again
+    // Step 6: Verify level 3 is displayed
+    hasLevel = await homePage.verifyFileHasLevelTag(1, 3)
+    expect(hasLevel).toBe(true)
+    await takeScreenshot(page, '5-file2-level3-verified')
+    
+    // Step 7: Override level to 5
+    await homePage.selectFile(1)
+    await homePage.setFileLevel(5)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '6-file2-level5-override')
+    
+    // Step 8: Verify level 5 is displayed (level 3 should be replaced)
+    hasLevel = await homePage.verifyFileHasLevelTag(1, 5)
+    expect(hasLevel).toBe(true)
+    const hasOldLevel = await homePage.verifyFileHasLevelTag(1, 3)
+    expect(hasOldLevel).toBe(false)
+    await takeScreenshot(page, '7-file2-level5-verified')
+    
+    // Step 9: Add tag to first file (should keep level 1)
     await homePage.selectFile(0)
-    await takeScreenshot(page, '5-file-reselected')
+    await homePage.addTagToSelectedFiles(tag1)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '8-file1-tag-added')
     
-    // Step 8: Open delete tag dialog
+    // Step 10: Verify tag and level coexist
+    let hasTag = await homePage.verifyFileHasTag(0, tag1)
+    expect(hasTag).toBe(true)
+    hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
+    expect(hasLevel).toBe(true)
+    await takeScreenshot(page, '9-file1-tag-and-level-verified')
+    
+    // Step 11: Add same tag to second file (should keep level 5)
+    await homePage.selectFile(1)
+    await homePage.addTagToSelectedFiles(tag1)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '10-file2-tag-added')
+    
+    // Step 12: Verify tag and level coexist
+    hasTag = await homePage.verifyFileHasTag(1, tag1)
+    expect(hasTag).toBe(true)
+    hasLevel = await homePage.verifyFileHasLevelTag(1, 5)
+    expect(hasLevel).toBe(true)
+    await takeScreenshot(page, '11-file2-tag-and-level-verified')
+    
+    // Step 13: Add same tag again to second file (should not duplicate)
+    await homePage.selectFile(1)
+    await homePage.addTagToSelectedFiles(tag1)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '12-file2-tag-duplicate-check')
+    
+    // Step 14: Verify no duplicate tag
+    hasTag = await homePage.verifyFileHasTag(1, tag1)
+    expect(hasTag).toBe(true)
+    await takeScreenshot(page, '13-file2-no-duplicate-tag')
+    
+    // Step 15: Add another tag to first file
+    await homePage.selectFile(0)
+    await homePage.addTagToSelectedFiles(tag2)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '14-file1-second-tag-added')
+    
+    // Step 16: Verify two tags and level coexist
+    hasTag = await homePage.verifyFileHasTag(0, tag1)
+    expect(hasTag).toBe(true)
+    hasTag = await homePage.verifyFileHasTag(0, tag2)
+    expect(hasTag).toBe(true)
+    hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
+    expect(hasLevel).toBe(true)
+    await takeScreenshot(page, '15-file1-two-tags-verified')
+    
+    // Step 17: Delete tag from second file
+    await homePage.selectFile(1)
     await homePage.openDeleteTagDialog()
-    await takeScreenshot(page, '6-delete-tag-dialog-opened')
+    await takeScreenshot(page, '16-delete-tag-dialog-opened')
     
-    // Step 9: Select the tag in dialog
-    await homePage.selectTagsInDialog([tagName])
-    await takeScreenshot(page, '7-tag-selected-in-dialog')
+    await homePage.selectTagsInDialog([tag1])
+    await takeScreenshot(page, '17-tag-selected-in-dialog')
     
-    // Step 10: Confirm tag deletion
     await homePage.confirmDeleteTags()
-    await page.waitForTimeout(1000)
-    await takeScreenshot(page, '8-tag-removed')
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '18-file2-tag-removed')
     
-    // Step 11: Verify tag is removed from file
-    hasTag = await homePage.verifyFileHasTag(0, tagName)
+    // Step 18: Verify tag removed but level remains
+    hasTag = await homePage.verifyFileHasTag(1, tag1)
     expect(hasTag).toBe(false)
-    await takeScreenshot(page, '9-tag-removal-verified')
+    hasLevel = await homePage.verifyFileHasLevelTag(1, 5)
+    expect(hasLevel).toBe(true)
+    await takeScreenshot(page, '19-file2-tag-removed-level-remains')
     
-    // Step 12: Cleanup: delete the test tag via API
-    const deleteResult = await api.deleteTag(tagName)
-    expect(deleteResult).toBeDefined()
-    expect(deleteResult.code).toBe(0)
-    await takeScreenshot(page, '10-cleanup-done')
+    // Step 19: Delete both tags from first file
+    await homePage.selectFile(0)
+    await homePage.openDeleteTagDialog()
+    await homePage.selectTagsInDialog([tag1, tag2])
+    await homePage.confirmDeleteTags()
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '20-file1-tags-removed')
+    
+    // Step 20: Verify all tags removed but level remains
+    hasTag = await homePage.verifyFileHasTag(0, tag1)
+    expect(hasTag).toBe(false)
+    hasTag = await homePage.verifyFileHasTag(0, tag2)
+    expect(hasTag).toBe(false)
+    hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
+    expect(hasLevel).toBe(true)
+    await takeScreenshot(page, '21-file1-all-tags-removed-level-remains')
+    
+    // ==================== Part 2: Batch Tag Operations ====================
+    
+    // Step 1: Select files 1, 3, 5 (index 0, 2, 4)
+    await homePage.selectFile(0)
+    await page.keyboard.down('Control')
+    await homePage.selectFile(2)
+    await homePage.selectFile(4)
+    await page.keyboard.up('Control')
+    await page.waitForTimeout(300)
+    await takeScreenshot(page, '22-batch-select-3-files')
+    
+    // Step 2: Add tag to selected files
+    await homePage.addTagToSelectedFiles(tag3)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '23-batch-tag-added')
+    
+    // Step 3: Verify tag added to all selected files
+    hasTag = await homePage.verifyFileHasTag(0, tag3)
+    expect(hasTag).toBe(true)
+    hasTag = await homePage.verifyFileHasTag(2, tag3)
+    expect(hasTag).toBe(true)
+    hasTag = await homePage.verifyFileHasTag(4, tag3)
+    expect(hasTag).toBe(true)
+    await takeScreenshot(page, '24-batch-tag-verified')
+    
+    // Step 4: Add another tag to file 3 (index 2)
+    await homePage.selectFile(2)
+    await homePage.addTagToSelectedFiles(tag2)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '25-file3-second-tag-added')
+    
+    // Step 5: Verify file 3 has both tags
+    hasTag = await homePage.verifyFileHasTag(2, tag3)
+    expect(hasTag).toBe(true)
+    hasTag = await homePage.verifyFileHasTag(2, tag2)
+    expect(hasTag).toBe(true)
+    await takeScreenshot(page, '26-file3-two-tags-verified')
+    
+    // ==================== Part 3: Tag Management Page ====================
+    
+    // Step 1: Navigate to management page
+    await page.locator('.sidebar-nav .menu-item:has-text("管理")').click()
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '27-management-page-opened')
+    
+    // Step 2: Navigate to tag management
+    await page.locator('.admin-nav .nav-item:has-text("标签")').click()
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '28-tag-management-page-opened')
+    
+    // Step 3: Verify tags exist in list
+    let tagExists = await tagManagementPage.verifyTagExists(tag3)
+    expect(tagExists).toBe(true)
+    await takeScreenshot(page, '29-tag3-exists-in-list')
+    
+    // Step 4: Delete tag3
+    await tagManagementPage.deleteTag(tag3)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '30-tag3-deleted')
+    
+    // Step 5: Navigate back to home
+    await page.locator('.sidebar-nav .menu-item:has-text("主页")').click()
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '31-back-to-home')
+    
+    // Step 6: Navigate to root directory by clicking the home icon in breadcrumb
+    // The home icon is the first clickable img in the breadcrumb area
+    const breadcrumbArea = page.locator('.file-path-bar, .breadcrumb').first()
+    const homeIcon = breadcrumbArea.locator('img[cursor=pointer]').first()
+    if (await homeIcon.isVisible()) {
+      await homeIcon.click()
+      await page.waitForTimeout(500)
+    }
+    
+    // Step 7: Navigate to test-tags/工作/ folder
+    await homePage.enterFolder('test-tags')
+    await page.waitForTimeout(1000)
+    await homePage.enterFolder('工作')
+    await page.waitForTimeout(1000)
+    await takeScreenshot(page, '32-back-to-work-folder')
+    
+    // Step 8: Verify tag3 removed from files
+    hasTag = await homePage.verifyFileHasTag(0, tag3)
+    expect(hasTag).toBe(false)
+    hasTag = await homePage.verifyFileHasTag(4, tag3)
+    expect(hasTag).toBe(false)
+    
+    // File 3 should still have tag2
+    hasTag = await homePage.verifyFileHasTag(2, tag2)
+    expect(hasTag).toBe(true)
+    await takeScreenshot(page, '33-tag3-removed-from-files')
+    
+    // ==================== Part 4: Batch Tag Delete ====================
+    
+    const tag4 = `工作2-${Date.now()}`
+    
+    // Step 1: Select files 2, 4, 5 (index 1, 3, 4)
+    await homePage.selectFile(1)
+    await page.keyboard.down('Control')
+    await homePage.selectFile(3)
+    await homePage.selectFile(4)
+    await page.keyboard.up('Control')
+    await page.waitForTimeout(300)
+    await takeScreenshot(page, '34-batch-select-3-files-part4')
+    
+    // Step 2: Add tag to selected files
+    await homePage.addTagToSelectedFiles(tag4)
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '35-batch-tag4-added')
+    
+    // Step 3: Verify tag added to all selected files
+    hasTag = await homePage.verifyFileHasTag(1, tag4)
+    expect(hasTag).toBe(true)
+    hasTag = await homePage.verifyFileHasTag(3, tag4)
+    expect(hasTag).toBe(true)
+    hasTag = await homePage.verifyFileHasTag(4, tag4)
+    expect(hasTag).toBe(true)
+    await takeScreenshot(page, '36-batch-tag4-verified')
+    
+    // Step 4: Delete tag4 from selected files
+    await homePage.openDeleteTagDialog()
+    await takeScreenshot(page, '37-delete-tag-dialog-opened-part4')
+    
+    await homePage.selectTagsInDialog([tag4])
+    await takeScreenshot(page, '38-tag4-selected-in-dialog')
+    
+    await homePage.confirmDeleteTags()
+    await page.waitForTimeout(500)
+    await takeScreenshot(page, '39-tag4-removed')
+    
+    // Step 5: Verify tag4 removed from all files
+    hasTag = await homePage.verifyFileHasTag(1, tag4)
+    expect(hasTag).toBe(false)
+    hasTag = await homePage.verifyFileHasTag(3, tag4)
+    expect(hasTag).toBe(false)
+    hasTag = await homePage.verifyFileHasTag(4, tag4)
+    expect(hasTag).toBe(false)
+    await takeScreenshot(page, '40-tag4-removed-from-all-files')
+    
+    // Cleanup: delete test tags via API
+    await api.deleteTag(tag1)
+    await api.deleteTag(tag2)
+    await takeScreenshot(page, '41-cleanup-done')
   })
 
   /**
