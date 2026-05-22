@@ -399,6 +399,7 @@ export class Prj {
     thumbPath: string = '';
     dbPath: string = '';
     repo: Repo = new Repo();
+    defaultPrjPath: string = ''; // Default project path when no project exists
 }
 
 export class PrjSetReq {

@@ -119,9 +119,9 @@ test.describe('File Management', () => {
     // Step 1: check file explorer is visible
     await expect(homePage.fileExplorer).toBeVisible()
     
-    // Step 2: check root folder count equals 15
+    // Step 2: check root folder count equals 16
     const rootFolderCount = await homePage.getFolderCount()
-    expect(rootFolderCount).toBe(15)
+    expect(rootFolderCount).toBe(16)
     
     // Step 3: take screenshot
     await takeScreenshot(page, '1-root-folders-displayed')
@@ -251,7 +251,7 @@ test.describe('File Management', () => {
     
     // Step 8: verify folder list section shows folder count
     const folderTotalCount = await homePage.getFolderTotalCount()
-    expect(folderTotalCount).toBe(56)
+    expect(folderTotalCount).toBe(69)
     await takeScreenshot(page, '8-info-sidebar-sections')
     
     // Step 9: click collapse button on first folder tree item
@@ -612,11 +612,10 @@ test.describe('File Management', () => {
     await takeScreenshot(page, '31-back-to-home')
     
     // Step 6: Navigate to root directory by clicking the home icon in breadcrumb
-    // The home icon is the first clickable img in the breadcrumb area
-    const breadcrumbArea = page.locator('.file-path-bar, .breadcrumb').first()
-    const homeIcon = breadcrumbArea.locator('img[cursor=pointer]').first()
-    if (await homeIcon.isVisible()) {
-      await homeIcon.click()
+    // Click the first path-part (root directory) in path-display
+    const rootPathItem = page.locator('.path-display .path-item:first-child .path-part').first()
+    if (await rootPathItem.isVisible()) {
+      await rootPathItem.click()
       await page.waitForTimeout(500)
     }
     

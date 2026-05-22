@@ -98,7 +98,13 @@ import SetEntryLog from '@/components/SetEntry/SetEntryLog.vue';
 // 使用 ref 创建响应式变量来存储输入框的值
 const prjPath = ref('');
 watch(() => appStore.prj.path, () => {
-    prjPath.value = appStore.prj.path == null ? "" : appStore.prj.path
+    if (appStore.prj.path !== '') {
+        prjPath.value = appStore.prj.path
+    } else if (appStore.prj.defaultPrjPath !== '') {
+        prjPath.value = appStore.prj.defaultPrjPath
+    } else {
+        prjPath.value = ""
+    }
 })
 
 function btnclk_detect_health() {
@@ -118,11 +124,11 @@ watch(() => appStore.prj.repo, () => {
 
 // ------------------------------------
 // 缩略图选项：'none' - 不生成, 'full' - 全量, 'incremental' - 增量
-const selectedThumbOption = ref('none')
+const selectedThumbOption = ref('incremental')
 // 元信息选项：'none' - 不提取, 'full' - 全量, 'incremental' - 增量
-const selectedExifOption = ref('none')
+const selectedExifOption = ref('incremental')
 // 指纹选项：'none' - 不生成, 'full' - 全量, 'incremental' - 增量
-const selectedHashOption = ref('none')
+const selectedHashOption = ref('incremental')
 const bPrjSetSave = ref(true)
 const bPrjSetSync = ref(false)
 
@@ -280,7 +286,13 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
 }
 
 onMounted(() => {
-    prjPath.value = appStore.prj.path == null ? "" : appStore.prj.path
+    if (appStore.prj.path) {
+        prjPath.value = appStore.prj.path
+    } else if (appStore.prj.defaultPrjPath) {
+        prjPath.value = appStore.prj.defaultPrjPath
+    } else {
+        prjPath.value = ""
+    }
     repoPath.value = appStore.prj.repo
 })
 
