@@ -115,293 +115,299 @@ test.describe('Comprehensive Test', () => {
    */
   test('should display file explorer and navigate into folder', async ({ page }) => {
     // ==================== Part 1: File Browsing and Navigation ====================
-    
-    // Step 1: check file explorer is visible
-    await expect(homePage.fileExplorer).toBeVisible()
-    
-    // Step 2: check root folder count equals 18
-    const rootFolderCount = await homePage.getFolderCount()
-    expect(rootFolderCount).toBe(18)
-    
-    // Step 3: take screenshot
-    await takeScreenshot(page, '1-root-folders-displayed')
-    
-    // Step 4: enter test-basic-navigation folder
-    await homePage.enterFolder('test-basic-navigation')
-    await page.waitForTimeout(1000)
-    
-    // Step 5: check subfolder count equals 2 (2024-01-旅游, 2024-02-聚会)
-    const level1FolderCount = await homePage.getFolderCount()
-    expect(level1FolderCount).toBe(2)
-    
-    // Verify folder names
-    const folder1Name = await homePage.folderCards.nth(0).locator('.xc-card-foldername').textContent()
-    const folder2Name = await homePage.folderCards.nth(1).locator('.xc-card-foldername').textContent()
-    expect(folder1Name).toContain('2024-01')
-    expect(folder2Name).toContain('2024-02')
-    
-    // Step 6: verify navigation bar shows correct path
-    const pathDisplay = page.locator('.path-display')
-    await expect(pathDisplay).toBeVisible()
-    const pathItems = pathDisplay.locator('.path-item')
-    await expect(pathItems).toHaveCount(2) // root + test-basic-navigation
-    await expect(pathItems.nth(1)).toContainText('test-basic-navigation')
-    await expect(pathItems.nth(1)).toHaveClass(/is-current/)
-    
-    // Step 7: select folder and verify operation bar
-    await homePage.folderCards.nth(0).locator('.xc-checkbox').check()
-    await expect(homePage.operationBar).toBeVisible()
-    await expect(homePage.operationBar).toContainText('已选中')
-    
-    // Step 8: take screenshot
-    await takeScreenshot(page, '2-level1-folders-with-operation-bar')
-    
-    // Step 9: click cancel button to hide operation bar
-    await homePage.clearSelection()
-    await expect(homePage.operationBar).not.toBeVisible()
-    
-    // Step 10: enter 2024-01-旅游 folder
-    await homePage.enterFolder(0)
-    await page.waitForTimeout(1000)
-    
-    // Step 11: check subfolder count equals 2 (day1, day2)
-    const level2FolderCount = await homePage.getFolderCount()
-    expect(level2FolderCount).toBe(2)
-    
-    // Verify folder names
-    const day1Name = await homePage.folderCards.nth(0).locator('.xc-card-foldername').textContent()
-    const day2Name = await homePage.folderCards.nth(1).locator('.xc-card-foldername').textContent()
-    expect(day1Name).toContain('day1')
-    expect(day2Name).toContain('day2')
-    
-    // Step 12: verify navigation bar shows correct path
-    const pathItemsLevel2 = pathDisplay.locator('.path-item')
-    await expect(pathItemsLevel2).toHaveCount(3) // root + test-basic-navigation + 2024-01-旅游
-    await expect(pathItemsLevel2.nth(1)).toContainText('test-basic-navigation')
-    await expect(pathItemsLevel2.nth(2)).toContainText('2024-01')
-    await expect(pathItemsLevel2.nth(2)).toHaveClass(/is-current/)
-    
-    // Step 13: take screenshot
-    await takeScreenshot(page, '3-level2-folders')
-    
-    // Step 14: enter day1 folder
-    await homePage.enterFolder(0)
-    await homePage.waitForFilesToLoad()
-    
-    // Step 15: check file count equals 10
-    const fileCount = await homePage.getFileCount()
-    expect(fileCount).toBe(10)
-    
-    // Step 16: verify file names match expected pattern (IMG_YYYYMMDD_HHMMSS.jpg)
-    const firstFileName = await homePage.getFileName(0)
-    expect(firstFileName).toMatch(/^IMG_\d{8}_\d{6}\.jpg$/)
-    
-    // Step 17: verify navigation bar shows correct path
-    const pathItemsLevel3 = pathDisplay.locator('.path-item')
-    await expect(pathItemsLevel3).toHaveCount(4) // root + test-basic-navigation + 2024-01-旅游 + day1
-    await expect(pathItemsLevel3.nth(1)).toContainText('test-basic-navigation')
-    await expect(pathItemsLevel3.nth(2)).toContainText('2024-01')
-    await expect(pathItemsLevel3.nth(3)).toContainText('day1')
-    await expect(pathItemsLevel3.nth(3)).toHaveClass(/is-current/)
-    
-    // Step 18: select first file and verify operation bar is visible
-    await homePage.selectFile(0)
-    await expect(homePage.operationBar).toBeVisible()
-    await expect(homePage.operationBar).toContainText('已选中')
-    
-    // Step 19: take screenshot
-    await takeScreenshot(page, '4-file-selected-with-operation-bar')
+    {
+      // Step 1: check file explorer is visible
+      await expect(homePage.fileExplorer).toBeVisible()
+      
+      // Step 2: check root folder count equals 18
+      const rootFolderCount = await homePage.getFolderCount()
+      expect(rootFolderCount).toBe(18)
+      
+      // Step 3: take screenshot
+      await takeScreenshot(page, '1-root-folders-displayed')
+      
+      // Step 4: enter test-basic-navigation folder
+      await homePage.enterFolder('test-basic-navigation')
+      await page.waitForTimeout(1000)
+      
+      // Step 5: check subfolder count equals 2 (2024-01-旅游, 2024-02-聚会)
+      const level1FolderCount = await homePage.getFolderCount()
+      expect(level1FolderCount).toBe(2)
+      
+      // Verify folder names
+      const folder1Name = await homePage.folderCards.nth(0).locator('.xc-card-foldername').textContent()
+      const folder2Name = await homePage.folderCards.nth(1).locator('.xc-card-foldername').textContent()
+      expect(folder1Name).toContain('2024-01')
+      expect(folder2Name).toContain('2024-02')
+      
+      // Step 6: verify navigation bar shows correct path
+      const pathDisplay = page.locator('.path-display')
+      await expect(pathDisplay).toBeVisible()
+      const pathItems = pathDisplay.locator('.path-item')
+      await expect(pathItems).toHaveCount(2) // root + test-basic-navigation
+      await expect(pathItems.nth(1)).toContainText('test-basic-navigation')
+      await expect(pathItems.nth(1)).toHaveClass(/is-current/)
+      
+      // Step 7: select folder and verify operation bar
+      await homePage.folderCards.nth(0).locator('.xc-checkbox').check()
+      await expect(homePage.operationBar).toBeVisible()
+      await expect(homePage.operationBar).toContainText('已选中')
+      
+      // Step 8: take screenshot
+      await takeScreenshot(page, '2-level1-folders-with-operation-bar')
+      
+      // Step 9: click cancel button to hide operation bar
+      await homePage.clearSelection()
+      await expect(homePage.operationBar).not.toBeVisible()
+      
+      // Step 10: enter 2024-01-旅游 folder
+      await homePage.enterFolder(0)
+      await page.waitForTimeout(1000)
+      
+      // Step 11: check subfolder count equals 2 (day1, day2)
+      const level2FolderCount = await homePage.getFolderCount()
+      expect(level2FolderCount).toBe(2)
+      
+      // Verify folder names
+      const day1Name = await homePage.folderCards.nth(0).locator('.xc-card-foldername').textContent()
+      const day2Name = await homePage.folderCards.nth(1).locator('.xc-card-foldername').textContent()
+      expect(day1Name).toContain('day1')
+      expect(day2Name).toContain('day2')
+      
+      // Step 12: verify navigation bar shows correct path
+      const pathItemsLevel2 = pathDisplay.locator('.path-item')
+      await expect(pathItemsLevel2).toHaveCount(3) // root + test-basic-navigation + 2024-01-旅游
+      await expect(pathItemsLevel2.nth(1)).toContainText('test-basic-navigation')
+      await expect(pathItemsLevel2.nth(2)).toContainText('2024-01')
+      await expect(pathItemsLevel2.nth(2)).toHaveClass(/is-current/)
+      
+      // Step 13: take screenshot
+      await takeScreenshot(page, '3-level2-folders')
+      
+      // Step 14: enter day1 folder
+      await homePage.enterFolder(0)
+      await homePage.waitForFilesToLoad()
+      
+      // Step 15: check file count equals 10
+      const fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(10)
+      
+      // Step 16: verify file names match expected pattern (IMG_YYYYMMDD_HHMMSS.jpg)
+      const firstFileName = await homePage.getFileName(0)
+      expect(firstFileName).toMatch(/^IMG_\d{8}_\d{6}\.jpg$/)
+      
+      // Step 17: verify navigation bar shows correct path
+      const pathItemsLevel3 = pathDisplay.locator('.path-item')
+      await expect(pathItemsLevel3).toHaveCount(4) // root + test-basic-navigation + 2024-01-旅游 + day1
+      await expect(pathItemsLevel3.nth(1)).toContainText('test-basic-navigation')
+      await expect(pathItemsLevel3.nth(2)).toContainText('2024-01')
+      await expect(pathItemsLevel3.nth(3)).toContainText('day1')
+      await expect(pathItemsLevel3.nth(3)).toHaveClass(/is-current/)
+      
+      // Step 18: select first file and verify operation bar is visible
+      await homePage.selectFile(0)
+      await expect(homePage.operationBar).toBeVisible()
+      await expect(homePage.operationBar).toContainText('已选中')
+      
+      // Step 19: take screenshot
+      await takeScreenshot(page, '4-file-selected-with-operation-bar')
+    }
     
     // ==================== Part 2: FAB and Info Sidebar ====================
-    
-    // 先清除文件选择状态，以便验证信息面板的空状态提示
-    await homePage.clearSelection()
-    await page.waitForTimeout(300)
-    
-    // Step 1: click FAB button
-    await homePage.clickFab()
-    await takeScreenshot(page, '5-fab-menu-displayed')
-    
-    // Step 2: click new folder button to open dialog
-    await homePage.newFolderButton.click()
-    await expect(homePage.newFolderDialog).toBeVisible()
-    await takeScreenshot(page, '6-new-folder-dialog')
-    
-    // Step 3: click cancel button to close dialog
-    const cancelBtn = homePage.newFolderDialog.locator('.cancel-btn')
-    await cancelBtn.click()
-    await expect(homePage.newFolderDialog).not.toBeVisible()
-    
-    // Step 4: click FAB again and expand info sidebar
-    await homePage.clickFab()
-    await homePage.expandPanelButton.click()
-    await expect(homePage.infoSidebar).toBeVisible()
-    await takeScreenshot(page, '7-info-sidebar-displayed')
-    
-    // Step 5: verify info sidebar has three sections
-    await expect(homePage.fileInfoSection).toBeVisible()
-    await expect(homePage.tagInfoSection).toBeVisible()
-    await expect(homePage.folderListSection).toBeVisible()
-    
-    // Step 6: verify file info section default state (no file selected)
-    await expect(homePage.fileInfoSection).toContainText('选择文件查看详细信息')
-    
-    // Step 7: verify tag info section default state (no file selected)
-    await expect(homePage.tagInfoSection).toContainText('选择文件查看标签信息')
-    
-    // Step 8: verify folder list section shows folder count
-    const folderTotalCount = await homePage.getFolderTotalCount()
-    expect(folderTotalCount).toBe(147)
-    await takeScreenshot(page, '8-info-sidebar-sections')
-    
-    // Step 9: click collapse button on first folder tree item
-    await homePage.collapseFolderTreeNode(0)
-    await page.waitForTimeout(300)
-    await takeScreenshot(page, '9-folder-tree-collapsed')
-    
-    // Step 10: click expand button on first folder tree item
-    await homePage.expandFolderTreeNode(0)
-    await page.waitForTimeout(300)
-    await takeScreenshot(page, '10-folder-tree-expanded')
-    
-    // Step 11: click first folder in tree to navigate
-    await homePage.clickFolderTreeItem(0)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '11-folder-tree-navigation')
-    
-    // Step 12: close info sidebar
-    await homePage.closeInfoSidebar()
-    await takeScreenshot(page, '12-info-sidebar-closed')
+    {
+      // 先清除文件选择状态，以便验证信息面板的空状态提示
+      await homePage.clearSelection()
+      await page.waitForTimeout(300)
+      
+      // Step 1: click FAB button
+      await homePage.clickFab()
+      await takeScreenshot(page, '5-fab-menu-displayed')
+      
+      // Step 2: click new folder button to open dialog
+      await homePage.newFolderButton.click()
+      await expect(homePage.newFolderDialog).toBeVisible()
+      await takeScreenshot(page, '6-new-folder-dialog')
+      
+      // Step 3: click cancel button to close dialog
+      const cancelBtn = homePage.newFolderDialog.locator('.cancel-btn')
+      await cancelBtn.click()
+      await expect(homePage.newFolderDialog).not.toBeVisible()
+      
+      // Step 4: click FAB again and expand info sidebar
+      await homePage.clickFab()
+      await homePage.expandPanelButton.click()
+      await expect(homePage.infoSidebar).toBeVisible()
+      await takeScreenshot(page, '7-info-sidebar-displayed')
+      
+      // Step 5: verify info sidebar has three sections
+      await expect(homePage.fileInfoSection).toBeVisible()
+      await expect(homePage.tagInfoSection).toBeVisible()
+      await expect(homePage.folderListSection).toBeVisible()
+      
+      // Step 6: verify file info section default state (no file selected)
+      await expect(homePage.fileInfoSection).toContainText('选择文件查看详细信息')
+      
+      // Step 7: verify tag info section default state (no file selected)
+      await expect(homePage.tagInfoSection).toContainText('选择文件查看标签信息')
+      
+      // Step 8: verify folder list section shows folder count
+      const folderTotalCount = await homePage.getFolderTotalCount()
+      expect(folderTotalCount).toBe(147)
+      await takeScreenshot(page, '8-info-sidebar-sections')
+      
+      // Step 9: click collapse button on first folder tree item
+      await homePage.collapseFolderTreeNode(0)
+      await page.waitForTimeout(300)
+      await takeScreenshot(page, '9-folder-tree-collapsed')
+      
+      // Step 10: click expand button on first folder tree item
+      await homePage.expandFolderTreeNode(0)
+      await page.waitForTimeout(300)
+      await takeScreenshot(page, '10-folder-tree-expanded')
+      
+      // Step 11: click first folder in tree to navigate
+      await homePage.clickFolderTreeItem(0)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '11-folder-tree-navigation')
+      
+      // Step 12: close info sidebar
+      await homePage.closeInfoSidebar()
+      await takeScreenshot(page, '12-info-sidebar-closed')
+    }
+
     
     // ==================== Part 3: Search Panel UI Completeness ====================
-    
-    // Step 1: open search panel
-    await homePage.openSearchPanel()
-    await takeScreenshot(page, '13-search-panel-opened')
-    
-    // Step 2: verify search input is visible
-    await expect(homePage.searchInput).toBeVisible()
-    
-    // Step 3: verify search and cancel buttons
-    await expect(homePage.searchPanel.locator('.search-btn-large')).toBeVisible()
-    await expect(homePage.searchCancelButton).toBeVisible()
-    
-    // Step 4: verify file type filter options
-    const fileTypeSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '文件类型' })
-    await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '图片' })).toBeVisible()
-    await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '视频' })).toBeVisible()
-    await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '音频' })).toBeVisible()
-    await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '文本' })).toBeVisible()
-    await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '其他' })).toBeVisible()
-    
-    // Step 5: verify sort options
-    const sortSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '排序方式' })
-    await expect(sortSection.locator('.filter-option-btn').filter({ hasText: '时间' })).toBeVisible()
-    await expect(sortSection.locator('.filter-option-btn').filter({ hasText: '大小' })).toBeVisible()
-    await expect(sortSection.locator('.filter-option-btn').filter({ hasText: '名称' })).toBeVisible()
-    
-    // Step 6: verify sort order buttons
-    await expect(homePage.searchPanel.locator('.order-btn').filter({ hasText: '升序' })).toBeVisible()
-    await expect(homePage.searchPanel.locator('.order-btn').filter({ hasText: '降序' })).toBeVisible()
-    
-    // Step 7: verify search scope options
-    const scopeSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '搜索范围' })
-    await expect(scopeSection.locator('.filter-option-btn').filter({ hasText: '当前目录' })).toBeVisible()
-    await expect(scopeSection.locator('.filter-option-btn').filter({ hasText: '全部文件' })).toBeVisible()
-    
-    // Step 8: verify file size input
-    const sizeSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '文件大小' })
-    await expect(sizeSection.locator('.range-input').first()).toBeVisible()
-    
-    // Step 9: verify video duration input
-    const durationSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '视频时长' })
-    await expect(durationSection.locator('.range-input').first()).toBeVisible()
-    
-    // Step 10: verify media dimensions input
-    const dimensionSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '图片/视频尺寸' })
-    await expect(dimensionSection.locator('.range-input').first()).toBeVisible()
-    
-    // Step 11: verify tag selection area
-    const tagSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '文件标签' })
-    await expect(tagSection).toBeVisible()
-    
-    // Step 12: verify inverse select checkbox
-    await expect(homePage.searchPanel.locator('.tag-checkbox')).toBeVisible()
-    
-    // Step 13: take screenshot
-    await takeScreenshot(page, '14-search-panel-ui-complete')
+    {
+      // Step 1: open search panel
+      await homePage.openSearchPanel()
+      await takeScreenshot(page, '13-search-panel-opened')
+      
+      // Step 2: verify search input is visible
+      await expect(homePage.searchInput).toBeVisible()
+      
+      // Step 3: verify search and cancel buttons
+      await expect(homePage.searchPanel.locator('.search-btn-large')).toBeVisible()
+      await expect(homePage.searchCancelButton).toBeVisible()
+      
+      // Step 4: verify file type filter options
+      const fileTypeSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '文件类型' })
+      await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '图片' })).toBeVisible()
+      await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '视频' })).toBeVisible()
+      await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '音频' })).toBeVisible()
+      await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '文本' })).toBeVisible()
+      await expect(fileTypeSection.locator('.filter-option-btn').filter({ hasText: '其他' })).toBeVisible()
+      
+      // Step 5: verify sort options
+      const sortSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '排序方式' })
+      await expect(sortSection.locator('.filter-option-btn').filter({ hasText: '时间' })).toBeVisible()
+      await expect(sortSection.locator('.filter-option-btn').filter({ hasText: '大小' })).toBeVisible()
+      await expect(sortSection.locator('.filter-option-btn').filter({ hasText: '名称' })).toBeVisible()
+      
+      // Step 6: verify sort order buttons
+      await expect(homePage.searchPanel.locator('.order-btn').filter({ hasText: '升序' })).toBeVisible()
+      await expect(homePage.searchPanel.locator('.order-btn').filter({ hasText: '降序' })).toBeVisible()
+      
+      // Step 7: verify search scope options
+      const scopeSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '搜索范围' })
+      await expect(scopeSection.locator('.filter-option-btn').filter({ hasText: '当前目录' })).toBeVisible()
+      await expect(scopeSection.locator('.filter-option-btn').filter({ hasText: '全部文件' })).toBeVisible()
+      
+      // Step 8: verify file size input
+      const sizeSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '文件大小' })
+      await expect(sizeSection.locator('.range-input').first()).toBeVisible()
+      
+      // Step 9: verify video duration input
+      const durationSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '视频时长' })
+      await expect(durationSection.locator('.range-input').first()).toBeVisible()
+      
+      // Step 10: verify media dimensions input
+      const dimensionSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '图片/视频尺寸' })
+      await expect(dimensionSection.locator('.range-input').first()).toBeVisible()
+      
+      // Step 11: verify tag selection area
+      const tagSection = homePage.searchPanel.locator('.filter-section').filter({ hasText: '文件标签' })
+      await expect(tagSection).toBeVisible()
+      
+      // Step 12: verify inverse select checkbox
+      await expect(homePage.searchPanel.locator('.tag-checkbox')).toBeVisible()
+      
+      // Step 13: take screenshot
+      await takeScreenshot(page, '14-search-panel-ui-complete')
+    }
+
     
     // ==================== Part 4: Search Condition State Management ====================
-    
-    // Step 1: input search keyword
-    await homePage.setSearchKeyword('test-keyword')
-    await takeScreenshot(page, '15-search-keyword-entered')
-    
-    // Step 2: select multiple search conditions
-    await homePage.selectFileType('图片')
-    await homePage.selectSortBy('时间')
-    await homePage.selectSortOrder('升序')
-    await homePage.selectSearchScope('当前目录')
-    
-    // Step 3: set file size range
-    await homePage.setFileSizeRange(1, 10)
-    
-    // Step 4: set video duration range
-    await homePage.setVideoDurationRange(60, 300)
-    
-    // Step 5: set media dimensions
-    await homePage.setMediaDimensions(1920, 1080)
-    
-    // Step 6: take screenshot
-    await takeScreenshot(page, '16-search-conditions-set')
-    
-    // Step 7: click clear all filters button
-    await homePage.clearAllSearchFilters()
-    await page.waitForTimeout(300)
-    
-    // Step 8: verify conditions are cleared
-    const isInputEmpty = await homePage.isSearchInputEmpty()
-    expect(isInputEmpty).toBe(true)
-    
-    // Step 9: verify search panel is still visible
-    await expect(homePage.searchPanel).toBeVisible()
-    
-    // Step 10: take screenshot
-    await takeScreenshot(page, '17-search-conditions-cleared')
-    
+    {
+      // Step 1: input search keyword
+      await homePage.setSearchKeyword('test-keyword')
+      await takeScreenshot(page, '15-search-keyword-entered')
+      
+      // Step 2: select multiple search conditions
+      await homePage.selectFileType('图片')
+      await homePage.selectSortBy('时间')
+      await homePage.selectSortOrder('升序')
+      await homePage.selectSearchScope('当前目录')
+      
+      // Step 3: set file size range
+      await homePage.setFileSizeRange(1, 10)
+      
+      // Step 4: set video duration range
+      await homePage.setVideoDurationRange(60, 300)
+      
+      // Step 5: set media dimensions
+      await homePage.setMediaDimensions(1920, 1080)
+      
+      // Step 6: take screenshot
+      await takeScreenshot(page, '16-search-conditions-set')
+      
+      // Step 7: click clear all filters button
+      await homePage.clearAllSearchFilters()
+      await page.waitForTimeout(300)
+      
+      // Step 8: verify conditions are cleared
+      const isInputEmpty = await homePage.isSearchInputEmpty()
+      expect(isInputEmpty).toBe(true)
+      
+      // Step 9: verify search panel is still visible
+      await expect(homePage.searchPanel).toBeVisible()
+      
+      // Step 10: take screenshot
+      await takeScreenshot(page, '17-search-conditions-cleared')
+    }
     // ==================== Part 5: Search Panel Cancel Operation ====================
-    
-    // Step 1: input search keyword
-    await homePage.setSearchKeyword('cancel-test')
-    
-    // Step 2: select multiple search conditions
-    await homePage.selectFileType('视频')
-    await homePage.selectSortBy('大小')
-    
-    // Step 3: take screenshot
-    await takeScreenshot(page, '18-search-conditions-before-cancel')
-    
-    // Step 4: click cancel button to close panel
-    await homePage.closeSearchPanel()
-    
-    // Step 5: verify panel is closed
-    await expect(homePage.searchPanel).not.toBeVisible()
-    
-    // Step 6: take screenshot
-    await takeScreenshot(page, '19-search-panel-closed')
-    
-    // Step 7: open search panel again
-    await homePage.openSearchPanel()
-    
-    // Step 8: verify conditions state (should be reset or persisted based on business logic)
-    const isInputEmptyAfterReopen = await homePage.isSearchInputEmpty()
-    // Note: Based on typical UX patterns, conditions should be reset
-    expect(isInputEmptyAfterReopen).toBe(true)
-    
-    // Step 9: take screenshot
-    await takeScreenshot(page, '20-search-panel-reopened')
-  })
+    { 
+      // Step 1: input search keyword
+      await homePage.setSearchKeyword('cancel-test')
+      
+      // Step 2: select multiple search conditions
+      await homePage.selectFileType('视频')
+      await homePage.selectSortBy('大小')
+      
+      // Step 3: take screenshot
+      await takeScreenshot(page, '18-search-conditions-before-cancel')
+      
+      // Step 4: click cancel button to close panel
+      await homePage.closeSearchPanel()
+      
+      // Step 5: verify panel is closed
+      await expect(homePage.searchPanel).not.toBeVisible()
+      
+      // Step 6: take screenshot
+      await takeScreenshot(page, '19-search-panel-closed')
+      
+      // Step 7: open search panel again
+      await homePage.openSearchPanel()
+      
+      // Step 8: verify conditions state (should be reset or persisted based on business logic)
+      const isInputEmptyAfterReopen = await homePage.isSearchInputEmpty()
+      // Note: Based on typical UX patterns, conditions should be reset
+      expect(isInputEmptyAfterReopen).toBe(true)
+      
+      // Step 9: take screenshot
+      await takeScreenshot(page, '20-search-panel-reopened')
+    }    
 
+  })
 
   test('should add and remove tag from file', async ({ page }) => {
     const tag1 = `工作-${Date.now()}`
@@ -409,292 +415,297 @@ test.describe('Comprehensive Test', () => {
     const tag3 = `工作2-${Date.now()}`
     
     // ==================== Part 1: File Rating and Tag Basic Operations ====================
-    
-    // Step 1: Navigate to test-tags/工作/ folder
-    await homePage.enterFolder('test-tags')
-    await page.waitForTimeout(1000)
-    await homePage.enterFolder('工作')
-    await page.waitForTimeout(1000)
-    
-    // Step 2: Wait for files to load and verify file count equals 6
-    await homePage.waitForFilesToLoad()
-    const fileCount = await homePage.getFileCount()
-    expect(fileCount).toBe(6)
-    await takeScreenshot(page, '1-files-loaded')
-    
-    // Step 3: Select first file and set level to 1
-    await homePage.selectFile(0)
-    await expect(homePage.operationBar).toBeVisible()
-    await homePage.setFileLevel(1)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '2-file1-level1-set')
-    
-    // Step 4: Verify level 1 is displayed
-    let hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
-    expect(hasLevel).toBe(true)
-    await takeScreenshot(page, '3-file1-level1-verified')
-    
-    // Step 5: Select second file and set level to 3
-    await homePage.selectFile(1)
-    await homePage.setFileLevel(3)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '4-file2-level3-set')
-    
-    // Step 6: Verify level 3 is displayed
-    hasLevel = await homePage.verifyFileHasLevelTag(1, 3)
-    expect(hasLevel).toBe(true)
-    await takeScreenshot(page, '5-file2-level3-verified')
-    
-    // Step 7: Override level to 5
-    await homePage.selectFile(1)
-    await homePage.setFileLevel(5)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '6-file2-level5-override')
-    
-    // Step 8: Verify level 5 is displayed (level 3 should be replaced)
-    hasLevel = await homePage.verifyFileHasLevelTag(1, 5)
-    expect(hasLevel).toBe(true)
-    const hasOldLevel = await homePage.verifyFileHasLevelTag(1, 3)
-    expect(hasOldLevel).toBe(false)
-    await takeScreenshot(page, '7-file2-level5-verified')
-    
-    // Step 9: Add tag to first file (should keep level 1)
-    await homePage.selectFile(0)
-    await homePage.addTagToSelectedFiles(tag1)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '8-file1-tag-added')
-    
-    // Step 10: Verify tag and level coexist
-    let hasTag = await homePage.verifyFileHasTag(0, tag1)
-    expect(hasTag).toBe(true)
-    hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
-    expect(hasLevel).toBe(true)
-    await takeScreenshot(page, '9-file1-tag-and-level-verified')
-    
-    // Step 11: Add same tag to second file (should keep level 5)
-    await homePage.selectFile(1)
-    await homePage.addTagToSelectedFiles(tag1)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '10-file2-tag-added')
-    
-    // Step 12: Verify tag and level coexist
-    hasTag = await homePage.verifyFileHasTag(1, tag1)
-    expect(hasTag).toBe(true)
-    hasLevel = await homePage.verifyFileHasLevelTag(1, 5)
-    expect(hasLevel).toBe(true)
-    await takeScreenshot(page, '11-file2-tag-and-level-verified')
-    
-    // Step 13: Add same tag again to second file (should not duplicate)
-    await homePage.selectFile(1)
-    await homePage.addTagToSelectedFiles(tag1)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '12-file2-tag-duplicate-check')
-    
-    // Step 14: Verify no duplicate tag
-    hasTag = await homePage.verifyFileHasTag(1, tag1)
-    expect(hasTag).toBe(true)
-    await takeScreenshot(page, '13-file2-no-duplicate-tag')
-    
-    // Step 15: Add another tag to first file
-    await homePage.selectFile(0)
-    await homePage.addTagToSelectedFiles(tag2)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '14-file1-second-tag-added')
-    
-    // Step 16: Verify two tags and level coexist
-    hasTag = await homePage.verifyFileHasTag(0, tag1)
-    expect(hasTag).toBe(true)
-    hasTag = await homePage.verifyFileHasTag(0, tag2)
-    expect(hasTag).toBe(true)
-    hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
-    expect(hasLevel).toBe(true)
-    await takeScreenshot(page, '15-file1-two-tags-verified')
-    
-    // Step 17: Delete tag from second file
-    await homePage.selectFile(1)
-    await homePage.openDeleteTagDialog()
-    await takeScreenshot(page, '16-delete-tag-dialog-opened')
-    
-    await homePage.selectTagsInDialog([tag1])
-    await takeScreenshot(page, '17-tag-selected-in-dialog')
-    
-    await homePage.confirmDeleteTags()
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '18-file2-tag-removed')
-    
-    // Step 18: Verify tag removed but level remains
-    hasTag = await homePage.verifyFileHasTag(1, tag1)
-    expect(hasTag).toBe(false)
-    hasLevel = await homePage.verifyFileHasLevelTag(1, 5)
-    expect(hasLevel).toBe(true)
-    await takeScreenshot(page, '19-file2-tag-removed-level-remains')
-    
-    // Step 19: Delete both tags from first file
-    await homePage.selectFile(0)
-    await homePage.openDeleteTagDialog()
-    await homePage.selectTagsInDialog([tag1, tag2])
-    await homePage.confirmDeleteTags()
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '20-file1-tags-removed')
-    
-    // Step 20: Verify all tags removed but level remains
-    hasTag = await homePage.verifyFileHasTag(0, tag1)
-    expect(hasTag).toBe(false)
-    hasTag = await homePage.verifyFileHasTag(0, tag2)
-    expect(hasTag).toBe(false)
-    hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
-    expect(hasLevel).toBe(true)
-    await takeScreenshot(page, '21-file1-all-tags-removed-level-remains')
+    {
+            // Step 1: Navigate to test-tags/工作/ folder
+      await homePage.enterFolder('test-tags')
+      await page.waitForTimeout(1000)
+      await homePage.enterFolder('工作')
+      await page.waitForTimeout(1000)
+      
+      // Step 2: Wait for files to load and verify file count equals 6
+      await homePage.waitForFilesToLoad()
+      const fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(6)
+      await takeScreenshot(page, '1-files-loaded')
+      
+      // Step 3: Select first file and set level to 1
+      await homePage.selectFile(0)
+      await expect(homePage.operationBar).toBeVisible()
+      await homePage.setFileLevel(1)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '2-file1-level1-set')
+      
+      // Step 4: Verify level 1 is displayed
+      let hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
+      expect(hasLevel).toBe(true)
+      await takeScreenshot(page, '3-file1-level1-verified')
+      
+      // Step 5: Select second file and set level to 3
+      await homePage.selectFile(1)
+      await homePage.setFileLevel(3)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '4-file2-level3-set')
+      
+      // Step 6: Verify level 3 is displayed
+      hasLevel = await homePage.verifyFileHasLevelTag(1, 3)
+      expect(hasLevel).toBe(true)
+      await takeScreenshot(page, '5-file2-level3-verified')
+      
+      // Step 7: Override level to 5
+      await homePage.selectFile(1)
+      await homePage.setFileLevel(5)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '6-file2-level5-override')
+      
+      // Step 8: Verify level 5 is displayed (level 3 should be replaced)
+      hasLevel = await homePage.verifyFileHasLevelTag(1, 5)
+      expect(hasLevel).toBe(true)
+      const hasOldLevel = await homePage.verifyFileHasLevelTag(1, 3)
+      expect(hasOldLevel).toBe(false)
+      await takeScreenshot(page, '7-file2-level5-verified')
+      
+      // Step 9: Add tag to first file (should keep level 1)
+      await homePage.selectFile(0)
+      await homePage.addTagToSelectedFiles(tag1)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '8-file1-tag-added')
+      
+      // Step 10: Verify tag and level coexist
+      let hasTag = await homePage.verifyFileHasTag(0, tag1)
+      expect(hasTag).toBe(true)
+      hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
+      expect(hasLevel).toBe(true)
+      await takeScreenshot(page, '9-file1-tag-and-level-verified')
+      
+      // Step 11: Add same tag to second file (should keep level 5)
+      await homePage.selectFile(1)
+      await homePage.addTagToSelectedFiles(tag1)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '10-file2-tag-added')
+      
+      // Step 12: Verify tag and level coexist
+      hasTag = await homePage.verifyFileHasTag(1, tag1)
+      expect(hasTag).toBe(true)
+      hasLevel = await homePage.verifyFileHasLevelTag(1, 5)
+      expect(hasLevel).toBe(true)
+      await takeScreenshot(page, '11-file2-tag-and-level-verified')
+      
+      // Step 13: Add same tag again to second file (should not duplicate)
+      await homePage.selectFile(1)
+      await homePage.addTagToSelectedFiles(tag1)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '12-file2-tag-duplicate-check')
+      
+      // Step 14: Verify no duplicate tag
+      hasTag = await homePage.verifyFileHasTag(1, tag1)
+      expect(hasTag).toBe(true)
+      await takeScreenshot(page, '13-file2-no-duplicate-tag')
+      
+      // Step 15: Add another tag to first file
+      await homePage.selectFile(0)
+      await homePage.addTagToSelectedFiles(tag2)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '14-file1-second-tag-added')
+      
+      // Step 16: Verify two tags and level coexist
+      hasTag = await homePage.verifyFileHasTag(0, tag1)
+      expect(hasTag).toBe(true)
+      hasTag = await homePage.verifyFileHasTag(0, tag2)
+      expect(hasTag).toBe(true)
+      hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
+      expect(hasLevel).toBe(true)
+      await takeScreenshot(page, '15-file1-two-tags-verified')
+      
+      // Step 17: Delete tag from second file
+      await homePage.selectFile(1)
+      await homePage.openDeleteTagDialog()
+      await takeScreenshot(page, '16-delete-tag-dialog-opened')
+      
+      await homePage.selectTagsInDialog([tag1])
+      await takeScreenshot(page, '17-tag-selected-in-dialog')
+      
+      await homePage.confirmDeleteTags()
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '18-file2-tag-removed')
+      
+      // Step 18: Verify tag removed but level remains
+      hasTag = await homePage.verifyFileHasTag(1, tag1)
+      expect(hasTag).toBe(false)
+      hasLevel = await homePage.verifyFileHasLevelTag(1, 5)
+      expect(hasLevel).toBe(true)
+      await takeScreenshot(page, '19-file2-tag-removed-level-remains')
+      
+      // Step 19: Delete both tags from first file
+      await homePage.selectFile(0)
+      await homePage.openDeleteTagDialog()
+      await homePage.selectTagsInDialog([tag1, tag2])
+      await homePage.confirmDeleteTags()
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '20-file1-tags-removed')
+      
+      // Step 20: Verify all tags removed but level remains
+      hasTag = await homePage.verifyFileHasTag(0, tag1)
+      expect(hasTag).toBe(false)
+      hasTag = await homePage.verifyFileHasTag(0, tag2)
+      expect(hasTag).toBe(false)
+      hasLevel = await homePage.verifyFileHasLevelTag(0, 1)
+      expect(hasLevel).toBe(true)
+      await takeScreenshot(page, '21-file1-all-tags-removed-level-remains')
+    }    
+
     
     // ==================== Part 2: Batch Tag Operations ====================
     
-    // Step 1: Select files 1, 3, 5 (index 0, 2, 4)
-    await homePage.selectFile(0)
-    await page.keyboard.down('Control')
-    await homePage.selectFile(2)
-    await homePage.selectFile(4)
-    await page.keyboard.up('Control')
-    await page.waitForTimeout(300)
-    await takeScreenshot(page, '22-batch-select-3-files')
-    
-    // Step 2: Add tag to selected files
-    await homePage.addTagToSelectedFiles(tag3)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '23-batch-tag-added')
-    
-    // Step 3: Verify tag added to all selected files
-    hasTag = await homePage.verifyFileHasTag(0, tag3)
-    expect(hasTag).toBe(true)
-    hasTag = await homePage.verifyFileHasTag(2, tag3)
-    expect(hasTag).toBe(true)
-    hasTag = await homePage.verifyFileHasTag(4, tag3)
-    expect(hasTag).toBe(true)
-    await takeScreenshot(page, '24-batch-tag-verified')
-    
-    // Step 4: Add another tag to file 3 (index 2)
-    await homePage.selectFile(2)
-    await homePage.addTagToSelectedFiles(tag2)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '25-file3-second-tag-added')
-    
-    // Step 5: Verify file 3 has both tags
-    hasTag = await homePage.verifyFileHasTag(2, tag3)
-    expect(hasTag).toBe(true)
-    hasTag = await homePage.verifyFileHasTag(2, tag2)
-    expect(hasTag).toBe(true)
-    await takeScreenshot(page, '26-file3-two-tags-verified')
-    
-    // ==================== Part 3: Tag Management Page ====================
-    
-    // Step 1: Navigate to management page
-    await page.locator('.sidebar-nav .menu-item:has-text("管理")').click()
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '27-management-page-opened')
-    
-    // Step 2: Navigate to tag management
-    await page.locator('.admin-nav .nav-item:has-text("标签")').click()
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '28-tag-management-page-opened')
-    
-    // Step 3: Verify tags exist in list
-    let tagExists = await tagManagementPage.verifyTagExists(tag3)
-    expect(tagExists).toBe(true)
-    await takeScreenshot(page, '29-tag3-exists-in-list')
-    
-    // Step 4: Delete tag3
-    await tagManagementPage.deleteTag(tag3)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '30-tag3-deleted')
-    
-    // Step 5: Navigate back to home
-    await page.locator('.sidebar-nav .menu-item:has-text("主页")').click()
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '31-back-to-home')
-    
-    // Step 6: Navigate to root directory by clicking the home icon in breadcrumb
-    // Click the first path-part (root directory) in path-display
-    const rootPathItem = page.locator('.path-display .path-item:first-child .path-part').first()
-    if (await rootPathItem.isVisible()) {
-      await rootPathItem.click()
+    {
+      // Step 1: Select files 1, 3, 5 (index 0, 2, 4)
+      await homePage.selectFile(0)
+      await page.keyboard.down('Control')
+      await homePage.selectFile(2)
+      await homePage.selectFile(4)
+      await page.keyboard.up('Control')
+      await page.waitForTimeout(300)
+      await takeScreenshot(page, '22-batch-select-3-files')
+      
+      // Step 2: Add tag to selected files
+      await homePage.addTagToSelectedFiles(tag3)
       await page.waitForTimeout(500)
+      await takeScreenshot(page, '23-batch-tag-added')
+      
+      // Step 3: Verify tag added to all selected files
+      let hasTag = await homePage.verifyFileHasTag(0, tag3)
+      expect(hasTag).toBe(true)
+      hasTag = await homePage.verifyFileHasTag(2, tag3)
+      expect(hasTag).toBe(true)
+      hasTag = await homePage.verifyFileHasTag(4, tag3)
+      expect(hasTag).toBe(true)
+      await takeScreenshot(page, '24-batch-tag-verified')
+      
+      // Step 4: Add another tag to file 3 (index 2)
+      await homePage.selectFile(2)
+      await homePage.addTagToSelectedFiles(tag2)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '25-file3-second-tag-added')
+      
+      // Step 5: Verify file 3 has both tags
+      hasTag = await homePage.verifyFileHasTag(2, tag3)
+      expect(hasTag).toBe(true)
+      hasTag = await homePage.verifyFileHasTag(2, tag2)
+      expect(hasTag).toBe(true)
+      await takeScreenshot(page, '26-file3-two-tags-verified')
     }
     
-    // Step 7: Navigate to test-tags/工作/ folder
-    await homePage.enterFolder('test-tags')
-    await page.waitForTimeout(1000)
-    await homePage.enterFolder('工作')
-    await page.waitForTimeout(1000)
-    await takeScreenshot(page, '32-back-to-work-folder')
-    
-    // Step 8: Verify tag3 removed from files
-    hasTag = await homePage.verifyFileHasTag(0, tag3)
-    expect(hasTag).toBe(false)
-    hasTag = await homePage.verifyFileHasTag(4, tag3)
-    expect(hasTag).toBe(false)
-    
-    // File 3 should still have tag2
-    hasTag = await homePage.verifyFileHasTag(2, tag2)
-    expect(hasTag).toBe(true)
-    await takeScreenshot(page, '33-tag3-removed-from-files')
+    // ==================== Part 3: Tag Management Page ====================
+    {
+      // Step 1: Navigate to management page
+      await page.locator('.sidebar-nav .menu-item:has-text("管理")').click()
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '27-management-page-opened')
+      
+      // Step 2: Navigate to tag management
+      await page.locator('.admin-nav .nav-item:has-text("标签")').click()
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '28-tag-management-page-opened')
+      
+      // Step 3: Verify tags exist in list
+      const tagExists = await tagManagementPage.verifyTagExists(tag3)
+      expect(tagExists).toBe(true)
+      await takeScreenshot(page, '29-tag3-exists-in-list')
+      
+      // Step 4: Delete tag3
+      await tagManagementPage.deleteTag(tag3)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '30-tag3-deleted')
+      
+      // Step 5: Navigate back to home
+      await page.locator('.sidebar-nav .menu-item:has-text("主页")').click()
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '31-back-to-home')
+      
+      // Step 6: Navigate to root directory by clicking the home icon in breadcrumb
+      // Click the first path-part (root directory) in path-display
+      const rootPathItem = page.locator('.path-display .path-item:first-child .path-part').first()
+      if (await rootPathItem.isVisible()) {
+        await rootPathItem.click()
+        await page.waitForTimeout(500)
+      }
+      
+      // Step 7: Navigate to test-tags/工作/ folder
+      await homePage.enterFolder('test-tags')
+      await page.waitForTimeout(1000)
+      await homePage.enterFolder('工作')
+      await page.waitForTimeout(1000)
+      await takeScreenshot(page, '32-back-to-work-folder')
+      
+      // Step 8: Verify tag3 removed from files
+      let hasTag = await homePage.verifyFileHasTag(0, tag3)
+      expect(hasTag).toBe(false)
+      hasTag = await homePage.verifyFileHasTag(4, tag3)
+      expect(hasTag).toBe(false)
+      
+      // File 3 should still have tag2
+      hasTag = await homePage.verifyFileHasTag(2, tag2)
+      expect(hasTag).toBe(true)
+      await takeScreenshot(page, '33-tag3-removed-from-files')
+    }
     
     // ==================== Part 4: Batch Tag Delete ====================
-    
-    const tag4 = `工作2-${Date.now()}`
-    
-    // Step 1: Select files 2, 4, 5 (index 1, 3, 4)
-    await homePage.selectFile(1)
-    await page.keyboard.down('Control')
-    await homePage.selectFile(3)
-    await homePage.selectFile(4)
-    await page.keyboard.up('Control')
-    await page.waitForTimeout(300)
-    await takeScreenshot(page, '34-batch-select-3-files-part4')
-    
-    // Step 2: Add tag to selected files
-    await homePage.addTagToSelectedFiles(tag4)
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '35-batch-tag4-added')
-    
-    await homePage.selectFile(1)
-    await page.keyboard.down('Control')
-    await homePage.selectFile(3)
-    await homePage.selectFile(4)
-    await page.keyboard.up('Control')
-    await page.waitForTimeout(300)
+    {
+      const tag4 = `工作2-${Date.now()}`
+      // Step 1: Select files 2, 4, 5 (index 1, 3, 4)
+      await homePage.selectFile(1)
+      await page.keyboard.down('Control')
+      await homePage.selectFile(3)
+      await homePage.selectFile(4)
+      await page.keyboard.up('Control')
+      await page.waitForTimeout(300)
+      await takeScreenshot(page, '34-batch-select-3-files-part4')
+      
+      // Step 2: Add tag to selected files
+      await homePage.addTagToSelectedFiles(tag4)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '35-batch-tag4-added')
+      
+      await homePage.selectFile(1)
+      await page.keyboard.down('Control')
+      await homePage.selectFile(3)
+      await homePage.selectFile(4)
+      await page.keyboard.up('Control')
+      await page.waitForTimeout(300)
 
-    // Step 3: Verify tag added to all selected files
-    hasTag = await homePage.verifyFileHasTag(1, tag4)
-    expect(hasTag).toBe(true)
-    hasTag = await homePage.verifyFileHasTag(3, tag4)
-    expect(hasTag).toBe(true)
-    hasTag = await homePage.verifyFileHasTag(4, tag4)
-    expect(hasTag).toBe(true)
-    await takeScreenshot(page, '36-batch-tag4-verified')
-    
-    // Step 4: Delete tag4 from selected files
-    await homePage.openDeleteTagDialog()
-    await takeScreenshot(page, '37-delete-tag-dialog-opened-part4')
-    
-    await homePage.selectTagsInDialog([tag4])
-    await takeScreenshot(page, '38-tag4-selected-in-dialog')
-    
-    await homePage.confirmDeleteTags()
-    await page.waitForTimeout(500)
-    await takeScreenshot(page, '39-tag4-removed')
-    
-    // Step 5: Verify tag4 removed from all files
-    hasTag = await homePage.verifyFileHasTag(1, tag4)
-    expect(hasTag).toBe(false)
-    hasTag = await homePage.verifyFileHasTag(3, tag4)
-    expect(hasTag).toBe(false)
-    hasTag = await homePage.verifyFileHasTag(4, tag4)
-    expect(hasTag).toBe(false)
-    await takeScreenshot(page, '40-tag4-removed-from-all-files')
-    
-    // Cleanup: delete test tags via API
-    await api.deleteTag(tag1)
-    await api.deleteTag(tag2)
-    await takeScreenshot(page, '41-cleanup-done')
+      // Step 3: Verify tag added to all selected files
+      let hasTag = await homePage.verifyFileHasTag(1, tag4)
+      expect(hasTag).toBe(true)
+      hasTag = await homePage.verifyFileHasTag(3, tag4)
+      expect(hasTag).toBe(true)
+      hasTag = await homePage.verifyFileHasTag(4, tag4)
+      expect(hasTag).toBe(true)
+      await takeScreenshot(page, '36-batch-tag4-verified')
+      
+      // Step 4: Delete tag4 from selected files
+      await homePage.openDeleteTagDialog()
+      await takeScreenshot(page, '37-delete-tag-dialog-opened-part4')
+      
+      await homePage.selectTagsInDialog([tag4])
+      await takeScreenshot(page, '38-tag4-selected-in-dialog')
+      
+      await homePage.confirmDeleteTags()
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '39-tag4-removed')
+      
+      // Step 5: Verify tag4 removed from all files
+      hasTag = await homePage.verifyFileHasTag(1, tag4)
+      expect(hasTag).toBe(false)
+      hasTag = await homePage.verifyFileHasTag(3, tag4)
+      expect(hasTag).toBe(false)
+      hasTag = await homePage.verifyFileHasTag(4, tag4)
+      expect(hasTag).toBe(false)
+      await takeScreenshot(page, '40-tag4-removed-from-all-files')
+      
+      // Cleanup: delete test tags via API
+      await api.deleteTag(tag1)
+      await api.deleteTag(tag2)
+      await takeScreenshot(page, '41-cleanup-done')
+    }
   })
 
 })
