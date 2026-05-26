@@ -597,7 +597,7 @@ test.describe('File Management', () => {
     await takeScreenshot(page, '28-tag-management-page-opened')
     
     // Step 3: Verify tags exist in list
-    let tagExists = await tagManagementPage.verifyTagExists(tag3)
+    const tagExists = await tagManagementPage.verifyTagExists(tag3)
     expect(tagExists).toBe(true)
     await takeScreenshot(page, '29-tag3-exists-in-list')
     

@@ -374,11 +374,11 @@ export class HomePage {
   async selectFile(index: number = 0) {
     const fileCard = this.fileCards.nth(index)
     
-    // 找到复选框并勾选
+    await fileCard.scrollIntoViewIfNeeded()
+    
     const checkbox = fileCard.locator('.xc-checkbox')
     await checkbox.check()
     
-    // 验证操作栏已显示
     await expect(this.operationBar).toBeVisible()
   }
 
@@ -832,10 +832,9 @@ export class HomePage {
       folderCard = this.folderCards.nth(folderNameOrIndex)
     }
     
-    // 点击文件夹卡片进入
-    await folderCard.click()
+    await folderCard.waitFor({ state: 'visible', timeout: 10000 })
+    await folderCard.click({ force: true })
     
-    // 等待页面加载完成
     await this.page.waitForTimeout(500)
   }
 
@@ -1253,5 +1252,208 @@ export class HomePage {
   async isSearchInputEmpty(): Promise<boolean> {
     const value = await this.searchInput.inputValue()
     return value === ''
+  }
+
+  // ==================== 文件移动/复制操作方法 ====================
+
+  /**
+   * 移动选中的文件
+   * 
+   * 点击操作栏中的"移动"按钮，选择目标文件夹并确认移动
+   * 
+   * @param targetFolderPath - 目标文件夹路径（如 "test-move-copy-delete/moved"）
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectFile(0)
+   * await homePage.moveSelectedFiles('test-move-copy-delete/moved')
+   * 
+   * @remarks
+   * - 必须先选择文件，否则操作栏不会显示
+   * - 文件会从当前文件夹移动到目标文件夹
+   */
+  async moveSelectedFiles(targetFolderPath: string) {
+    await expect(this.operationBar).toBeVisible()
+    
+    const moveBtn = this.operationBar.locator('.action-btn:has-text("移动")')
+    await moveBtn.click()
+    
+    const fileTransferOverlay = this.page.locator('.file-transfer-overlay')
+    await expect(fileTransferOverlay).toBeVisible({ timeout: 5000 })
+    
+    const pathParts = targetFolderPath.split('/')
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i]
+      const expectedPath = pathParts.slice(0, i + 1).join('/')
+      
+      const dirItems = fileTransferOverlay.locator('.dir-item').filter({ hasText: part })
+      const count = await dirItems.count()
+      
+      let found = false
+      for (let j = 0; j < count; j++) {
+        const dirItem = dirItems.nth(j)
+        const folderName = dirItem.locator('.no-wrap')
+        await folderName.click({ force: true })
+        await this.page.waitForTimeout(500)
+        
+        const pathValue = fileTransferOverlay.locator('.path-value')
+        const selectedPath = await pathValue.textContent() || ''
+        
+        if (selectedPath.includes(expectedPath)) {
+          found = true
+          break
+        }
+      }
+      
+      if (!found) {
+        throw new Error(`Cannot find folder with path: ${expectedPath}`)
+      }
+    }
+    
+    const confirmBtn = fileTransferOverlay.locator('.btn-primary.move:has-text("移动文件")')
+    await confirmBtn.click()
+    
+    await expect(fileTransferOverlay).not.toBeVisible({ timeout: 5000 })
+    await this.page.waitForTimeout(500)
+  }
+
+  /**
+   * 复制选中的文件
+   * 
+   * 点击操作栏中的"复制"按钮，选择目标文件夹并确认复制
+   * 
+   * @param targetFolderPath - 目标文件夹路径（如 "test-move-copy-delete/moved"）
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectFile(0)
+   * await homePage.copySelectedFiles('test-move-copy-delete/moved')
+   * 
+   * @remarks
+   * - 必须先选择文件，否则操作栏不会显示
+   * - 文件会复制到目标文件夹，原文件保留
+   */
+  async copySelectedFiles(targetFolderPath: string) {
+    await expect(this.operationBar).toBeVisible()
+    
+    const copyBtn = this.operationBar.locator('.action-btn:has-text("复制")')
+    await copyBtn.click()
+    
+    const fileTransferOverlay = this.page.locator('.file-transfer-overlay')
+    await expect(fileTransferOverlay).toBeVisible({ timeout: 5000 })
+    
+    const pathParts = targetFolderPath.split('/')
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i]
+      const expectedPath = pathParts.slice(0, i + 1).join('/')
+      
+      const dirItems = fileTransferOverlay.locator('.dir-item').filter({ hasText: part })
+      const count = await dirItems.count()
+      
+      let found = false
+      for (let j = 0; j < count; j++) {
+        const dirItem = dirItems.nth(j)
+        const folderName = dirItem.locator('.no-wrap')
+        await folderName.click({ force: true })
+        await this.page.waitForTimeout(1000)
+        
+        const pathValue = fileTransferOverlay.locator('.path-value')
+        const selectedPath = await pathValue.textContent() || ''
+        
+        if (selectedPath.includes(expectedPath)) {
+          found = true
+          break
+        }
+      }
+      
+      if (!found) {
+        throw new Error(`Cannot find folder with path: ${expectedPath}`)
+      }
+    }
+    
+    const confirmBtn = fileTransferOverlay.locator('.btn-primary.copy:has-text("复制文件")')
+    await confirmBtn.click()
+    
+    await expect(fileTransferOverlay).not.toBeVisible({ timeout: 30000 })
+    await this.page.waitForTimeout(500)
+  }
+
+  /**
+   * 全选当前文件夹所有文件
+   * 
+   * 使用Ctrl+点击方式选中所有文件
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.selectAllFiles()
+   */
+  async selectAllFiles() {
+    const fileCount = await this.getFileCount()
+    
+    await this.page.keyboard.down('Control')
+    for (let i = 0; i < fileCount; i++) {
+      await this.selectFile(i)
+      await this.page.waitForTimeout(100)
+    }
+    await this.page.keyboard.up('Control')
+    
+    await expect(this.operationBar).toBeVisible()
+  }
+
+  /**
+   * 导航到根目录
+   * 
+   * 点击导航栏的第一个路径项返回根目录
+   * 
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.navigateToRoot()
+   */
+  async navigateToRoot() {
+    const rootPathItem = this.page.locator('.path-display .path-item:first-child .path-part').first()
+    if (await rootPathItem.isVisible()) {
+      await rootPathItem.click()
+      await this.page.waitForTimeout(500)
+    }
+  }
+
+  // ==================== 文件夹创建操作方法 ====================
+
+  /**
+   * 创建新文件夹
+   * 
+   * 通过FAB按钮打开创建文件夹对话框，输入文件夹名称并确认
+   * 
+   * @param folderName - 新文件夹名称
+   * @returns Promise<void>
+   * 
+   * @example
+   * await homePage.createNewFolder('moved')
+   * 
+   * @remarks
+   * - 文件夹将在当前目录下创建
+   */
+  async createNewFolder(folderName: string) {
+    const fabButton = this.page.locator('.fab-button')
+    await fabButton.click()
+    await this.page.waitForTimeout(300)
+    
+    const createFolderMenuItem = this.page.locator('.fab-menu-item:has-text("创建文件夹")')
+    await createFolderMenuItem.click()
+    await this.page.waitForTimeout(300)
+    
+    const dialogOverlay = this.page.locator('.dialog-overlay')
+    await expect(dialogOverlay).toBeVisible({ timeout: 5000 })
+    
+    const folderNameInput = dialogOverlay.locator('.folder-name-input')
+    await folderNameInput.fill(folderName)
+    
+    const confirmBtn = dialogOverlay.locator('.confirm-btn')
+    await confirmBtn.click()
+    
+    await expect(dialogOverlay).not.toBeVisible({ timeout: 5000 })
+    await this.page.waitForTimeout(500)
   }
 }

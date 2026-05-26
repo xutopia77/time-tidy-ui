@@ -708,4 +708,252 @@ test.describe('Comprehensive Test', () => {
     }
   })
 
+  test('should move, copy and delete files', async ({ page }) => {
+    const moveTag = `move-${Date.now()}`
+    const copyTag = `copy-${Date.now()}`
+    const deleteTag = `delete-${Date.now()}`
+    
+    // ==================== Part 1: File Move Operations ====================
+    {
+      // Step 1: Navigate to test-move-copy-delete and create moved folder
+      await homePage.navigateToRoot()
+      await page.waitForTimeout(500)
+      await homePage.enterFolder('test-move-copy-delete')
+      await page.waitForTimeout(500)
+      await homePage.createNewFolder('moved')
+      await page.waitForTimeout(500)
+      
+      // Step 2: Enter origin folder
+      await homePage.enterFolder('origin')
+      await page.waitForTimeout(500)
+      
+      // Step 3: Verify file count equals 30
+      await homePage.waitForFilesToLoad()
+      let fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(30)
+      await takeScreenshot(page, '1-origin-folder-loaded')
+      
+      // Step 4: Select files 1, 3, 5, 8, 10 and add move tag
+      await homePage.selectFile(0)
+      await page.keyboard.down('Control')
+      await homePage.selectFile(2)
+      await homePage.selectFile(4)
+      await homePage.selectFile(7)
+      await homePage.selectFile(9)
+      await page.keyboard.up('Control')
+      await page.waitForTimeout(300)
+      await homePage.addTagToSelectedFiles(moveTag)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '2-move-tag-added')
+      
+      // Step 5: Move first file to moved folder
+      await homePage.clearSelection()
+      await homePage.selectFile(0)
+      await homePage.moveSelectedFiles('test-move-copy-delete/moved')
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '3-first-file-moved')
+      
+      // Step 6: Move files 3, 4, 5 to moved folder
+      await homePage.clearSelection()
+      await homePage.selectFile(2)
+      await page.keyboard.down('Control')
+      await homePage.selectFile(3)
+      await homePage.selectFile(4)
+      await page.keyboard.up('Control')
+      await page.waitForTimeout(300)
+      await homePage.moveSelectedFiles('test-move-copy-delete/moved')
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '4-multiple-files-moved')
+      
+      // Step 7: Verify current folder file count
+      fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(26)
+      await takeScreenshot(page, '5-file-count-after-move')
+      
+      // Step 8: Enter moved folder and verify
+      await homePage.navigateToRoot()
+      await page.waitForTimeout(500)
+      await homePage.enterFolder('test-move-copy-delete')
+      await page.waitForTimeout(1000)
+      await homePage.enterFolder('moved')
+      await page.waitForTimeout(1000)
+      
+      fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(4)
+      await takeScreenshot(page, '6-moved-folder-verified')
+      
+      // Step 9: Move all files back to origin folder
+      await homePage.selectAllFiles()
+      await homePage.moveSelectedFiles('test-move-copy-delete/origin')
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '7-files-moved-back')
+      
+      // Step 10: Verify origin folder
+      await homePage.navigateToRoot()
+      await page.waitForTimeout(500)
+      await homePage.enterFolder('test-move-copy-delete')
+      await page.waitForTimeout(1000)
+      await homePage.enterFolder('origin')
+      await page.waitForTimeout(1000)
+      
+      fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(30)
+      await takeScreenshot(page, '8-origin-folder-restored')
+    }
+    
+    // ==================== Part 2: File Copy Operations ====================
+    {
+      // Step 1: Ensure in origin folder
+      let fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(30)
+      
+      // Step 2: Select files 11, 13, 15, 18, 20 and add copy tag
+      await homePage.selectFile(10)
+      await page.keyboard.down('Control')
+      await homePage.selectFile(12)
+      await homePage.selectFile(14)
+      await homePage.selectFile(17)
+      await homePage.selectFile(19)
+      await page.keyboard.up('Control')
+      await page.waitForTimeout(300)
+      await homePage.addTagToSelectedFiles(copyTag)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '9-copy-tag-added')
+      
+      // Step 3: Copy first file to moved folder
+      await homePage.clearSelection()
+      await homePage.selectFile(10)
+      await homePage.copySelectedFiles('test-move-copy-delete/moved')
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '10-first-file-copied')
+      
+      // Step 4: Copy files 13, 14, 15, 17 to moved folder
+      await homePage.clearSelection()
+      await homePage.selectFile(12)
+      await page.keyboard.down('Control')
+      await homePage.selectFile(13)
+      await homePage.selectFile(14)
+      await homePage.selectFile(16)
+      await page.keyboard.up('Control')
+      await page.waitForTimeout(300)
+      await homePage.copySelectedFiles('test-move-copy-delete/moved')
+      await page.waitForTimeout(1000)
+      await takeScreenshot(page, '11-multiple-files-copied')
+      
+      // Step 5: Verify current folder file count (should still be 30)
+      fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(30)
+      await takeScreenshot(page, '12-file-count-after-copy')
+      
+      // Step 6: Enter moved folder and verify
+      await homePage.navigateToRoot()
+      await page.waitForTimeout(500)
+      await homePage.enterFolder('test-move-copy-delete')
+      await page.waitForTimeout(1000)
+      await homePage.enterFolder('moved')
+      await page.waitForTimeout(1000)
+      
+      fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(5)
+      await takeScreenshot(page, '13-moved-folder-copy-verified')
+    }
+    
+    // ==================== Part 3: File Delete Operations ====================
+    {
+      // Step 1: Return to origin folder
+      await homePage.navigateToRoot()
+      await page.waitForTimeout(500)
+      await homePage.enterFolder('test-move-copy-delete')
+      await page.waitForTimeout(1000)
+      await homePage.enterFolder('origin')
+      await page.waitForTimeout(1000)
+      
+      let fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(30)
+      
+      // Step 2: Select files 21, 23, 25, 28, 30 and add delete tag
+      await homePage.selectFile(20)
+      await page.keyboard.down('Control')
+      await homePage.selectFile(22)
+      await homePage.selectFile(24)
+      await homePage.selectFile(27)
+      await homePage.selectFile(29)
+      await page.keyboard.up('Control')
+      await page.waitForTimeout(300)
+      await homePage.addTagToSelectedFiles(deleteTag)
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '14-delete-tag-added')
+      
+      // Step 3: Delete first file
+      await homePage.clearSelection()
+      await homePage.selectFile(20)
+      await homePage.deleteSelectedFiles()
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '15-first-file-deleted')
+      
+      // Step 4: Delete multiple files
+      await homePage.clearSelection()
+      await homePage.selectFile(21)
+      await page.keyboard.down('Control')
+      await homePage.selectFile(22)
+      await homePage.selectFile(23)
+      await homePage.selectFile(24)
+      await homePage.selectFile(25)
+      await homePage.selectFile(26)
+      await homePage.selectFile(27)
+      await homePage.selectFile(28)
+      await page.keyboard.up('Control')
+      await page.waitForTimeout(300)
+      await homePage.deleteSelectedFiles()
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '16-multiple-files-deleted')
+      
+      // Step 5: Verify current folder file count
+      fileCount = await homePage.getFileCount()
+      expect(fileCount).toBe(21)
+      await takeScreenshot(page, '17-file-count-after-delete')
+    }
+    
+    // ==================== Part 4: Trash Management ====================
+    {
+      // Step 1: Navigate to trash management page
+      await page.locator('.sidebar-nav .menu-item:has-text("管理")').click()
+      await page.waitForTimeout(500)
+      await page.locator('.admin-nav .nav-item:has-text("回收站")').click()
+      await page.waitForTimeout(500)
+      await takeScreenshot(page, '18-trash-page-opened')
+      
+      // Step 2: Verify trash file count
+      const trashFileItems = page.locator('.file-card')
+      let trashCount = await trashFileItems.count()
+      expect(trashCount).toBe(9)
+      await takeScreenshot(page, '19-trash-files-verified')
+      
+      // Step 3: Restore first file
+      const firstFile = trashFileItems.first()
+      await firstFile.hover()
+      await firstFile.locator('.file-action-btn[title="恢复"]').click()
+      await page.waitForTimeout(1000)
+      await takeScreenshot(page, '20-first-file-restored')
+      
+      // Step 4: Permanently delete second file
+      const secondFile = trashFileItems.first()
+      await secondFile.hover()
+      await secondFile.locator('.file-action-btn.danger[title="永久删除"]').click()
+      await page.waitForTimeout(1000)
+      await takeScreenshot(page, '21-second-file-permanently-deleted')
+      
+      // Step 5: Empty trash
+      const emptyTrashBtn = page.locator('button:has-text("清空回收站")')
+      await emptyTrashBtn.click()
+      await page.waitForTimeout(1000)
+      await takeScreenshot(page, '22-trash-emptied')
+      
+      // Step 6: Verify trash is empty
+      trashCount = await trashFileItems.count()
+      expect(trashCount).toBe(0)
+      await takeScreenshot(page, '23-trash-empty-verified')
+    }
+  })
+
 })
