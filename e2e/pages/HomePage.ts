@@ -1293,8 +1293,12 @@ export class HomePage {
       for (let j = 0; j < count; j++) {
         const dirItem = dirItems.nth(j)
         const folderName = dirItem.locator('.no-wrap')
-        await folderName.click({ force: true })
-        await this.page.waitForTimeout(500)
+
+        await folderName.scrollIntoViewIfNeeded()
+        await this.page.waitForTimeout(200)
+        
+        await folderName.click()
+        await this.page.waitForTimeout(1000)
         
         const pathValue = fileTransferOverlay.locator('.path-value')
         const selectedPath = await pathValue.textContent() || ''
@@ -1354,7 +1358,11 @@ export class HomePage {
       for (let j = 0; j < count; j++) {
         const dirItem = dirItems.nth(j)
         const folderName = dirItem.locator('.no-wrap')
-        await folderName.click({ force: true })
+        
+        await folderName.scrollIntoViewIfNeeded()
+        await this.page.waitForTimeout(200)
+        
+        await folderName.click()
         await this.page.waitForTimeout(1000)
         
         const pathValue = fileTransferOverlay.locator('.path-value')

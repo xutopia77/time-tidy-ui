@@ -709,12 +709,13 @@ test.describe('Comprehensive Test', () => {
   })
 
   test('should move, copy and delete files', async ({ page }) => {
+    
     const moveTag = `move-${Date.now()}`
     const copyTag = `copy-${Date.now()}`
     const deleteTag = `delete-${Date.now()}`
     
     // ==================== Part 1: File Move Operations ====================
-    {
+    if(true){
       // Step 1: Navigate to test-move-copy-delete and create moved folder
       await homePage.navigateToRoot()
       await page.waitForTimeout(500)
@@ -785,7 +786,7 @@ test.describe('Comprehensive Test', () => {
       // Step 9: Move all files back to origin folder
       await homePage.selectAllFiles()
       await homePage.moveSelectedFiles('test-move-copy-delete/origin')
-      await page.waitForTimeout(500)
+      await page.waitForTimeout(5000)
       await takeScreenshot(page, '7-files-moved-back')
       
       // Step 10: Verify origin folder
@@ -802,8 +803,20 @@ test.describe('Comprehensive Test', () => {
     }
     
     // ==================== Part 2: File Copy Operations ====================
-    {
+    if(true){
       // Step 1: Ensure in origin folder
+      // Step 1: Navigate to test-move-copy-delete and create moved folder
+      await homePage.navigateToRoot()
+      await page.waitForTimeout(500)
+      await homePage.enterFolder('test-move-copy-delete')
+      await page.waitForTimeout(500)
+      await homePage.createNewFolder('moved')
+      await page.waitForTimeout(500)
+      
+      // Step 2: Enter origin folder
+      await homePage.enterFolder('origin')
+      await page.waitForTimeout(500)
+
       let fileCount = await homePage.getFileCount()
       expect(fileCount).toBe(30)
       
@@ -905,7 +918,7 @@ test.describe('Comprehensive Test', () => {
       await page.keyboard.up('Control')
       await page.waitForTimeout(300)
       await homePage.deleteSelectedFiles()
-      await page.waitForTimeout(500)
+      await page.waitForTimeout(5000)
       await takeScreenshot(page, '16-multiple-files-deleted')
       
       // Step 5: Verify current folder file count
@@ -919,7 +932,10 @@ test.describe('Comprehensive Test', () => {
       // Step 1: Navigate to trash management page
       await page.locator('.sidebar-nav .menu-item:has-text("管理")').click()
       await page.waitForTimeout(500)
-      await page.locator('.admin-nav .nav-item:has-text("回收站")').click()
+      
+      const trashNavItem = page.locator('.admin-nav .nav-item:has-text("回收站")')
+      await trashNavItem.waitFor({ state: 'visible', timeout: 10000 })
+      await trashNavItem.click()
       await page.waitForTimeout(500)
       await takeScreenshot(page, '18-trash-page-opened')
       
@@ -932,6 +948,11 @@ test.describe('Comprehensive Test', () => {
       // Step 3: Restore first file
       const firstFile = trashFileItems.first()
       await firstFile.hover()
+      
+      page.once('dialog', async dialog => {
+        expect(dialog.message()).toContain('确定要恢复文件')
+        await dialog.accept()
+      })
       await firstFile.locator('.file-action-btn[title="恢复"]').click()
       await page.waitForTimeout(1000)
       await takeScreenshot(page, '20-first-file-restored')
@@ -939,14 +960,24 @@ test.describe('Comprehensive Test', () => {
       // Step 4: Permanently delete second file
       const secondFile = trashFileItems.first()
       await secondFile.hover()
+      
+      page.once('dialog', async dialog => {
+        expect(dialog.message()).toContain('确定要永久删除文件')
+        await dialog.accept()
+      })
       await secondFile.locator('.file-action-btn.danger[title="永久删除"]').click()
       await page.waitForTimeout(1000)
       await takeScreenshot(page, '21-second-file-permanently-deleted')
       
       // Step 5: Empty trash
       const emptyTrashBtn = page.locator('button:has-text("清空回收站")')
+      
+      page.once('dialog', async dialog => {
+        expect(dialog.message()).toContain('确定要清空回收站吗')
+        await dialog.accept()
+      })
       await emptyTrashBtn.click()
-      await page.waitForTimeout(1000)
+      await page.waitForTimeout(5000)
       await takeScreenshot(page, '22-trash-emptied')
       
       // Step 6: Verify trash is empty
