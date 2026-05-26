@@ -119,9 +119,9 @@ test.describe('File Management', () => {
     // Step 1: check file explorer is visible
     await expect(homePage.fileExplorer).toBeVisible()
     
-    // Step 2: check root folder count equals 16
+    // Step 2: check root folder count equals 18
     const rootFolderCount = await homePage.getFolderCount()
-    expect(rootFolderCount).toBe(16)
+    expect(rootFolderCount).toBe(18)
     
     // Step 3: take screenshot
     await takeScreenshot(page, '1-root-folders-displayed')
@@ -251,7 +251,7 @@ test.describe('File Management', () => {
     
     // Step 8: verify folder list section shows folder count
     const folderTotalCount = await homePage.getFolderTotalCount()
-    expect(folderTotalCount).toBe(69)
+    expect(folderTotalCount).toBe(147)
     await takeScreenshot(page, '8-info-sidebar-sections')
     
     // Step 9: click collapse button on first folder tree item
