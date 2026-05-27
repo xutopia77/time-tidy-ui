@@ -487,15 +487,6 @@ export class FileRestoreReq {
     fileIds: number[] = [];
 }
 
-export class FileSimilarityGetReq {
-    page: number = 1;
-    pageSize: number = 20;
-}
-
-export class FileSimilarityDeleteReq {
-    fileIds: number[] = [];
-}
-
 export class FileHealthGetReq {
     type: number = 1;
     page: number = 0;

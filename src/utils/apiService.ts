@@ -60,11 +60,7 @@ export class ApiService {
   }
 
   static async fileSimilarityGet(page: number, pageSize: number): Promise<ApiResponse<DatTypes.SimilarityGetResp>> {
-    return getApiClient().get(`/api/v1/file_similarity_get?page=${page}&pageSize=${pageSize}`);
-  }
-
-  static async fileSimilarityDelete(req: DatTypes.FileSimilarityDeleteReq): Promise<ApiResponse<void>> {
-    return getApiClient().post('/api/v1/file_similarity_delete', req);
+    return getApiClient().post('/api/v1/file_similarity_get', { page, pageSize });
   }
 
   static async projectHealth(req: DatTypes.FileHealthGetReq): Promise<ApiResponse<void>> {
