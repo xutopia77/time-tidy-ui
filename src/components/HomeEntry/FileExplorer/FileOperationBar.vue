@@ -302,27 +302,6 @@ const btnclk_add_tag = () => {
     newTag.value = '';
 };
 
-const btnclk_remove_tag = (tag: DatType.FileItemTag) => {
-    const req: DatType.FilesTagSetReq = {
-        tagName: tag.name,
-        fileIds: []
-    };
-    
-    if (appStore.curFiles) {
-        appStore.curFiles.forEach((file) => {
-            if (file.checked) {
-                req.fileIds.push(file.id);
-            }
-        });
-    }
-    
-    if (req.fileIds.length === 0) {
-        Utils.addToast('请选择要操作的文件');
-        return;
-    }
-    
-    Utils.files_tag_delete(req);
-};
 </script>
 
 <style scoped>

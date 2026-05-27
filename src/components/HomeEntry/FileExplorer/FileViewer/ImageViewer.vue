@@ -127,7 +127,7 @@ const currentImageUrl = computed(() => {
         return `file:///${img.fullpath}`;
     } else {
         const filePath = img.path + "/" + img.name;
-        return `${appStore.srvPrefix}/static_file/${filePath}?rootPathId=${img.rootPathId}&fileId=${img.id}`;
+        return `${appStore.srvPrefix}/static_file/${filePath}?fileId=${img.id}`;
     }
 })
 
