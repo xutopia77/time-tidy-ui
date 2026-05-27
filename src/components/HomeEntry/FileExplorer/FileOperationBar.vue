@@ -3,92 +3,74 @@
         <div v-if="showBar" class="operation-bar">
             <div class="operation-bar-content">
                 <div class="selection-info">
-                    <span class="selection-count">{{ checkedCount }} 项已选中</span>
-                    <button @click="clearSelection" class="clear-btn">取消</button>
+                    <span class="selection-count">{{ checkedCount }} 选中</span>
+                    <button @click="clearSelection" class="xc-button clear-btn">取消</button>
                 </div>
                 
                 <div class="operation-actions">
-                    <button @click="btnclk_set_file_level" class="action-btn">
-                        <span class="action-icon">⭐</span>
-                        <span class="action-text">设置等级</span>
-                    </button>
-                    
-                    <div class="action-select-wrapper">
-                        <select v-model="sltLevel" class="level-select" @click.stop>
-                            <option value="sys_score1">1☆</option>
-                            <option value="sys_score2">2☆</option>
-                            <option value="sys_score3">3☆</option>
-                            <option value="sys_score4">4☆</option>
-                            <option value="sys_score5">5☆</option>
-                        </select>
+                    <div class="popup-wrapper">
+                        <button @click="toggleScorePanel" class="xc-button action-btn">评分</button>
+                        <Transition name="fade-down">
+                            <div v-if="showScorePanel" class="popup-panel score-panel">
+                                <button 
+                                    v-for="score in 5" 
+                                    :key="score"
+                                    @click="setFileScore(score)"
+                                    class="xc-button score-btn"
+                                    :class="{ active: isCurrentScore(score) }"
+                                >
+                                    {{ score }}☆
+                                </button>
+                            </div>
+                        </Transition>
                     </div>
                     
-                    <div class="tag-input-wrapper">
-                        <input v-model="newTag" @keyup.enter="btnclk_add_tag" placeholder="添加标签..."
-                            class="tag-input" list="tagSuggestions" @click.stop />
-                        <datalist id="tagSuggestions">
-                            <option v-for="tag in tagSuggestions" :key="tag" :value="tag"></option>
-                        </datalist>
+                    <div class="popup-wrapper">
+                        <button @click="toggleTagPanel" class="xc-button action-btn">标签</button>
+                        <Transition name="fade-down">
+                            <div v-if="showTagPanel" class="popup-panel tag-panel" @click.stop>
+                                <div class="tag-input-section">
+                                    <input 
+                                        v-model="newTag" 
+                                        @keyup.enter="addTag"
+                                        placeholder="输入标签回车添加..."
+                                        class="xc-input-text tag-input"
+                                        list="tagSuggestions"
+                                    />
+                                    <datalist id="tagSuggestions">
+                                        <option v-for="tag in tagSuggestions" :key="tag" :value="tag"></option>
+                                    </datalist>
+                                </div>
+                                
+                                <div v-if="fileTags.length > 0" class="tag-list-section">
+                                    <div class="tag-list-title">已有标签</div>
+                                    <div class="tag-list">
+                                        <div v-for="tag in fileTags" :key="tag.name" class="tag-item">
+                                            <span class="tag-color" :style="{ backgroundColor: tag.color || '#999' }"></span>
+                                            <span class="tag-name">{{ Utils.tagName2Display(tag.name) }}</span>
+                                            <button @click="deleteTag(tag.name)" class="tag-delete-btn">×</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div v-else class="no-tags-message">
+                                    暂无标签
+                                </div>
+                            </div>
+                        </Transition>
                     </div>
                     
-                    <button @click="btnclk_delete_tag" class="action-btn">
-                        <span class="action-icon">🏷️</span>
-                        <span class="action-text">删除标签</span>
-                    </button>
-                    
-                    <button @click="btnclk_move_file" class="action-btn">
-                        <span class="action-icon">📁</span>
-                        <span class="action-text">移动</span>
-                    </button>
-                    
-                    <button @click="btnclk_copy_file" class="action-btn">
-                        <span class="action-icon">📋</span>
-                        <span class="action-text">复制</span>
-                    </button>
-                    
-                    <button @click="btnclk_delete_file" class="action-btn danger">
-                        <span class="action-icon">🗑️</span>
-                        <span class="action-text">删除</span>
-                    </button>
+                    <button @click="btnclk_move_file" class="xc-button action-btn">移动</button>
+                    <button @click="btnclk_copy_file" class="xc-button action-btn">复制</button>
+                    <button @click="btnclk_delete_file" class="xc-button action-btn danger">删除</button>
                 </div>
             </div>
         </div>
     </Transition>
-
-    <!-- Delete Tag Dialog -->
-    <div v-if="showDeleteTagDialog" class="dialog-overlay" @click="closeDeleteTagDialog">
-        <div class="dialog-content" @click.stop>
-            <h3>删除文件标签</h3>
-            <p class="dialog-desc">选择要从选中文件中删除的标签：</p>
-            
-            <div v-if="fileTags.length === 0" class="no-tags-message">
-                选中的文件没有标签
-            </div>
-            
-            <div v-else class="tag-list">
-                <div v-for="tag in fileTags" :key="tag.name" class="tag-item">
-                    <label class="tag-checkbox">
-                        <input type="checkbox" v-model="selectedTagsForDeletion" :value="tag.name" />
-                        <span class="tag-label">
-                            <span class="tag-color" :style="{ backgroundColor: tag.color || '#999' }"></span>
-                            <span class="tag-name">{{ Utils.tagName2Display(tag.name) }}</span>
-                        </span>
-                    </label>
-                </div>
-            </div>
-            
-            <div class="dialog-actions">
-                <button @click="confirmDeleteTags" class="confirm-btn" :disabled="selectedTagsForDeletion.length === 0">
-                    确定删除
-                </button>
-                <button @click="closeDeleteTagDialog" class="cancel-btn">取消</button>
-            </div>
-        </div>
-    </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
@@ -118,10 +100,9 @@ const showBar = computed(() => {
     return checkedCount.value > 0;
 });
 
-const sltLevel = ref("sys_score3");
+const showScorePanel = ref(false);
+const showTagPanel = ref(false);
 const newTag = ref('');
-const showDeleteTagDialog = ref(false);
-const selectedTagsForDeletion = ref<string[]>([]);
 
 const tagSuggestions = computed(() => {
     return appStore.allTags.map(tag => Utils.tagName2Display(tag.name));
@@ -147,6 +128,67 @@ const fileTags = computed(() => {
     return [];
 });
 
+const currentScore = computed(() => {
+    const fSlt: DatType.File[] = [];
+    for (const item of appStore.curFiles) {
+        if (item.checked)
+            fSlt.push(item);
+    }
+    
+    if (fSlt.length === 0) return 0;
+    
+    const scores = fSlt.map(file => {
+        const scoreTag = file.tags.find(tag => tag.name.startsWith('sys_score'));
+        if (scoreTag) {
+            return parseInt(scoreTag.name.replace('sys_score', ''));
+        }
+        return 0;
+    });
+    
+    const firstScore = scores[0];
+    const allSame = scores.every(s => s === firstScore);
+    
+    return allSame ? firstScore : 0;
+});
+
+const isCurrentScore = (score: number) => {
+    return currentScore.value === score;
+};
+
+const toggleScorePanel = () => {
+    showScorePanel.value = !showScorePanel.value;
+    if (showScorePanel.value) {
+        showTagPanel.value = false;
+    }
+};
+
+const toggleTagPanel = () => {
+    showTagPanel.value = !showTagPanel.value;
+    if (showTagPanel.value) {
+        showScorePanel.value = false;
+    }
+};
+
+const closeAllPanels = () => {
+    showScorePanel.value = false;
+    showTagPanel.value = false;
+};
+
+const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.popup-wrapper')) {
+        closeAllPanels();
+    }
+};
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
+
 const clearSelection = () => {
     if (appStore.curFiles) {
         appStore.curFiles.forEach((file) => {
@@ -158,18 +200,14 @@ const clearSelection = () => {
             dir.checked = false;
         });
     }
+    closeAllPanels();
 };
 
-const btnclk_set_file_level = () => {
+const setFileScore = (score: number) => {
     const req: DatType.FilesTagSetReq = {
         fileIds: [],
         tagName: ''
     };
-    
-    if (sltLevel.value == '') {
-        Utils.addToast('请选择要设置的等级');
-        return;
-    }
     
     if (appStore.curFiles) {
         appStore.curFiles.forEach((file) => {
@@ -184,63 +222,86 @@ const btnclk_set_file_level = () => {
         return;
     }
     
-    req.tagName = sltLevel.value;
-    Utils.files_tag_set(req);
+    if (isCurrentScore(score)) {
+        req.tagName = `sys_score${score}`;
+        Utils.files_tag_delete(req);
+        Utils.message_notify({ 
+            content: `已删除评分`, 
+            type: 'success' 
+        });
+    } else {
+        req.tagName = `sys_score${score}`;
+        Utils.files_tag_set(req);
+        Utils.message_notify({ 
+            content: `已设置评分 ${score}☆`, 
+            type: 'success' 
+        });
+    }
+    
+    closeAllPanels();
 };
 
-const btnclk_delete_tag = () => {
-    selectedTagsForDeletion.value = [];
-    showDeleteTagDialog.value = true;
-};
-
-const closeDeleteTagDialog = () => {
-    showDeleteTagDialog.value = false;
-    selectedTagsForDeletion.value = [];
-};
-
-const confirmDeleteTags = () => {
-    if (selectedTagsForDeletion.value.length === 0) {
-        Utils.addToast('请选择要删除的标签');
+const addTag = () => {
+    if (!newTag.value.trim()) {
         return;
     }
     
-    const fileIds: number[] = [];
+    const req: DatType.FilesTagSetReq = {
+        fileIds: [],
+        tagName: newTag.value.trim()
+    };
+    
     if (appStore.curFiles) {
         appStore.curFiles.forEach((file) => {
             if (file.checked) {
-                fileIds.push(file.id);
+                req.fileIds.push(file.id);
             }
         });
     }
     
-    if (fileIds.length === 0) {
+    if (req.fileIds.length === 0) {
         Utils.addToast('请选择要操作的文件');
         return;
     }
     
-    // Delete each selected tag
-    for (const tagName of selectedTagsForDeletion.value) {
-        const req: DatType.FilesTagSetReq = {
-            tagName: tagName,
-            fileIds: fileIds
-        };
-        Utils.files_tag_delete(req);
+    Utils.files_tag_set(req);
+    newTag.value = '';
+};
+
+const deleteTag = (tagName: string) => {
+    const req: DatType.FilesTagSetReq = {
+        tagName: tagName,
+        fileIds: []
+    };
+    
+    if (appStore.curFiles) {
+        appStore.curFiles.forEach((file) => {
+            if (file.checked) {
+                req.fileIds.push(file.id);
+            }
+        });
     }
     
+    if (req.fileIds.length === 0) {
+        Utils.addToast('请选择要操作的文件');
+        return;
+    }
+    
+    Utils.files_tag_delete(req);
     Utils.message_notify({ 
-        content: `已删除 ${selectedTagsForDeletion.value.length} 个标签`, 
+        content: `已删除标签 ${Utils.tagName2Display(tagName)}`, 
         type: 'success' 
     });
-    
-    closeDeleteTagDialog();
 };
 
 const btnclk_move_file = () => {
     appStore.bPageFileTransfer = true;
+    closeAllPanels();
 };
 
 const btnclk_copy_file = () => {
     appStore.bPageFileTransfer = true;
+    closeAllPanels();
 };
 
 const btnclk_delete_file = () => {
@@ -275,33 +336,6 @@ const btnclk_delete_file = () => {
     clearSelection();
 };
 
-const btnclk_add_tag = () => {
-    if (!newTag.value.trim()) {
-        return;
-    }
-    
-    const req: DatType.FilesTagSetReq = {
-        fileIds: [],
-        tagName: newTag.value.trim()
-    };
-    
-    if (appStore.curFiles) {
-        appStore.curFiles.forEach((file) => {
-            if (file.checked) {
-                req.fileIds.push(file.id);
-            }
-        });
-    }
-    
-    if (req.fileIds.length === 0) {
-        Utils.addToast('请选择要操作的文件');
-        return;
-    }
-    
-    Utils.files_tag_set(req);
-    newTag.value = '';
-};
-
 </script>
 
 <style scoped>
@@ -317,10 +351,10 @@ const btnclk_add_tag = () => {
 
 .operation-bar-content {
     background-color: var(--xc-background-color);
-    border: 1px solid var(--xc-border-color);
+    border: var(--xc-border);
     border-radius: var(--xc-border-radius-lg);
     box-shadow: var(--xc-shadow-lg);
-    padding: var(--xc-spacing-sm) var(--xc-spacing-sm);
+    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
     display: flex;
     align-items: center;
     gap: var(--xc-spacing-lg);
@@ -342,154 +376,102 @@ const btnclk_add_tag = () => {
 }
 
 .clear-btn {
-    background: none;
-    border: none;
-    color: var(--xc-primary-color);
-    font-size: var(--xc-font-size-sm);
-    cursor: pointer;
     padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
-    border-radius: var(--xc-border-radius-sm);
-    transition: all var(--xc-transition-fast);
-}
-
-.clear-btn:hover {
-    background-color: var(--xc-background-color-hover);
+    font-size: var(--xc-font-size-sm);
 }
 
 .operation-actions {
     display: flex;
     align-items: center;
-    gap: var(--xc-spacing-xs);
+    gap: var(--xc-spacing-sm);
 }
 
 .action-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
     padding: var(--xc-spacing-xs) var(--xc-spacing-md);
-    background-color: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--xc-border-radius-md);
-    cursor: pointer;
-    transition: all var(--xc-transition-fast);
-    min-width: 60px;
+    font-size: var(--xc-font-size-sm);
 }
 
-.action-btn:hover {
-    background-color: var(--xc-background-color-hover);
-    border-color: var(--xc-border-color);
+.action-btn.danger {
+    background-color: var(--xc-error-color);
+    color: white;
 }
 
 .action-btn.danger:hover {
-    background-color: rgba(245, 34, 45, 0.1);
-    border-color: var(--xc-error-color);
+    background-color: #d41920;
 }
 
-.action-icon {
-    font-size: 20px;
-    line-height: 1;
+.popup-wrapper {
+    position: relative;
+    display: inline-block;
 }
 
-.action-text {
-    font-size: var(--xc-font-size-xs);
-    color: var(--xc-text-color);
-    white-space: nowrap;
-}
-
-.action-select-wrapper {
-    display: flex;
-    align-items: center;
-}
-
-.level-select {
-    height: 32px;
-    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-sm);
+.popup-panel {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: var(--xc-spacing-xs);
     background-color: var(--xc-background-color);
-    color: var(--xc-text-color);
-    font-size: var(--xc-font-size-sm);
-    cursor: pointer;
+    border: var(--xc-border);
+    border-radius: var(--xc-border-radius-md);
+    box-shadow: var(--xc-shadow-md);
+    z-index: 1001;
 }
 
-.tag-input-wrapper {
+.score-panel {
+    padding: var(--xc-spacing-xs);
     display: flex;
-    align-items: center;
+    gap: var(--xc-spacing-xs);
+}
+
+.score-btn {
+    min-width: 50px;
+    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
+    font-size: var(--xc-font-size-sm);
+}
+
+.score-btn.active {
+    background-color: var(--xc-primary-color);
+    color: white;
+}
+
+.tag-panel {
+    padding: var(--xc-spacing-md);
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.tag-input-section {
+    margin-bottom: var(--xc-spacing-md);
 }
 
 .tag-input {
-    height: 32px;
-    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    background-color: var(--xc-background-color);
-    color: var(--xc-text-color);
+    width: calc(100% - 14px);
+    margin: 0;
+}
+
+.tag-list-section {
+    margin-top: var(--xc-spacing-sm);
+}
+
+.tag-list-title {
     font-size: var(--xc-font-size-sm);
-    min-width: 120px;
-}
-
-.tag-input:focus {
-    outline: none;
-    border-color: var(--xc-primary-color);
-}
-
-/* Dialog Styles */
-.dialog-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-}
-
-.dialog-content {
-    background-color: var(--xc-background-color);
-    border-radius: var(--xc-border-radius-lg);
-    padding: var(--xc-spacing-xl);
-    min-width: 400px;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: var(--xc-shadow-lg);
-}
-
-.dialog-content h3 {
-    margin: 0 0 var(--xc-spacing-md) 0;
-    font-size: var(--xc-font-size-lg);
-    color: var(--xc-text-color);
-}
-
-.dialog-desc {
-    margin: 0 0 var(--xc-spacing-md) 0;
-    font-size: var(--xc-font-size-md);
     color: var(--xc-text-color-secondary);
-}
-
-.no-tags-message {
-    padding: var(--xc-spacing-xl);
-    text-align: center;
-    color: var(--xc-text-color-secondary);
-    font-size: var(--xc-font-size-md);
+    margin-bottom: var(--xc-spacing-sm);
 }
 
 .tag-list {
     display: flex;
-    flex-direction: column;
-    gap: var(--xc-spacing-sm);
-    margin-bottom: var(--xc-spacing-lg);
-    max-height: 300px;
-    overflow-y: auto;
+    flex-wrap: wrap;
+    gap: var(--xc-spacing-xs);
 }
 
 .tag-item {
-    padding: var(--xc-spacing-sm);
-    border: 1px solid var(--xc-border-color);
+    display: flex;
+    align-items: center;
+    gap: var(--xc-spacing-xs);
+    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
+    background-color: var(--xc-group-color);
     border-radius: var(--xc-border-radius-sm);
     transition: all var(--xc-transition-fast);
 }
@@ -498,76 +480,46 @@ const btnclk_add_tag = () => {
     background-color: var(--xc-background-color-hover);
 }
 
-.tag-checkbox {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-
-.tag-checkbox input[type="checkbox"] {
-    margin-right: var(--xc-spacing-sm);
-    cursor: pointer;
-}
-
-.tag-label {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-sm);
-}
-
 .tag-color {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     display: inline-block;
 }
 
 .tag-name {
-    font-size: var(--xc-font-size-md);
+    font-size: var(--xc-font-size-sm);
     color: var(--xc-text-color);
 }
 
-.dialog-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--xc-spacing-sm);
-}
-
-.confirm-btn,
-.cancel-btn {
-    padding: var(--xc-spacing-sm) var(--xc-spacing-lg);
-    border-radius: var(--xc-border-radius-sm);
-    font-size: var(--xc-font-size-md);
+.tag-delete-btn {
+    background: none;
+    border: none;
+    color: var(--xc-text-color-secondary);
+    font-size: 16px;
     cursor: pointer;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
     transition: all var(--xc-transition-fast);
 }
 
-.confirm-btn {
-    background-color: var(--xc-primary-color);
+.tag-delete-btn:hover {
+    background-color: var(--xc-error-color);
     color: white;
-    border: none;
 }
 
-.confirm-btn:hover:not(:disabled) {
-    opacity: 0.9;
+.no-tags-message {
+    padding: var(--xc-spacing-md);
+    text-align: center;
+    color: var(--xc-text-color-secondary);
+    font-size: var(--xc-font-size-sm);
 }
 
-.confirm-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.cancel-btn {
-    background-color: transparent;
-    color: var(--xc-text-color);
-    border: 1px solid var(--xc-border-color);
-}
-
-.cancel-btn:hover {
-    background-color: var(--xc-background-color-hover);
-}
-
-/* Transition */
 .slide-up-enter-active,
 .slide-up-leave-active {
     transition: all 0.3s ease;
@@ -577,5 +529,16 @@ const btnclk_add_tag = () => {
 .slide-up-leave-to {
     transform: translateX(-50%) translateY(100%);
     opacity: 0;
+}
+
+.fade-down-enter-active,
+.fade-down-leave-active {
+    transition: all 0.2s ease;
+}
+
+.fade-down-enter-from,
+.fade-down-leave-to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
 }
 </style>

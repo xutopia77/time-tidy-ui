@@ -129,6 +129,12 @@ const handleKeyUp = (event: KeyboardEvent) => {
     }
 };
 
+const handleMouseDown = () => {
+    if (!isShiftPressed.value) {
+        firstCheckedIndex.value = null;
+    }
+};
+
 watch(() => items.value.map(item => item.checked), (newCheckedStates, oldValue) => {
     const changedIndex = newCheckedStates.findIndex((checked, index) => {
         return oldValue[index] !== checked;
@@ -140,7 +146,6 @@ watch(() => items.value.map(item => item.checked), (newCheckedStates, oldValue) 
     }
 
     if (!isShiftPressed.value) {
-        firstCheckedIndex.value = null
         return
     }
     if (firstCheckedIndex.value === null) {
@@ -162,6 +167,7 @@ watch(() => items.value.map(item => item.checked), (newCheckedStates, oldValue) 
 onMounted(() => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('mousedown', handleMouseDown);
     
     Utils.files_get();
 });
@@ -169,6 +175,7 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('keydown', handleKeyDown);
     window.removeEventListener('keyup', handleKeyUp);
+    window.removeEventListener('mousedown', handleMouseDown);
     document.removeEventListener('keydown', handleEscKey);
 });
 
@@ -269,6 +276,10 @@ document.addEventListener('keydown', handleEscKey);
     overflow-y: auto;
     overflow-x: hidden;
     transition: margin-right var(--xc-transition-normal);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .sidebar-open .file-content {

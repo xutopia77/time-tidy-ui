@@ -384,3 +384,29 @@
     background: #555;
     /* 悬停时滑块颜色 */
 }
+
+/* ==================================== datalist */
+datalist {
+    background-color: var(--xc-background-color);
+    color: var(--xc-text-color);
+}
+
+datalist option {
+    background-color: var(--xc-input-bg-color);
+    color: var(--xc-text-color);
+    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
+}
+
+datalist option:hover {
+    background-color: var(--xc-background-color-hover);
+}
+
+/* ==================================== autocomplete dropdown */
+input[list]::-webkit-calendar-picker-indicator {
+    filter: invert(0.8);
+    cursor: pointer;
+}
+
+input[list]::-webkit-calendar-picker-indicator:hover {
+    filter: invert(0.9);
+}

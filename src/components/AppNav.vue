@@ -1,7 +1,7 @@
 <template>
     <div class="sidebar-nav">
         <div class="sidebar-logo">
-            <WindmillTwo size="28" />
+            <img src="/assets/images/icon.png" alt="logo" width="28" height="28" />
         </div>
         
         <div class="sidebar-menu">
@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { Home, System, WindmillTwo, Remind, Dashboard } from '@icon-park/vue-next'
+import { Home, System, Remind, Dashboard } from '@icon-park/vue-next'
 import '@/assets/common.css'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
