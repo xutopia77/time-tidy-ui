@@ -21,6 +21,7 @@ export type AppStore = {
     envMode: DataTypes.EnvModeType,
     cardWidth: number,                          // 卡片宽度
     cardHeight: number,                         // 卡片高度
+    cardViewMode: DataTypes.CardViewMode,       // 卡片视图模式
     // 
     prj: DataTypes.Prj,                        // 当前项目信息
     srvPrefix: string,                          // 服务器前缀
@@ -65,6 +66,7 @@ export const useAppStore = defineStore('app', {
         envMode: DataTypes.EnvModeType.pro,
         cardWidth: 216, // 卡片宽度
         cardHeight: 216, // 卡片高度
+        cardViewMode: "card", // 卡片视图模式
         // 
         srvPrefix: 'http://127.0.0.1:38080', // debug，electron
         // srvPrefix: '', // release

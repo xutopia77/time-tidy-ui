@@ -9,13 +9,13 @@
                         <span style="color: aliceblue;">{{ catalog.name }}</span>
                         <hr>
                     </div>
-                    <div class="file-grid">
+                    <div class="file-grid" :class="`view-mode-${cardViewMode}`">
                         <template v-for="(item) in catalog.files" :key="item.id">
                             <ImageCard :item="item" />
                         </template>
                     </div>
                 </template>
-                <div class="file-grid" v-if="!isAllPathSearch">
+                <div class="file-grid" :class="`view-mode-${cardViewMode}`" v-if="!isAllPathSearch">
                     <template v-for="item in dirs" :key="item.id">
                         <FolderCard :item="item" />
                     </template>
@@ -92,6 +92,8 @@ const dirs = computed(() => appStore.curDirs);
 const currentPath = computed(() => appStore.curPath);
 
 const isAllPathSearch = computed(() => appStore.searchCon.pathType === 'allPath');
+
+const cardViewMode = computed(() => appStore.cardViewMode);
 
 const showPagination = computed(() => {
     const totalPages = Math.ceil(appStore.curFileTotal / appStore.searchCon.pageSize);
@@ -292,6 +294,20 @@ document.addEventListener('keydown', handleEscKey);
     gap: var(--xc-spacing-md);
     padding: var(--xc-spacing-sm);
     align-content: flex-start;
+}
+
+.file-grid.view-mode-card {
+    gap: var(--xc-spacing-md);
+}
+
+.file-grid.view-mode-tile {
+    gap: var(--xc-spacing-xs);
+}
+
+.file-grid.view-mode-adaptive {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--xc-spacing-xs);
 }
 
 .file-pagination {

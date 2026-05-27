@@ -1,5 +1,5 @@
 <template>
-    <div class="xc-card" :class="{ 'checked': isChecked }" :style="{
+    <div class="xc-card" :class="{ 'checked': isChecked, 'no-info': !showCardInfo }" :style="{
         width: `${cardWidth}px`
     }">
         <div class="xc-card-checkbox-container">
@@ -11,7 +11,7 @@
             }" @click="btnclk_handleClickImage">
                 <img :src="item.icon" alt="icon" />
             </div>
-            <div class="xc-card-desc" @click="btnclk_handleClickItemMsg">
+            <div v-if="showCardInfo" class="xc-card-desc" @click="btnclk_handleClickItemMsg">
                 <p class="xc-card-name xc-card-filename">{{ item.name }}</p>
                 <div class="xc-card-meta">
                     <span class="xc-card-size">{{ Utils.gen_size_str(item.size) }}</span>
@@ -49,6 +49,10 @@ const cardHeight = computed(() => {
 
 const showFilePath = computed(() => {
     return appStore.searchCon.pathType === 'allPath';
+});
+
+const showCardInfo = computed(() => {
+    return appStore.cardViewMode === 'card';
 });
 
 const isChecked = ref(false);
@@ -91,6 +95,10 @@ const btnclk_handleClickItemMsg = () => {
 .xc-card.checked {
     border-color: var(--xc-primary-color);
     background-color: rgba(74, 111, 165, 0.1);
+}
+
+.xc-card.no-info {
+    height: auto;
 }
 
 .xc-card-content {

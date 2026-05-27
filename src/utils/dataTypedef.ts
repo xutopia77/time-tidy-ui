@@ -145,6 +145,7 @@ export enum FileType {
 
 export type FileShowType = "fileSimilarity" | "time" | "";
 export type MessageShowType = "success" | "error" | "warning" | "info";
+export type CardViewMode = "card" | "tile" | "adaptive";
 
 // 字符串转 FileType 枚举
 export function stringToFileType(str: string): FileType | null {
