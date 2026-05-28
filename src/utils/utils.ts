@@ -923,6 +923,9 @@ class Utils {
             return { code: -1, status: errorMsg, doing: false };
         }
     }
+    static async fileOpenWithDefault(fileId: number): Promise<DatTypes.Resp> {
+        return await ApiService.fileOpenWithDefault(fileId);
+    }
 }
 
 export default Utils;

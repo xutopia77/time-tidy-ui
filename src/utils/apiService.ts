@@ -66,4 +66,8 @@ export class ApiService {
   static async projectHealth(req: DatTypes.FileHealthGetReq): Promise<ApiResponse<void>> {
     return getApiClient().post('/api/v1/project_health', req);
   }
+
+  static async fileOpenWithDefault(fileId: number): Promise<ApiResponse<void>> {
+    return getApiClient().post('/api/v1/file_open_with_default', { fileId });
+  }
 }

@@ -34,6 +34,10 @@
 
         <div class="fab-container" :class="{ 'fab-sidebar-open': sidebarOpen }">
             <div v-if="fabMenuOpen" class="fab-menu">
+                <div class="fab-menu-item" @click="openFileWithDefault" :class="{ 'disabled': !canOpenFile }">
+                    <span class="fab-menu-icon">📂</span>
+                    <span class="fab-menu-text">默认打开</span>
+                </div>
                 <div class="fab-menu-item" @click="toggleSidebar">
                     <span class="fab-menu-icon">{{ sidebarOpen ? '◀' : '▶' }}</span>
                     <span class="fab-menu-text">{{ sidebarOpen ? '收起面板' : '展开面板' }}</span>
@@ -104,6 +108,10 @@ const selectedFiles = computed(() => {
     return items.value.filter(item => item.checked);
 });
 
+const canOpenFile = computed(() => {
+    return selectedFiles.value.length === 1;
+});
+
 const sidebarOpen = ref(false);
 
 function toggleSidebar() {
@@ -114,6 +122,31 @@ function toggleSidebar() {
 function enterFolder(dir: DatType.DirItem) {
     Utils.dir_slt_update(dir.path);
 }
+
+const openFileWithDefault = async () => {
+    if (!canOpenFile.value) {
+        Utils.message_notify({ 
+            content: '请选择单个文件', 
+            type: 'warning' 
+        });
+        return;
+    }
+
+    const file = selectedFiles.value[0];
+    try {
+        await Utils.fileOpenWithDefault(file.id);
+        Utils.message_notify({ 
+            content: '已使用默认软件打开文件', 
+            type: 'success' 
+        });
+    } catch (error) {
+        console.error('打开文件失败:', error);
+        Utils.message_notify({ 
+            content: '打开文件失败', 
+            type: 'error' 
+        });
+    }
+};
 
 const isShiftPressed = ref(false);
 const firstCheckedIndex = ref<number | null>(null);
@@ -369,7 +402,7 @@ document.addEventListener('keydown', handleEscKey);
     display: flex;
     align-items: center;
     gap: var(--xc-spacing-xs);
-    padding: var(--xc-spacing-xs) var(--xc-spacing-md);
+    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
     background-color: var(--xc-background-color-hover);
     border-radius: var(--xc-border-radius-md);
     cursor: pointer;
@@ -380,6 +413,12 @@ document.addEventListener('keydown', handleEscKey);
 .fab-menu-item:hover {
     background-color: var(--xc-primary-color);
     color: white;
+}
+
+.fab-menu-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .fab-menu-icon {
