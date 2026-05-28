@@ -1,16 +1,17 @@
 <template>
-    <div class="xc-card" :class="{ 'checked': isChecked }" :style="{
-        width: `${cardWidth}px`,
-        height: `${cardHeight}px`
+    <div class="xc-card" :class="{ 'checked': isChecked, 'no-info': !showCardInfo }" :style="{
+        width: `${cardWidth}px`
     }">
         <div class="xc-card-checkbox-container">
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" class="xc-checkbox" />
         </div>
         <div class="xc-card-content" @click="btnclk_dir">
-            <div class="xc-card-icon">
+            <div class="xc-card-icon" :class="{ 'tile-mode': isTileMode }" :style="{
+                height: `${cardHeight}px`
+            }">
                 <FolderClose :size="cardWidth - 80" :strokeWidth=1 color="#333" />
             </div>
-            <div class="xc-card-desc">
+            <div v-if="showCardInfo" class="xc-card-desc">
                 <p class="xc-card-name xc-card-foldername">{{ item.name }}</p>
             </div>
         </div>
@@ -28,7 +29,6 @@ import { FolderClose } from '@icon-park/vue-next'
 
 const props = defineProps<{
     item: DatType.DirItem;
-    // 新增：接收是否选中的初始状态
     checked?: boolean;
 }>();
 
@@ -40,9 +40,16 @@ const cardHeight = computed(() => {
     return appStore.cardWidth;
 });
 
+const showCardInfo = computed(() => {
+    return appStore.cardViewMode === 'card';
+});
+
+const isTileMode = computed(() => {
+    return appStore.cardViewMode === 'tile' || appStore.cardViewMode === 'adaptive';
+});
+
 const isChecked = ref(props.checked || false);
 
-// 处理 checkbox 状态变化
 const handleCheckboxChange = () => {
     appStore.curDirs.forEach((folder) => {
         if (folder.id == props.item.id) {
@@ -71,11 +78,25 @@ function btnclk_dir() {
     background-color: rgba(74, 111, 165, 0.1);
 }
 
+.xc-card.no-info {
+    height: auto;
+}
+
 .xc-card-icon {
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform var(--xc-transition-normal);
+}
+
+.xc-card-icon.tile-mode {
+    overflow: hidden;
+}
+
+.xc-card-icon.tile-mode svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .xc-card:hover .xc-card-icon {

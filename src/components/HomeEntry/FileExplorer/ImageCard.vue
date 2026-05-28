@@ -6,7 +6,7 @@
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" class="xc-checkbox" />
         </div>
         <div class="xc-card-content">
-            <div class="xc-card-icon" :style="{
+            <div class="xc-card-icon" :class="{ 'tile-mode': isTileMode }" :style="{
                 height: `${cardHeight}px`
             }" @click="btnclk_handleClickImage">
                 <img :src="item.icon" alt="icon" />
@@ -53,6 +53,10 @@ const showFilePath = computed(() => {
 
 const showCardInfo = computed(() => {
     return appStore.cardViewMode === 'card';
+});
+
+const isTileMode = computed(() => {
+    return appStore.cardViewMode === 'tile' || appStore.cardViewMode === 'adaptive';
 });
 
 const isChecked = ref(false);
@@ -107,6 +111,23 @@ const btnclk_handleClickItemMsg = () => {
 
 .xc-card-icon {
     position: relative;
+}
+
+.xc-card-icon.tile-mode {
+    overflow: hidden;
+}
+
+.xc-card-icon.tile-mode img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.xc-card-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .xc-card-overlay {
