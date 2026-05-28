@@ -45,6 +45,13 @@ watch(selectedItem, (newValue: DatType.DirTreeItem | null) => {
         return
     }
     console.log('FolderListSection selected:', newValue)
+    if (appStore.searchCon.pathType === 'allPath') {
+        Utils.message_notify({ 
+            content: '当前为全部文件搜索模式，无法跳转文件夹', 
+            type: 'warning' 
+        });
+        return;
+    }
     Utils.dir_slt_update(newValue)
 })
 

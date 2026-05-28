@@ -314,7 +314,7 @@ export class FileSearchCondition {
     sortOrder: string = "asc";// asc, desc
     pathType: string = "curPath";// curPath, allPath
     page: number = 1;
-    pageSize: number = 50;
+    pageSize: number = 500;
     tags: string[] = [];// tags
     noTag: 'true' | 'false' | '' = '';
     bReverseSltTag: boolean = false; // 反向选择标签

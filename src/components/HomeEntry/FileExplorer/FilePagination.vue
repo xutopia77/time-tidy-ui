@@ -17,12 +17,12 @@
         <div class="page-size-selector">
             <label class="page-size-label">每页:</label>
             <select v-model="pageSize" @change="btnclk_chgePageSize" class="page-size-select">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="200">200</option>
-                <option value="500">500</option>
+                <option value="10">200</option>
+                <option value="20">300</option>
+                <option value="50">500</option>
+                <option value="100">1000</option>
+                <option value="200">2000</option>
+                <option value="500">5000</option>
             </select>
         </div>
     </div>

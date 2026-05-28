@@ -10,7 +10,7 @@
                 <span 
                     @click="navigateToPath(part.path)" 
                     class="path-part"
-                    :class="{ 'clickable': index < pathParts.length - 1 }"
+                    :class="{ 'clickable': index < pathParts.length - 1 && !isAllPathSearch, 'disabled': isAllPathSearch }"
                 >
                     <HardDisk v-if="part.name == ''" size="16" />
                     <span v-else>{{ part.name }}</span>
@@ -43,6 +43,10 @@ const currentPath = computed(() => {
     return appStore.curPath
 });
 
+const isAllPathSearch = computed(() => {
+    return appStore.searchCon.pathType === 'allPath';
+});
+
 const pathParts: ComputedRef<PathPart[]> = computed(() => {
     const parts = currentPath.value.split('/').filter(part => part !== '');
     const re = parts.map((part, index) => {
@@ -61,6 +65,13 @@ const pathParts: ComputedRef<PathPart[]> = computed(() => {
 });
 
 const navigateToPath = (path: string) => {
+    if (isAllPathSearch.value) {
+        Utils.message_notify({ 
+            content: '当前为全部文件搜索模式，无法跳转文件夹', 
+            type: 'warning' 
+        });
+        return;
+    }
     appStore.searchCon.pathType = 'curPath';
     Utils.dir_slt_update(path);
 };
@@ -110,6 +121,11 @@ const navigateToPath = (path: string) => {
 
 .path-part.clickable:active {
     transform: scale(0.98);
+}
+
+.path-part.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .path-item.is-current .path-part {

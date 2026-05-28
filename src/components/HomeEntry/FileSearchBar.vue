@@ -168,6 +168,17 @@ const bReverseSltTag = ref(false);
 const bNoTag = ref<'true' | 'false' | ''>('');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 
+watch(pathType, (newVal) => {
+    if (newVal === 'allPath') {
+        const rootPath = appStore.curSltDirTreeItem?.dirInfo?.dir?.path || '/';
+        Utils.dir_slt_update(rootPath);
+        Utils.message_notify({ 
+            content: '已切换到全部文件搜索，当前路径已设置为根路径', 
+            type: 'info' 
+        });
+    }
+});
+
 // New search condition variables
 const minSizeMB = ref<number | null>(null);
 const maxSizeMB = ref<number | null>(null);

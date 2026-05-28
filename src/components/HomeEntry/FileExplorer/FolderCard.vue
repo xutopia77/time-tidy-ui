@@ -52,6 +52,13 @@ const handleCheckboxChange = () => {
 };
 
 function btnclk_dir() {
+    if (appStore.searchCon.pathType === 'allPath') {
+        Utils.message_notify({ 
+            content: '当前为全部文件搜索模式，无法跳转文件夹', 
+            type: 'warning' 
+        });
+        return;
+    }
     console.log('click', props.item);
     appStore.searchCon.pathType = 'curPath';
     Utils.dir_slt_update(props.item.path)
