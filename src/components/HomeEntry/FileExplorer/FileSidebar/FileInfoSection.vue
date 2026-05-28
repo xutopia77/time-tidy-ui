@@ -8,33 +8,33 @@
         <div class="section-content" v-if="selectedFiles.length > 0">
             <template v-if="selectedFiles.length === 1">
                 <div class="info-item">
-                    <span class="info-label">文件名</span>
+                    <span class="info-label">名称：</span>
                     <span class="info-value">{{ selectedFiles[0].name }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">路径</span>
+                    <span class="info-label">路径：</span>
                     <span class="info-value" :title="selectedFiles[0].path">{{ selectedFiles[0].path }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">大小</span>
+                    <span class="info-label">大小：</span>
                     <span class="info-value">{{ formatFileSize(selectedFiles[0].size) }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">时间</span>
+                    <span class="info-label">时间：</span>
                     <span class="info-value">{{ selectedFiles[0].time }}</span>
                 </div>
                 <div class="info-item" v-if="selectedFiles[0].duration > 0">
-                    <span class="info-label">时长</span>
+                    <span class="info-label">时长：</span>
                     <span class="info-value">{{ formatDuration(selectedFiles[0].duration) }}</span>
                 </div>
             </template>
             <template v-else>
                 <div class="info-item">
-                    <span class="info-label">已选中</span>
+                    <span class="info-label">已选中：</span>
                     <span class="info-value">{{ selectedFiles.length }} 个文件</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">总大小</span>
+                    <span class="info-label">总大小：</span>
                     <span class="info-value">{{ formatFileSize(totalSelectedSize) }}</span>
                 </div>
             </template>
@@ -106,9 +106,9 @@ function formatDuration(ms: number): string {
 }
 
 .info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    /* display: flex;
+    flex-direction: column; */
+    gap: 1px;
 }
 
 .info-label {
@@ -117,7 +117,7 @@ function formatDuration(ms: number): string {
 }
 
 .info-value {
-    font-size: var(--xc-font-size-md);
+    font-size: var(--xc-font-size-sm);
     color: var(--xc-text-color);
     word-break: break-all;
 }

@@ -44,6 +44,7 @@ export type AppStore = {
     allTags: DataTypes.TagItem[],               // 所有标签列表
     curFiles: DataTypes.File[],             // 当前展示的文件列表
     curSltFile: DataTypes.File | null,      // 当前 选中 的单个文件
+    hoverFile: DataTypes.File | null,       // 当前悬停的文件（用于侧边栏预览）
     curDirs: DataTypes.DirItem[],               // 当前展示的文件夹列表
     curAllDirs: DataTypes.DirItem[],            // 当前工程中所有文件夹列表
     DirTrees: DataTypes.DirTreeItem[],          // 当前工程中所有文件夹列表的树状结构
@@ -88,6 +89,7 @@ export const useAppStore = defineStore('app', {
         allTags: [], // 所有标签列表
         curFiles: [],
         curSltFile: null,
+        hoverFile: null,
         curDirs: [],
         curAllDirs: [],
         DirTrees: [],

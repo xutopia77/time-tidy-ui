@@ -1,7 +1,7 @@
 <template>
     <div class="xc-card" :class="{ 'checked': isChecked, 'no-info': !showCardInfo }" :style="{
         width: `${cardWidth}px`
-    }">
+    }" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
         <div class="xc-card-checkbox-container">
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" class="xc-checkbox" />
         </div>
@@ -88,6 +88,14 @@ const btnclk_handleClickImage = () => {
 
 const btnclk_handleClickItemMsg = () => {
     appStore.curSltFile = props.item;
+};
+
+const handleMouseEnter = () => {
+    appStore.hoverFile = props.item;
+};
+
+const handleMouseLeave = () => {
+    appStore.hoverFile = null;
 };
 </script>
 

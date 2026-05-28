@@ -25,10 +25,10 @@
             </div>
 
             <div class="setting-section">
-                <label class="setting-label">文件展示类型</label>
+                <label class="setting-label">分组依据</label>
                 <select v-model="fileShowType" class="xc-select">
-                    <option value="">默认</option>
-                    <option value="time">按时间分类</option>
+                    <option value="">无</option>
+                    <option value="time">按时间分组</option>
                 </select>
             </div>
 
@@ -38,17 +38,14 @@
                     <label class="view-mode-option">
                         <input type="radio" v-model="cardViewMode" value="card" class="xc-radio" />
                         <span class="view-mode-label">卡片视图</span>
-                        <span class="view-mode-desc">显示完整信息</span>
                     </label>
                     <label class="view-mode-option">
                         <input type="radio" v-model="cardViewMode" value="tile" class="xc-radio" />
                         <span class="view-mode-label">平铺视图</span>
-                        <span class="view-mode-desc">仅显示图片</span>
                     </label>
                     <label class="view-mode-option">
                         <input type="radio" v-model="cardViewMode" value="adaptive" class="xc-radio" />
                         <span class="view-mode-label">自适应视图</span>
-                        <span class="view-mode-desc">自适应网格</span>
                     </label>
                 </div>
             </div>
@@ -216,20 +213,22 @@ onMounted(() => {
 
 .view-mode-options {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: var(--xc-spacing-sm);
 }
 
 .view-mode-option {
     display: flex;
     align-items: center;
-    gap: var(--xc-spacing-sm);
+    gap: var(--xc-spacing-xs);
     padding: var(--xc-spacing-sm) var(--xc-spacing-md);
     background-color: var(--xc-input-bg-color);
     border: var(--xc-border);
     border-radius: var(--xc-border-radius-sm);
     cursor: pointer;
     transition: all var(--xc-transition-fast);
+    flex: 1;
+    justify-content: center;
 }
 
 .view-mode-option:hover {
@@ -278,12 +277,6 @@ onMounted(() => {
     font-size: var(--xc-font-size-md);
     color: var(--xc-text-color);
     font-weight: 500;
-}
-
-.view-mode-desc {
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color-secondary);
-    margin-left: auto;
 }
 
 .page-footer {

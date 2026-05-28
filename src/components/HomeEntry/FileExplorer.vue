@@ -301,7 +301,7 @@ document.addEventListener('keydown', handleEscKey);
 }
 
 .file-grid.view-mode-tile {
-    gap: var(--xc-spacing-xs);
+    gap: 2px;
 }
 
 .file-grid.view-mode-adaptive {

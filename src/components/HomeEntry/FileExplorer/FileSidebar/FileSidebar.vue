@@ -6,9 +6,9 @@
                 <button class="sidebar-close-btn" @click="$emit('close')">×</button>
             </div>
 
-            <FileInfoSection :selected-files="selectedFiles" />
+            <FileInfoSection :selected-files="displayFiles" />
             
-            <FileTagSection :selected-files="selectedFiles" />
+            <FileTagSection :selected-files="displayFiles" />
             
             <FolderListSection 
                 :dirs="dirs"
@@ -20,12 +20,16 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import * as DatType from '@/utils/dataTypedef'
+import { useAppStore } from '@/stores/AppStore';
 import FileInfoSection from './FileInfoSection.vue'
 import FileTagSection from './FileTagSection.vue'
 import FolderListSection from './FolderListSection.vue'
 
-defineProps<{
+const appStore = useAppStore();
+
+const props = defineProps<{
     visible: boolean;
     selectedFiles: DatType.File[];
     dirs: DatType.DirItem[];
@@ -36,6 +40,13 @@ defineEmits<{
     (e: 'close'): void;
     (e: 'enter-folder', dir: DatType.DirItem): void;
 }>();
+
+const displayFiles = computed(() => {
+    if (appStore.hoverFile && props.visible) {
+        return [appStore.hoverFile];
+    }
+    return props.selectedFiles;
+});
 </script>
 
 <style scoped>
