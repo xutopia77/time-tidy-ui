@@ -70,4 +70,16 @@ export class ApiService {
   static async fileOpenWithDefault(fileId: number): Promise<ApiResponse<void>> {
     return getApiClient().post('/api/v1/file_open_with_default', { fileId });
   }
+
+  static async aiStatus(): Promise<ApiResponse<DatTypes.AIStatus>> {
+    return getApiClient().post('/api/v1/ai_status');
+  }
+
+  static async aiTagDetect(req: DatTypes.AITagDetectReq): Promise<ApiResponse<void>> {
+    return getApiClient().post('/api/v1/ai_tag_detect', req);
+  }
+
+  static async aiConfigSet(req: DatTypes.AIConfigSetReq): Promise<ApiResponse<DatTypes.AIStatus>> {
+    return getApiClient().post('/api/v1/ai_config_set', req);
+  }
 }

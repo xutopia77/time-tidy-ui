@@ -22,6 +22,7 @@
         <div class="settings-content">
             <div class="content-wrapper">
                 <GeneralSettings v-if="activeSection === 'general'" />
+                <AISettings v-if="activeSection === 'ai'" />
                 <AboutSettings v-if="activeSection === 'about'" />
             </div>
         </div>
@@ -30,15 +31,17 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { User, Info } from '@icon-park/vue-next';
+import { User, Info, Brain } from '@icon-park/vue-next';
 import GeneralSettings from './SettingsEntry/GeneralSettings.vue';
 import AboutSettings from './SettingsEntry/AboutSettings.vue';
+import AISettings from './SettingsEntry/AISettings.vue';
 import '@/assets/common.css';
 
 const activeSection = ref('general');
 
 const menuItems = [
     { id: 'general', label: '基本设置', icon: User },
+    { id: 'ai', label: 'AI设置', icon: Brain },
     { id: 'about', label: '关于', icon: Info },
 ];
 </script>

@@ -38,6 +38,10 @@
                     <span class="fab-menu-icon">📂</span>
                     <span class="fab-menu-text">默认打开</span>
                 </div>
+                <div class="fab-menu-item" @click="aiTagDetect" :class="{ 'disabled': !canAITag }">
+                    <span class="fab-menu-icon">🤖</span>
+                    <span class="fab-menu-text">AI标签</span>
+                </div>
                 <div class="fab-menu-item" @click="toggleSidebar">
                     <span class="fab-menu-icon">{{ sidebarOpen ? '◀' : '▶' }}</span>
                     <span class="fab-menu-text">{{ sidebarOpen ? '收起面板' : '展开面板' }}</span>
@@ -81,6 +85,8 @@ import FilePagination from '@/components/HomeEntry/FileExplorer/FilePagination.v
 import FileSidebar from '@/components/HomeEntry/FileExplorer/FileSidebar/FileSidebar.vue';
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
+import { ApiService } from '@/utils/apiService';
+import type { AIStatus } from '@/utils/dataTypedef';
 const appStore = useAppStore()
 import '@/assets/common.css'
 import Utils from '@/utils/utils';
@@ -111,6 +117,53 @@ const selectedFiles = computed(() => {
 const canOpenFile = computed(() => {
     return selectedFiles.value.length === 1;
 });
+
+const aiStatus = ref<AIStatus | null>(null);
+
+const canAITag = computed(() => {
+    return selectedFiles.value.length > 0 && aiStatus.value?.available === true;
+});
+
+const loadAIStatus = async () => {
+    try {
+        const resp = await ApiService.aiStatus();
+        if (resp.code === 0 && resp.data) {
+            aiStatus.value = resp.data as AIStatus;
+        }
+    } catch (e) {
+        console.error('Failed to load AI status:', e);
+    }
+};
+
+const aiTagDetect = async () => {
+    if (!canAITag.value) {
+        if (!aiStatus.value?.available) {
+            Utils.message_notify({ content: 'AI引擎不可用，请在设置中启用AI功能', type: 'warning' });
+        } else {
+            Utils.message_notify({ content: '请选择文件', type: 'warning' });
+        }
+        return;
+    }
+
+    fabMenuOpen.value = false;
+
+    const fileIds = selectedFiles.value.map(f => f.id);
+    try {
+        const resp = await ApiService.aiTagDetect({ fileIds, topK: 5 });
+        if (resp.code === 0) {
+            if (resp.doing) {
+                Utils.message_notify({ content: 'AI标签检测已开始', type: 'info' });
+            } else {
+                Utils.message_notify({ content: 'AI标签检测完成', type: 'success' });
+            }
+        } else {
+            Utils.message_notify({ content: 'AI标签检测失败: ' + (resp.status || '未知错误'), type: 'error' });
+        }
+    } catch (error) {
+        console.error('AI标签检测失败:', error);
+        Utils.message_notify({ content: 'AI标签检测失败', type: 'error' });
+    }
+};
 
 const sidebarOpen = ref(false);
 
@@ -205,6 +258,7 @@ onMounted(() => {
     window.addEventListener('mousedown', handleMouseDown);
     
     Utils.files_get();
+    loadAIStatus();
 });
 
 onUnmounted(() => {

@@ -596,3 +596,23 @@ export class DictionaryResp {
     respCode: Record<string, any> = {};
 }
 
+export class AIStatus {
+    available: boolean = false;
+    enabled: boolean = false;
+    pythonPath: string = '';
+    tagThreshold: number = 0.1;
+    autoTag: boolean = false;
+}
+
+export class AITagDetectReq {
+    fileIds: number[] = [];
+    topK: number = 5;
+}
+
+export class AIConfigSetReq {
+    enabled?: boolean;
+    python_path?: string;
+    tag_threshold?: number;
+    auto_tag?: boolean;
+}
+
