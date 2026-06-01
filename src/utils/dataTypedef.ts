@@ -28,7 +28,8 @@ export enum ProgressStep {
     Hash = 'hash',
     Sync = 'sync',
     Similarity = 'similarity',
-    FileMove = 'file_move'
+    FileMove = 'file_move',
+    AIBackgroundAnalyze = 'ai_background_analyze'
 }
 
 // 进度数据
@@ -242,6 +243,8 @@ export class FileItemTag {
     color: string = "#4A6FA5";
     type: string = "";
     description: string = "";
+    source: string = "manual";
+    confidence: number = 1.0;
     createdAt: string = "";
     updatedAt: string = "";
 }
@@ -477,6 +480,8 @@ export class FileTagSetReq {
     fileIds: number[] = [];
     tagName: string = '';
     tagColor?: string = '';
+    source?: string = 'manual';
+    confidence?: number = 1.0;
 }
 
 export class FileTagDeleteReq {
@@ -614,5 +619,19 @@ export class AIConfigSetReq {
     python_path?: string;
     tag_threshold?: number;
     auto_tag?: boolean;
+}
+
+export class AIBackgroundAnalyzeReq {
+    mode: string = 'incremental';
+}
+
+export class AIBackgroundAnalyzeStatus {
+    isRunning: boolean = false;
+    totalFiles: number = 0;
+    processedFiles: number = 0;
+    successCount: number = 0;
+    failCount: number = 0;
+    currentBatch: number = 0;
+    status: string = '';
 }
 

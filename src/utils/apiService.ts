@@ -82,4 +82,12 @@ export class ApiService {
   static async aiConfigSet(req: DatTypes.AIConfigSetReq): Promise<ApiResponse<DatTypes.AIStatus>> {
     return getApiClient().post('/api/v1/ai_config_set', req);
   }
+
+  static async aiBackgroundAnalyze(req: DatTypes.AIBackgroundAnalyzeReq): Promise<ApiResponse<void>> {
+    return getApiClient().post('/api/v1/ai_background_analyze', req);
+  }
+
+  static async aiBackgroundAnalyzeStop(): Promise<ApiResponse<void>> {
+    return getApiClient().post('/api/v1/ai_background_analyze_stop');
+  }
 }

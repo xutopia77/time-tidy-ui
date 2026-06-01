@@ -230,6 +230,9 @@ function handleProgressUpdate(data: DatType.Resp<DatType.ProgressUpdateData>) {
             case DatType.ProgressStep.FileMove:
                 appStore.progressFileMove = progress
                 break
+            case DatType.ProgressStep.AIBackgroundAnalyze:
+                appStore.progressData = progress
+                break
         }
     }
 }

@@ -123,10 +123,15 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
         if (jRecord.tags != null) {
             for (const x of jRecord.tags) {
                 const tag = new DatTypes.FileItemTag();
-                tag.name = x.name
-                tag.color = x.color == '' ? tag.color : x.color
-                tag.type = x.type == '' ? tag.type : x.type
-                tag.description = x.Description == '' ? tag.description : x.Description
+                tag.id = x.id || 0;
+                tag.name = x.name || '';
+                tag.color = x.color || tag.color;
+                tag.type = x.type || tag.type;
+                tag.description = x.description || tag.description;
+                tag.source = x.source || 'manual';
+                tag.confidence = x.confidence || 1.0;
+                tag.createdAt = x.createdAt || x.created_at || '';
+                tag.updatedAt = x.updatedAt || x.updated_at || '';
                 if (tag.name == '') {
                     continue;
                 }

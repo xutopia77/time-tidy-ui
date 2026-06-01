@@ -10,9 +10,14 @@
                     v-for="tag in selectedFiles[0].tags" 
                     :key="tag.id" 
                     class="tag-item"
+                    :class="`tag-source-${tag.source}`"
                     :style="{ backgroundColor: tag.color }"
                 >
                     {{ tag.name }}
+                    <span v-if="tag.source === 'ai'" class="tag-badge ai-badge">
+                        🤖 {{ (tag.confidence * 100).toFixed(0) }}%
+                    </span>
+                    <span v-else class="tag-badge manual-badge">👤</span>
                 </span>
             </div>
         </div>
@@ -67,6 +72,30 @@ defineProps<{
     border-radius: var(--xc-border-radius-sm);
     font-size: var(--xc-font-size-sm);
     color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tag-source-ai {
+    border-left: 3px solid rgba(255, 255, 255, 0.8);
+}
+
+.tag-source-manual {
+    border-left: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.tag-badge {
+    font-size: 10px;
+    opacity: 0.9;
+}
+
+.ai-badge {
+    font-weight: 500;
+}
+
+.manual-badge {
+    font-size: 12px;
 }
 
 .empty-hint {

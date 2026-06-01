@@ -1,6 +1,6 @@
 <template>
     <div class="set-entry">
-        <div class="set-options">
+        <div class="set-options xc-scrollbar">
             <div class="settings-group">
                 <div class="form-item">
                     <label class="xc-label">项目路径:</label>
@@ -75,6 +75,41 @@
                     <button title="数据检查" @click="btnclk_detect_health()" class="xc-button">数据检查</button>
                 </div>
             </div>
+
+            <div class="settings-group">
+                <h3 class="group-title">后台AI分析</h3>
+                <div class="form-item select-item">
+                    <label class="xc-label">分析模式:</label>
+                    <select v-model="aiAnalyzeMode" class="xc-select">
+                        <option value="incremental">增量分析(仅分析未打AI标签的图片)</option>
+                        <option value="full">全量分析(分析所有图片)</option>
+                    </select>
+                </div>
+                <div v-if="aiAnalyzeStatus.isRunning" class="ai-status">
+                    <div class="status-info">
+                        <span class="status-badge running">运行中</span>
+                        <span class="status-text">{{ aiAnalyzeStatus.status }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" 
+                            :style="{ width: (aiAnalyzeStatus.processedFiles / aiAnalyzeStatus.totalFiles * 100) + '%' }">
+                        </div>
+                    </div>
+                    <div class="progress-info">
+                        <span>进度: {{ aiAnalyzeStatus.processedFiles }} / {{ aiAnalyzeStatus.totalFiles }}</span>
+                        <span>成功: {{ aiAnalyzeStatus.successCount }}</span>
+                        <span>失败: {{ aiAnalyzeStatus.failCount }}</span>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button v-if="!aiAnalyzeStatus.isRunning" 
+                        title="启动后台AI分析" @click="startAIBackgroundAnalyze" 
+                        class="xc-button">启动分析</button>
+                    <button v-else 
+                        title="停止后台AI分析" @click="stopAIBackgroundAnalyze" 
+                        class="xc-button" style="background-color: #ff4d4f;">停止分析</button>
+                </div>
+            </div>
         </div>
         <div class="set-log">
             <SetEntryLog />
@@ -92,6 +127,7 @@ const appStore = useAppStore()
 // import axios from 'axios';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
+import { ApiService } from '@/utils/apiService';
 
 import SetEntryLog from '@/components/SetEntry/SetEntryLog.vue';
 
@@ -296,6 +332,58 @@ onMounted(() => {
     repoPath.value = appStore.prj.repo
 })
 
+const aiAnalyzeMode = ref('incremental')
+const aiAnalyzeStatus = ref(new DatType.AIBackgroundAnalyzeStatus())
+
+const startAIBackgroundAnalyze = async () => {
+    try {
+        const req = new DatType.AIBackgroundAnalyzeReq()
+        req.mode = aiAnalyzeMode.value
+        
+        const resp = await ApiService.aiBackgroundAnalyze(req)
+        if (resp.code === 0) {
+            Utils.message_notify({ content: '后台AI分析已启动', type: 'success' })
+        } else {
+            Utils.message_notify({ content: '启动失败: ' + (resp.status || '未知错误'), type: 'error' })
+        }
+    } catch (error) {
+        console.error('启动后台AI分析失败:', error)
+        Utils.message_notify({ content: '启动后台AI分析失败', type: 'error' })
+    }
+}
+
+const stopAIBackgroundAnalyze = async () => {
+    try {
+        const resp = await ApiService.aiBackgroundAnalyzeStop()
+        if (resp.code === 0) {
+            Utils.message_notify({ content: '已停止后台AI分析', type: 'info' })
+        } else {
+            Utils.message_notify({ content: '停止失败: ' + (resp.status || '未知错误'), type: 'error' })
+        }
+    } catch (error) {
+        console.error('停止后台AI分析失败:', error)
+        Utils.message_notify({ content: '停止后台AI分析失败', type: 'error' })
+    }
+}
+
+watch(() => appStore.progressData, () => {
+    if (appStore.progressData.step === 'ai_background_analyze') {
+        aiAnalyzeStatus.value.processedFiles = appStore.progressData.current
+        aiAnalyzeStatus.value.totalFiles = appStore.progressData.total
+        aiAnalyzeStatus.value.status = appStore.progressData.status
+        aiAnalyzeStatus.value.isRunning = appStore.progressData.isRunning
+        
+        const successMatch = appStore.progressData.status.match(/success:\s*(\d+)/)
+        const failMatch = appStore.progressData.status.match(/fail:\s*(\d+)/)
+        if (successMatch) {
+            aiAnalyzeStatus.value.successCount = parseInt(successMatch[1])
+        }
+        if (failMatch) {
+            aiAnalyzeStatus.value.failCount = parseInt(failMatch[1])
+        }
+    }
+}, { deep: true })
+
 </script>
 
 <style scoped>
@@ -312,8 +400,6 @@ onMounted(() => {
     width: 60%;
     height: 100%;
     margin: 0;
-    /* padding: 20px; */
-    overflow-y: auto;
     background-color: var(--xc-background-color);
 }
 
@@ -399,5 +485,74 @@ onMounted(() => {
     display: flex;
     align-items: center;
     margin: 8px 0;
+}
+
+.group-title {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--xc-text-color);
+    border-bottom: 1px solid var(--xc-border-color);
+    padding-bottom: 8px;
+}
+
+.hint-text {
+    margin-left: 10px;
+    font-size: 12px;
+    color: var(--xc-text-color-secondary);
+}
+
+.ai-status {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: var(--xc-background-color);
+    border-radius: 6px;
+    border: 1px solid var(--xc-border-color);
+}
+
+.status-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-badge.running {
+    background-color: #52c41a;
+    color: white;
+}
+
+.status-text {
+    font-size: 14px;
+    color: var(--xc-text-color);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--xc-border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--xc-primary-color);
+    transition: width 0.3s ease;
+}
+
+.progress-info {
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--xc-text-color-secondary);
 }
 </style>
