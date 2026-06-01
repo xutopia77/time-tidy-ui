@@ -346,7 +346,7 @@ async function tags_get() {
 }
 
 async function tags_set(tag: DatTypes.TagItem): Promise<void> {
-    const scoreRegex = /^sys_score(10|[1-9])$/;
+    const scoreRegex = /^[1-5]☆$/;
     if (scoreRegex.test(tag.name)) {
         Utils.message_notify({ content: `系统标签 ${tag.name} 不能被修改`, type: "error" });
         return;
@@ -549,7 +549,7 @@ function dir_slt_update(treeItem: DatTypes.DirTreeItem | string) {
 
 async function tag_delete(_req: DatTypes.TagItem): Promise<DatTypes.Resp> {
     const resp = new DatTypes.Resp()
-    const scoreRegex = /^sys_score(10|[1-9])$/;
+    const scoreRegex = /^[1-5]☆$/;
     if (scoreRegex.test(_req.name)) {
         Utils.message_notify({ content: `系统标签 ${_req.name} 不能被删除`, type: "error" });
         return resp;
@@ -587,13 +587,6 @@ class Utils {
     static tagName2Display(name: string): string {
         if (!name) {
             return '';
-        }
-        const scoreMatch = name.match(/^sys_score(\d{1,2})$/);
-        if (scoreMatch) {
-            const score = parseInt(scoreMatch[1]);
-            if (score >= 1 && score <= 10) {
-                return `${score}☆`;
-            }
         }
         return name;
     }

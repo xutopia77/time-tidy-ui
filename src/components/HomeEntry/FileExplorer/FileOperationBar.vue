@@ -138,9 +138,9 @@ const currentScore = computed(() => {
     if (fSlt.length === 0) return 0;
     
     const scores = fSlt.map(file => {
-        const scoreTag = file.tags.find(tag => tag.name.startsWith('sys_score'));
+        const scoreTag = file.tags.find(tag => /^\d☆$/.test(tag.name));
         if (scoreTag) {
-            return parseInt(scoreTag.name.replace('sys_score', ''));
+            return parseInt(scoreTag.name.replace('☆', ''));
         }
         return 0;
     });
@@ -223,14 +223,14 @@ const setFileScore = (score: number) => {
     }
     
     if (isCurrentScore(score)) {
-        req.tagName = `sys_score${score}`;
+        req.tagName = `${score}☆`;
         Utils.files_tag_delete(req);
         Utils.message_notify({ 
             content: `已删除评分`, 
             type: 'success' 
         });
     } else {
-        req.tagName = `sys_score${score}`;
+        req.tagName = `${score}☆`;
         Utils.files_tag_set(req);
         Utils.message_notify({ 
             content: `已设置评分 ${score}☆`, 
