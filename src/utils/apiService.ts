@@ -55,8 +55,8 @@ export class ApiService {
     return getApiClient().post('/api/v1/tags_delete', req);
   }
 
-  static async fileSimilarityDetect(): Promise<ApiResponse<void>> {
-    return getApiClient().post('/api/v1/file_similarity_detect');
+  static async fileSimilarityDetect(useAI: boolean, minSimilarity: number): Promise<ApiResponse<void>> {
+    return getApiClient().post('/api/v1/file_similarity_detect', { useAI, minSimilarity });
   }
 
   static async fileSimilarityGet(page: number, pageSize: number): Promise<ApiResponse<DatTypes.SimilarityGetResp>> {

@@ -871,9 +871,9 @@ class Utils {
     static files_restore = files_restore;
     static project_health = project_health;
 
-    static async file_similarity_detect(): Promise<DatTypes.Resp> {
+    static async file_similarity_detect(useAI: boolean = false, minSimilarity: number = 0.9): Promise<DatTypes.Resp> {
         try {
-            const response = await ApiService.fileSimilarityDetect();
+            const response = await ApiService.fileSimilarityDetect(useAI, minSimilarity);
             console.log('file info:', response);
             return response;
         } catch (error) {

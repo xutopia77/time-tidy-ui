@@ -110,6 +110,36 @@
                         class="xc-button" style="background-color: #ff4d4f;">停止分析</button>
                 </div>
             </div>
+
+            <div class="settings-group">
+                <h3 class="group-title">AI向量索引</h3>
+                <p class="setting-hint">创建FAISS向量索引，用于AI相似度检测和图像搜索</p>
+                <div v-if="aiIndexInitStatus.isRunning" class="ai-status">
+                    <div class="status-info">
+                        <span class="status-badge running">运行中</span>
+                        <span class="status-text">{{ aiIndexInitStatus.status }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" 
+                            :style="{ width: aiIndexInitStatus.percent + '%' }">
+                        </div>
+                    </div>
+                    <div class="progress-info">
+                        <span>进度: {{ aiIndexInitStatus.current }} / {{ aiIndexInitStatus.total }}</span>
+                        <span v-if="aiIndexInitStatus.processedFiles > 0">
+                            已处理: {{ aiIndexInitStatus.processedFiles }}
+                        </span>
+                        <span v-if="aiIndexInitStatus.skippedFiles > 0">
+                            已跳过: {{ aiIndexInitStatus.skippedFiles }}
+                        </span>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button v-if="!aiIndexInitStatus.isRunning" 
+                        title="创建AI向量索引" @click="startAIIndexInit" 
+                        class="xc-button">创建索引</button>
+                </div>
+            </div>
         </div>
         <div class="set-log">
             <SetEntryLog />
@@ -367,7 +397,7 @@ const stopAIBackgroundAnalyze = async () => {
 }
 
 watch(() => appStore.progressData, () => {
-    if (appStore.progressData.step === 'ai_background_analyze') {
+    if (appStore.progressData.step === DatType.ProgressStep.AIBackgroundAnalyze) {
         aiAnalyzeStatus.value.processedFiles = appStore.progressData.current
         aiAnalyzeStatus.value.totalFiles = appStore.progressData.total
         aiAnalyzeStatus.value.status = appStore.progressData.status
@@ -382,7 +412,51 @@ watch(() => appStore.progressData, () => {
             aiAnalyzeStatus.value.failCount = parseInt(failMatch[1])
         }
     }
+    
+    // AI index init progress
+    if (appStore.progressData.step === DatType.ProgressStep.AiIndexInit) {
+        aiIndexInitStatus.value.current = appStore.progressData.current
+        aiIndexInitStatus.value.total = appStore.progressData.total
+        aiIndexInitStatus.value.percent = appStore.progressData.percent
+        aiIndexInitStatus.value.status = appStore.progressData.status
+        aiIndexInitStatus.value.isRunning = appStore.progressData.isRunning
+        
+        // Parse processed and skipped from status
+        const processedMatch = appStore.progressData.status.match(/processed=(\d+)/)
+        const skippedMatch = appStore.progressData.status.match(/skipped=(\d+)/)
+        if (processedMatch) {
+            aiIndexInitStatus.value.processedFiles = parseInt(processedMatch[1])
+        }
+        if (skippedMatch) {
+            aiIndexInitStatus.value.skippedFiles = parseInt(skippedMatch[1])
+        }
+    }
 }, { deep: true })
+
+// AI Index Init
+const aiIndexInitStatus = ref({
+    isRunning: false,
+    current: 0,
+    total: 0,
+    percent: 0,
+    status: '',
+    processedFiles: 0,
+    skippedFiles: 0
+})
+
+const startAIIndexInit = async () => {
+    try {
+        const req = new DatType.PrjSetReq()
+        req.type = [DatType.PrjSetType.AiIndexInit]
+        req.prj.path = Utils.convertToLinuxPath(prjPath.value)
+        
+        await Utils.project_set(req)
+        Utils.message_notify({ content: 'AI向量索引创建已启动', type: 'success' })
+    } catch (error) {
+        console.error('启动AI索引创建失败:', error)
+        Utils.message_notify({ content: '启动AI索引创建失败', type: 'error' })
+    }
+}
 
 </script>
 
@@ -500,6 +574,13 @@ watch(() => appStore.progressData, () => {
     margin-left: 10px;
     font-size: 12px;
     color: var(--xc-text-color-secondary);
+}
+
+.setting-hint {
+    margin: 0 0 15px 0;
+    font-size: 13px;
+    color: var(--xc-text-color-secondary);
+    line-height: 1.5;
 }
 
 .ai-status {

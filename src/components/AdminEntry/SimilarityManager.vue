@@ -117,11 +117,27 @@
                 </div>
                 <div class="settings-body">
                     <div class="setting-item">
-                        <label>相似度阈值</label>
-                        <div class="setting-control">
-                            <input type="range" v-model="settings.threshold" min="50" max="100" />
-                            <span class="setting-value">{{ settings.threshold }}%</span>
+                        <label>启用AI检测</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" v-model="settings.useAI" />
+                                <span>使用AI相似度检测（基于图像内容）</span>
+                            </label>
                         </div>
+                        <p class="setting-hint" v-if="settings.useAI">
+                            AI检测基于图像内容相似度，比Hash检测更智能，但需要AI引擎支持
+                        </p>
+                    </div>
+
+                    <div class="setting-item" v-if="settings.useAI">
+                        <label>AI相似度阈值</label>
+                        <div class="setting-control">
+                            <input type="range" v-model="settings.minSimilarity" min="0" max="100" step="5" />
+                            <span class="setting-value">{{ (settings.minSimilarity / 100).toFixed(2) }}</span>
+                        </div>
+                        <p class="setting-hint">
+                            相似度阈值越高，检测越严格（推荐0.85-0.95）
+                        </p>
                     </div>
 
                     <div class="setting-item">
@@ -224,7 +240,8 @@ const isDetecting = computed(() => progressSimilarity.value.isRunning);
 const progress = computed(() => progressSimilarity.value.percent);
 
 const settings = ref({
-    threshold: 90,
+    useAI: false,
+    minSimilarity: 90,
     scope: 'all',
     types: {
         image: true,
@@ -247,7 +264,10 @@ const statusClass = computed(() => {
 const startDetection = async () => {
     similarityGroups.value = [];
 
-    const response = await Utils.file_similarity_detect();
+    const useAI = settings.value.useAI;
+    const minSimilarity = settings.value.minSimilarity / 100;
+
+    const response = await Utils.file_similarity_detect(useAI, minSimilarity);
     if (response.code !== 0) {
         Utils.addToast(response.status || '检测启动失败');
     }
@@ -853,6 +873,14 @@ onMounted(() => {
     font-size: var(--xc-font-size-sm);
     font-weight: 500;
     color: var(--xc-text-color);
+}
+
+.setting-hint {
+    margin-top: var(--xc-spacing-xs);
+    font-size: var(--xc-font-size-xs);
+    color: var(--xc-text-color-secondary);
+    opacity: 0.8;
+    line-height: 1.4;
 }
 
 .setting-control {

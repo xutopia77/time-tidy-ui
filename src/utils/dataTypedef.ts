@@ -29,7 +29,8 @@ export enum ProgressStep {
     Sync = 'sync',
     Similarity = 'similarity',
     FileMove = 'file_move',
-    AIBackgroundAnalyze = 'ai_background_analyze'
+    AIBackgroundAnalyze = 'ai_background_analyze',
+    AiIndexInit = 'ai_index_init'
 }
 
 // 进度数据
@@ -390,6 +391,7 @@ export enum PrjSetType {
     GenHashNone = "genHashNone",
     GenHashFull = "genHashFull",
     GenHashIncre = "genHashIncre", // incremental
+    AiIndexInit = "aiIndexInit", // AI vector index initialization
 }
 
 export class Repo {
