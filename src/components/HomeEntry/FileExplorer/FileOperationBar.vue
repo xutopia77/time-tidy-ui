@@ -63,6 +63,25 @@
                     <button @click="btnclk_move_file" class="xc-button action-btn">移动</button>
                     <button @click="btnclk_copy_file" class="xc-button action-btn">复制</button>
                     <button @click="btnclk_delete_file" class="xc-button action-btn danger">删除</button>
+
+                    <div class="popup-wrapper">
+                        <button @click="toggleImageSearchPanel" class="xc-button action-btn">图搜</button>
+                        <Transition name="fade-down">
+                            <div v-if="showImageSearchPanel" class="popup-panel image-search-panel" @click.stop>
+                                <div class="image-search-settings">
+                                    <label>
+                                        相似度阈值:
+                                        <input v-model.number="imageSearchMinSimilar" type="number" min="0" max="1" step="0.1" class="range-input" />
+                                    </label>
+                                    <label>
+                                        返回数量:
+                                        <input v-model.number="imageSearchTopK" type="number" min="1" max="100" class="range-input" />
+                                    </label>
+                                </div>
+                                <button @click="handleImageSearch" class="xc-button search-btn">开始查找</button>
+                            </div>
+                        </Transition>
+                    </div>
                 </div>
             </div>
         </div>
@@ -102,7 +121,12 @@ const showBar = computed(() => {
 
 const showScorePanel = ref(false);
 const showTagPanel = ref(false);
+const showImageSearchPanel = ref(false);
 const newTag = ref('');
+
+// Image search parameters
+const imageSearchMinSimilar = ref(0.5);
+const imageSearchTopK = ref(20);
 
 const tagSuggestions = computed(() => {
     return appStore.allTags.map(tag => Utils.tagName2Display(tag.name));
@@ -166,12 +190,22 @@ const toggleTagPanel = () => {
     showTagPanel.value = !showTagPanel.value;
     if (showTagPanel.value) {
         showScorePanel.value = false;
+        showImageSearchPanel.value = false;
+    }
+};
+
+const toggleImageSearchPanel = () => {
+    showImageSearchPanel.value = !showImageSearchPanel.value;
+    if (showImageSearchPanel.value) {
+        showScorePanel.value = false;
+        showTagPanel.value = false;
     }
 };
 
 const closeAllPanels = () => {
     showScorePanel.value = false;
     showTagPanel.value = false;
+    showImageSearchPanel.value = false;
 };
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -334,6 +368,37 @@ const btnclk_delete_file = () => {
     
     Utils.files_delete(req);
     clearSelection();
+};
+
+const handleImageSearch = async () => {
+    const recordIds: number[] = [];
+
+    if (appStore.curFiles) {
+        for (const item of appStore.curFiles) {
+            if (item.checked) {
+                recordIds.push(item.id);
+            }
+        }
+    }
+
+    if (recordIds.length === 0) {
+        Utils.addToast('请选择要查找相似的图片');
+        return;
+    }
+
+    const req = new DatType.FilesGetReq();
+    req.aiImageSearchEnabled = true;
+    req.aiImageSearchRecordIds = recordIds;
+    req.aiImageSearchMinSimilar = imageSearchMinSimilar.value;
+    req.aiImageSearchTopK = imageSearchTopK.value;
+
+    await Utils.files_get(req);
+    Utils.message_notify({
+        content: `已查找相似图片，共${recordIds.length}张参考图片`,
+        type: 'success'
+    });
+
+    closeAllPanels();
 };
 
 </script>
@@ -518,6 +583,34 @@ const btnclk_delete_file = () => {
     text-align: center;
     color: var(--xc-text-color-secondary);
     font-size: var(--xc-font-size-sm);
+}
+
+.image-search-panel {
+    padding: var(--xc-spacing-md);
+    min-width: 250px;
+}
+
+.image-search-settings {
+    display: flex;
+    flex-direction: column;
+    gap: var(--xc-spacing-sm);
+    margin-bottom: var(--xc-spacing-md);
+}
+
+.image-search-settings label {
+    display: flex;
+    align-items: center;
+    gap: var(--xc-spacing-sm);
+    font-size: var(--xc-font-size-sm);
+    color: var(--xc-text-color);
+}
+
+.image-search-settings .range-input {
+    width: 80px;
+}
+
+.search-btn {
+    width: 100%;
 }
 
 .slide-up-enter-active,

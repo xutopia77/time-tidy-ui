@@ -368,6 +368,18 @@ export class FilesGetReq {
 	minHeight: number | null = null;     // Minimum height
 	maxHeight: number | null = null;     // Maximum height
 	extensions: string[] | null = null;  // File extension list
+
+	// AI Search
+	aiSearchEnabled: boolean = false;        // Enable AI search mode
+	aiSearchQuery: string = '';              // Text query for AI search
+	aiSearchMinSimilar: number = 0.5;        // Min similarity threshold
+	aiSearchTopK: number = 20;               // Number of results to return
+
+	// AI Image Search (find similar images)
+	aiImageSearchEnabled: boolean = false;        // Enable AI image search
+	aiImageSearchRecordIds: number[] = [];        // Record IDs to find similar
+	aiImageSearchMinSimilar: number = 0.5;        // Min similarity threshold
+	aiImageSearchTopK: number = 20;               // Number of results per image
 }
 
 export class FilesTagSetReq {

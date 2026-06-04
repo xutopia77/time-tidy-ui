@@ -716,6 +716,14 @@ class Utils {
 			minHeight: null,
 			maxHeight: null,
 			extensions: null,
+			aiSearchEnabled: false,
+			aiSearchQuery: '',
+			aiSearchMinSimilar: 0.5,
+			aiSearchTopK: 20,
+			aiImageSearchEnabled: false,
+			aiImageSearchRecordIds: [],
+			aiImageSearchMinSimilar: 0.5,
+			aiImageSearchTopK: 20,
 		}
 		if (appStore.searchCon.pathType == "allPath") {
 			req.dirs = [];
@@ -754,6 +762,16 @@ class Utils {
 			if (_req.minHeight != null) { req.minHeight = _req.minHeight; }
 			if (_req.maxHeight != null) { req.maxHeight = _req.maxHeight; }
 			if (_req.extensions != null) { req.extensions = _req.extensions; }
+
+			// AI Search fields
+			if (_req.aiSearchEnabled) { req.aiSearchEnabled = _req.aiSearchEnabled; }
+			if (_req.aiSearchQuery) { req.aiSearchQuery = _req.aiSearchQuery; }
+			if (_req.aiSearchMinSimilar) { req.aiSearchMinSimilar = _req.aiSearchMinSimilar; }
+			if (_req.aiSearchTopK) { req.aiSearchTopK = _req.aiSearchTopK; }
+			if (_req.aiImageSearchEnabled) { req.aiImageSearchEnabled = _req.aiImageSearchEnabled; }
+			if (_req.aiImageSearchRecordIds && _req.aiImageSearchRecordIds.length > 0) { req.aiImageSearchRecordIds = _req.aiImageSearchRecordIds; }
+			if (_req.aiImageSearchMinSimilar) { req.aiImageSearchMinSimilar = _req.aiImageSearchMinSimilar; }
+			if (_req.aiImageSearchTopK) { req.aiImageSearchTopK = _req.aiImageSearchTopK; }
 		}
 
 		try {

@@ -28,19 +28,54 @@
 				
 				<div class="search-panel-filters">
 					<div class="filter-section">
-						<h4 class="filter-section-title">文件类型</h4>
+						<h4 class="filter-section-title">搜索模式</h4>
 						<div class="filter-options">
-							<button v-for="type in fileTypes" :key="type.value" 
-								@click="toggleFileType(type.value)"
+							<button @click="aiSearchEnabled = false"
 								class="filter-option-btn"
-								:class="{ 'active': isFileTypeSelected(type.value) }">
-								{{ type.label }}
+								:class="{ 'active': !aiSearchEnabled }">
+								传统搜索
+							</button>
+							<button @click="aiSearchEnabled = true"
+								class="filter-option-btn"
+								:class="{ 'active': aiSearchEnabled }">
+								AI智能搜索
 							</button>
 						</div>
 					</div>
-					
-					<div class="filter-section">
-						<h4 class="filter-section-title">排序方式</h4>
+
+					<div v-if="aiSearchEnabled" class="filter-section">
+						<h4 class="filter-section-title">AI搜索设置</h4>
+						<div class="ai-search-settings">
+							<input v-model="aiSearchQuery" placeholder="输入搜索文本（如：风景、人物、美食）..."
+								class="xc-input-text ai-search-input" type="text" />
+							<div class="ai-search-params">
+								<label>
+									相似度阈值:
+									<input v-model.number="aiSearchMinSimilar" type="number" min="0" max="1" step="0.1" class="range-input" />
+								</label>
+								<label>
+									返回数量:
+									<input v-model.number="aiSearchTopK" type="number" min="1" max="100" class="range-input" />
+								</label>
+							</div>
+						</div>
+					</div>
+
+					<div v-if="!aiSearchEnabled" class="traditional-search-sections">
+						<div class="filter-section">
+							<h4 class="filter-section-title">文件类型</h4>
+							<div class="filter-options">
+								<button v-for="type in fileTypes" :key="type.value" 
+									@click="toggleFileType(type.value)"
+									class="filter-option-btn"
+									:class="{ 'active': isFileTypeSelected(type.value) }">
+									{{ type.label }}
+								</button>
+							</div>
+						</div>
+						
+						<div class="filter-section">
+							<h4 class="filter-section-title">排序方式</h4>
 						<div class="filter-options">
 							<button v-for="sort in sortOptions" :key="sort.value"
 								@click="sortBy = sort.value"
@@ -143,6 +178,7 @@
 							</button>
 						</div>
 					</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -167,6 +203,12 @@ const pathType = ref('curPath');
 const bReverseSltTag = ref(false);
 const bNoTag = ref<'true' | 'false' | ''>('');
 const searchInputRef = ref<HTMLInputElement | null>(null);
+
+// AI Search
+const aiSearchEnabled = ref(false);
+const aiSearchQuery = ref('');
+const aiSearchMinSimilar = ref(0.5);
+const aiSearchTopK = ref(20);
 
 watch(pathType, (newVal) => {
     if (newVal === 'allPath') {
@@ -371,32 +413,41 @@ const handleSearch = async () => {
 	appStore.searchCon.tags = [...selectedTags.value];
 	appStore.searchCon.bReverseSltTag = bReverseSltTag.value;
 	appStore.searchCon.noTag = bNoTag.value;
-	
+
 	// Build request with new search conditions
 	const req = new DatType.FilesGetReq();
 	req.keyword = searchKeyword.value || null;
-	
-	// Convert MB to bytes
-	if (minSizeMB.value !== null) {
-		req.minSize = minSizeMB.value * 1024 * 1024;
+
+	// AI Search
+	if (aiSearchEnabled.value && aiSearchQuery.value) {
+		req.aiSearchEnabled = true;
+		req.aiSearchQuery = aiSearchQuery.value;
+		req.aiSearchMinSimilar = aiSearchMinSimilar.value;
+		req.aiSearchTopK = aiSearchTopK.value;
+	} else {
+		// Traditional search - only apply filters when not in AI mode
+		// Convert MB to bytes
+		if (minSizeMB.value !== null) {
+			req.minSize = minSizeMB.value * 1024 * 1024;
+		}
+		if (maxSizeMB.value !== null) {
+			req.maxSize = maxSizeMB.value * 1024 * 1024;
+		}
+		
+		// Convert minutes to milliseconds
+		if (minDurationMin.value !== null) {
+			req.minDuration = minDurationMin.value * 60 * 1000;
+		}
+		if (maxDurationMin.value !== null) {
+			req.maxDuration = maxDurationMin.value * 60 * 1000;
+		}
+		
+		// Dimensions
+		req.minWidth = minWidth.value;
+		req.maxWidth = maxWidth.value;
+		req.minHeight = minHeight.value;
+		req.maxHeight = maxHeight.value;
 	}
-	if (maxSizeMB.value !== null) {
-		req.maxSize = maxSizeMB.value * 1024 * 1024;
-	}
-	
-	// Convert minutes to milliseconds
-	if (minDurationMin.value !== null) {
-		req.minDuration = minDurationMin.value * 60 * 1000;
-	}
-	if (maxDurationMin.value !== null) {
-		req.maxDuration = maxDurationMin.value * 60 * 1000;
-	}
-	
-	// Dimensions
-	req.minWidth = minWidth.value;
-	req.maxWidth = maxWidth.value;
-	req.minHeight = minHeight.value;
-	req.maxHeight = maxHeight.value;
 	
 	await Utils.files_get(req);
 	closeSearchPanel();
@@ -833,5 +884,33 @@ const handleCancel = () => {
 	min-width: 50px;
 	font-size: var(--xc-font-size-sm);
 	color: var(--xc-text-color-secondary);
+}
+
+.ai-search-settings {
+	display: flex;
+	flex-direction: column;
+	gap: var(--xc-spacing-sm);
+}
+
+.ai-search-input {
+	width: 100%;
+	margin-bottom: var(--xc-spacing-sm);
+}
+
+.ai-search-params {
+	display: flex;
+	gap: var(--xc-spacing-md);
+}
+
+.ai-search-params label {
+	display: flex;
+	align-items: center;
+	gap: var(--xc-spacing-xs);
+	font-size: var(--xc-font-size-sm);
+	color: var(--xc-text-color);
+}
+
+.ai-search-params .range-input {
+	width: 80px;
 }
 </style>
