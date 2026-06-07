@@ -135,8 +135,18 @@
                     </div>
                 </div>
                 <div class="button-group">
-                    <button v-if="!aiIndexInitStatus.isRunning" 
-                        title="创建AI向量索引" @click="startAIIndexInit" 
+                    <div v-if="!aiIndexInitStatus.isRunning" class="ai-index-options">
+                        <label class="option-label">
+                            <input type="radio" v-model="aiIndexMode" value="incre" />
+                            增量更新
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" v-model="aiIndexMode" value="full" />
+                            全量重建
+                        </label>
+                    </div>
+                    <button v-if="!aiIndexInitStatus.isRunning"
+                        title="创建AI向量索引" @click="startAIIndexInit"
                         class="xc-button">创建索引</button>
                 </div>
             </div>
@@ -444,14 +454,17 @@ const aiIndexInitStatus = ref({
     skippedFiles: 0
 })
 
+const aiIndexMode = ref<'incre' | 'full'>('incre') // 'incre'=incremental, 'full'=full rebuild
+
 const startAIIndexInit = async () => {
     try {
         const req = new DatType.PrjSetReq()
-        req.type = [DatType.PrjSetType.AiIndexInit]
+        req.type = [aiIndexMode.value === 'full' ? DatType.PrjSetType.AiIndexInitFull : DatType.PrjSetType.AiIndexInitIncre]
         req.prj.path = Utils.convertToLinuxPath(prjPath.value)
-        
+
         await Utils.project_set(req)
-        Utils.message_notify({ content: 'AI向量索引创建已启动', type: 'success' })
+        const modeText = aiIndexMode.value === 'full' ? '全量重建' : '增量更新'
+        Utils.message_notify({ content: `AI向量索引${modeText}已启动`, type: 'success' })
     } catch (error) {
         console.error('启动AI索引创建失败:', error)
         Utils.message_notify({ content: '启动AI索引创建失败', type: 'error' })
@@ -553,6 +566,24 @@ const startAIIndexInit = async () => {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.ai-index-options {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.option-label input[type="radio"] {
+    cursor: pointer;
 }
 
 .select-item {

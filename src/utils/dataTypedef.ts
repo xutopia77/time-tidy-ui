@@ -403,7 +403,8 @@ export enum PrjSetType {
     GenHashNone = "genHashNone",
     GenHashFull = "genHashFull",
     GenHashIncre = "genHashIncre", // incremental
-    AiIndexInit = "aiIndexInit", // AI vector index initialization
+    AiIndexInitFull = "aiIndexInitFull", // AI index init full rebuild
+    AiIndexInitIncre = "aiIndexInitIncre", // AI index init incremental
 }
 
 export class Repo {
