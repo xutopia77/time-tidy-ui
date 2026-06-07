@@ -11,7 +11,8 @@
 				<div class="search-panel-header">
 					<div class="search-input-container">
 						<span class="search-icon-large">🔍</span>
-						<input v-model="searchKeyword" @keyup.enter="handleSearch" placeholder="输入文件名或路径搜索..."
+						<input v-model="searchKeyword" @keyup.enter="handleSearch" 
+							:placeholder="aiSearchEnabled ? '输入AI搜索文本（如：风景、人物、美食）...' : '输入文件名或路径搜索...'"
 							class="search-input-large" type="text" ref="searchInputRef" />
 						<button v-if="searchKeyword" @click="clearSearch" class="clear-btn-large">✕</button>
 					</div>
@@ -30,24 +31,16 @@
 					<div class="filter-section">
 						<h4 class="filter-section-title">搜索模式</h4>
 						<div class="filter-options">
-							<button @click="aiSearchEnabled = false"
-								class="filter-option-btn"
-								:class="{ 'active': !aiSearchEnabled }">
-								传统搜索
-							</button>
-							<button @click="aiSearchEnabled = true"
-								class="filter-option-btn"
-								:class="{ 'active': aiSearchEnabled }">
-								AI智能搜索
-							</button>
+							<label class="ai-search-checkbox">
+								<input type="checkbox" v-model="aiSearchEnabled" />
+								<span>启用AI智能搜索</span>
+							</label>
 						</div>
 					</div>
 
 					<div v-if="aiSearchEnabled" class="filter-section">
 						<h4 class="filter-section-title">AI搜索设置</h4>
 						<div class="ai-search-settings">
-							<input v-model="aiSearchQuery" placeholder="输入搜索文本（如：风景、人物、美食）..."
-								class="xc-input-text ai-search-input" type="text" />
 							<div class="ai-search-params">
 								<label>
 									相似度阈值:
@@ -206,7 +199,6 @@ const searchInputRef = ref<HTMLInputElement | null>(null);
 
 // AI Search
 const aiSearchEnabled = ref(false);
-const aiSearchQuery = ref('');
 const aiSearchMinSimilar = ref(0.5);
 const aiSearchTopK = ref(20);
 
@@ -419,13 +411,15 @@ const handleSearch = async () => {
 	req.keyword = searchKeyword.value || null;
 
 	// AI Search
-	if (aiSearchEnabled.value && aiSearchQuery.value) {
+	if (aiSearchEnabled.value && searchKeyword.value) {
 		req.aiSearchEnabled = true;
-		req.aiSearchQuery = aiSearchQuery.value;
+		req.aiSearchQuery = searchKeyword.value;
 		req.aiSearchMinSimilar = aiSearchMinSimilar.value;
 		req.aiSearchTopK = aiSearchTopK.value;
 	} else {
 		// Traditional search - only apply filters when not in AI mode
+		req.keyword = searchKeyword.value || null;
+		
 		// Convert MB to bytes
 		if (minSizeMB.value !== null) {
 			req.minSize = minSizeMB.value * 1024 * 1024;
@@ -681,6 +675,25 @@ const handleCancel = () => {
     font-weight: 500;
     transition: all var(--xc-transition-normal);
     white-space: nowrap;
+}
+
+.ai-search-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--xc-spacing-sm);
+    cursor: pointer;
+    font-size: var(--xc-font-size-md);
+    color: var(--xc-text-color);
+}
+
+.ai-search-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.ai-search-checkbox span {
+    user-select: none;
 }
 
 .cancel-btn:hover {
