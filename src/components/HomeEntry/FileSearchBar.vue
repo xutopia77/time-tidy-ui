@@ -199,8 +199,8 @@ const searchInputRef = ref<HTMLInputElement | null>(null);
 
 // AI Search
 const aiSearchEnabled = ref(false);
-const aiSearchMinSimilar = ref(0.5);
-const aiSearchTopK = ref(20);
+const aiSearchMinSimilar = ref(0.2);
+const aiSearchTopK = ref(200);
 
 watch(pathType, (newVal) => {
     if (newVal === 'allPath') {
