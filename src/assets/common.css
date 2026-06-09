@@ -1,412 +1,655 @@
+/**
+ * Time Tidy - Component Styles
+ * 基于 Tailwind CSS v4 的组件样式系统
+ *
+ * Design Token 定义在 tailwind.css 中（使用 @theme 指令）
+ * 本文件只包含：
+ * 1. 向后兼容的 CSS 变量映射
+ * 2. 组件样式类（使用 @apply 指令）
+ */
+
+@reference "./tailwind.css";
+
+/* ==================== 向后兼容的 CSS 变量映射 ==================== */
+/* 这些变量映射到 Tailwind 配置中的值，确保向后兼容 */
+
 :root {
-    /* ==================================== Color - Background */
-    --xc-background-color: #161823;
-    --xc-background-color-hover: #363741;
-    --xc-group-color: #252632;
-    
-    /* ==================================== Color - Primary */
-    --xc-primary-color: #4A6FA5;
-    --xc-primary-color-hover: #3d5a80;
-    --xc-primary-color-active: #2d4a70;
-    
-    /* ==================================== Color - Text */
-    --xc-text-color: #c2cad1;
-    --xc-text-color-secondary: #8b95a1;
-    --xc-text-color-disabled: #5a6270;
-    
-    /* ==================================== Color - Border */
-    --xc-border-color: #2a2c3a;
-    --xc-border: 1px solid #2a2c3a;
-    --xc-border-hover: 1px solid #44465a;
-    
-    /* ==================================== Color - Input */
-    --xc-input-bg-color: #1e2029;
-    --xc-input-bg-color-hover: #252632;
-    --xc-input-border-color: #2a2c3a;
-    --xc-input-border-color-focus: #4A6FA5;
-    
-    /* ==================================== Color - Button */
-    --xc-button-bg-color: #2a2c3a;
-    --xc-button-bg-color-hover: #363741;
-    --xc-button-bg-color-active: #3d4452;
-    --xc-button-bg-color-disabled: #1e2029;
-    --xc-button-text-color: #c2cad1;
-    --xc-button-text-color-disabled: #5a6270;
-    
-    /* ==================================== Color - Status */
-    --xc-success-color: #52c41a;
-    --xc-warning-color: #faad14;
-    --xc-error-color: #f5222d;
-    --xc-info-color: #1890ff;
-    
-    /* ==================================== Size - Normal */
-    --xc-normal-height: 28px;
-    --xc-normal-padding: 2px;
-    --xc-normal-margin: 2px;
-    
-    /* ==================================== Size - Border Radius */
-    --xc-border-radius-sm: 4px;
-    --xc-border-radius-md: 8px;
-    --xc-border-radius-lg: 12px;
-    
-    /* ==================================== Size - Spacing */
-    --xc-spacing-xs: 4px;
-    --xc-spacing-sm: 8px;
-    --xc-spacing-md: 12px;
-    --xc-spacing-lg: 16px;
-    --xc-spacing-xl: 20px;
-    
-    /* ==================================== Size - Font */
-    --xc-font-size-xs: 10px;
-    --xc-font-size-sm: 12px;
-    --xc-font-size-md: 14px;
-    --xc-font-size-lg: 16px;
-    --xc-font-size-xl: 18px;
-    
-    /* ==================================== Size - Component */
-    --xc-card-desc-height: 60px;
-    --xc-sidebar-width: 72px;
-    
-    /* ==================================== Transition */
-    --xc-transition-fast: 0.15s ease;
-    --xc-transition-normal: 0.2s ease;
-    --xc-transition-slow: 0.3s ease;
-    
-    /* ==================================== Shadow */
-    --xc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
-    --xc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-    --xc-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  /* Primary Colors */
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+  --color-primary-active: #4338ca;
+  --color-primary-light: #818cf8;
+
+  /* Background Colors */
+  --color-bg-primary: #0a0a0a;
+  --color-bg-secondary: #141414;
+  --color-bg-tertiary: #1f1f1f;
+  --color-bg-elevated: #2a2a2a;
+
+  /* Text Colors */
+  --color-text-primary: #fafafa;
+  --color-text-secondary: #a1a1aa;
+  --color-text-tertiary: #71717a;
+  --color-text-disabled: #52525b;
+
+  /* Border Colors */
+  --color-border: #27272a;
+  --color-border-light: #1f1f1f;
+  --color-border-dark: #3f3f46;
+
+  /* Status Colors */
+  --color-success: #22c55e;
+  --color-success-light: #4ade80;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fbbf24;
+  --color-error: #ef4444;
+  --color-error-light: #f87171;
+  --color-info: #3b82f6;
+  --color-info-light: #60a5fa;
+
+  /* Tag Colors */
+  --color-tag-violet: #8b5cf6;
+  --color-tag-blue: #3b82f6;
+  --color-tag-green: #22c55e;
+  --color-tag-purple: #a855f7;
+  --color-tag-yellow: #f59e0b;
+  --color-tag-red: #ef4444;
+  --color-tag-pink: #ec4899;
+  --color-tag-cyan: #06b6d4;
+
+  /* Font Family */
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-mono: 'Fira Code', 'Consolas', 'Monaco', monospace;
+
+  /* Font Sizes */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 36px;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Spacing */
+  --spacing-0: 0;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+
+  /* Border Radius */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* Z-Index */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  /* Component Sizes */
+  --button-height-sm: 28px;
+  --button-height-md: 36px;
+  --button-height-lg: 44px;
+
+  --input-height-sm: 28px;
+  --input-height-md: 36px;
+  --input-height-lg: 44px;
+
+  --sidebar-width: 320px;
+  --sidebar-collapsed-width: 64px;
+  --navbar-height: 56px;
+
+  /* ==================== 旧变量向后兼容映射 ==================== */
+
+  --xc-primary-color: var(--color-primary);
+  --xc-primary-color-hover: var(--color-primary-hover);
+  --xc-primary-color-active: var(--color-primary-active);
+
+  --xc-background-color: var(--color-bg-secondary);
+  --xc-background-color-hover: var(--color-bg-elevated);
+  --xc-group-color: var(--color-bg-tertiary);
+
+  --xc-text-color: var(--color-text-primary);
+  --xc-text-color-secondary: var(--color-text-secondary);
+  --xc-text-color-disabled: var(--color-text-disabled);
+
+  --xc-border-color: var(--color-border);
+  --xc-border: 1px solid var(--color-border);
+  --xc-border-hover: 1px solid var(--color-border-dark);
+
+  --xc-input-bg-color: var(--color-bg-tertiary);
+  --xc-input-bg-color-hover: var(--color-bg-elevated);
+  --xc-input-border-color: var(--color-border);
+  --xc-input-border-color-focus: var(--color-primary);
+
+  --xc-button-bg-color: var(--color-bg-elevated);
+  --xc-button-bg-color-hover: var(--color-bg-tertiary);
+  --xc-button-bg-color-active: var(--color-bg-secondary);
+  --xc-button-bg-color-disabled: var(--color-bg-tertiary);
+  --xc-button-text-color: var(--color-text-primary);
+  --xc-button-text-color-disabled: var(--color-text-disabled);
+
+  --xc-success-color: var(--color-success);
+  --xc-warning-color: var(--color-warning);
+  --xc-error-color: var(--color-error);
+  --xc-info-color: var(--color-info);
+
+  --xc-normal-height: var(--button-height-sm);
+  --xc-normal-padding: var(--spacing-1);
+  --xc-normal-margin: var(--spacing-1);
+
+  --xc-border-radius-sm: var(--radius-sm);
+  --xc-border-radius-md: var(--radius-lg);
+  --xc-border-radius-lg: var(--radius-xl);
+
+  --xc-spacing-xs: var(--spacing-1);
+  --xc-spacing-sm: var(--spacing-2);
+  --xc-spacing-md: var(--spacing-3);
+  --xc-spacing-lg: var(--spacing-4);
+  --xc-spacing-xl: var(--spacing-5);
+
+  --xc-font-size-xs: 10px;
+  --xc-font-size-sm: var(--font-size-xs);
+  --xc-font-size-md: var(--font-size-sm);
+  --xc-font-size-lg: var(--font-size-base);
+  --xc-font-size-xl: var(--font-size-lg);
+
+  --xc-card-desc-height: 60px;
+  --xc-sidebar-width: var(--sidebar-collapsed-width);
+
+  --xc-transition-fast: var(--transition-fast);
+  --xc-transition-normal: var(--transition-normal);
+  --xc-transition-slow: var(--transition-slow);
+
+  --xc-shadow-sm: var(--shadow-sm);
+  --xc-shadow-md: var(--shadow-md);
+  --xc-shadow-lg: var(--shadow-lg);
 }
 
-/* ==================================== button */
+/* ==================== 组件样式 ==================== */
+
+/* Button */
 .xc-button {
-    height: var(--xc-normal-height);
-    background-color: var(--xc-button-bg-color);
-    color: var(--xc-button-text-color);
-    border: var(--xc-border);
-    border-radius: var(--xc-border-radius-sm);
-    padding: var(--xc-normal-padding) var(--xc-spacing-sm);
-    margin: 0;
-    cursor: pointer;
-    display: inline-block;
-    transition: all var(--xc-transition-normal);
+  @apply inline-flex items-center justify-center gap-2;
+  @apply bg-bg-elevated text-text-primary;
+  @apply border border-border rounded-md;
+  @apply px-4 py-2;
+  @apply text-sm font-medium;
+  @apply transition-all duration-150;
+  @apply cursor-pointer;
+  height: var(--button-height-md);
 }
 
 .xc-button:hover {
-    outline: none;
-    border: var(--xc-border-hover);
-    background-color: var(--xc-button-bg-color-hover);
+  @apply bg-bg-tertiary border-border-dark;
+  outline: none;
 }
 
 .xc-button:active {
-    background-color: var(--xc-button-bg-color-active);
+  @apply bg-bg-secondary;
 }
 
 .xc-button:disabled {
-    background-color: var(--xc-button-bg-color-disabled);
-    cursor: not-allowed;
-    color: var(--xc-button-text-color-disabled);
+  @apply bg-bg-tertiary text-text-disabled;
+  @apply cursor-not-allowed opacity-50;
 }
 
-/* ==================================== card */
+.xc-button.primary {
+  @apply bg-primary text-white border-primary;
+}
+
+.xc-button.primary:hover {
+  @apply bg-primary-hover border-primary-hover;
+}
+
+.xc-button.primary:active {
+  @apply bg-primary-active border-primary-active;
+}
+
+/* Card */
 .xc-card {
-    width: 390px;
-    height: 390px;
-    padding: 0px;
-    margin: var(--xc-spacing-xs);
-    color: var(--xc-text-color);
-    /* border: 1px solid var(--xc-border-color); */
-    border-radius: var(--xc-border-radius-lg);
-    text-align: center;
-    position: relative;
-    transition: all var(--xc-transition-normal);
-    background-color: var(--xc-background-color);
-    overflow: hidden;
+  @apply relative overflow-hidden;
+  @apply bg-bg-secondary text-text-primary;
+  @apply border border-border rounded-lg;
+  @apply transition-all duration-200;
+  @apply text-center;
+  width: 390px;
+  height: 390px;
+  padding: 0;
+  margin: var(--spacing-1);
 }
 
 .xc-card:hover {
-    background-color: var(--xc-background-color-hover);
-    box-shadow: var(--xc-shadow-md);
-    transform: translateY(-2px);
+  @apply bg-bg-elevated border-border-dark;
+  @apply shadow-lg;
+  transform: translateY(-2px);
 }
 
 .xc-card-checkbox-container {
-    position: absolute;
-    top: var(--xc-spacing-sm);
-    left: var(--xc-spacing-sm);
-    z-index: 2;
-    opacity: 0;
-    transition: opacity var(--xc-transition-fast);
+  @apply absolute z-[2];
+  @apply opacity-0;
+  @apply transition-opacity duration-150;
+  top: var(--spacing-2);
+  left: var(--spacing-2);
 }
 
 .xc-card:hover .xc-card-checkbox-container,
 .xc-card.checked .xc-card-checkbox-container {
-    opacity: 1;
+  @apply opacity-100;
 }
 
 .xc-card-content {
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  @apply flex flex-col;
+  @apply cursor-pointer;
+  width: 100%;
+  height: 100%;
 }
 
 .xc-card-icon {
-    width: 100%;
-    height: calc(100% - var(--xc-card-desc-height));
-    padding: var(--xc-spacing-sm);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
+  @apply flex items-center justify-center;
+  @apply relative overflow-hidden;
+  width: 100%;
+  height: calc(100% - 60px);
+  padding: var(--spacing-2);
+  margin: 0;
 }
 
 .xc-card-icon img {
-    width: 100%;
-    height: 100%;
-    margin: 0px;
-    object-fit: contain;
-    border-radius: var(--xc-border-radius-sm);
-    transition: transform var(--xc-transition-normal);
+  @apply rounded-sm;
+  @apply transition-transform duration-200;
+  @apply object-contain;
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 .xc-card:hover .xc-card-icon img {
-    transform: scale(1.02);
+  transform: scale(1.02);
 }
 
 .xc-card-desc {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: var(--xc-font-size-sm);
-    height: var(--xc-card-desc-height);
-    width: 100%;
-    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
-    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.02));
+  @apply whitespace-nowrap overflow-hidden;
+  @apply text-ellipsis;
+  @apply text-xs;
+  width: 100%;
+  height: 60px;
+  padding: var(--spacing-1) var(--spacing-2);
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.3));
 }
 
 .xc-card-name {
-    padding: 2px 0px;
-    margin: 0px;
-    font-size: var(--xc-font-size-sm);
-    text-align: left;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  @apply overflow-hidden text-ellipsis;
+  @apply text-left text-xs;
+  @apply text-text-primary;
+  padding: 2px 0;
+  margin: 0;
 }
 
 .xc-card-tags {
-    padding: 2px 0px;
-    margin: 0px;
-    font-size: var(--xc-font-size-xs);
-    height: auto;
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
+  @apply flex flex-wrap;
+  @apply w-full;
+  height: auto;
+  padding: 2px 0;
+  margin: 0;
+  font-size: 10px;
+  gap: 4px;
 }
 
 .xc-card-tags span {
-    padding: 2px var(--xc-spacing-xs);
-    margin: 0;
-    border-radius: var(--xc-border-radius-sm);
-    height: auto;
-    cursor: pointer;
-    color: var(--xc-text-color);
-    background-color: var(--xc-group-color);
-    transition: all var(--xc-transition-fast);
+  @apply rounded-sm;
+  @apply bg-bg-tertiary text-text-primary;
+  @apply transition-all duration-150;
+  @apply cursor-pointer;
+  padding: 2px var(--spacing-1);
+  margin: 0;
+  height: auto;
 }
 
 .xc-card-tags span:hover {
-    background-color: var(--xc-primary-color);
-    color: white;
+  @apply bg-primary text-white;
 }
 
-/* ==================================== select */
-
+/* Select */
 .xc-select {
-    margin-left: var(--xc-spacing-xs);
-    color: var(--xc-text-color);
-    background-color: var(--xc-input-bg-color);
-    border: 1px solid var(--xc-input-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
-    outline: none;
-    transition: all var(--xc-transition-normal);
+  @apply bg-bg-tertiary text-text-primary;
+  @apply border border-border rounded-md;
+  @apply text-sm;
+  @apply outline-none;
+  @apply transition-all duration-150;
+  margin-left: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
 }
 
 .xc-select:hover {
-    border-color: var(--xc-border-color);
+  @apply border-border-dark;
 }
 
 .xc-select:focus {
-    border-color: var(--xc-input-border-color-focus);
+  @apply border-primary;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .xc-select option {
-    background-color: var(--xc-input-bg-color);
-    color: var(--xc-text-color);
+  @apply bg-bg-tertiary text-text-primary;
 }
 
-/* ==================================== checkbox */
+/* Checkbox */
 .xc-checkbox {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 2px solid rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    position: relative;
-    outline: none;
-    transition: all var(--xc-transition-fast);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  @apply appearance-none;
+  @apply bg-bg-elevated;
+  @apply border-2 border-border-dark rounded-sm;
+  @apply cursor-pointer relative;
+  @apply outline-none;
+  @apply transition-all duration-150;
+  @apply shadow-sm;
+  width: 18px;
+  height: 18px;
 }
 
 .xc-checkbox:hover {
-    border-color: var(--xc-primary-color);
-    transform: scale(1.1);
+  @apply border-primary;
+  transform: scale(1.1);
 }
 
 .xc-checkbox:checked {
-    background-color: var(--xc-primary-color);
-    border-color: var(--xc-primary-color);
+  @apply bg-primary border-primary;
 }
 
 .xc-checkbox:checked::after {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 2px;
-    width: 5px;
-    height: 9px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+  content: '';
+  @apply absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .xc-checkbox:focus {
-    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.3);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
 }
 
-/* ==================================== label */
-
+/* Label */
 .xc-label {
-    color: var(--xc-text-color);
+  @apply text-text-primary;
+  @apply text-sm font-medium;
 }
 
-/* ==================================== input text */
+/* Input Text */
 .xc-input-text {
-    height: var(--xc-normal-height);
-    background-color: var(--xc-input-bg-color);
-    color: var(--xc-text-color);
-    border: 1px solid var(--xc-input-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    outline: none;
-    padding: var(--xc-normal-padding) var(--xc-spacing-sm);
-    margin: var(--xc-normal-margin);
-    transition: all var(--xc-transition-normal);
+  @apply bg-bg-tertiary text-text-primary;
+  @apply border border-border rounded-md;
+  @apply text-sm;
+  @apply outline-none;
+  @apply transition-all duration-150;
+  height: var(--input-height-md);
+  padding: var(--spacing-2) var(--spacing-3);
+  margin: var(--spacing-1);
 }
 
 .xc-input-text:hover {
-    background-color: var(--xc-input-bg-color-hover);
-    border-color: var(--xc-border-color);
+  @apply bg-bg-elevated border-border-dark;
 }
 
 .xc-input-text:focus {
-    border-color: var(--xc-input-border-color-focus);
+  @apply border-primary;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-/* ==================================== tag */
+.xc-input-text::placeholder {
+  @apply text-text-tertiary;
+}
+
+/* Tag */
 .xc-tag {
-    display: inline-block;
-    margin: var(--xc-spacing-xs);
-    padding: 0px;
-    padding-right: var(--xc-spacing-xs);
-    border: var(--xc-border);
-    border-radius: var(--xc-border-radius-sm);
-    background-color: var(--xc-background-color);
-    transition: all var(--xc-transition-slow);
-    cursor: pointer;
-    opacity: 0.8;
+  @apply inline-flex items-center;
+  @apply bg-bg-secondary text-text-primary;
+  @apply border border-border rounded-sm;
+  @apply text-xs font-medium;
+  @apply transition-all duration-150;
+  @apply cursor-pointer;
+  @apply opacity-90;
+  gap: var(--spacing-1);
+  margin: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
 }
 
 .xc-tag:hover {
-    background-color: var(--xc-background-color-hover);
-    border: var(--xc-border-hover);
+  @apply bg-bg-elevated border-border-dark;
+  @apply opacity-100;
 }
 
 .xc-tag.selected {
-    background-color: var(--xc-primary-color);
-    color: white;
+  @apply bg-primary border-primary text-white;
+  @apply opacity-100;
 }
 
-/* ==================================== scrollbar */
+/* Tag Color Variants */
+.xc-tag.tag-violet {
+  @apply bg-tag-violet border-tag-violet text-white;
+}
+
+.xc-tag.tag-blue {
+  @apply bg-tag-blue border-tag-blue text-white;
+}
+
+.xc-tag.tag-green {
+  @apply bg-tag-green border-tag-green text-white;
+}
+
+.xc-tag.tag-purple {
+  @apply bg-tag-purple border-tag-purple text-white;
+}
+
+.xc-tag.tag-yellow {
+  @apply bg-tag-yellow border-tag-yellow text-white;
+}
+
+.xc-tag.tag-red {
+  @apply bg-tag-red border-tag-red text-white;
+}
+
+.xc-tag.tag-pink {
+  @apply bg-tag-pink border-tag-pink text-white;
+}
+
+.xc-tag.tag-cyan {
+  @apply bg-tag-cyan border-tag-cyan text-white;
+}
+
+/* Scrollbar */
 .xc-scrollbar {
-    overflow: auto;
-    /* 添加 overflow 属性，内容超出时自动显示滚动条 */
+  @apply overflow-auto;
 }
 
-/* 自定义滚动条整体样式 */
 .xc-scrollbar::-webkit-scrollbar {
-    width: 12px;
-    /* 垂直滚动条宽度 */
-    height: 12px;
-    /* 水平滚动条高度 */
+  width: 12px;
+  height: 12px;
 }
 
-/* 自定义滚动条轨道样式 */
 .xc-scrollbar::-webkit-scrollbar-track {
-    background: var(--xc-background-color);
-    /* 轨道背景颜色 */
-    /* border-radius: 6px; */
-    /* 轨道圆角 */
-    border: none;
-    /* 轨道边框 */
+  @apply bg-bg-secondary;
+  border: none;
 }
 
-/* 自定义滚动条滑块样式 */
 .xc-scrollbar::-webkit-scrollbar-thumb {
-    background: #2a2c3a;
-    /* 滑块颜色 */
-    /* border-radius: 6px; */
-    /* 滑块圆角 */
-    border: none;
-    /* 滑块边框 */
+  @apply bg-border-dark;
+  @apply rounded-full;
+  border: none;
 }
 
-/* 鼠标悬停在滑块上时的样式 */
 .xc-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #555;
-    /* 悬停时滑块颜色 */
+  background: #555;
 }
 
-/* ==================================== datalist */
+/* Datalist */
 datalist {
-    background-color: var(--xc-background-color);
-    color: var(--xc-text-color);
+  @apply bg-bg-secondary text-text-primary;
 }
 
 datalist option {
-    background-color: var(--xc-input-bg-color);
-    color: var(--xc-text-color);
-    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
+  @apply bg-bg-tertiary text-text-primary;
+  padding: var(--spacing-1) var(--spacing-2);
 }
 
 datalist option:hover {
-    background-color: var(--xc-background-color-hover);
+  @apply bg-bg-elevated;
 }
 
-/* ==================================== autocomplete dropdown */
+/* Autocomplete dropdown */
 input[list]::-webkit-calendar-picker-indicator {
-    filter: invert(0.8);
-    cursor: pointer;
+  filter: invert(0.8);
+  @apply cursor-pointer;
 }
 
 input[list]::-webkit-calendar-picker-indicator:hover {
-    filter: invert(0.9);
+  filter: invert(0.9);
+}
+
+/* ==================== 导航组件样式 ==================== */
+
+.xc-nav {
+  @apply flex items-center;
+  @apply bg-bg-primary;
+  @apply border-b border-border;
+  height: var(--navbar-height);
+  padding: 0 var(--spacing-4);
+}
+
+.xc-nav-item {
+  @apply flex items-center;
+  @apply rounded-md;
+  @apply text-text-secondary;
+  @apply text-sm font-medium;
+  @apply transition-all duration-150;
+  @apply cursor-pointer;
+  @apply no-underline;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+}
+
+.xc-nav-item:hover {
+  @apply bg-bg-elevated text-text-primary;
+}
+
+.xc-nav-item.active {
+  @apply bg-primary text-white;
+}
+
+/* ==================== 侧边栏组件样式 ==================== */
+
+.xc-sidebar {
+  @apply flex flex-col;
+  @apply bg-bg-primary;
+  @apply border-r border-border;
+  @apply overflow-hidden;
+  width: var(--sidebar-width);
+}
+
+.xc-sidebar-section {
+  @apply border-b border-border;
+  padding: var(--spacing-4);
+}
+
+.xc-sidebar-section-title {
+  @apply text-text-tertiary;
+  @apply text-xs font-semibold;
+  @apply uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-2);
+}
+
+.xc-sidebar-item {
+  @apply flex items-center;
+  @apply rounded-md;
+  @apply text-text-secondary;
+  @apply text-sm;
+  @apply transition-all duration-150;
+  @apply cursor-pointer;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+}
+
+.xc-sidebar-item:hover {
+  @apply bg-bg-elevated text-text-primary;
+}
+
+.xc-sidebar-item.active {
+  @apply bg-primary text-white;
+}
+
+/* ==================== 状态颜色辅助类 ==================== */
+
+.xc-text-success {
+  @apply text-success;
+}
+
+.xc-text-warning {
+  @apply text-warning;
+}
+
+.xc-text-error {
+  @apply text-error;
+}
+
+.xc-text-info {
+  @apply text-info;
+}
+
+.xc-bg-success {
+  @apply bg-success;
+}
+
+.xc-bg-warning {
+  @apply bg-warning;
+}
+
+.xc-bg-error {
+  @apply bg-error;
+}
+
+.xc-bg-info {
+  @apply bg-info;
 }
