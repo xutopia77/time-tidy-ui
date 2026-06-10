@@ -1,19 +1,29 @@
 <template>
-  <div v-if="visible" class="global-message-panel" @click.stop>
-    <div class="panel-header">
-      <p>最近消息</p>
-      <button @click="btn_clear_all_msg" class="clear-button">清空所有</button>
-      <button @click="appStore.bPageResentMsg = false" class="clear-button">关闭</button>
+  <div v-if="visible" class="fixed top-[70px] right-5 w-[350px] bg-white border border-zinc-300 rounded-lg shadow-lg z-[10000]" @click.stop>
+    <div class="flex justify-between items-center p-1.5 border-b border-zinc-200">
+      <p class="m-0 text-zinc-700">最近消息</p>
+      <button @click="btn_clear_all_msg" class="bg-zinc-500 text-white border-none rounded px-2.5 py-1.5 cursor-pointer text-xs hover:bg-zinc-600">清空所有</button>
+      <button @click="appStore.bPageResentMsg = false" class="bg-zinc-500 text-white border-none rounded px-2.5 py-1.5 cursor-pointer text-xs hover:bg-zinc-600">关闭</button>
     </div>
-    <div class="message-list">
-      <div v-for="message in recentMessages" :key="message.id" class="message-item" :class="message.type">
-        <span class="message-icon">{{ getIcon(message.type) }}</span>
-        <div class="message-content">
-          <span class="message-text">{{ message.message }}</span>
-          <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+    <div class="max-h-[300px] overflow-y-auto">
+      <div 
+        v-for="message in recentMessages" 
+        :key="message.id" 
+        class="flex py-0.5 px-1 border-b border-zinc-100 last:border-b-none"
+        :class="{
+          'border-l-4 border-l-success': message.type === 'success',
+          'border-l-4 border-l-error': message.type === 'error',
+          'border-l-4 border-l-warning': message.type === 'warning',
+          'border-l-4 border-l-info': message.type === 'info'
+        }"
+      >
+        <span class="text-xs mr-0.5 flex-shrink-0">{{ getIcon(message.type) }}</span>
+        <div class="flex-1 text-xs">
+          <span class="block mb-1.5 text-zinc-700">{{ message.message }}</span>
+          <span class="text-xs text-zinc-400">{{ formatTime(message.timestamp) }}</span>
         </div>
       </div>
-      <div v-if="recentMessages.length === 0" class="no-messages">
+      <div v-if="recentMessages.length === 0" class="py-8 text-center text-zinc-400">
         暂无消息
       </div>
     </div>
@@ -66,103 +76,3 @@ const formatTime = (timestamp: number) => {
   return `${days}天前`
 }
 </script>
-
-<style scoped>
-.global-message-panel {
-  position: fixed;
-  top: 70px;
-  right: 20px;
-  width: 350px;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 10000;
-}
-
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px;
-  border-bottom: 1px solid #eee;
-}
-
-.panel-header p {
-  margin: 0;
-  color: #333;
-}
-
-.clear-button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.clear-button:hover {
-  background-color: #5a6268;
-}
-
-.message-list {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.message-item {
-  display: flex;
-  padding: 3px 5px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.message-item:last-child {
-  border-bottom: none;
-}
-
-.message-item.success {
-  border-left: 4px solid #28a745;
-}
-
-.message-item.error {
-  border-left: 4px solid #dc3545;
-}
-
-.message-item.warning {
-  border-left: 4px solid #ffc107;
-}
-
-.message-item.info {
-  border-left: 4px solid #17a2b8;
-}
-
-.message-icon {
-  font-size: small;
-  margin-right: 2px;
-  flex-shrink: 0;
-}
-
-.message-content {
-  flex: 1;
-  font-size: small;
-}
-
-.message-text {
-  display: block;
-  margin-bottom: 5px;
-  color: #333;
-}
-
-.message-time {
-  font-size: small;
-  color: #999;
-}
-
-.no-messages {
-  padding: 30px;
-  text-align: center;
-  color: #999;
-}
-</style>

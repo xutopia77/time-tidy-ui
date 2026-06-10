@@ -521,7 +521,7 @@
 }
 
 .xc-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  @apply bg-text-tertiary;
 }
 
 /* Datalist */

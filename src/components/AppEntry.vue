@@ -1,22 +1,22 @@
 <template>
-    <div class="app-entry">
-        <HeaderPanel class="header-panel-section" />
-        <div class="home-entry">
-            <router-view class="page-view" />
+    <div class="p-0 m-0 h-full w-full relative">
+        <HeaderPanel class="fixed left-0 top-0 h-full z-[100]" />
+        <div class="ml-16 h-full w-[calc(100%-64px)] z-[10]">
+            <router-view class="m-0 p-0 h-full w-full bg-bg-secondary overflow-y-auto overflow-x-hidden" />
         </div>
-        <div class='image-view' v-if="appStore.bPageImgView" style="z-index: 100;">
+        <div class='fixed top-0 left-0 w-full h-full p-0 m-0 z-[100]' v-if="appStore.bPageImgView">
             <FileViewer />
         </div>
 
-        <div v-if="bPageSearchSetting" class="fullscreen-overlay">
+        <div v-if="bPageSearchSetting" class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex justify-center items-center p-5 box-border [&>div]:w-[90%] [&>div]:max-w-[800px] [&>div]:max-h-[90%] [&>div]:overflow-hidden">
             <SearchSet>
             </SearchSet>
         </div>
-        <div v-if="bPageFileTransfer" class="fullscreen-overlay">
+        <div v-if="bPageFileTransfer" class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex justify-center items-center p-5 box-border [&>div]:w-[90%] [&>div]:max-w-[800px] [&>div]:max-h-[90%] [&>div]:overflow-hidden">
             <FileTransfer>
             </FileTransfer>
         </div>
-        <div v-if="bPageSet" class="fullscreen-overlay">
+        <div v-if="bPageSet" class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex justify-center items-center p-5 box-border [&>div]:w-[90%] [&>div]:max-w-[800px] [&>div]:max-h-[90%] [&>div]:overflow-hidden">
             <PageSet />
         </div>
         <MessageToast />
@@ -33,7 +33,6 @@ import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
 // import SearchSet from '@/components/HomeEntry/WorkPanel/SearchSet.vue'
 import FileTransfer from '@/components/HomeEntry/WorkPanel/FileTransfer.vue'
 import PageSet from '@/components/HomeEntry/WorkPanel/PageSet.vue'
-import '@/assets/common.css'
 import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
@@ -238,83 +237,3 @@ function handleProgressUpdate(data: DatType.Resp<DatType.ProgressUpdateData>) {
 }
 
 </script>
-
-<style scoped>
-.app-entry {
-    padding: 0px;
-    margin: 0px;
-    height: 100%;
-    width: 100%;
-    position: relative;
-}
-
-.header-panel-section {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100%;
-    z-index: 100;
-}
-
-.home-entry {
-    margin-left: var(--xc-sidebar-width);
-    height: 100%;
-    width: calc(100% - var(--xc-sidebar-width));
-    z-index: 10;
-}
-
-.settings-panel,
-.image-view,
-.message-show {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.settings-panel {
-    padding: 0;
-    margin: 0;
-    background-color: var(--xc-background-color);
-    z-index: 10;
-}
-
-.image-view {
-    padding: 0;
-    margin: 0;
-    z-index: 100;
-}
-
-.page-view {
-    margin: 0px;
-    padding: 0px;
-    height: 100%;
-    width: 100%;
-    background-color: var(--xc-background-color);
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.fullscreen-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: var(--xc-spacing-xl);
-    box-sizing: border-box;
-}
-
-.fullscreen-overlay>div {
-    width: 90%;
-    max-width: 800px;
-    max-height: 90%;
-    overflow: hidden;
-}
-</style>

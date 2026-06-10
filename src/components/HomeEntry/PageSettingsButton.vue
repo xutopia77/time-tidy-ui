@@ -1,6 +1,10 @@
 <template>
-    <button @click="openPageSettings" class="settings-btn" title="界面设置">
-        <span class="settings-icon">⚙️</span>
+    <button 
+        @click="openPageSettings" 
+        class="flex items-center justify-center w-9 h-9 p-0 bg-bg-elevated border border-border rounded-sm cursor-pointer transition-all duration-200 hover:bg-bg-tertiary hover:border-border-dark"
+        title="界面设置"
+    >
+        <span class="text-base leading-none">⚙️</span>
     </button>
 </template>
 
@@ -13,29 +17,3 @@ const openPageSettings = () => {
     appStore.bPageSet = true;
 };
 </script>
-
-<style scoped>
-.settings-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--xc-normal-height);
-    height: var(--xc-normal-height);
-    padding: 0;
-    background-color: var(--xc-button-bg-color);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
-}
-
-.settings-btn:hover {
-    background-color: var(--xc-button-bg-color-hover);
-    border-color: var(--xc-border-hover);
-}
-
-.settings-icon {
-    font-size: var(--xc-font-size-lg);
-    line-height: 1;
-}
-</style>

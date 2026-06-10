@@ -1,92 +1,98 @@
 <template>
-    <div class="settings-page">
-        <div class="page-header">
-            <h1>AI功能设置</h1>
-            <p class="page-desc">配置AI智能标签功能</p>
+    <div class="w-full">
+        <div class="mb-5">
+            <h1 class="text-xl font-semibold text-text-primary m-0 mb-1">AI功能设置</h1>
+            <p class="text-base text-text-secondary m-0">配置AI智能标签功能</p>
         </div>
 
-        <div class="settings-section">
-            <div class="section-header">
+        <div class="mb-5">
+            <div class="flex items-center gap-2 mb-3 text-text-primary">
                 <Brain size="20" />
-                <h2>AI引擎</h2>
+                <h2 class="text-lg font-medium m-0">AI引擎</h2>
             </div>
 
-            <div class="settings-card">
-                <div class="form-item">
-                    <label class="form-label">启用AI功能</label>
-                    <div class="form-control">
-                        <label class="switch">
-                            <input type="checkbox" v-model="form.enabled" @change="handleEnabledChange" />
-                            <span class="slider"></span>
+            <div class="bg-bg-secondary border border-border rounded-lg p-4">
+                <div class="mb-4 last:mb-0">
+                    <label class="block text-base font-medium text-text-primary mb-2">启用AI功能</label>
+                    <div class="w-full flex items-center">
+                        <label class="relative inline-block w-11 h-6">
+                            <input type="checkbox" class="opacity-0 w-0 h-0" v-model="form.enabled" @change="handleEnabledChange" />
+                            <span class="absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-border rounded-full transition-all duration-300 before:content-[''] before:absolute before:h-[18px] before:w-[18px] before:left-[3px] before:bottom-[3px] before:bg-white before:transition-all before:duration-300 before:rounded-full" :class="{'bg-primary before:translate-x-5': form.enabled}"></span>
                         </label>
-                        <span class="switch-label">{{ form.enabled ? '已启用' : '已禁用' }}</span>
+                        <span class="ml-2 text-base text-text-primary">{{ form.enabled ? '已启用' : '已禁用' }}</span>
                     </div>
                 </div>
 
-                <div class="form-item">
-                    <label class="form-label">引擎状态</label>
-                    <div class="form-control">
-                        <span class="status-badge" :class="statusClass">{{ statusText }}</span>
+                <div class="mb-4 last:mb-0">
+                    <label class="block text-base font-medium text-text-primary mb-2">引擎状态</label>
+                    <div class="w-full">
+                        <span 
+                            class="inline-block py-1 px-3 rounded-sm text-sm font-medium"
+                            :class="{
+                                'bg-success/15 text-success': aiAvailable,
+                                'bg-zinc-500/15 text-zinc-500': !aiAvailable
+                            }"
+                        >{{ statusText }}</span>
                     </div>
                 </div>
 
-                <div class="form-item">
-                    <label class="form-label">Python路径</label>
-                    <div class="form-control">
+                <div class="mb-4 last:mb-0">
+                    <label class="block text-base font-medium text-text-primary mb-2">Python路径</label>
+                    <div class="w-full">
                         <input
                             type="text"
-                            class="input-field"
+                            class="w-full py-2 px-3 text-base border border-border rounded-sm bg-bg-secondary text-text-primary box-border transition-colors duration-200 focus:outline-none focus:border-primary"
                             v-model="form.pythonPath"
                             placeholder="留空则自动检测系统Python"
                         />
-                        <p class="form-hint">指定Python可执行文件路径，留空将自动检测系统Python或使用内置Python</p>
+                        <p class="text-sm text-text-secondary mt-1 mb-0">指定Python可执行文件路径，留空将自动检测系统Python或使用内置Python</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="settings-section">
-            <div class="section-header">
+        <div class="mb-5">
+            <div class="flex items-center gap-2 mb-3 text-text-primary">
                 <Tag size="20" />
-                <h2>标签检测</h2>
+                <h2 class="text-lg font-medium m-0">标签检测</h2>
             </div>
 
-            <div class="settings-card">
-                <div class="form-item">
-                    <label class="form-label">置信度阈值: {{ form.tagThreshold.toFixed(2) }}</label>
-                    <div class="form-control">
+            <div class="bg-bg-secondary border border-border rounded-lg p-4">
+                <div class="mb-4 last:mb-0">
+                    <label class="block text-base font-medium text-text-primary mb-2">置信度阈值: {{ form.tagThreshold.toFixed(2) }}</label>
+                    <div class="w-full">
                         <input
                             type="range"
-                            class="range-field"
+                            class="w-full h-1.5 appearance-none bg-border rounded-sm outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer"
                             v-model.number="form.tagThreshold"
                             min="0.05"
                             max="1.0"
                             step="0.05"
                         />
-                        <div class="range-labels">
+                        <div class="flex justify-between text-xs text-text-secondary mt-1">
                             <span>0.05 (更多标签)</span>
                             <span>1.0 (更精确)</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-item">
-                    <label class="form-label">自动标签</label>
-                    <div class="form-control">
-                        <label class="switch">
-                            <input type="checkbox" v-model="form.autoTag" @change="handleAutoTagChange" />
-                            <span class="slider"></span>
+                <div class="mb-4 last:mb-0">
+                    <label class="block text-base font-medium text-text-primary mb-2">自动标签</label>
+                    <div class="w-full flex items-center">
+                        <label class="relative inline-block w-11 h-6">
+                            <input type="checkbox" class="opacity-0 w-0 h-0" v-model="form.autoTag" @change="handleAutoTagChange" />
+                            <span class="absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-border rounded-full transition-all duration-300 before:content-[''] before:absolute before:h-[18px] before:w-[18px] before:left-[3px] before:bottom-[3px] before:bg-white before:transition-all before:duration-300 before:rounded-full" :class="{'bg-primary before:translate-x-5': form.autoTag}"></span>
                         </label>
-                        <span class="switch-label">{{ form.autoTag ? '已启用' : '已禁用' }}</span>
-                        <p class="form-hint">启用后，新扫描的图片将自动进行AI标签检测</p>
+                        <span class="ml-2 text-base text-text-primary">{{ form.autoTag ? '已启用' : '已禁用' }}</span>
+                        <p class="text-sm text-text-secondary mt-1 mb-0 ml-2">启用后，新扫描的图片将自动进行AI标签检测</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="settings-actions">
-            <button class="btn btn-secondary" @click="loadStatus">重置</button>
-            <button class="btn btn-primary" @click="saveConfig">保存设置</button>
+        <div class="flex gap-3 justify-end mt-5">
+            <button class="py-2 px-4 text-base rounded-sm border-none cursor-pointer transition-all duration-200 bg-bg-secondary text-text-primary border border-border hover:bg-bg-tertiary" @click="loadStatus">重置</button>
+            <button class="py-2 px-4 text-base rounded-sm border-none cursor-pointer transition-all duration-200 bg-primary text-white hover:bg-primary-hover" @click="saveConfig">保存设置</button>
         </div>
     </div>
 </template>
@@ -97,7 +103,6 @@ import { Brain, Tag } from '@icon-park/vue-next';
 import { ApiService } from '@/utils/apiService';
 import type { AIStatus } from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
-import '@/assets/common.css';
 
 const form = reactive({
     enabled: false,
@@ -107,11 +112,6 @@ const form = reactive({
 });
 
 const aiAvailable = computed(() => form.enabled);
-
-const statusClass = computed(() => ({
-    'status-available': aiAvailable.value,
-    'status-unavailable': !aiAvailable.value,
-}));
 
 const statusText = computed(() => {
     if (aiAvailable.value) return 'AI引擎可用';
@@ -170,226 +170,3 @@ onMounted(() => {
     loadStatus();
 });
 </script>
-
-<style scoped>
-.settings-page {
-    width: 100%;
-}
-
-.page-header {
-    margin-bottom: var(--xc-spacing-xl);
-}
-
-.page-header h1 {
-    font-size: var(--xc-font-size-xl);
-    font-weight: 600;
-    color: var(--xc-text-color);
-    margin: 0 0 var(--xc-spacing-xs) 0;
-}
-
-.page-desc {
-    font-size: var(--xc-font-size-md);
-    color: var(--xc-text-color-secondary);
-    margin: 0;
-}
-
-.settings-section {
-    margin-bottom: var(--xc-spacing-xl);
-}
-
-.section-header {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-sm);
-    margin-bottom: var(--xc-spacing-md);
-    color: var(--xc-text-color);
-}
-
-.section-header h2 {
-    font-size: var(--xc-font-size-lg);
-    font-weight: 500;
-    margin: 0;
-}
-
-.settings-card {
-    background-color: var(--xc-background-color);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-md);
-    padding: var(--xc-spacing-lg);
-}
-
-.form-item {
-    margin-bottom: var(--xc-spacing-lg);
-}
-
-.form-item:last-child {
-    margin-bottom: 0;
-}
-
-.form-label {
-    display: block;
-    font-size: var(--xc-font-size-md);
-    font-weight: 500;
-    color: var(--xc-text-color);
-    margin-bottom: var(--xc-spacing-sm);
-}
-
-.form-control {
-    width: 100%;
-}
-
-.form-hint {
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color-secondary);
-    margin: var(--xc-spacing-xs) 0 0 0;
-}
-
-.input-field {
-    width: 100%;
-    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
-    font-size: var(--xc-font-size-md);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    background-color: var(--xc-background-color);
-    color: var(--xc-text-color);
-    box-sizing: border-box;
-    transition: border-color var(--xc-transition-normal);
-}
-
-.input-field:focus {
-    outline: none;
-    border-color: var(--xc-primary-color);
-}
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 24px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--xc-border-color);
-    transition: 0.3s;
-    border-radius: 24px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.3s;
-    border-radius: 50%;
-}
-
-input:checked + .slider {
-    background-color: var(--xc-primary-color);
-}
-
-input:checked + .slider:before {
-    transform: translateX(20px);
-}
-
-.switch-label {
-    margin-left: var(--xc-spacing-sm);
-    font-size: var(--xc-font-size-md);
-    color: var(--xc-text-color);
-}
-
-.status-badge {
-    display: inline-block;
-    padding: var(--xc-spacing-xs) var(--xc-spacing-md);
-    border-radius: var(--xc-border-radius-sm);
-    font-size: var(--xc-font-size-sm);
-    font-weight: 500;
-}
-
-.status-available {
-    background-color: rgba(76, 175, 80, 0.15);
-    color: #4CAF50;
-}
-
-.status-unavailable {
-    background-color: rgba(158, 158, 158, 0.15);
-    color: #9E9E9E;
-}
-
-.range-field {
-    width: 100%;
-    height: 6px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: var(--xc-border-color);
-    border-radius: 3px;
-    outline: none;
-}
-
-.range-field::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--xc-primary-color);
-    cursor: pointer;
-}
-
-.range-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: var(--xc-font-size-xs);
-    color: var(--xc-text-color-secondary);
-    margin-top: var(--xc-spacing-xs);
-}
-
-.settings-actions {
-    display: flex;
-    gap: var(--xc-spacing-md);
-    justify-content: flex-end;
-    margin-top: var(--xc-spacing-xl);
-}
-
-.btn {
-    padding: var(--xc-spacing-sm) var(--xc-spacing-lg);
-    font-size: var(--xc-font-size-md);
-    border-radius: var(--xc-border-radius-sm);
-    border: none;
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
-}
-
-.btn-secondary {
-    background-color: var(--xc-background-color);
-    color: var(--xc-text-color);
-    border: 1px solid var(--xc-border-color);
-}
-
-.btn-secondary:hover {
-    background-color: var(--xc-background-color-hover);
-}
-
-.btn-primary {
-    background-color: var(--xc-primary-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--xc-primary-color-hover);
-}
-</style>

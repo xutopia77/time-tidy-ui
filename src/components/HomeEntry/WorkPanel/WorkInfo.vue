@@ -1,9 +1,9 @@
 <template>
-    <div class="work-info">
-        <p class="info-item">名称:{{ fileinfo.name }}</p>
-        <p class="info-item">大小:{{ fileinfo.size }}</p>
-        <p class="info-item">时间:{{ fileinfo.createTime }}</p>
-        <p class="info-item">路径:{{ fileinfo.path }}</p>
+    <div class="p-0 m-0 w-full h-full bg-bg-secondary text-text-primary">
+        <p class="p-0 m-0 text-xs whitespace-nowrap">名称:{{ fileinfo.name }}</p>
+        <p class="p-0 m-0 text-xs whitespace-nowrap">大小:{{ fileinfo.size }}</p>
+        <p class="p-0 m-0 text-xs whitespace-nowrap">时间:{{ fileinfo.createTime }}</p>
+        <p class="p-0 m-0 text-xs whitespace-nowrap">路径:{{ fileinfo.path }}</p>
     </div>
 </template>
 <script setup lang="ts">
@@ -20,23 +20,4 @@ const fileinfo = computed(() => {
     fileInfo.path = appStore.curSltFile?.path || ''
     return fileInfo
 })
-
-
 </script>
-<style scoped>
-.work-info {
-    padding: 0px;
-    margin: 0px;
-    width: 100%;
-    height: 100%;
-    background-color: var(--xc-background-color);
-    color: var(--xc-text-color);
-}
-
-.info-item {
-    padding: 0px;
-    margin: 0px;
-    font-size: small;
-    white-space: nowrap;
-}
-</style>

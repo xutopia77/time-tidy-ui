@@ -1,46 +1,46 @@
 <template>
-    <div class="sidebar-section">
-        <h4 class="section-title">
-            <span class="section-icon">📷</span>
+    <div class="py-3 border-b border-border">
+        <h4 class="flex items-center gap-1 m-0 mb-3 text-base text-text-primary font-medium">
+            <span class="text-base">📷</span>
             文件信息
-            <span class="section-count" v-if="selectedFiles.length > 0">({{ selectedFiles.length }})</span>
+            <span class="text-text-secondary font-normal text-sm" v-if="selectedFiles.length > 0">({{ selectedFiles.length }})</span>
         </h4>
-        <div class="section-content" v-if="selectedFiles.length > 0">
+        <div class="flex flex-col gap-2" v-if="selectedFiles.length > 0">
             <template v-if="selectedFiles.length === 1">
-                <div class="info-item">
-                    <span class="info-label">名称：</span>
-                    <span class="info-value">{{ selectedFiles[0].name }}</span>
+                <div class="gap-px">
+                    <span class="text-sm text-text-secondary">名称：</span>
+                    <span class="text-sm text-text-primary break-all">{{ selectedFiles[0].name }}</span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">路径：</span>
-                    <span class="info-value" :title="selectedFiles[0].path">{{ selectedFiles[0].path }}</span>
+                <div class="gap-px">
+                    <span class="text-sm text-text-secondary">路径：</span>
+                    <span class="text-sm text-text-primary break-all" :title="selectedFiles[0].path">{{ selectedFiles[0].path }}</span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">大小：</span>
-                    <span class="info-value">{{ formatFileSize(selectedFiles[0].size) }}</span>
+                <div class="gap-px">
+                    <span class="text-sm text-text-secondary">大小：</span>
+                    <span class="text-sm text-text-primary">{{ formatFileSize(selectedFiles[0].size) }}</span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">时间：</span>
-                    <span class="info-value">{{ selectedFiles[0].time }}</span>
+                <div class="gap-px">
+                    <span class="text-sm text-text-secondary">时间：</span>
+                    <span class="text-sm text-text-primary">{{ selectedFiles[0].time }}</span>
                 </div>
-                <div class="info-item" v-if="selectedFiles[0].duration > 0">
-                    <span class="info-label">时长：</span>
-                    <span class="info-value">{{ formatDuration(selectedFiles[0].duration) }}</span>
+                <div class="gap-px" v-if="selectedFiles[0].duration > 0">
+                    <span class="text-sm text-text-secondary">时长：</span>
+                    <span class="text-sm text-text-primary">{{ formatDuration(selectedFiles[0].duration) }}</span>
                 </div>
             </template>
             <template v-else>
-                <div class="info-item">
-                    <span class="info-label">已选中：</span>
-                    <span class="info-value">{{ selectedFiles.length }} 个文件</span>
+                <div class="gap-px">
+                    <span class="text-sm text-text-secondary">已选中：</span>
+                    <span class="text-sm text-text-primary">{{ selectedFiles.length }} 个文件</span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">总大小：</span>
-                    <span class="info-value">{{ formatFileSize(totalSelectedSize) }}</span>
+                <div class="gap-px">
+                    <span class="text-sm text-text-secondary">总大小：</span>
+                    <span class="text-sm text-text-primary">{{ formatFileSize(totalSelectedSize) }}</span>
                 </div>
             </template>
         </div>
-        <div class="section-content" v-else>
-            <div class="empty-hint">选择文件查看详细信息</div>
+        <div class="flex flex-col gap-2" v-else>
+            <div class="text-sm text-text-secondary text-center py-2">选择文件查看详细信息</div>
         </div>
     </div>
 </template>
@@ -72,60 +72,3 @@ function formatDuration(ms: number): string {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 </script>
-
-<style scoped>
-.sidebar-section {
-    padding: var(--xc-spacing-md);
-    border-bottom: var(--xc-border);
-}
-
-.section-title {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-xs);
-    margin: 0 0 var(--xc-spacing-md) 0;
-    font-size: var(--xc-font-size-md);
-    color: var(--xc-text-color);
-    font-weight: 500;
-}
-
-.section-icon {
-    font-size: var(--xc-font-size-md);
-}
-
-.section-count {
-    color: var(--xc-text-color-secondary);
-    font-weight: normal;
-    font-size: var(--xc-font-size-sm);
-}
-
-.section-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--xc-spacing-sm);
-}
-
-.info-item {
-    /* display: flex;
-    flex-direction: column; */
-    gap: 1px;
-}
-
-.info-label {
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color-secondary);
-}
-
-.info-value {
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color);
-    word-break: break-all;
-}
-
-.empty-hint {
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color-secondary);
-    text-align: center;
-    padding: var(--xc-spacing-sm) 0;
-}
-</style>

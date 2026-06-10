@@ -1,176 +1,208 @@
 <template>
-	<div class="file-search-bar">
-		<div class="search-trigger" @click="openSearchPanel" :class="{ 'has-filters': hasActiveFilters }">
-			<span class="search-icon">🔍</span>
-			<span class="search-placeholder">{{ searchSummary }}</span>
-			<span v-if="hasActiveFilters" class="filter-badge">{{ activeFiltersCount }}</span>
+	<div class="w-full px-3 py-2 bg-bg-secondary border-b border-border">
+		<div 
+			class="flex items-center gap-2 px-1 py-1 bg-bg-tertiary border rounded-lg cursor-pointer transition-all duration-200 max-w-[300px]"
+			:class="hasActiveFilters ? 'border-primary bg-primary/5' : 'border-border hover:bg-bg-elevated hover:border-border-dark'"
+			@click="openSearchPanel">
+			<span class="text-sm text-text-secondary">🔍</span>
+			<span class="flex-1 text-xs text-text-secondary whitespace-nowrap overflow-hidden text-ellipsis"
+				:class="{ 'text-text-primary': hasActiveFilters }">
+				{{ searchSummary }}
+			</span>
+			<span v-if="hasActiveFilters" 
+				class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-primary text-white text-xs font-semibold rounded-full flex-shrink-0">
+				{{ activeFiltersCount }}
+			</span>
 		</div>
 		
-		<div v-if="showSearchPanel" class="search-panel-overlay" @click="closeSearchPanel">
-			<div class="search-panel" @click.stop>
-				<div class="search-panel-header">
-					<div class="search-input-container">
-						<span class="search-icon-large">🔍</span>
+		<div v-if="showSearchPanel" 
+			class="fixed inset-0 bg-black/50 flex items-start justify-center pt-[100px] z-[1000]"
+			@click="closeSearchPanel">
+			<div class="bg-bg-secondary rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto"
+				@click.stop>
+				<div class="flex gap-2 p-3 border-b border-border sticky top-0 bg-bg-secondary z-[1]">
+					<div class="flex-1 relative flex items-center">
+						<span class="absolute left-3 text-base text-text-secondary pointer-events-none">🔍</span>
 						<input v-model="searchKeyword" @keyup.enter="handleSearch" 
 							:placeholder="aiSearchEnabled ? '输入AI搜索文本（如：风景、人物、美食）...' : '输入文件名或路径搜索...'"
-							class="search-input-large" type="text" ref="searchInputRef" />
-						<button v-if="searchKeyword" @click="clearSearch" class="clear-btn-large">✕</button>
+							class="w-full h-10 py-2 px-5 pl-10 bg-bg-tertiary border-2 border-border rounded-lg text-text-primary text-sm outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.2)] placeholder:text-text-secondary"
+							type="text" ref="searchInputRef" />
+						<button v-if="searchKeyword" @click="clearSearch" 
+							class="absolute right-2 bg-none border-none text-text-secondary cursor-pointer p-1 flex items-center justify-center transition-colors duration-150 text-sm hover:text-text-primary">
+							✕
+						</button>
 					</div>
-					<button @click="handleSearch" class="search-btn-large">
+					<button @click="handleSearch" 
+						class="h-10 py-2 px-4 bg-primary text-white border-none rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 whitespace-nowrap hover:bg-primary-hover">
 						搜索
 					</button>
-					<button @click="handleCancel" class="cancel-btn">
+					<button @click="handleCancel" 
+						class="h-10 py-2 px-4 bg-transparent text-text-secondary border border-border rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 whitespace-nowrap hover:bg-bg-elevated hover:text-text-primary hover:border-border-dark">
 						取消
 					</button>
-					<button v-if="hasActiveFilters" @click="clearAllFilters" class="clear-all-btn">
+					<button v-if="hasActiveFilters" @click="clearAllFilters" 
+						class="h-10 py-2 px-3 bg-transparent text-text-secondary border border-border rounded-lg cursor-pointer text-xs transition-all duration-200 whitespace-nowrap hover:bg-bg-elevated hover:text-text-primary hover:border-border-dark">
 						清除条件
 					</button>
 				</div>
 				
-				<div class="search-panel-filters">
-					<div class="filter-section">
-						<h4 class="filter-section-title">搜索模式</h4>
-						<div class="filter-options">
-							<label class="ai-search-checkbox">
-								<input type="checkbox" v-model="aiSearchEnabled" />
-								<span>启用AI智能搜索</span>
+				<div class="p-3">
+					<div class="mb-4">
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">搜索模式</h4>
+						<div class="flex flex-wrap gap-1">
+							<label class="flex items-center gap-2 cursor-pointer text-sm text-text-primary">
+								<input type="checkbox" v-model="aiSearchEnabled" class="w-[18px] h-[18px] cursor-pointer" />
+								<span class="select-none">启用AI智能搜索</span>
 							</label>
 						</div>
 					</div>
 
-					<div v-if="aiSearchEnabled" class="filter-section">
-						<h4 class="filter-section-title">AI搜索设置</h4>
-						<div class="ai-search-settings">
-							<div class="ai-search-params">
-								<label>
-									相似度阈值:
-									<input v-model.number="aiSearchMinSimilar" type="number" min="0" max="1" step="0.1" class="range-input" />
-								</label>
-								<label>
-									返回数量:
-									<input v-model.number="aiSearchTopK" type="number" min="1" max="100" class="range-input" />
-								</label>
-							</div>
+					<div v-if="aiSearchEnabled" class="mb-4">
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">AI搜索设置</h4>
+						<div class="flex flex-col gap-2">
+							<label class="flex items-center gap-2">
+								相似度阈值:
+								<input v-model.number="aiSearchMinSimilar" type="number" min="0" max="1" step="0.1" 
+									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)]" />
+							</label>
+							<label class="flex items-center gap-2">
+								返回数量:
+								<input v-model.number="aiSearchTopK" type="number" min="1" max="100" 
+									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)]" />
+							</label>
 						</div>
 					</div>
 
-					<div v-if="!aiSearchEnabled" class="traditional-search-sections">
-						<div class="filter-section">
-							<h4 class="filter-section-title">文件类型</h4>
-							<div class="filter-options">
+					<div v-if="!aiSearchEnabled">
+						<div class="mb-4">
+							<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">文件类型</h4>
+							<div class="flex flex-wrap gap-1">
 								<button v-for="type in fileTypes" :key="type.value" 
 									@click="toggleFileType(type.value)"
-									class="filter-option-btn"
-									:class="{ 'active': isFileTypeSelected(type.value) }">
+									class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
+									:class="{ 'bg-primary border-primary text-white': isFileTypeSelected(type.value) }">
 									{{ type.label }}
 								</button>
 							</div>
 						</div>
 						
-						<div class="filter-section">
-							<h4 class="filter-section-title">排序方式</h4>
-						<div class="filter-options">
-							<button v-for="sort in sortOptions" :key="sort.value"
-								@click="sortBy = sort.value"
-								class="filter-option-btn"
-								:class="{ 'active': sortBy === sort.value }">
-								{{ sort.label }}
-							</button>
-						</div>
-						<div class="sort-order-toggle">
-							<button @click="sortOrder = 'asc'" class="order-btn" :class="{ 'active': sortOrder === 'asc' }">
-								↑ 升序
-							</button>
-							<button @click="sortOrder = 'desc'" class="order-btn" :class="{ 'active': sortOrder === 'desc' }">
-								↓ 降序
-							</button>
+						<div class="mb-4">
+							<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">排序方式</h4>
+							<div class="flex flex-wrap gap-1">
+								<button v-for="sort in sortOptions" :key="sort.value"
+									@click="sortBy = sort.value"
+									class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
+									:class="{ 'bg-primary border-primary text-white': sortBy === sort.value }">
+									{{ sort.label }}
+								</button>
+							</div>
+							<div class="flex gap-1 mt-2">
+								<button @click="sortOrder = 'asc'" 
+									class="flex-1 py-1 px-2 bg-bg-elevated border border-border rounded text-text-secondary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary"
+									:class="{ 'bg-primary border-primary text-white': sortOrder === 'asc' }">
+									↑ 升序
+								</button>
+								<button @click="sortOrder = 'desc'" 
+									class="flex-1 py-1 px-2 bg-bg-elevated border border-border rounded text-text-secondary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary"
+									:class="{ 'bg-primary border-primary text-white': sortOrder === 'desc' }">
+									↓ 降序
+								</button>
+							</div>
 						</div>
 					</div>
 					
-					<div class="filter-section">
-						<h4 class="filter-section-title">搜索范围</h4>
-						<div class="filter-options">
+					<div class="mb-4">
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">搜索范围</h4>
+						<div class="flex flex-wrap gap-1">
 							<button @click="pathType = 'curPath'" 
-								class="filter-option-btn"
-								:class="{ 'active': pathType === 'curPath' }">
+								class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
+								:class="{ 'bg-primary border-primary text-white': pathType === 'curPath' }">
 								当前目录
 							</button>
 							<button @click="pathType = 'allPath'"
-								class="filter-option-btn"
-								:class="{ 'active': pathType === 'allPath' }">
+								class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
+								:class="{ 'bg-primary border-primary text-white': pathType === 'allPath' }">
 								全部文件
 							</button>
 						</div>
 					</div>
 					
-					<div class="filter-section">
-						<h4 class="filter-section-title">文件大小</h4>
-						<div class="range-input-group">
-							<input v-model.number="minSizeMB" type="number" placeholder="最小" class="range-input" min="0" />
-							<span class="range-separator">-</span>
-							<input v-model.number="maxSizeMB" type="number" placeholder="最大" class="range-input" min="0" />
-							<span class="range-unit">MB</span>
+					<div class="mb-4">
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">文件大小</h4>
+						<div class="flex items-center gap-1">
+							<input v-model.number="minSizeMB" type="number" placeholder="最小" min="0" 
+								class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
+							<span class="text-text-secondary text-xs">-</span>
+							<input v-model.number="maxSizeMB" type="number" placeholder="最大" min="0" 
+								class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
+							<span class="text-text-secondary text-xs min-w-[30px]">MB</span>
 						</div>
 					</div>
 					
-					<div class="filter-section">
-						<h4 class="filter-section-title">视频时长</h4>
-						<div class="range-input-group">
-							<input v-model.number="minDurationMin" type="number" placeholder="最短" class="range-input" min="0" />
-							<span class="range-separator">-</span>
-							<input v-model.number="maxDurationMin" type="number" placeholder="最长" class="range-input" min="0" />
-							<span class="range-unit">分钟</span>
+					<div class="mb-4">
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">视频时长</h4>
+						<div class="flex items-center gap-1">
+							<input v-model.number="minDurationMin" type="number" placeholder="最短" min="0" 
+								class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
+							<span class="text-text-secondary text-xs">-</span>
+							<input v-model.number="maxDurationMin" type="number" placeholder="最长" min="0" 
+								class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
+							<span class="text-text-secondary text-xs min-w-[30px]">分钟</span>
 						</div>
 					</div>
 					
-					<div class="filter-section">
-						<h4 class="filter-section-title">图片/视频尺寸</h4>
-						<div class="dimension-inputs">
-							<div class="dimension-row">
-								<label>宽度:</label>
-								<input v-model.number="minWidth" type="number" placeholder="最小" class="range-input" min="0" />
-								<span class="range-separator">-</span>
-								<input v-model.number="maxWidth" type="number" placeholder="最大" class="range-input" min="0" />
-								<span class="range-unit">px</span>
+					<div class="mb-4">
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">图片/视频尺寸</h4>
+						<div class="flex flex-col gap-2">
+							<div class="flex items-center gap-1">
+								<label class="min-w-[50px] text-xs text-text-secondary">宽度:</label>
+								<input v-model.number="minWidth" type="number" placeholder="最小" min="0" 
+									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
+								<span class="text-text-secondary text-xs">-</span>
+								<input v-model.number="maxWidth" type="number" placeholder="最大" min="0" 
+									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
+								<span class="text-text-secondary text-xs min-w-[30px]">px</span>
 							</div>
-							<div class="dimension-row">
-								<label>高度:</label>
-								<input v-model.number="minHeight" type="number" placeholder="最小" class="range-input" min="0" />
-								<span class="range-separator">-</span>
-								<input v-model.number="maxHeight" type="number" placeholder="最大" class="range-input" min="0" />
-								<span class="range-unit">px</span>
+							<div class="flex items-center gap-1">
+								<label class="min-w-[50px] text-xs text-text-secondary">高度:</label>
+								<input v-model.number="minHeight" type="number" placeholder="最小" min="0" 
+									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
+								<span class="text-text-secondary text-xs">-</span>
+								<input v-model.number="maxHeight" type="number" placeholder="最大" min="0" 
+									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
+								<span class="text-text-secondary text-xs min-w-[30px]">px</span>
 							</div>
 						</div>
 					</div>
 					
-					<div class="filter-section">
-						<h4 class="filter-section-title">
+					<div class="mb-0">
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">
 							文件标签 ({{ selectedTags.length }})
 						</h4>
-						<div class="tag-options-header">
-							<label class="tag-option-label">
-								<input type="checkbox" v-model="bReverseSltTag" class="tag-checkbox" />
+						<div class="flex items-center gap-3 mb-2 flex-wrap">
+							<label class="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
+								<input type="checkbox" v-model="bReverseSltTag" class="cursor-pointer" />
 								反选
 							</label>
-							<label class="tag-option-label">
+							<label class="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
 								无标签:
-								<select v-model="bNoTag" class="tag-select">
+								<select v-model="bNoTag" 
+									class="h-6 py-0.5 px-1 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none cursor-pointer">
 									<option value="">全部</option>
 									<option value="false">有标签</option>
 									<option value="true">无标签</option>
 								</select>
 							</label>
 						</div>
-						<div class="filter-options tag-options">
+						<div class="flex flex-wrap gap-1 max-h-[200px] overflow-y-auto">
 							<button v-for="tag in fileTags" :key="tag.name"
 								@click="toggleTag(tag.name)"
-								class="filter-option-btn tag-btn"
-								:class="{ 'active': isTagSelected(tag.name) }"
+								class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
+								:class="{ 'text-white': isTagSelected(tag.name) }"
 								:style="isTagSelected(tag.name) ? { backgroundColor: tag.color, borderColor: tag.color } : {}">
 								{{ Utils.tagName2Display(tag.name) }}
 							</button>
 						</div>
-					</div>
 					</div>
 				</div>
 			</div>
@@ -488,442 +520,3 @@ const handleCancel = () => {
 	closeSearchPanel();
 };
 </script>
-
-<style scoped>
-.file-search-bar {
-    width: 100%;
-    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
-    background-color: var(--xc-background-color);
-    border-bottom: var(--xc-border);
-}
-
-.search-trigger {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-sm);
-    padding: var(--xc-spacing-xs) var(--xc-spacing-md);
-    background-color: var(--xc-input-bg-color);
-    border: 1px solid var(--xc-input-border-color);
-    border-radius: var(--xc-border-radius-md);
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
-    max-width: 300px;
-}
-
-.search-trigger:hover {
-    background-color: var(--xc-input-bg-color-hover);
-    border-color: var(--xc-border-color);
-}
-
-.search-trigger.has-filters {
-    border-color: var(--xc-primary-color);
-    background-color: rgba(74, 111, 165, 0.05);
-}
-
-.search-icon {
-    font-size: var(--xc-font-size-md);
-    color: var(--xc-text-color-secondary);
-}
-
-.search-placeholder {
-    flex: 1;
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.search-trigger.has-filters .search-placeholder {
-    color: var(--xc-text-color);
-}
-
-.filter-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    background-color: var(--xc-primary-color);
-    color: white;
-    font-size: var(--xc-font-size-xs);
-    font-weight: 600;
-    border-radius: 10px;
-    flex-shrink: 0;
-}
-
-.search-panel-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 100px;
-    z-index: 1000;
-}
-
-.search-panel {
-    background-color: var(--xc-background-color);
-    border-radius: var(--xc-border-radius-lg);
-    box-shadow: var(--xc-shadow-lg);
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-.search-panel-header {
-    display: flex;
-    gap: var(--xc-spacing-sm);
-    padding: var(--xc-spacing-md);
-    border-bottom: var(--xc-border);
-    position: sticky;
-    top: 0;
-    background-color: var(--xc-background-color);
-    z-index: 1;
-}
-
-.search-input-container {
-    flex: 1;
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.search-icon-large {
-    position: absolute;
-    left: var(--xc-spacing-md);
-    font-size: var(--xc-font-size-lg);
-    color: var(--xc-text-color-secondary);
-    pointer-events: none;
-}
-
-.search-input-large {
-    width: 100%;
-    height: 40px;
-    padding: var(--xc-spacing-sm) var(--xc-spacing-xl);
-    padding-left: 40px;
-    background-color: var(--xc-input-bg-color);
-    border: 2px solid var(--xc-input-border-color);
-    border-radius: var(--xc-border-radius-md);
-    color: var(--xc-text-color);
-    font-size: var(--xc-font-size-md);
-    outline: none;
-    transition: all var(--xc-transition-normal);
-}
-
-.search-input-large:focus {
-    border-color: var(--xc-input-border-color-focus);
-    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
-}
-
-.search-input-large::placeholder {
-    color: var(--xc-text-color-secondary);
-}
-
-.clear-btn-large {
-    position: absolute;
-    right: var(--xc-spacing-sm);
-    background: none;
-    border: none;
-    color: var(--xc-text-color-secondary);
-    cursor: pointer;
-    padding: var(--xc-spacing-xs);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color var(--xc-transition-fast);
-    font-size: var(--xc-font-size-md);
-}
-
-.clear-btn-large:hover {
-    color: var(--xc-text-color);
-}
-
-.search-btn-large {
-    height: 40px;
-    padding: var(--xc-spacing-sm) var(--xc-spacing-lg);
-    background-color: var(--xc-primary-color);
-    color: white;
-    border: none;
-    border-radius: var(--xc-border-radius-md);
-    cursor: pointer;
-    font-size: var(--xc-font-size-md);
-    font-weight: 500;
-    transition: all var(--xc-transition-normal);
-    white-space: nowrap;
-}
-
-.search-btn-large:hover {
-    background-color: var(--xc-primary-color-hover);
-}
-
-.cancel-btn {
-    height: 40px;
-    padding: var(--xc-spacing-sm) var(--xc-spacing-lg);
-    background-color: transparent;
-    color: var(--xc-text-color-secondary);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-md);
-    cursor: pointer;
-    font-size: var(--xc-font-size-md);
-    font-weight: 500;
-    transition: all var(--xc-transition-normal);
-    white-space: nowrap;
-}
-
-.ai-search-checkbox {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-sm);
-    cursor: pointer;
-    font-size: var(--xc-font-size-md);
-    color: var(--xc-text-color);
-}
-
-.ai-search-checkbox input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-.ai-search-checkbox span {
-    user-select: none;
-}
-
-.cancel-btn:hover {
-    background-color: var(--xc-background-color-hover);
-    color: var(--xc-text-color);
-    border-color: var(--xc-border-hover);
-}
-
-.clear-all-btn {
-    height: 40px;
-    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
-    background-color: transparent;
-    color: var(--xc-text-color-secondary);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-md);
-    cursor: pointer;
-    font-size: var(--xc-font-size-sm);
-    transition: all var(--xc-transition-normal);
-    white-space: nowrap;
-}
-
-.clear-all-btn:hover {
-    background-color: var(--xc-background-color-hover);
-    color: var(--xc-text-color);
-    border-color: var(--xc-border-hover);
-}
-
-.search-panel-filters {
-    padding: var(--xc-spacing-md);
-}
-
-.filter-section {
-    margin-bottom: var(--xc-spacing-lg);
-}
-
-.filter-section:last-child {
-    margin-bottom: 0;
-}
-
-.filter-section-title {
-    font-size: var(--xc-font-size-sm);
-    font-weight: 600;
-    color: var(--xc-text-color);
-    margin: 0 0 var(--xc-spacing-sm) 0;
-}
-
-.filter-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--xc-spacing-xs);
-}
-
-.filter-option-btn {
-    padding: var(--xc-spacing-xs) var(--xc-spacing-md);
-    background-color: var(--xc-button-bg-color);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-md);
-    color: var(--xc-text-color);
-    font-size: var(--xc-font-size-sm);
-    cursor: pointer;
-    transition: all var(--xc-transition-fast);
-}
-
-.filter-option-btn:hover {
-    background-color: var(--xc-button-bg-color-hover);
-    border-color: var(--xc-border-hover);
-}
-
-.filter-option-btn.active {
-    background-color: var(--xc-primary-color);
-    border-color: var(--xc-primary-color);
-    color: white;
-}
-
-.sort-order-toggle {
-    display: flex;
-    gap: var(--xc-spacing-xs);
-    margin-top: var(--xc-spacing-sm);
-}
-
-.order-btn {
-    flex: 1;
-    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
-    background-color: var(--xc-button-bg-color);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    color: var(--xc-text-color-secondary);
-    font-size: var(--xc-font-size-sm);
-    cursor: pointer;
-    transition: all var(--xc-transition-fast);
-}
-
-.order-btn:hover {
-    background-color: var(--xc-button-bg-color-hover);
-}
-
-.order-btn.active {
-    background-color: var(--xc-primary-color);
-    border-color: var(--xc-primary-color);
-    color: white;
-}
-
-.tag-options-header {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-md);
-    margin-bottom: var(--xc-spacing-sm);
-    flex-wrap: wrap;
-}
-
-.tag-option-label {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-xs);
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color-secondary);
-    cursor: pointer;
-}
-
-.tag-checkbox {
-    cursor: pointer;
-}
-
-.tag-select {
-    height: 24px;
-    padding: 2px var(--xc-spacing-xs);
-    background-color: var(--xc-input-bg-color);
-    border: 1px solid var(--xc-input-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    color: var(--xc-text-color);
-    font-size: var(--xc-font-size-xs);
-    outline: none;
-    cursor: pointer;
-}
-
-.tag-options {
-	max-height: 200px;
-	overflow-y: auto;
-}
-
-.tag-btn {
-	position: relative;
-}
-
-.tag-btn.active {
-	color: white;
-}
-
-.range-input-group {
-	display: flex;
-	align-items: center;
-	gap: var(--xc-spacing-xs);
-}
-
-.range-input {
-	flex: 1;
-	height: 32px;
-	padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
-	background-color: var(--xc-input-bg-color);
-	border: 1px solid var(--xc-input-border-color);
-	border-radius: var(--xc-border-radius-sm);
-	color: var(--xc-text-color);
-	font-size: var(--xc-font-size-sm);
-	outline: none;
-	transition: all var(--xc-transition-fast);
-}
-
-.range-input:focus {
-	border-color: var(--xc-input-border-color-focus);
-	box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.1);
-}
-
-.range-input::placeholder {
-	color: var(--xc-text-color-secondary);
-}
-
-.range-separator {
-	color: var(--xc-text-color-secondary);
-	font-size: var(--xc-font-size-sm);
-}
-
-.range-unit {
-	color: var(--xc-text-color-secondary);
-	font-size: var(--xc-font-size-sm);
-	min-width: 30px;
-}
-
-.dimension-inputs {
-	display: flex;
-	flex-direction: column;
-	gap: var(--xc-spacing-sm);
-}
-
-.dimension-row {
-	display: flex;
-	align-items: center;
-	gap: var(--xc-spacing-xs);
-}
-
-.dimension-row label {
-	min-width: 50px;
-	font-size: var(--xc-font-size-sm);
-	color: var(--xc-text-color-secondary);
-}
-
-.ai-search-settings {
-	display: flex;
-	flex-direction: column;
-	gap: var(--xc-spacing-sm);
-}
-
-.ai-search-input {
-	width: 100%;
-	margin-bottom: var(--xc-spacing-sm);
-}
-
-.ai-search-params {
-	display: flex;
-	gap: var(--xc-spacing-md);
-}
-
-.ai-search-params label {
-	display: flex;
-	align-items: center;
-	gap: var(--xc-spacing-xs);
-	font-size: var(--xc-font-size-sm);
-	color: var(--xc-text-color);
-}
-
-.ai-search-params .range-input {
-	width: 80px;
-}
-</style>

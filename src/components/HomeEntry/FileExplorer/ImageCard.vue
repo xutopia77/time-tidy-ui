@@ -36,7 +36,6 @@ import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-import '@/assets/common.css'
 
 const props = defineProps<{ item: DatType.File; }>();
 
@@ -105,8 +104,8 @@ const handleMouseLeave = () => {
 }
 
 .xc-card.checked {
-    border-color: var(--xc-primary-color);
-    background-color: rgba(74, 111, 165, 0.1);
+    border-color: var(--color-primary);
+    background-color: rgba(99, 102, 241, 0.1);
 }
 
 .xc-card.no-info {
@@ -149,8 +148,8 @@ const handleMouseLeave = () => {
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity var(--xc-transition-fast);
-    border-radius: var(--xc-border-radius-sm);
+    transition: opacity 150ms;
+    border-radius: 2px;
 }
 
 .xc-card:hover .xc-card-overlay {
@@ -164,34 +163,34 @@ const handleMouseLeave = () => {
 
 .xc-card-desc {
     height: auto;
-    padding: var(--xc-spacing-sm);
+    padding: 6px;
 }
 
 .xc-card-filename {
     font-weight: 500;
-    margin-bottom: var(--xc-spacing-xs);
-    color: var(--xc-text-color);
+    margin-bottom: 4px;
+    color: var(--color-text-primary);
 }
 
 .xc-card-meta {
     display: flex;
-    gap: var(--xc-spacing-sm);
-    margin-bottom: var(--xc-spacing-xs);
-    font-size: var(--xc-font-size-xs);
+    gap: 6px;
+    margin-bottom: 4px;
+    font-size: 12px;
 }
 
 .xc-card-size {
-    color: var(--xc-text-color-secondary);
+    color: var(--color-text-secondary);
 }
 
 .xc-card-time {
-    color: var(--xc-text-color-secondary);
+    color: var(--color-text-secondary);
 }
 
 .xc-card-path {
-    font-size: var(--xc-font-size-xs);
-    color: var(--xc-text-color-secondary);
-    margin-bottom: var(--xc-spacing-xs);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -202,7 +201,7 @@ const handleMouseLeave = () => {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: var(--xc-spacing-xs);
+    margin-top: 4px;
     max-height: 60px;
     overflow: hidden;
 }
@@ -212,9 +211,9 @@ const handleMouseLeave = () => {
     align-items: center;
     padding: 3px 8px;
     border-radius: 12px;
-    font-size: var(--xc-font-size-xs);
+    font-size: 12px;
     color: white;
-    transition: all var(--xc-transition-fast);
+    transition: all 150ms;
     white-space: nowrap;
     text-overflow: ellipsis;
     max-width: 100%;

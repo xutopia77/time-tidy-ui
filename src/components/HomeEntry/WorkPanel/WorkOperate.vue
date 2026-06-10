@@ -1,10 +1,10 @@
 <template>
-    <div>
-        <button @click="btnclk_file_transfer" class="xc-button op-button">移动</button>
-        <button @click="btnclk_file_transfer" class="xc-button op-button">复制</button>
-        <button @click="btnclk_delete_file" class="xc-button op-button">删除</button>
-        <button @click="btnclk_similarity_file" class="xc-button op-button">{{ fileSimilarityBtnName }}</button>
-        <button @click="btnclk_search_setting" class="xc-button op-button">搜索筛选</button>
+    <div class="flex gap-2">
+        <button @click="btnclk_file_transfer" class="py-1.5 px-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm cursor-pointer transition-all duration-200 hover:bg-bg-tertiary hover:border-border-dark">移动</button>
+        <button @click="btnclk_file_transfer" class="py-1.5 px-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm cursor-pointer transition-all duration-200 hover:bg-bg-tertiary hover:border-border-dark">复制</button>
+        <button @click="btnclk_delete_file" class="py-1.5 px-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm cursor-pointer transition-all duration-200 hover:bg-bg-tertiary hover:border-border-dark">删除</button>
+        <button @click="btnclk_similarity_file" class="py-1.5 px-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm cursor-pointer transition-all duration-200 hover:bg-bg-tertiary hover:border-border-dark">{{ fileSimilarityBtnName }}</button>
+        <button @click="btnclk_search_setting" class="py-1.5 px-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm cursor-pointer transition-all duration-200 hover:bg-bg-tertiary hover:border-border-dark">搜索筛选</button>
     </div>
 </template>
 
@@ -14,7 +14,6 @@ import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-import '@/assets/common.css';
 
 
 function btnclk_delete_file() {
@@ -60,15 +59,3 @@ function btnclk_file_transfer() {
     appStore.bPageFileTransfer = true
 }
 </script>
-
-<style scoped>
-/* 可以添加一些样式来美化选择框 */
-span,
-label {
-    margin-left: 2px;
-}
-
-.op-button {
-    margin-right: 10px;
-}
-</style>

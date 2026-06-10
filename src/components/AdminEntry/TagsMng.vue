@@ -1,42 +1,53 @@
 <template>
-    <div class="tags-mng">
-        <div class="tags-header">
-            <div class="header-title">
+    <div class="w-full h-full flex flex-col bg-bg-secondary">
+        <div class="flex justify-between items-center px-5 py-4 border-b border-border bg-bg-secondary">
+            <div class="flex items-center gap-2">
                 <TagOne theme="outline" size="24" fill="currentColor" />
-                <h2>标签管理</h2>
+                <h2 class="m-0 text-lg font-semibold text-text-primary">标签管理</h2>
             </div>
-            <button @click="btn_showAddDialog" class="add-tag-btn">
+            <button @click="btn_showAddDialog" 
+                class="flex items-center gap-1 py-2 px-3 bg-primary text-white border-none rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 hover:bg-primary-hover hover:-translate-y-px hover:shadow-md">
                 <Plus theme="outline" size="18" :strokeWidth="3" />
                 <span>新建标签</span>
             </button>
         </div>
 
-        <div class="tags-cloud xc-scrollbar">
-            <div v-for="(item, index) in allTags" :key="index" class="tag-card"
-                :class="{ 'selected': selectedTagItem?.name === item.name }" @click="selectTag(item)">
-                <div class="tag-color-bar" :style="{ backgroundColor: item.color }"></div>
-                <div class="tag-content">
-                    <div class="tag-header">
-                        <div class="tag-icon" :style="{ color: item.color }">
+        <div class="flex-1 flex flex-wrap gap-3 p-4 content-start overflow-y-auto">
+            <div v-for="(item, index) in allTags" :key="index" 
+                class="flex w-[calc(33.333%-12px)] min-w-[280px] bg-bg-secondary border border-border rounded-xl cursor-pointer transition-all duration-200 overflow-hidden relative hover:-translate-y-0.5 hover:shadow-lg hover:border-border-dark"
+                :class="{ 'border-primary shadow-[0_0_0_2px_rgba(99,102,241,0.2)]': selectedTagItem?.name === item.name }"
+                @click="selectTag(item)">
+                <div class="w-1 flex-shrink-0" :style="{ backgroundColor: item.color }"></div>
+                <div class="flex-1 flex flex-col p-3">
+                    <div class="flex items-start gap-2 mb-2">
+                        <div class="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-bg-elevated rounded"
+                            :style="{ color: item.color }">
                             <TagOne theme="filled" size="20" fill="currentColor" />
                         </div>
-                        <div class="tag-info">
-                            <div class="tag-name">{{ Utils.tagName2Display(item.name) }}</div>
-                            <div class="tag-description" v-if="item.description">{{ item.description }}</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-semibold text-text-primary mb-0.5 overflow-hidden text-ellipsis whitespace-nowrap">
+                                {{ Utils.tagName2Display(item.name) }}
+                            </div>
+                            <div class="text-xs text-text-secondary overflow-hidden text-ellipsis whitespace-nowrap" 
+                                v-if="item.description">{{ item.description }}</div>
                         </div>
                     </div>
-                    <div class="tag-footer">
-                        <div class="tag-stats">
-                            <span class="stat-item">
+                    <div class="flex justify-between items-center pt-2 border-t border-border">
+                        <div class="flex gap-2">
+                            <span class="flex items-center gap-1 text-xs text-text-secondary">
                                 <FileDoc theme="outline" size="14" />
                                 {{ item.fileCount || 0 }} 个文件
                             </span>
                         </div>
-                        <div class="tag-actions">
-                            <button @click.stop="btn_showEditDialog(item)" class="action-btn edit-btn" title="编辑">
+                        <div class="flex gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                            <button @click.stop="btn_showEditDialog(item)" 
+                                class="flex items-center justify-center w-7 h-7 p-0 bg-bg-elevated border border-border rounded text-text-primary cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:text-primary hover:border-primary"
+                                title="编辑">
                                 <Edit theme="outline" size="16" :strokeWidth="3" />
                             </button>
-                            <button @click.stop="btn_deletetag(item)" class="action-btn delete-btn" title="删除">
+                            <button @click.stop="btn_deletetag(item)" 
+                                class="flex items-center justify-center w-7 h-7 p-0 bg-bg-elevated border border-border rounded text-text-primary cursor-pointer transition-all duration-150 hover:bg-error/10 hover:text-error hover:border-error"
+                                title="删除">
                                 <Close theme="outline" size="16" :strokeWidth="3" />
                             </button>
                         </div>
@@ -44,64 +55,79 @@
                 </div>
             </div>
 
-            <div v-if="allTags.length === 0" class="no-tags">
-                <TagOne theme="outline" size="64" fill="currentColor" class="empty-icon" />
-                <p class="empty-title">暂无标签</p>
-                <p class="empty-desc">点击右上角"新建标签"按钮创建您的第一个标签</p>
+            <div v-if="allTags.length === 0" 
+                class="w-full flex flex-col items-center justify-center p-16 text-text-secondary">
+                <TagOne theme="outline" size="64" fill="currentColor" class="opacity-30 mb-3" />
+                <p class="text-base font-medium m-0 mb-1">暂无标签</p>
+                <p class="text-sm m-0 opacity-70">点击右上角"新建标签"按钮创建您的第一个标签</p>
             </div>
         </div>
 
-        <div v-if="isEditDialogVisible" class="dialog-overlay" @click="closeDialog">
-            <div class="dialog-content" @click.stop>
-                <div class="dialog-header">
-                    <h3>{{ isNewTag ? '新建标签' : '编辑标签' }}</h3>
-                    <button @click="closeDialog" class="close-btn">×</button>
+        <div v-if="isEditDialogVisible" 
+            class="fixed inset-0 bg-black/60 flex items-center justify-center z-[1000] backdrop-blur-sm"
+            @click="closeDialog">
+            <div class="bg-bg-secondary rounded-xl shadow-lg w-[90%] max-w-[500px] max-h-[90vh] flex flex-col overflow-hidden"
+                @click.stop>
+                <div class="flex justify-between items-center px-4 py-4 border-b border-border">
+                    <h3 class="m-0 text-base font-semibold text-text-primary">{{ isNewTag ? '新建标签' : '编辑标签' }}</h3>
+                    <button @click="closeDialog" 
+                        class="w-8 h-8 p-0 bg-none border-none text-text-secondary text-2xl leading-none cursor-pointer rounded transition-all duration-150 hover:bg-bg-elevated hover:text-text-primary">
+                        ×
+                    </button>
                 </div>
 
-                <div class="dialog-body">
-                    <div class="form-group">
-                        <label for="tagName">
-                            <span class="label-text">标签名称</span>
-                            <span class="required">*</span>
+                <div class="flex-1 p-4 overflow-y-auto">
+                    <div class="mb-4">
+                        <label for="tagName" class="flex items-center gap-1 mb-2 text-sm font-medium text-text-primary">
+                            <span>标签名称</span>
+                            <span class="text-error">*</span>
                         </label>
                         <input id="tagName" v-model="editingTag.name" placeholder="请输入标签名称"
-                            class="form-input" />
+                            class="w-full py-2 px-3 bg-bg-tertiary border border-border rounded-lg text-text-primary text-sm outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]" />
                     </div>
 
-                    <div class="form-group">
-                        <label for="tagColor">
-                            <span class="label-text">标签颜色</span>
-                            <span class="required">*</span>
+                    <div class="mb-4">
+                        <label for="tagColor" class="flex items-center gap-1 mb-2 text-sm font-medium text-text-primary">
+                            <span>标签颜色</span>
+                            <span class="text-error">*</span>
                         </label>
-                        <div class="color-picker-container">
-                            <div class="color-preview" :style="{ backgroundColor: editingTag.color }"></div>
-                            <input type="color" v-model="editingTag.color" class="color-input" />
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-10 h-10 rounded-lg border-2 border-border flex-shrink-0" 
+                                :style="{ backgroundColor: editingTag.color }"></div>
+                            <input type="color" v-model="editingTag.color" 
+                                class="w-10 h-10 p-0.5 border border-border rounded-lg cursor-pointer bg-none" />
                             <input type="text" v-model="editingTag.color" placeholder="#000000"
-                                maxlength="7" class="color-text-input" />
+                                maxlength="7" 
+                                class="flex-1 py-2 px-3 bg-bg-tertiary border border-border rounded-lg text-text-primary text-sm font-mono outline-none transition-all duration-200 focus:border-primary" />
                         </div>
-                        <div class="color-presets">
+                        <div class="flex flex-wrap gap-1">
                             <button v-for="color in colorPresets" :key="color"
                                 @click="editingTag.color = color"
-                                class="color-preset-btn"
-                                :style="{ backgroundColor: color }"
-                                :class="{ 'active': editingTag.color === color }">
+                                class="w-8 h-8 p-0 border-2 border-transparent rounded cursor-pointer transition-all duration-150 hover:scale-110"
+                                :class="{ 'border-text-primary shadow-[0_0_0_2px_rgba(0,0,0,0.1)]': editingTag.color === color }"
+                                :style="{ backgroundColor: color }">
                             </button>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="tagDescription">
-                            <span class="label-text">标签描述</span>
-                            <span class="optional">（可选）</span>
+                    <div class="mb-0">
+                        <label for="tagDescription" class="flex items-center gap-1 mb-2 text-sm font-medium text-text-primary">
+                            <span>标签描述</span>
+                            <span class="text-text-secondary font-normal">（可选）</span>
                         </label>
                         <textarea id="tagDescription" v-model="editingTag.description"
-                            placeholder="请输入标签描述（可选）" rows="3" class="form-textarea"></textarea>
+                            placeholder="请输入标签描述（可选）" rows="3" 
+                            class="w-full py-2 px-3 bg-bg-tertiary border border-border rounded-lg text-text-primary text-sm outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] resize-y min-h-[80px]"></textarea>
                     </div>
                 </div>
 
-                <div class="dialog-footer">
-                    <button @click="closeDialog" class="btn btn-secondary">取消</button>
-                    <button @click="submitEdit" class="btn btn-primary">
+                <div class="flex justify-end gap-2 px-4 py-4 border-t border-border">
+                    <button @click="closeDialog" 
+                        class="py-2 px-4 border border-border rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 bg-bg-elevated text-text-primary hover:bg-bg-tertiary">
+                        取消
+                    </button>
+                    <button @click="submitEdit" 
+                        class="py-2 px-4 border-none rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 bg-primary text-white hover:bg-primary-hover">
                         {{ isNewTag ? '创建' : '保存' }}
                     </button>
                 </div>
@@ -177,457 +203,3 @@ function submitEdit() {
     closeDialog();
 }
 </script>
-
-<style scoped>
-.tags-mng {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--xc-background-color);
-}
-
-.tags-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--xc-spacing-lg) var(--xc-spacing-xl);
-    border-bottom: var(--xc-border);
-    background-color: var(--xc-background-color);
-}
-
-.header-title {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-sm);
-}
-
-.header-title h2 {
-    margin: 0;
-    font-size: var(--xc-font-size-xl);
-    font-weight: 600;
-    color: var(--xc-text-color);
-}
-
-.add-tag-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-xs);
-    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
-    background-color: var(--xc-primary-color);
-    color: white;
-    border: none;
-    border-radius: var(--xc-border-radius-md);
-    font-size: var(--xc-font-size-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
-}
-
-.add-tag-btn:hover {
-    background-color: var(--xc-primary-color-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--xc-shadow-md);
-}
-
-.tags-cloud {
-    flex: 1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--xc-spacing-md);
-    padding: var(--xc-spacing-lg);
-    align-content: flex-start;
-    overflow-y: auto;
-}
-
-.tag-card {
-    display: flex;
-    width: calc(33.333% - var(--xc-spacing-md));
-    min-width: 280px;
-    background-color: var(--xc-background-color);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-lg);
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
-    overflow: hidden;
-    position: relative;
-}
-
-.tag-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--xc-shadow-lg);
-    border-color: var(--xc-border-hover);
-}
-
-.tag-card.selected {
-    border-color: var(--xc-primary-color);
-    box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
-}
-
-.tag-color-bar {
-    width: 4px;
-    flex-shrink: 0;
-}
-
-.tag-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: var(--xc-spacing-md);
-}
-
-.tag-header {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--xc-spacing-sm);
-    margin-bottom: var(--xc-spacing-sm);
-}
-
-.tag-icon {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background-color: var(--xc-background-color-hover);
-    border-radius: var(--xc-border-radius-sm);
-}
-
-.tag-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.tag-name {
-    font-size: var(--xc-font-size-md);
-    font-weight: 600;
-    color: var(--xc-text-color);
-    margin-bottom: 2px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.tag-description {
-    font-size: var(--xc-font-size-xs);
-    color: var(--xc-text-color-secondary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.tag-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: var(--xc-spacing-sm);
-    border-top: 1px solid var(--xc-border-color);
-}
-
-.tag-stats {
-    display: flex;
-    gap: var(--xc-spacing-sm);
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: var(--xc-font-size-xs);
-    color: var(--xc-text-color-secondary);
-}
-
-.tag-actions {
-    display: flex;
-    gap: var(--xc-spacing-xs);
-    opacity: 0;
-    transition: opacity var(--xc-transition-fast);
-}
-
-.tag-card:hover .tag-actions {
-    opacity: 1;
-}
-
-.action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    background-color: var(--xc-button-bg-color);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    color: var(--xc-text-color);
-    cursor: pointer;
-    transition: all var(--xc-transition-fast);
-}
-
-.action-btn:hover {
-    background-color: var(--xc-button-bg-color-hover);
-}
-
-.edit-btn:hover {
-    color: var(--xc-primary-color);
-    border-color: var(--xc-primary-color);
-}
-
-.delete-btn:hover {
-    color: var(--xc-error-color);
-    border-color: var(--xc-error-color);
-    background-color: rgba(245, 34, 45, 0.1);
-}
-
-.no-tags {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--xc-spacing-xxl);
-    color: var(--xc-text-color-secondary);
-}
-
-.empty-icon {
-    opacity: 0.3;
-    margin-bottom: var(--xc-spacing-md);
-}
-
-.empty-title {
-    font-size: var(--xc-font-size-lg);
-    font-weight: 500;
-    margin: 0 0 var(--xc-spacing-xs) 0;
-}
-
-.empty-desc {
-    font-size: var(--xc-font-size-sm);
-    margin: 0;
-    opacity: 0.7;
-}
-
-.dialog-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px);
-}
-
-.dialog-content {
-    background-color: var(--xc-background-color);
-    border-radius: var(--xc-border-radius-lg);
-    box-shadow: var(--xc-shadow-lg);
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.dialog-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--xc-spacing-lg);
-    border-bottom: var(--xc-border);
-}
-
-.dialog-header h3 {
-    margin: 0;
-    font-size: var(--xc-font-size-lg);
-    font-weight: 600;
-    color: var(--xc-text-color);
-}
-
-.close-btn {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    background: none;
-    border: none;
-    color: var(--xc-text-color-secondary);
-    font-size: 24px;
-    line-height: 1;
-    cursor: pointer;
-    border-radius: var(--xc-border-radius-sm);
-    transition: all var(--xc-transition-fast);
-}
-
-.close-btn:hover {
-    background-color: var(--xc-background-color-hover);
-    color: var(--xc-text-color);
-}
-
-.dialog-body {
-    flex: 1;
-    padding: var(--xc-spacing-lg);
-    overflow-y: auto;
-}
-
-.form-group {
-    margin-bottom: var(--xc-spacing-lg);
-}
-
-.form-group:last-child {
-    margin-bottom: 0;
-}
-
-.form-group label {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: var(--xc-spacing-sm);
-    font-size: var(--xc-font-size-sm);
-    font-weight: 500;
-    color: var(--xc-text-color);
-}
-
-.label-text {
-    color: var(--xc-text-color);
-}
-
-.required {
-    color: var(--xc-error-color);
-}
-
-.optional {
-    color: var(--xc-text-color-secondary);
-    font-weight: 400;
-}
-
-.form-input,
-.form-textarea {
-    width: 100%;
-    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
-    background-color: var(--xc-input-bg-color);
-    border: 1px solid var(--xc-input-border-color);
-    border-radius: var(--xc-border-radius-md);
-    color: var(--xc-text-color);
-    font-size: var(--xc-font-size-sm);
-    outline: none;
-    transition: all var(--xc-transition-normal);
-}
-
-.form-input:focus,
-.form-textarea:focus {
-    border-color: var(--xc-input-border-color-focus);
-    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
-}
-
-.form-textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
-.color-picker-container {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-sm);
-    margin-bottom: var(--xc-spacing-sm);
-}
-
-.color-preview {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--xc-border-radius-md);
-    border: 2px solid var(--xc-border-color);
-    flex-shrink: 0;
-}
-
-.color-input {
-    width: 40px;
-    height: 40px;
-    padding: 2px;
-    border: 1px solid var(--xc-input-border-color);
-    border-radius: var(--xc-border-radius-md);
-    cursor: pointer;
-    background: none;
-}
-
-.color-text-input {
-    flex: 1;
-    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
-    background-color: var(--xc-input-bg-color);
-    border: 1px solid var(--xc-input-border-color);
-    border-radius: var(--xc-border-radius-md);
-    color: var(--xc-text-color);
-    font-size: var(--xc-font-size-sm);
-    font-family: monospace;
-    outline: none;
-    transition: all var(--xc-transition-normal);
-}
-
-.color-text-input:focus {
-    border-color: var(--xc-input-border-color-focus);
-}
-
-.color-presets {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--xc-spacing-xs);
-}
-
-.color-preset-btn {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border: 2px solid transparent;
-    border-radius: var(--xc-border-radius-sm);
-    cursor: pointer;
-    transition: all var(--xc-transition-fast);
-}
-
-.color-preset-btn:hover {
-    transform: scale(1.1);
-}
-
-.color-preset-btn.active {
-    border-color: var(--xc-text-color);
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-}
-
-.dialog-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--xc-spacing-sm);
-    padding: var(--xc-spacing-lg);
-    border-top: var(--xc-border);
-}
-
-.btn {
-    padding: var(--xc-spacing-sm) var(--xc-spacing-lg);
-    border: none;
-    border-radius: var(--xc-border-radius-md);
-    font-size: var(--xc-font-size-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
-}
-
-.btn-secondary {
-    background-color: var(--xc-button-bg-color);
-    color: var(--xc-text-color);
-    border: 1px solid var(--xc-border-color);
-}
-
-.btn-secondary:hover {
-    background-color: var(--xc-button-bg-color-hover);
-}
-
-.btn-primary {
-    background-color: var(--xc-primary-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--xc-primary-color-hover);
-}
-</style>

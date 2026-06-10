@@ -1,21 +1,25 @@
 <template>
-    <div class="file-explorer">
-        <div class="path-display">
+    <div class="py-3 px-4 bg-bg-secondary rounded-lg mb-4">
+        <div class="flex items-center flex-wrap gap-1 text-base text-text-primary">
             <span 
                 v-for="(part, index) in pathParts" 
                 :key="index" 
-                class="path-item"
+                class="flex items-center gap-1"
                 :class="{ 'is-current': index === pathParts.length - 1 }"
             >
                 <span 
                     @click="navigateToPath(part.path)" 
-                    class="path-part"
-                    :class="{ 'clickable': index < pathParts.length - 1 && !isAllPathSearch, 'disabled': isAllPathSearch }"
+                    class="flex items-center py-1.5 px-2.5 rounded-sm transition-all duration-200 cursor-default select-none"
+                    :class="{
+                        'cursor-pointer hover:bg-bg-tertiary hover:text-primary active:scale-[0.98]': index < pathParts.length - 1 && !isAllPathSearch,
+                        'opacity-60 cursor-not-allowed': isAllPathSearch,
+                        'font-medium text-text-primary': index === pathParts.length - 1
+                    }"
                 >
                     <HardDisk v-if="part.name == ''" size="16" />
                     <span v-else>{{ part.name }}</span>
                 </span>
-                <span v-if="index < pathParts.length - 1" class="path-separator">
+                <span v-if="index < pathParts.length - 1" class="flex items-center text-text-secondary opacity-50 mx-1">
                     <svg viewBox="0 0 24 24" width="14" height="14">
                         <path fill="currentColor" d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
                     </svg>
@@ -28,7 +32,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { ComputedRef } from 'vue';
-import '@/assets/common.css'
 import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
@@ -76,72 +79,3 @@ const navigateToPath = (path: string) => {
     Utils.dir_slt_update(path);
 };
 </script>
-
-<style scoped>
-.file-explorer {
-    padding: var(--xc-spacing-md) var(--xc-spacing-lg);
-    background-color: var(--xc-background-color);
-    border-radius: var(--xc-border-radius-md);
-    margin-bottom: var(--xc-spacing-lg);
-}
-
-.path-display {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--xc-spacing-xs);
-    font-size: var(--xc-font-size-md);
-    color: var(--xc-text-color);
-}
-
-.path-item {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-xs);
-}
-
-.path-part {
-    display: flex;
-    align-items: center;
-    padding: 6px 10px;
-    border-radius: var(--xc-border-radius-sm);
-    transition: all var(--xc-transition-normal);
-    cursor: default;
-    user-select: none;
-}
-
-.path-part.clickable {
-    cursor: pointer;
-}
-
-.path-part.clickable:hover {
-    background-color: var(--xc-background-color-hover);
-    color: var(--xc-primary-color);
-}
-
-.path-part.clickable:active {
-    transform: scale(0.98);
-}
-
-.path-part.disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.path-item.is-current .path-part {
-    font-weight: 500;
-    color: var(--xc-text-color);
-}
-
-.path-separator {
-    display: flex;
-    align-items: center;
-    color: var(--xc-text-color-secondary);
-    opacity: 0.5;
-    margin: 0 var(--xc-spacing-xs);
-}
-
-.path-separator svg {
-    display: block;
-}
-</style>

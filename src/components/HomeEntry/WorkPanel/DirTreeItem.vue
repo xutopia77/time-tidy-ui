@@ -1,19 +1,19 @@
 <template>
-    <ul class="folder-list">
-        <li v-for="(item, index) in dirTrees" :key="index" class="dir-item-group">
-            <!-- 根据是否有子项和展开状态显示对应图标，并添加点击事件切换展开状态 -->
-            <div class="dir-item" :class="{ 'selected': curSltDirTreeItem?.dirInfo.id == item.dirInfo.id }">
-                <div v-if="!bShowDirIcon(item, 1) && !bShowDirIcon(item, 2)" class="icon-placeholder">
-                </div>
+    <ul class="w-full list-none pl-2.5">
+        <li v-for="(item, index) in dirTrees" :key="index" class="border-none rounded w-full text-text-primary">
+            <div 
+                class="border-none rounded w-full text-text-primary flex hover:border-border-dark"
+                :class="{ 'bg-bg-tertiary': curSltDirTreeItem?.dirInfo.id == item.dirInfo.id }"
+            >
+                <div v-if="!bShowDirIcon(item, 1) && !bShowDirIcon(item, 2)" class="w-[18px] align-middle"></div>
                 <Right size="18" v-if="bShowDirIcon(item, 1)" @click="btn_toggleExpand(item)" />
                 <Down size="18" v-if="bShowDirIcon(item, 2)" @click="btn_toggleExpand(item)" />
-                <div @click="btn_sltTreeItem(item)" class="no-wrap">
+                <div @click="btn_sltTreeItem(item)" class="whitespace-nowrap text-xs">
                     <FolderClose :size="16" />
                     {{ item.name }}
                 </div>
             </div>
-            <!-- 仅在文件夹有子项且展开时渲染子项的 ul -->
-            <ul v-if="item.children && item.children.length > 0 && item.expanded" class="folder-list">
+            <ul v-if="item.children && item.children.length > 0 && item.expanded" class="w-full list-none pl-2.5">
                 <DirTreeItem :data="item.children" v-model="curSltDirTreeItem" />
             </ul>
         </li>
@@ -22,9 +22,7 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, watch, computed, ref } from 'vue'
-import '@/assets/common.css'
 import { FolderClose, Right, Down } from '@icon-park/vue-next'
-// import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 
 const props = defineProps<{
@@ -44,7 +42,6 @@ const curSltDirTreeItem = computed({
         return props.modelValue;
     },
     set(value: DatType.DirTreeItem) {
-        // Utils.dir_slt_update(value)
         emit('update:modelValue', value);
     }
 })
@@ -67,70 +64,13 @@ function btn_sltTreeItem(iteam: DatType.DirTreeItem) {
     console.log("curSltDirTreeItem: ", iteam);
 }
 
-// 切换文件夹展开状态的方法
 const btn_toggleExpand = (item: DatType.DirTreeItem) => {
     item.expanded = !item.expanded;
 };
 </script>
 
 <style scoped>
-ul {
-    width: calc(100% - 0px);
-    list-style: none;
-    /* 去掉列表项前面的标识 */
-    padding-left: 10px;
-    /* 设置左侧内边距实现缩进效果 */
-}
-
-.dir-item-group {
-    border: none;
-    border-radius: 4px;
-    width: 100%;
-    color: var(--xc-text-color);
-}
-
-.dir-item {
-    border: none;
-    border-radius: 4px;
-    width: 100%;
-    color: var(--xc-text-color);
-    display: flex;
-}
-
-.dir-item:hover {
-    border: var(--xc-border-hover);
-}
-
-.dir-item.selected {
-    background-color: var(--xc-background-color-hover);
-}
-
-.folder-name {
-    vertical-align: middle;
-    /* 设置垂直居中对齐 */
-}
-
 svg {
     vertical-align: middle;
-    /* 设置 SVG 图标垂直居中对齐 */
 }
-
-.icon-placeholder {
-    /* display: inline-block; */
-    /* width: 28px; */
-    /* height: 28px; */
-    vertical-align: middle;
-    width: 18px;
-}
-
-.no-wrap {
-    white-space: nowrap;
-    font-size: small;
-}
-
-
-
-/* .sub-folder-list {
-    padding-left: 20px;
-} */
 </style>

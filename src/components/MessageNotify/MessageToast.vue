@@ -1,9 +1,19 @@
 <template>
-  <div class="toast-container">
+  <div class="fixed top-8 right-5 z-[9999] flex flex-col gap-2.5">
     <transition-group name="toast" tag="div">
-      <div v-for="toast in appStore.toasts" :key="toast.id" class="toast" :class="toast.type">
-        <span class="toast-icon">{{ getIcon(toast.type) }}</span>
-        <span class="toast-message">{{ toast.message }}</span>
+      <div 
+        v-for="toast in appStore.toasts" 
+        :key="toast.id" 
+        class="flex items-center py-0.5 px-1 rounded-md shadow-lg text-sm font-medium min-w-[250px] backdrop-blur-sm"
+        :class="{
+          'bg-success/90 text-white border border-success/50': toast.type === 'success',
+          'bg-error/90 text-white border border-error/50': toast.type === 'error',
+          'bg-warning/90 text-zinc-900 border border-warning/50': toast.type === 'warning',
+          'bg-info/90 text-white border border-info/50': toast.type === 'info'
+        }"
+      >
+        <span class="mr-0.5 text-xs">{{ getIcon(toast.type) }}</span>
+        <span>{{ toast.message }}</span>
       </div>
     </transition-group>
   </div>
@@ -13,7 +23,6 @@
 import { useAppStore } from '@/stores/AppStore'
 const appStore = useAppStore()
 import * as DatType from '@/utils/dataTypedef';
-// import Utils from '@/utils/utils';
 
 // 获取图标
 const getIcon = (type: DatType.MessageShowType) => {
@@ -28,58 +37,6 @@ const getIcon = (type: DatType.MessageShowType) => {
 </script>
 
 <style scoped>
-.toast-container {
-  position: fixed;
-  top: 32px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.toast {
-  display: flex;
-  align-items: center;
-  padding: 3px 5px;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  font-size: 14px;
-  font-weight: 500;
-  min-width: 250px;
-  backdrop-filter: blur(10px);
-  animation-duration: 0.3s;
-}
-
-.toast.success {
-  background-color: rgba(40, 167, 69, 0.9);
-  color: white;
-  border: 1px solid rgba(40, 167, 69, 0.5);
-}
-
-.toast.error {
-  background-color: rgba(220, 53, 69, 0.9);
-  color: white;
-  border: 1px solid rgba(220, 53, 69, 0.5);
-}
-
-.toast.warning {
-  background-color: rgba(255, 193, 7, 0.9);
-  color: #212529;
-  border: 1px solid rgba(255, 193, 7, 0.5);
-}
-
-.toast.info {
-  background-color: rgba(23, 162, 184, 0.9);
-  color: white;
-  border: 1px solid rgba(23, 162, 184, 0.5);
-}
-
-.toast-icon {
-  margin-right: 2px;
-  font-size: small;
-}
-
 /* 进入和离开动画 */
 .toast-enter-active {
   animation: toast-in 0.3s ease-out forwards;

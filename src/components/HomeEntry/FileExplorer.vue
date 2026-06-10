@@ -1,21 +1,25 @@
 <template>
-    <div class="file-explorer" :class="{ 'sidebar-open': sidebarOpen }">
-        <FileNavHeader class="file-nav-header" />
+    <div class="p-0 m-0 w-full h-full relative flex flex-col">
+        <FileNavHeader class="p-0 m-0 w-full h-[50px] flex-shrink-0 border-b border-border" />
 
-        <div class="main-content">
-            <div class="file-content xc-scrollbar">
+        <div class="flex-1 flex min-h-0 relative">
+            <div class="flex-1 xc-scrollbar p-0 m-0 h-full"
+				:class="{ 'mr-[320px]': sidebarOpen }">
                 <template v-for="catalog in fileCatalog" :key="catalog.name">
                     <div v-if="catalog.name.length">
-                        <span style="color: aliceblue;">{{ catalog.name }}</span>
-                        <hr>
+                        <span class="text-white">{{ catalog.name }}</span>
+                        <hr class="border-border">
                     </div>
-                    <div class="file-grid" :class="`view-mode-${cardViewMode}`">
+                    <div class="flex flex-wrap p-0 m-0"
+                        :class="cardViewMode === 'tile' ? 'gap-0' : 'gap-0'">
                         <template v-for="(item) in catalog.files" :key="item.id">
                             <ImageCard :item="item" />
                         </template>
                     </div>
                 </template>
-                <div class="file-grid" :class="`view-mode-${cardViewMode}`" v-if="!isAllPathSearch">
+                <div class="flex flex-wrap p-0 m-0"
+                    :class="cardViewMode === 'tile' ? 'gap-0' : 'gap-0'"
+                    v-if="!isAllPathSearch">
                     <template v-for="item in dirs" :key="item.id">
                         <FolderCard :item="item" />
                     </template>
@@ -32,44 +36,61 @@
             />
         </div>
 
-        <div class="fab-container" :class="{ 'fab-sidebar-open': sidebarOpen }">
-            <div v-if="fabMenuOpen" class="fab-menu">
-                <div class="fab-menu-item" @click="openFileWithDefault" :class="{ 'disabled': !canOpenFile }">
-                    <span class="fab-menu-icon">📂</span>
-                    <span class="fab-menu-text">默认打开</span>
+        <div class="fixed bottom-5 right-5 z-[100]"
+            :class="{ 'right-[340px]': sidebarOpen }">
+            <div v-if="fabMenuOpen" class="absolute bottom-14 right-0 flex flex-col gap-2 p-2 bg-bg-secondary rounded-lg border border-border shadow-lg">
+                <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
+                    @click="openFileWithDefault"
+                    :class="{ 'opacity-50 cursor-not-allowed': !canOpenFile }">
+                    <span class="text-sm">📂</span>
+                    <span class="text-sm whitespace-nowrap">默认打开</span>
                 </div>
-                <div class="fab-menu-item" @click="aiTagDetect" :class="{ 'disabled': !canAITag }">
-                    <span class="fab-menu-icon">🤖</span>
-                    <span class="fab-menu-text">AI标签</span>
+                <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
+                    @click="aiTagDetect"
+                    :class="{ 'opacity-50 cursor-not-allowed': !canAITag }">
+                    <span class="text-sm">🤖</span>
+                    <span class="text-sm whitespace-nowrap">AI标签</span>
                 </div>
-                <div class="fab-menu-item" @click="toggleSidebar">
-                    <span class="fab-menu-icon">{{ sidebarOpen ? '◀' : '▶' }}</span>
-                    <span class="fab-menu-text">{{ sidebarOpen ? '收起面板' : '展开面板' }}</span>
+                <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
+                    @click="toggleSidebar">
+                    <span class="text-sm">{{ sidebarOpen ? '◀' : '▶' }}</span>
+                    <span class="text-sm whitespace-nowrap">{{ sidebarOpen ? '收起面板' : '展开面板' }}</span>
                 </div>
-                <div class="fab-menu-item" @click="openCreateFolderDialog">
-                    <span class="fab-menu-icon">📁</span>
-                    <span class="fab-menu-text">创建文件夹</span>
+                <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
+                    @click="openCreateFolderDialog">
+                    <span class="text-sm">📁</span>
+                    <span class="text-sm whitespace-nowrap">创建文件夹</span>
                 </div>
             </div>
-            <button class="fab-button" @click="toggleFabMenu">
-                <span :class="{ 'fab-icon-rotate': fabMenuOpen }">+</span>
+            <button class="w-12 h-12 rounded-full bg-primary text-white border-none cursor-pointer shadow-lg transition-all duration-200 hover:bg-primary-hover"
+                @click="toggleFabMenu">
+                <span class="inline-block transition-transform duration-200"
+                    :class="{ 'rotate-45': fabMenuOpen }">+</span>
             </button>
         </div>
 
-        <div v-if="showCreateFolderDialog" class="dialog-overlay" @click="closeCreateFolderDialog">
-            <div class="dialog-content" @click.stop>
-                <h3>创建新文件夹</h3>
-                <p class="current-path">当前位置: {{ currentPath }}</p>
+        <div v-if="showCreateFolderDialog" 
+            class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
+            @click="closeCreateFolderDialog">
+            <div class="bg-bg-secondary p-5 rounded-lg shadow-lg min-w-[300px] max-w-[500px]"
+                @click.stop>
+                <h3 class="m-0 mb-3 text-text-primary text-base">创建新文件夹</h3>
+                <p class="m-0 mb-3 text-text-secondary text-sm">当前位置: {{ currentPath }}</p>
                 <input v-model="newFolderName" @keyup.enter="createNewFolder" placeholder="输入文件夹名称"
-                    class="folder-name-input" ref="folderInputRef" maxlength="100" />
-                <div class="dialog-actions">
-                    <button @click="createNewFolder" class="confirm-btn" :disabled="!newFolderName.trim()">确定</button>
-                    <button @click="closeCreateFolderDialog" class="cancel-btn">取消</button>
+                    class="w-full py-2 mb-3 bg-bg-tertiary border border-border rounded text-text-primary text-sm outline-none transition-colors duration-200 focus:border-primary"
+                    ref="folderInputRef" maxlength="100" />
+                <div class="flex justify-end gap-2">
+                    <button @click="createNewFolder" 
+                        class="py-1 px-3 rounded text-sm cursor-pointer transition-all duration-200 bg-primary text-white border-none hover:bg-primary-hover disabled:bg-bg-tertiary disabled:text-text-disabled disabled:cursor-not-allowed"
+                        :disabled="!newFolderName.trim()">确定</button>
+                    <button @click="closeCreateFolderDialog" 
+                        class="py-1 px-3 rounded text-sm cursor-pointer transition-all duration-200 bg-bg-elevated text-text-primary border border-border hover:bg-bg-tertiary">
+                        取消</button>
                 </div>
             </div>
         </div>
 
-        <FilePagination v-if="showPagination" class="file-pagination" />
+        <FilePagination v-if="showPagination" class="w-full h-[40px] flex-shrink-0 border-t border-border" />
         
         <FileOperationBar />
     </div>

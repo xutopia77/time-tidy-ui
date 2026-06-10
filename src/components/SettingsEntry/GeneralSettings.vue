@@ -1,46 +1,49 @@
 <template>
-    <div class="settings-page">
-        <div class="page-header">
-            <h1>基本设置</h1>
-            <p class="page-desc">程序的基本设置</p>
+    <div class="w-full">
+        <div class="mb-5">
+            <h1 class="text-xl font-semibold text-text-primary m-0 mb-1">基本设置</h1>
+            <p class="text-base text-text-secondary m-0">程序的基本设置</p>
         </div>
 
-        <div class="settings-section">
-            <div class="section-header">
+        <div class="mb-5">
+            <div class="flex items-center gap-2 mb-3 text-text-primary">
                 <Theme size="20" />
-                <h2>主题</h2>
+                <h2 class="text-lg font-medium m-0">主题</h2>
             </div>
             
-            <div class="settings-card">
-                <div class="form-item">
-                    <label class="form-label">主题模式</label>
-                    <div class="form-control theme-options">
+            <div class="bg-bg-secondary border border-border rounded-lg p-4">
+                <div class="mb-4 last:mb-0">
+                    <label class="block text-base font-medium text-text-primary mb-2">主题模式</label>
+                    <div class="w-full flex gap-3">
                         <button 
                             v-for="theme in themes" 
                             :key="theme.id"
-                            class="theme-option"
-                            :class="{ 'active': selectedTheme === theme.id }"
+                            class="flex flex-col items-center gap-1 p-3 border-2 border-transparent rounded-lg bg-bg-secondary cursor-pointer transition-all duration-200 min-w-[100px] hover:border-border"
+                            :class="{ 'border-primary bg-primary/5': selectedTheme === theme.id }"
                             @click="selectedTheme = theme.id"
                         >
-                            <div class="theme-preview" :style="{ background: theme.preview }"></div>
-                            <span>{{ theme.name }}</span>
+                            <div class="w-12 h-12 rounded-lg border border-border" :style="{ background: theme.preview }"></div>
+                            <span class="text-sm text-text-primary">{{ theme.name }}</span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="settings-section">
-            <div class="section-header">
+        <div class="mb-5">
+            <div class="flex items-center gap-2 mb-3 text-text-primary">
                 <Earth size="20" />
-                <h2>语言</h2>
+                <h2 class="text-lg font-medium m-0">语言</h2>
             </div>
             
-            <div class="settings-card">
-                <div class="form-item">
-                    <label class="form-label">界面语言</label>
-                    <div class="form-control">
-                        <select class="select-field" v-model="form.language">
+            <div class="bg-bg-secondary border border-border rounded-lg p-4">
+                <div class="mb-4 last:mb-0">
+                    <label class="block text-base font-medium text-text-primary mb-2">界面语言</label>
+                    <div class="w-full">
+                        <select 
+                            class="w-full py-2 px-3 text-base border border-border rounded-sm bg-bg-secondary text-text-primary box-border transition-colors duration-200 focus:outline-none focus:border-primary"
+                            v-model="form.language"
+                        >
                             <option value="zh-CN">简体中文</option>
                             <option value="zh-TW">繁體中文</option>
                             <option value="en-US">English (US)</option>
@@ -53,9 +56,9 @@
             </div>
         </div>
 
-        <div class="settings-actions">
-            <button class="btn btn-secondary">取消</button>
-            <button class="btn btn-primary">保存设置</button>
+        <div class="flex gap-3 justify-end mt-5">
+            <button class="py-2 px-4 text-base rounded-sm border-none cursor-pointer transition-all duration-200 bg-bg-secondary text-text-primary border border-border hover:bg-bg-tertiary">取消</button>
+            <button class="py-2 px-4 text-base rounded-sm border-none cursor-pointer transition-all duration-200 bg-primary text-white hover:bg-primary-hover">保存设置</button>
         </div>
     </div>
 </template>
@@ -63,7 +66,6 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { Theme, Earth } from '@icon-park/vue-next';
-import '@/assets/common.css';
 
 const selectedTheme = ref('dark');
 
@@ -77,163 +79,3 @@ const form = reactive({
     language: 'zh-CN'
 });
 </script>
-
-<style scoped>
-.settings-page {
-    width: 100%;
-}
-
-.page-header {
-    margin-bottom: var(--xc-spacing-xl);
-}
-
-.page-header h1 {
-    font-size: var(--xc-font-size-xl);
-    font-weight: 600;
-    color: var(--xc-text-color);
-    margin: 0 0 var(--xc-spacing-xs) 0;
-}
-
-.page-desc {
-    font-size: var(--xc-font-size-md);
-    color: var(--xc-text-color-secondary);
-    margin: 0;
-}
-
-.settings-section {
-    margin-bottom: var(--xc-spacing-xl);
-}
-
-.section-header {
-    display: flex;
-    align-items: center;
-    gap: var(--xc-spacing-sm);
-    margin-bottom: var(--xc-spacing-md);
-    color: var(--xc-text-color);
-}
-
-.section-header h2 {
-    font-size: var(--xc-font-size-lg);
-    font-weight: 500;
-    margin: 0;
-}
-
-.settings-card {
-    background-color: var(--xc-background-color);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-md);
-    padding: var(--xc-spacing-lg);
-}
-
-.form-item {
-    margin-bottom: var(--xc-spacing-lg);
-}
-
-.form-item:last-child {
-    margin-bottom: 0;
-}
-
-.form-label {
-    display: block;
-    font-size: var(--xc-font-size-md);
-    font-weight: 500;
-    color: var(--xc-text-color);
-    margin-bottom: var(--xc-spacing-sm);
-}
-
-.form-control {
-    width: 100%;
-}
-
-.select-field {
-    width: 100%;
-    padding: var(--xc-spacing-sm) var(--xc-spacing-md);
-    font-size: var(--xc-font-size-md);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    background-color: var(--xc-background-color);
-    color: var(--xc-text-color);
-    box-sizing: border-box;
-    transition: border-color var(--xc-transition-normal);
-}
-
-.select-field:focus {
-    outline: none;
-    border-color: var(--xc-primary-color);
-}
-
-.theme-options {
-    display: flex;
-    gap: var(--xc-spacing-md);
-}
-
-.theme-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--xc-spacing-xs);
-    padding: var(--xc-spacing-md);
-    border: 2px solid transparent;
-    border-radius: var(--xc-border-radius-md);
-    background-color: var(--xc-background-color);
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
-    min-width: 100px;
-}
-
-.theme-option:hover {
-    border-color: var(--xc-border-color);
-}
-
-.theme-option.active {
-    border-color: var(--xc-primary-color);
-    background-color: rgba(74, 111, 165, 0.08);
-}
-
-.theme-preview {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    border: 1px solid var(--xc-border-color);
-}
-
-.theme-option span {
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color);
-}
-
-.settings-actions {
-    display: flex;
-    gap: var(--xc-spacing-md);
-    justify-content: flex-end;
-    margin-top: var(--xc-spacing-xl);
-}
-
-.btn {
-    padding: var(--xc-spacing-sm) var(--xc-spacing-lg);
-    font-size: var(--xc-font-size-md);
-    border-radius: var(--xc-border-radius-sm);
-    border: none;
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
-}
-
-.btn-secondary {
-    background-color: var(--xc-background-color);
-    color: var(--xc-text-color);
-    border: 1px solid var(--xc-border-color);
-}
-
-.btn-secondary:hover {
-    background-color: var(--xc-background-color-hover);
-}
-
-.btn-primary {
-    background-color: var(--xc-primary-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--xc-primary-color-hover);
-}
-</style>

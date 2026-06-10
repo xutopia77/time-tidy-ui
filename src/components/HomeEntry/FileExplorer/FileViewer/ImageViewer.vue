@@ -1,8 +1,8 @@
 <template>
-    <div class="image-viewer-container">
-        <div v-if="currentImage != null" class="image-viewer">
-            <div class="overlay" @click="close"></div>
-            <div class="viewer-container">
+    <div class="fixed top-0 left-0 w-full h-full">
+        <div v-if="currentImage != null" class="fixed top-0 left-0 w-full h-full z-[9999]">
+            <div class="absolute top-0 left-0 w-full h-full bg-black/90" @click="close"></div>
+            <div class="relative flex justify-center items-center h-full">
                 <button class="nav-btn prev" @click="prevImage" :disabled="currentIndex === 0">
                     ‹
                 </button>
@@ -26,19 +26,19 @@
                 
                 <button class="close-btn" @click="close">×</button>
                 
-                <div class="image-info">
-                    <span class="image-counter">{{ currentIndex + 1 }} / {{ imageList.length }}</span>
-                    <span class="image-name">{{ currentImage?.name }}</span>
+                <div class="absolute top-5 left-5 bg-black/70 text-white py-3 px-4 rounded-lg text-sm flex flex-col gap-1">
+                    <span class="font-semibold text-base">{{ currentIndex + 1 }} / {{ imageList.length }}</span>
+                    <span class="opacity-80 max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap">{{ currentImage?.name }}</span>
                 </div>
                 
                 <div class="control-toolbar">
-                    <div class="toolbar-group">
+                    <div class="flex gap-2 items-center">
                         <button @click="zoomOut" class="toolbar-btn" title="缩小 (-)">
                             <svg viewBox="0 0 24 24" width="20" height="20">
                                 <path fill="currentColor" d="M19 13H5v-2h14v2z"/>
                             </svg>
                         </button>
-                        <span class="zoom-display">{{ Math.round(scale * 100) }}%</span>
+                        <span class="text-white text-sm font-medium min-w-[50px] text-center">{{ Math.round(scale * 100) }}%</span>
                         <button @click="zoomIn" class="toolbar-btn" title="放大 (+)">
                             <svg viewBox="0 0 24 24" width="20" height="20">
                                 <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -46,9 +46,9 @@
                         </button>
                     </div>
                     
-                    <div class="toolbar-divider"></div>
+                    <div class="w-px h-6 bg-white/20"></div>
                     
-                    <div class="toolbar-group">
+                    <div class="flex gap-2 items-center">
                         <button @click="fitToScreen" class="toolbar-btn" title="适应屏幕 (F)">
                             <svg viewBox="0 0 24 24" width="20" height="20">
                                 <path fill="currentColor" d="M3 5v4h2V5h4V3H5c-1.1 0-2 .9-2 2zm2 10H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm14 4h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zm0-16h-4v2h4v4h2V5c0-1.1-.9-2-2-2z"/>
@@ -61,9 +61,9 @@
                         </button>
                     </div>
                     
-                    <div class="toolbar-divider"></div>
+                    <div class="w-px h-6 bg-white/20"></div>
                     
-                    <div class="toolbar-group">
+                    <div class="flex gap-2 items-center">
                         <button @click="rotateLeft" class="toolbar-btn" title="左旋转 (Shift+R)">
                             <svg viewBox="0 0 24 24" width="20" height="20">
                                 <path fill="currentColor" d="M7.11 8.53L5.7 7.11C4.8 8.27 4.24 9.61 4.07 11h2.02c.14-.87.49-1.72 1.02-2.47zM6.09 13H4.07c.17 1.39.72 2.73 1.62 3.89l1.41-1.42c-.52-.75-.87-1.59-1.01-2.47zm1.01 5.32c1.16.9 2.51 1.44 3.9 1.61V17.9c-.87-.15-1.71-.49-2.46-1.03L7.1 18.32zM13 4.07V1L8.45 5.55 13 10V6.09c2.84.48 5 2.94 5 5.91s-2.16 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93s-3.05-7.44-7-7.93z"/>
@@ -77,10 +77,10 @@
                     </div>
                 </div>
                 
-                <div class="keyboard-hints">
-                    <span>← → 切换</span>
-                    <span>+/- 缩放</span>
-                    <span>ESC 关闭</span>
+                <div class="absolute bottom-[100px] left-1/2 -translate-x-1/2 flex gap-4 text-white/50 text-xs">
+                    <span class="bg-black/50 py-1 px-2 rounded">← → 切换</span>
+                    <span class="bg-black/50 py-1 px-2 rounded">+/- 缩放</span>
+                    <span class="bg-black/50 py-1 px-2 rounded">ESC 关闭</span>
                 </div>
             </div>
         </div>
@@ -301,40 +301,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.image-viewer-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.image-viewer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-}
-
-.overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-}
-
-.viewer-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
-
 .preview-image {
     max-width: 90%;
     max-height: 90%;
@@ -406,33 +372,6 @@ onUnmounted(() => {
     cursor: not-allowed;
 }
 
-.image-info {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.image-counter {
-    font-weight: 600;
-    font-size: 16px;
-}
-
-.image-name {
-    opacity: 0.8;
-    max-width: 300px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .control-toolbar {
     position: absolute;
     bottom: 30px;
@@ -446,18 +385,6 @@ onUnmounted(() => {
     gap: 16px;
     align-items: center;
     border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.toolbar-group {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.toolbar-divider {
-    width: 1px;
-    height: 24px;
-    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .toolbar-btn {
@@ -480,30 +407,5 @@ onUnmounted(() => {
 
 .toolbar-btn:active {
     background-color: rgba(255, 255, 255, 0.2);
-}
-
-.zoom-display {
-    color: white;
-    font-size: 14px;
-    font-weight: 500;
-    min-width: 50px;
-    text-align: center;
-}
-
-.keyboard-hints {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 16px;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
-}
-
-.keyboard-hints span {
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 4px 8px;
-    border-radius: 4px;
 }
 </style>

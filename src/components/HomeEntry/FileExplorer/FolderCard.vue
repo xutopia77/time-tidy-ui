@@ -6,13 +6,15 @@
             <input type="checkbox" v-model="isChecked" @change="handleCheckboxChange" class="xc-checkbox" />
         </div>
         <div class="xc-card-content" @click="btnclk_dir">
-            <div class="xc-card-icon" :class="{ 'tile-mode': isTileMode }" :style="{
-                height: `${cardHeight}px`
-            }">
+            <div 
+                class="flex items-center justify-center transition-transform duration-200"
+                :class="{ 'tile-mode': isTileMode, 'group-hover:scale-105': true }"
+                :style="{ height: `${cardHeight}px` }"
+            >
                 <FolderClose :size="cardWidth - 80" :strokeWidth=1 color="#333" />
             </div>
-            <div v-if="showCardInfo" class="xc-card-desc">
-                <p class="xc-card-name xc-card-foldername">{{ item.name }}</p>
+            <div v-if="showCardInfo" class="flex items-center justify-center py-2">
+                <p class="font-medium text-center overflow-hidden text-ellipsis whitespace-nowrap max-w-full">{{ item.name }}</p>
             </div>
         </div>
     </div>
@@ -23,7 +25,6 @@ import { defineProps, ref, computed } from 'vue';
 import * as DatType from '@/utils/dataTypedef';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
-import '@/assets/common.css'
 import Utils from '@/utils/utils';
 import { FolderClose } from '@icon-park/vue-next'
 
@@ -74,48 +75,21 @@ function btnclk_dir() {
 
 <style scoped>
 .xc-card.checked {
-    border-color: var(--xc-primary-color);
-    background-color: rgba(74, 111, 165, 0.1);
+    border-color: var(--color-primary);
+    background-color: rgba(99, 102, 241, 0.1);
 }
 
 .xc-card.no-info {
     height: auto;
 }
 
-.xc-card-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform var(--xc-transition-normal);
-}
-
-.xc-card-icon.tile-mode {
+.tile-mode {
     overflow: hidden;
 }
 
-.xc-card-icon.tile-mode svg {
+.tile-mode :deep(svg) {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.xc-card:hover .xc-card-icon {
-    transform: scale(1.05);
-}
-
-.xc-card-desc {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--xc-spacing-sm);
-}
-
-.xc-card-foldername {
-    font-weight: 500;
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
 }
 </style>
