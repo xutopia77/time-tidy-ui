@@ -23,7 +23,7 @@
             </div>
         </div>
         <!-- Content -->
-        <div class="flex-1 overflow-y-auto bg-bg-secondary">
+        <div class="flex-1 xc-scrollbar bg-bg-secondary">
             <div class="p-5 max-w-[800px]">
                 <GeneralSettings v-if="activeSection === 'general'" />
                 <AISettings v-if="activeSection === 'ai'" />

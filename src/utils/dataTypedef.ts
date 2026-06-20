@@ -317,11 +317,9 @@ export class FileSearchCondition {
     sortBy: string = "time";// name, size, time, type
     sortOrder: string = "asc";// asc, desc
     pathType: string = "curPath";// curPath, allPath
-    page: number = 1;
-    pageSize: number = 500;
     tags: string[] = [];// tags
     noTag: 'true' | 'false' | '' = '';
-    bReverseSltTag: boolean = false; // 反向选择标签
+    bReverseSltTag: boolean = false; // reverse select tag
     types: FileType[] = [];
 }
 
@@ -610,10 +608,10 @@ export class DirCreateResp {
 }
 
 export class DictionaryResp {
-    operationType: Record<string, any> = {};
-    operationLogLevel: Record<string, any> = {};
-    operationLogType: Record<string, any> = {};
-    respCode: Record<string, any> = {};
+    operationType: Record<string, unknown> = {};
+    operationLogLevel: Record<string, unknown> = {};
+    operationLogType: Record<string, unknown> = {};
+    respCode: Record<string, unknown> = {};
 }
 
 export class AIStatus {

@@ -685,8 +685,8 @@ class Utils {
     static dictionary_get = dictionary_get;
 	static async files_get(_req: DatTypes.FilesGetReq | null = null, bUpdateStore: boolean = true): Promise<DatTypes.Resp> {
 		const req: DatTypes.FilesGetReq = {
-			pageSize: appStore.searchCon.pageSize,
-			page: appStore.searchCon.page - 1,
+			pageSize: 100000,
+			page: 0,
 			tags: appStore.searchCon.tags,
 			noTag: appStore.searchCon.noTag,
 			bReverseTag: appStore.searchCon.bReverseSltTag,
@@ -730,8 +730,6 @@ class Utils {
 		}
 
 		if (_req != null) {
-			if (_req.pageSize != null) { req.pageSize = _req.pageSize; }
-			if (_req.page != null) { req.page = _req.page; }
 			if (_req.tags != null) { req.tags = _req.tags; }
 			if (_req.noTag != null) { req.noTag = _req.noTag; }
 			if (_req.bReverseTag != null) { req.bReverseTag = _req.bReverseTag; }

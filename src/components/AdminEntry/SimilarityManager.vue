@@ -407,11 +407,11 @@ const deleteFile = async (file: SimilarityFile) => {
     }
 };
 
-const previewFile = (file: SimilarityFile) => {
+const previewFile = (_file: SimilarityFile) => {
     Utils.addToast('预览功能开发中');
 };
 
-const locateFile = (file: SimilarityFile) => {
+const locateFile = (_file: SimilarityFile) => {
     Utils.addToast('定位功能开发中');
 };
 

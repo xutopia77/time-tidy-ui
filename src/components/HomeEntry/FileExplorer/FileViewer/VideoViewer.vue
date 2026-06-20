@@ -49,7 +49,7 @@ import * as DatType from '@/utils/dataTypedef';
 
 declare global {
     interface HTMLVideoElement {
-        videoTracks?: any[];
+        videoTracks?: unknown[];
     }
 }
 

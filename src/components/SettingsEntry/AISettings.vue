@@ -144,7 +144,7 @@ const handleAutoTagChange = () => {
 
 const saveConfig = async () => {
     try {
-        const req: Record<string, any> = {};
+        const req: Record<string, unknown> = {};
         req.enabled = form.enabled;
         req.python_path = form.pythonPath;
         req.tag_threshold = form.tagThreshold;
@@ -161,7 +161,7 @@ const saveConfig = async () => {
         } else {
             Utils.message_notify({ content: '保存失败: ' + (resp.status || '未知错误'), type: 'error' });
         }
-    } catch (e) {
+    } catch (_e) {
         Utils.message_notify({ content: '保存失败', type: 'error' });
     }
 };

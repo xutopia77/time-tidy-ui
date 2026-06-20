@@ -1,9 +1,9 @@
 import axios from 'axios';
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import type { AppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number;
   status: string;
   data: T;
@@ -46,33 +46,38 @@ export class ApiClient {
       (response: AxiosResponse) => {
         return response;
       },
-      (error: any) => {
-        if (error.response) {
-          const status = error.response.status;
-          const message = error.response.data?.message || 'Request failed';
+      (error: unknown) => {
+        const axiosErr = error as AxiosError;
+        if (axiosErr.response) {
+          const status = axiosErr.response.status;
+          const message = (axiosErr.response.data as { message?: string })?.message || 'Request failed';
           console.error(`API Error [${status}]: ${message}`);
-        } else if (error.request) {
+        } else if (axiosErr.request) {
           console.error('Network Error: No response received');
         } else {
-          console.error('Request Error:', error.message);
+          console.error('Request Error:', (error as Error).message);
         }
         return Promise.reject(error);
       }
     );
   }
 
-  private handleError(error: any, showMessage: boolean = true): never {
+  private handleError(error: unknown, showMessage: boolean = true): never {
     let apiError: ApiError;
 
     if (error instanceof ApiError) {
       apiError = error;
-    } else if (error.response) {
-      apiError = new ApiError(
-        error.response.data?.code || -1,
-        error.response.data?.status || 'Request failed'
-      );
     } else {
-      apiError = new ApiError(-1, 'Network error');
+      const axiosErr = error as AxiosError;
+      if (axiosErr.response) {
+        const respData = axiosErr.response.data as { code?: number; status?: string };
+        apiError = new ApiError(
+          respData?.code || -1,
+          respData?.status || 'Request failed'
+        );
+      } else {
+        apiError = new ApiError(-1, 'Network error');
+      }
     }
 
     if (showMessage) {
@@ -88,7 +93,7 @@ export class ApiClient {
   private async request<T>(
     method: string,
     url: string,
-    data?: any,
+    data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     try {
@@ -114,7 +119,7 @@ export class ApiClient {
   async requestRaw<T>(
     method: string,
     url: string,
-    data?: any,
+    data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     const response: AxiosResponse<ApiResponse<T>> = await this.instance.request({
@@ -127,19 +132,19 @@ export class ApiClient {
     return response.data;
   }
 
-  async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>('GET', url, undefined, config);
   }
 
-  async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>('POST', url, data, config);
   }
 
-  async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>('PUT', url, data, config);
   }
 
-  async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>('DELETE', url, undefined, config);
   }
 }

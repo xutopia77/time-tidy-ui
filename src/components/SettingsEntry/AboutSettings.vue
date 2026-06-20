@@ -8,7 +8,7 @@
         <div class="mb-5">
             <div class="flex items-center gap-4 bg-gradient-to-br from-primary to-primary-hover border-none rounded-lg p-4">
                 <div class="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center text-white flex-shrink-0">
-                    <WindmillTwo size="64" />
+                     <img src="/assets/images/icon.png" alt="logo" width="64" height="64" />
                 </div>
                 <div>
                     <h2 class="text-xl font-semibold text-white m-0 mb-1">Time Tidy</h2>
@@ -121,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { WindmillTwo, Info, Shield, Mail, Globe, Bug, Heart, Refresh } from '@icon-park/vue-next';
+import { Info, Shield, Mail, Globe, Bug, Heart, Refresh } from '@icon-park/vue-next';
 
 const appVersion = '1.0.0';
 const updateDate = '2026-05-09';
