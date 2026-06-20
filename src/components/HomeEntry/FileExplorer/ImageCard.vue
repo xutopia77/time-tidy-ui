@@ -15,7 +15,7 @@
                 <p class="xc-card-name xc-card-filename">{{ item.name }}</p>
                 <div class="xc-card-meta">
                     <span class="xc-card-size">{{ Utils.gen_size_str(item.size) }}</span>
-                    <span class="xc-card-time">{{ item.time }}</span>
+                    <span class="xc-card-time">{{ formatTime(item.time) }}</span>
                 </div>
                 <div v-if="showFilePath" class="xc-card-path" :title="item.path">
                     {{ item.path }}
@@ -96,6 +96,11 @@ const handleMouseEnter = () => {
 const handleMouseLeave = () => {
     appStore.hoverFile = null;
 };
+
+function formatTime(time: string | undefined): string {
+    if (!time) return '';
+    return time.replace('T', ' ').replace('Z', '').slice(0, 19);
+}
 </script>
 
 <style scoped>
