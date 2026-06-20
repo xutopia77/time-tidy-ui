@@ -13,6 +13,10 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 
+const emit = defineEmits<{
+    (e: 'scroll', payload: { ratio: number }): void;
+}>();
+
 const props = withDefaults(defineProps<{
     items: unknown[];
     itemWidth: number;
@@ -26,6 +30,7 @@ const props = withDefaults(defineProps<{
 
 const scrollContainer = ref<HTMLDivElement | null>(null);
 const scrollTop = ref(0);
+let scrollDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 // read container dimensions directly from DOM - always fresh, no caching issues
 function getContainerWidth(): number {
@@ -47,26 +52,26 @@ function getColumns(): number {
 const totalHeight = computed(() => {
     const cols = getColumns();
     const rows = Math.ceil(props.items.length / cols);
-    return rows * props.rowHeight;
+    return rows * props.rowHeight + Math.max(0, rows - 1) * props.gap;
 });
 
 const startIdx = computed(() => {
     const cols = getColumns();
-    const row = Math.max(0, Math.floor(scrollTop.value / props.rowHeight) - props.bufferRows);
+    const row = Math.max(0, Math.floor(scrollTop.value / (props.rowHeight + props.gap)) - props.bufferRows);
     return row * cols;
 });
 
 const endIdx = computed(() => {
     const cols = getColumns();
     const h = getContainerHeight() || window.innerHeight;
-    const lastVisibleRow = Math.floor(scrollTop.value / props.rowHeight) + Math.ceil(h / props.rowHeight) + props.bufferRows;
+    const lastVisibleRow = Math.floor(scrollTop.value / (props.rowHeight + props.gap)) + Math.ceil(h / props.rowHeight) + props.bufferRows;
     const totalRows = Math.ceil(props.items.length / cols);
     return Math.min(props.items.length, Math.min(lastVisibleRow, totalRows) * cols);
 });
 
 const offsetY = computed(() => {
-    const row = Math.max(0, Math.floor(scrollTop.value / props.rowHeight) - props.bufferRows);
-    return row * props.rowHeight;
+    const row = Math.max(0, Math.floor(scrollTop.value / (props.rowHeight + props.gap)) - props.bufferRows);
+    return row * (props.rowHeight + props.gap);
 });
 
 const visibleItems = computed(() => {
@@ -80,7 +85,19 @@ function getItemKey(item: unknown, index: number): string | number {
 
 function onScroll() {
     if (!scrollContainer.value) return;
-    scrollTop.value = scrollContainer.value.scrollTop;
+    const currentScrollTop = scrollContainer.value.scrollTop;
+
+    // emit scroll ratio immediately for timeline sync
+    const containerH = scrollContainer.value.clientHeight;
+    const totalH = scrollContainer.value.scrollHeight;
+    const ratio = totalH > containerH ? currentScrollTop / (totalH - containerH) : 0;
+    emit('scroll', { ratio });
+
+    // debounce scrollTop update to avoid excessive re-rendering during fast scroll
+    if (scrollDebounceTimer) clearTimeout(scrollDebounceTimer);
+    scrollDebounceTimer = setTimeout(() => {
+        scrollTop.value = currentScrollTop;
+    }, 150);
 }
 
 // reset scroll when items change
@@ -97,5 +114,14 @@ function scrollToTop() {
     }
 }
 
-defineExpose({ scrollToTop });
+function scrollToItem(index: number) {
+    if (!scrollContainer.value) return;
+    const cols = getColumns();
+    const row = Math.floor(index / cols);
+    const target = row * (props.rowHeight + props.gap);
+    scrollContainer.value.scrollTop = target;
+    scrollTop.value = target;
+}
+
+defineExpose({ scrollToTop, scrollToItem });
 </script>

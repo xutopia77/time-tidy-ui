@@ -10,13 +10,16 @@
                     :item-width="cardItemWidth"
                     :row-height="cardRowHeight"
                     :gap="cardGap"
-                    :buffer-rows="3">
+                    :buffer-rows="3"
+                    @scroll="onVirtualScroll">
                     <template #item="{ item }">
                         <FolderCard v-if="isDirItem(item)" :item="item" />
                         <ImageCard v-else :item="item" />
                     </template>
                 </VirtualScroll>
             </div>
+
+            <TimelineBar :items="virtualScrollItems" :scroll-ratio="scrollRatio" @scroll-to-index="onScrollToIndex" />
 
             <FileSidebar 
                 :visible="sidebarOpen"
@@ -94,6 +97,7 @@ import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
 import FileOperationBar from '@/components/HomeEntry/FileExplorer/FileOperationBar.vue';
 import FileSidebar from '@/components/HomeEntry/FileExplorer/FileSidebar/FileSidebar.vue';
 import VirtualScroll from '@/components/HomeEntry/FileExplorer/VirtualScroll.vue';
+import TimelineBar from '@/components/HomeEntry/FileExplorer/TimelineBar.vue';
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 import { ApiService } from '@/utils/apiService';
@@ -144,6 +148,15 @@ const cardGap = computed(() => {
 });
 
 const virtualScrollRef = ref<InstanceType<typeof VirtualScroll> | null>(null);
+const scrollRatio = ref(0);
+
+const onVirtualScroll = ({ ratio }: { ratio: number }) => {
+    scrollRatio.value = ratio;
+};
+
+const onScrollToIndex = (index: number) => {
+    virtualScrollRef.value?.scrollToItem(index);
+};
 
 const selectedFiles = computed(() => {
     return items.value.filter(item => item.checked);
