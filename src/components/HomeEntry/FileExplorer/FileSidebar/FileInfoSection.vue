@@ -1,11 +1,12 @@
 <template>
     <div class="py-3 border-b border-border">
-        <h4 class="flex items-center gap-1 m-0 mb-3 text-base text-text-primary font-medium">
+        <h4 class="flex items-center gap-1 m-0 mb-3 text-base text-text-primary font-medium cursor-pointer select-none" @click="$emit('update:collapsed', !collapsed)">
+            <span class="text-base transition-transform duration-200" :class="{ 'rotate-[-90deg]': collapsed }">▾</span>
             <span class="text-base">📷</span>
             文件信息
             <span class="text-text-secondary font-normal text-sm" v-if="selectedFiles.length > 0">({{ selectedFiles.length }})</span>
         </h4>
-        <div class="flex flex-col gap-2" v-if="selectedFiles.length > 0">
+        <div class="flex flex-col gap-2" v-if="!collapsed">
             <template v-if="selectedFiles.length === 1">
                 <div class="gap-px">
                     <span class="text-sm text-text-secondary">名称：</span>
@@ -39,7 +40,7 @@
                 </div>
             </template>
         </div>
-        <div class="flex flex-col gap-2" v-else>
+        <div class="flex flex-col gap-2" v-if="!collapsed && selectedFiles.length === 0">
             <div class="text-sm text-text-secondary text-center py-2">选择文件查看详细信息</div>
         </div>
     </div>
@@ -51,6 +52,11 @@ import * as DatType from '@/utils/dataTypedef'
 
 const props = defineProps<{
     selectedFiles: DatType.File[];
+    collapsed: boolean;
+}>();
+
+defineEmits<{
+    (e: 'update:collapsed', value: boolean): void;
 }>();
 
 const totalSelectedSize = computed(() => {

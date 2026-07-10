@@ -1,11 +1,12 @@
 <template>
     <div class="py-3 border-b border-border">
-        <h4 class="flex items-center gap-1 m-0 mb-3 text-base text-text-primary font-medium">
+        <h4 class="flex items-center gap-1 m-0 mb-3 text-base text-text-primary font-medium cursor-pointer select-none" @click="$emit('update:collapsed', !collapsed)">
+            <span class="text-base transition-transform duration-200" :class="{ 'rotate-[-90deg]': collapsed }">▾</span>
             <span class="text-base">📁</span>
             文件夹列表
             <span class="text-text-secondary font-normal text-sm">({{ totalFolderCount }})</span>
         </h4>
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2" v-if="!collapsed">
             <div class="w-full" v-if="dirTrees.length > 0">
                 <DirTreeItem :data="dirTrees" v-model="selectedItem" />
             </div>
@@ -28,10 +29,12 @@ const appStore = useAppStore()
 defineProps<{
     dirs: DatType.DirItem[];
     isAllPathSearch: boolean;
+    collapsed: boolean;
 }>()
 
 defineEmits<{
     (e: 'enter-folder', dir: DatType.DirItem): void;
+    (e: 'update:collapsed', value: boolean): void;
 }>()
 
 const dirTrees = computed(() => {

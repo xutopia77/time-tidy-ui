@@ -16,6 +16,17 @@
                     <span>主页</span>
                 </div>
             </router-link>
+
+            <div class="block mb-5 w-full">
+                <div 
+                    class="flex flex-col items-center justify-center gap-1 mx-1 rounded-lg text-text-primary transition-all duration-200 cursor-pointer border-none bg-none w-[calc(100%-8px)] max-w-[calc(100%-8px)] text-center"
+                    :class="{ 'bg-primary text-white': appStore.sidebarOpen, 'hover:bg-bg-elevated': !appStore.sidebarOpen }"
+                    @click="appStore.sidebarOpen = !appStore.sidebarOpen"
+                >
+                    <TagOne size="22" />
+                    <span>标签</span>
+                </div>
+            </div>
             
             <router-link class="block mb-5 w-full no-underline" to="/admin/PrjSet" v-slot="{ isActive }">
                 <div 
@@ -53,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { Home, System, Remind, Dashboard } from '@icon-park/vue-next'
+import { Home, System, Remind, Dashboard, TagOne } from '@icon-park/vue-next'
 import { useAppStore } from '@/stores/AppStore';
 
 const appStore = useAppStore()

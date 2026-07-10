@@ -25,6 +25,7 @@
                     </svg>
                 </span>
             </span>
+            <span class="ml-auto text-text-secondary text-sm">{{ appStore.curFileTotal }} Files</span>
         </div>
     </div>
 </template>

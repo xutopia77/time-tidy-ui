@@ -13,8 +13,8 @@
                     :buffer-rows="3"
                     @scroll="onVirtualScroll">
                     <template #item="{ item }">
-                        <FolderCard v-if="isDirItem(item)" :item="item" />
-                        <ImageCard v-else :item="item" />
+                        <FolderCard v-if="isDirItem(item)" :item="(item as DatType.DirItem)" />
+                        <ImageCard v-else :item="(item as DatType.File)" />
                     </template>
                 </VirtualScroll>
             </div>
@@ -26,7 +26,7 @@
                 :selected-files="selectedFiles"
                 :dirs="dirs"
                 :is-all-path-search="isAllPathSearch"
-                @close="sidebarOpen = false"
+                @close="appStore.sidebarOpen = false"
                 @enter-folder="enterFolder"
             />
         </div>
@@ -126,8 +126,8 @@ const virtualScrollItems = computed(() => {
     return result;
 });
 
-function isDirItem(item: DatType.DirItem | DatType.File): boolean {
-    return 'dir' in item;
+function isDirItem(item: unknown): boolean {
+    return typeof item === 'object' && item !== null && 'dir' in item;
 }
 
 // card dimensions for virtual scroll
@@ -213,11 +213,11 @@ const aiTagDetect = async () => {
     }
 };
 
-const sidebarOpen = ref(false);
+const sidebarOpen = computed(() => appStore.sidebarOpen);
 
 function toggleSidebar() {
     fabMenuOpen.value = false;
-    sidebarOpen.value = !sidebarOpen.value;
+    appStore.sidebarOpen = !appStore.sidebarOpen;
 }
 
 function enterFolder(dir: DatType.DirItem) {
@@ -375,7 +375,7 @@ const handleEscKey = (event: KeyboardEvent) => {
         } else if (fabMenuOpen.value) {
             fabMenuOpen.value = false;
         } else if (sidebarOpen.value) {
-            sidebarOpen.value = false;
+            appStore.sidebarOpen = false;
         }
     }
 };

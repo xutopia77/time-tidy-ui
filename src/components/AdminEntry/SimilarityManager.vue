@@ -407,8 +407,12 @@ const deleteFile = async (file: SimilarityFile) => {
     }
 };
 
-const previewFile = (_file: SimilarityFile) => {
-    Utils.addToast('预览功能开发中');
+const previewFile = (file: SimilarityFile) => {
+    const f = new DatType.File();
+    Object.assign(f, file);
+    appStore.curSltFile = f;
+    appStore.curFiles = [f];
+    appStore.bPageImgView = true;
 };
 
 const locateFile = (_file: SimilarityFile) => {

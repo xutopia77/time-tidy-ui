@@ -112,22 +112,6 @@
 					</div>
 					
 					<div class="mb-4">
-						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">搜索范围</h4>
-						<div class="flex flex-wrap gap-1">
-							<button @click="pathType = 'curPath'" 
-								class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
-								:class="{ 'bg-primary border-primary text-white': pathType === 'curPath' }">
-								当前目录
-							</button>
-							<button @click="pathType = 'allPath'"
-								class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
-								:class="{ 'bg-primary border-primary text-white': pathType === 'allPath' }">
-								全部文件
-							</button>
-						</div>
-					</div>
-					
-					<div class="mb-4">
 						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">文件大小</h4>
 						<div class="flex items-center gap-1">
 							<input v-model.number="minSizeMB" type="number" placeholder="最小" min="0" 
@@ -234,17 +218,6 @@ const aiSearchEnabled = ref(false);
 const aiSearchMinSimilar = ref(0.2);
 const aiSearchTopK = ref(200);
 
-watch(pathType, (newVal) => {
-    if (newVal === 'allPath') {
-        const rootPath = appStore.curSltDirTreeItem?.dirInfo?.dir?.path || '/';
-        Utils.dir_slt_update(rootPath);
-        Utils.message_notify({ 
-            content: '已切换到全部文件搜索，当前路径已设置为根路径', 
-            type: 'info' 
-        });
-    }
-});
-
 // New search condition variables
 const minSizeMB = ref<number | null>(null);
 const maxSizeMB = ref<number | null>(null);
@@ -290,7 +263,6 @@ const hasActiveFilters = computed(() => {
 		bNoTag.value ||
 		sortBy.value !== 'time' ||
 		sortOrder.value !== 'asc' ||
-		pathType.value !== 'curPath' ||
 		minSizeMB.value !== null ||
 		maxSizeMB.value !== null ||
 		minDurationMin.value !== null ||
@@ -311,7 +283,6 @@ const activeFiltersCount = computed(() => {
 	if (bNoTag.value) count++;
 	if (sortBy.value !== 'time') count++;
 	if (sortOrder.value !== 'asc') count++;
-	if (pathType.value !== 'curPath') count++;
 	if (minSizeMB.value !== null || maxSizeMB.value !== null) count++;
 	if (minDurationMin.value !== null || maxDurationMin.value !== null) count++;
 	if (minWidth.value !== null || maxWidth.value !== null || minHeight.value !== null || maxHeight.value !== null) count++;
@@ -345,10 +316,6 @@ const searchSummary = computed(() => {
 		parts.push('无标签');
 	} else if (bNoTag.value === 'false') {
 		parts.push('有标签');
-	}
-	
-	if (pathType.value === 'allPath') {
-		parts.push('全部文件');
 	}
 	
 	if (sortBy.value !== 'time') {
@@ -494,7 +461,6 @@ const clearAllFilters = () => {
 	bNoTag.value = '';
 	sortBy.value = 'time';
 	sortOrder.value = 'asc';
-	pathType.value = 'curPath';
 	minSizeMB.value = null;
 	maxSizeMB.value = null;
 	minDurationMin.value = null;
@@ -506,7 +472,6 @@ const clearAllFilters = () => {
 	
 	appStore.searchCon.sortBy = 'time';
 	appStore.searchCon.sortOrder = 'asc';
-	appStore.searchCon.pathType = 'curPath';
 	appStore.searchCon.types = [];
 	appStore.searchCon.tags = [];
 	appStore.searchCon.bReverseSltTag = false;

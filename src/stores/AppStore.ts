@@ -52,6 +52,7 @@ export type AppStore = {
     curFileTotal: number,                       // 当前文件列表的总数
     searchCon: DataTypes.FileSearchCondition,   // 文件搜索条件
     curPath: string,                            // 当前路径
+    sidebarOpen: boolean,                       // file explorer sidebar open state
 
     // 进度状态
     progressThumbnail: DataTypes.ProgressData,
@@ -98,6 +99,7 @@ export const useAppStore = defineStore('app', {
         curFileTotal: 0,
         searchCon: new DataTypes.FileSearchCondition(),
         curPath: '/',
+        sidebarOpen: false,
 
         // 进度状态
         progressThumbnail: { step: DataTypes.ProgressStep.Thumbnail, current: 0, total: 0, percent: 0, status: '', isRunning: false },

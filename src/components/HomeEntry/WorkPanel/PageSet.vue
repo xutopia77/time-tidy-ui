@@ -25,6 +25,20 @@
             </div>
 
             <div class="mb-6">
+                <label class="block text-base font-medium text-text-primary mb-2">浏览模式</label>
+                <div class="flex flex-row gap-2">
+                    <label class="flex items-center gap-1 py-2 px-3 bg-bg-tertiary border border-border rounded-sm cursor-pointer transition-all duration-150 flex-1 justify-center hover:bg-bg-elevated hover:border-border-dark">
+                        <input type="radio" v-model="pathType" value="curPath" class="w-4 h-4 bg-bg-elevated border-2 border-border rounded-full cursor-pointer outline-none transition-all duration-150 hover:border-primary" />
+                        <span class="text-base text-text-primary font-medium">文件夹</span>
+                    </label>
+                    <label class="flex items-center gap-1 py-2 px-3 bg-bg-tertiary border border-border rounded-sm cursor-pointer transition-all duration-150 flex-1 justify-center hover:bg-bg-elevated hover:border-border-dark">
+                        <input type="radio" v-model="pathType" value="allPath" class="w-4 h-4 bg-bg-elevated border-2 border-border rounded-full cursor-pointer outline-none transition-all duration-150 hover:border-primary" />
+                        <span class="text-base text-text-primary font-medium">全部文件</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-6">
                 <label class="block text-base font-medium text-text-primary mb-2">分组依据</label>
                 <select v-model="fileShowType" class="w-full h-10 py-2 px-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-base cursor-pointer outline-none transition-all duration-200 focus:border-primary">
                     <option value="">无</option>
@@ -61,6 +75,7 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { useAppStore } from '@/stores/AppStore';
+import Utils from '@/utils/utils';
 const appStore = useAppStore()
 
 const cardWidth = computed({
@@ -97,8 +112,19 @@ const cardViewMode = computed({
     }
 });
 
+const pathType = computed({
+    get: () => appStore.searchCon.pathType,
+    set: (newValue: string) => {
+        appStore.searchCon.pathType = newValue;
+        if (newValue === 'allPath') {
+            appStore.curPath = '';
+        }
+    }
+});
+
 const btn_page_save = () => {
     appStore.bPageSet = false
+    Utils.files_get();
 }
 
 const btn_page_close = () => {
