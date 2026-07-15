@@ -1,6 +1,8 @@
 
 # time-tidy-ui
 
+![alt text](images/time-tidy-home.jpg)
+
 This template should help get you started developing with Vue 3 in Vite.
 
 ## Recommended IDE Setup
