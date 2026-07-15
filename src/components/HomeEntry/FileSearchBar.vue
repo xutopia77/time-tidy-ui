@@ -1,6 +1,6 @@
 <template>
 	<div class="w-full px-3 py-2 bg-bg-secondary border-b border-border">
-		<div 
+		<div
 			class="flex items-center gap-2 px-1 py-1 bg-bg-tertiary border rounded-lg cursor-pointer transition-all duration-200 max-w-[300px]"
 			:class="hasActiveFilters ? 'border-primary bg-primary/5' : 'border-border hover:bg-bg-elevated hover:border-border-dark'"
 			@click="openSearchPanel">
@@ -9,13 +9,13 @@
 				:class="{ 'text-text-primary': hasActiveFilters }">
 				{{ searchSummary }}
 			</span>
-			<span v-if="hasActiveFilters" 
+			<span v-if="hasActiveFilters"
 				class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-primary text-white text-xs font-semibold rounded-full flex-shrink-0">
 				{{ activeFiltersCount }}
 			</span>
 		</div>
-		
-		<div v-if="showSearchPanel" 
+
+		<div v-if="showSearchPanel"
 			class="fixed inset-0 bg-black/50 flex items-start justify-center pt-[100px] z-[1000]"
 			@click="closeSearchPanel">
 			<div class="bg-bg-secondary rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto"
@@ -23,51 +23,51 @@
 				<div class="flex gap-2 p-3 border-b border-border sticky top-0 bg-bg-secondary z-[1]">
 					<div class="flex-1 relative flex items-center">
 						<span class="absolute left-3 text-base text-text-secondary pointer-events-none">🔍</span>
-						<input v-model="searchKeyword" @keyup.enter="handleSearch" 
-							:placeholder="aiSearchEnabled ? '输入AI搜索文本（如：风景、人物、美食）...' : '输入文件名或路径搜索...'"
+						<input v-model="searchKeyword" @keyup.enter="handleSearch"
+							:placeholder="aiSearchEnabled ? t('search.aiPlaceholder') : t('search.normalPlaceholder')"
 							class="w-full h-10 py-2 px-5 pl-10 bg-bg-tertiary border-2 border-border rounded-lg text-text-primary text-sm outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.2)] placeholder:text-text-secondary"
 							type="text" ref="searchInputRef" />
-						<button v-if="searchKeyword" @click="clearSearch" 
+						<button v-if="searchKeyword" @click="clearSearch"
 							class="absolute right-2 bg-none border-none text-text-secondary cursor-pointer p-1 flex items-center justify-center transition-colors duration-150 text-sm hover:text-text-primary">
 							✕
 						</button>
 					</div>
-					<button @click="handleSearch" 
+					<button @click="handleSearch"
 						class="h-10 py-2 px-4 bg-primary text-white border-none rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 whitespace-nowrap hover:bg-primary-hover">
-						搜索
+						{{ t('search.search') }}
 					</button>
-					<button @click="handleCancel" 
+					<button @click="handleCancel"
 						class="h-10 py-2 px-4 bg-transparent text-text-secondary border border-border rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 whitespace-nowrap hover:bg-bg-elevated hover:text-text-primary hover:border-border-dark">
-						取消
+						{{ t('common.cancel') }}
 					</button>
-					<button v-if="hasActiveFilters" @click="clearAllFilters" 
+					<button v-if="hasActiveFilters" @click="clearAllFilters"
 						class="h-10 py-2 px-3 bg-transparent text-text-secondary border border-border rounded-lg cursor-pointer text-xs transition-all duration-200 whitespace-nowrap hover:bg-bg-elevated hover:text-text-primary hover:border-border-dark">
-						清除条件
+						{{ t('search.clearConditions') }}
 					</button>
 				</div>
-				
+
 				<div class="p-3">
 					<div class="mb-4">
-						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">搜索模式</h4>
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">{{ t('search.searchMode') }}</h4>
 						<div class="flex flex-wrap gap-1">
 							<label class="flex items-center gap-2 cursor-pointer text-sm text-text-primary">
 								<input type="checkbox" v-model="aiSearchEnabled" class="w-[18px] h-[18px] cursor-pointer" />
-								<span class="select-none">启用AI智能搜索</span>
+								<span class="select-none">{{ t('search.enableAI') }}</span>
 							</label>
 						</div>
 					</div>
 
 					<div v-if="aiSearchEnabled" class="mb-4">
-						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">AI搜索设置</h4>
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">{{ t('search.aiSettings') }}</h4>
 						<div class="flex flex-col gap-2">
 							<label class="flex items-center gap-2">
-								相似度阈值:
-								<input v-model.number="aiSearchMinSimilar" type="number" min="0" max="1" step="0.1" 
+								{{ t('search.similarityThreshold') }}:
+								<input v-model.number="aiSearchMinSimilar" type="number" min="0" max="1" step="0.1"
 									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)]" />
 							</label>
 							<label class="flex items-center gap-2">
-								返回数量:
-								<input v-model.number="aiSearchTopK" type="number" min="1" max="100" 
+								{{ t('search.returnCount') }}:
+								<input v-model.number="aiSearchTopK" type="number" min="1" max="100"
 									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)]" />
 							</label>
 						</div>
@@ -75,9 +75,9 @@
 
 					<div v-if="!aiSearchEnabled">
 						<div class="mb-4">
-							<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">文件类型</h4>
+							<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">{{ t('search.fileType') }}</h4>
 							<div class="flex flex-wrap gap-1">
-								<button v-for="type in fileTypes" :key="type.value" 
+								<button v-for="type in fileTypes" :key="type.value"
 									@click="toggleFileType(type.value)"
 									class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
 									:class="{ 'bg-primary border-primary text-white': isFileTypeSelected(type.value) }">
@@ -85,9 +85,9 @@
 								</button>
 							</div>
 						</div>
-						
+
 						<div class="mb-4">
-							<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">排序方式</h4>
+							<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">{{ t('search.sortBy') }}</h4>
 							<div class="flex flex-wrap gap-1">
 								<button v-for="sort in sortOptions" :key="sort.value"
 									@click="sortBy = sort.value"
@@ -97,84 +97,84 @@
 								</button>
 							</div>
 							<div class="flex gap-1 mt-2">
-								<button @click="sortOrder = 'asc'" 
+								<button @click="sortOrder = 'asc'"
 									class="flex-1 py-1 px-2 bg-bg-elevated border border-border rounded text-text-secondary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary"
 									:class="{ 'bg-primary border-primary text-white': sortOrder === 'asc' }">
-									↑ 升序
+									↑ {{ t('search.ascending') }}
 								</button>
-								<button @click="sortOrder = 'desc'" 
+								<button @click="sortOrder = 'desc'"
 									class="flex-1 py-1 px-2 bg-bg-elevated border border-border rounded text-text-secondary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary"
 									:class="{ 'bg-primary border-primary text-white': sortOrder === 'desc' }">
-									↓ 降序
+									↓ {{ t('search.descending') }}
 								</button>
 							</div>
 						</div>
 					</div>
-					
+
 					<div class="mb-4">
-						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">文件大小</h4>
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">{{ t('search.fileSize') }}</h4>
 						<div class="flex items-center gap-1">
-							<input v-model.number="minSizeMB" type="number" placeholder="最小" min="0" 
+							<input v-model.number="minSizeMB" type="number" :placeholder="t('search.min')" min="0"
 								class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
 							<span class="text-text-secondary text-xs">-</span>
-							<input v-model.number="maxSizeMB" type="number" placeholder="最大" min="0" 
+							<input v-model.number="maxSizeMB" type="number" :placeholder="t('search.max')" min="0"
 								class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
 							<span class="text-text-secondary text-xs min-w-[30px]">MB</span>
 						</div>
 					</div>
-					
+
 					<div class="mb-4">
-						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">视频时长</h4>
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">{{ t('search.videoDuration') }}</h4>
 						<div class="flex items-center gap-1">
-							<input v-model.number="minDurationMin" type="number" placeholder="最短" min="0" 
+							<input v-model.number="minDurationMin" type="number" :placeholder="t('search.min')" min="0"
 								class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
 							<span class="text-text-secondary text-xs">-</span>
-							<input v-model.number="maxDurationMin" type="number" placeholder="最长" min="0" 
+							<input v-model.number="maxDurationMin" type="number" :placeholder="t('search.max')" min="0"
 								class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
-							<span class="text-text-secondary text-xs min-w-[30px]">分钟</span>
+							<span class="text-text-secondary text-xs min-w-[30px]">{{ t('search.minutes') }}</span>
 						</div>
 					</div>
-					
+
 					<div class="mb-4">
-						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">图片/视频尺寸</h4>
+						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">{{ t('search.dimensions') }}</h4>
 						<div class="flex flex-col gap-2">
 							<div class="flex items-center gap-1">
-								<label class="min-w-[50px] text-xs text-text-secondary">宽度:</label>
-								<input v-model.number="minWidth" type="number" placeholder="最小" min="0" 
+								<label class="min-w-[50px] text-xs text-text-secondary">{{ t('search.width') }}:</label>
+								<input v-model.number="minWidth" type="number" :placeholder="t('search.min')" min="0"
 									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
 								<span class="text-text-secondary text-xs">-</span>
-								<input v-model.number="maxWidth" type="number" placeholder="最大" min="0" 
+								<input v-model.number="maxWidth" type="number" :placeholder="t('search.max')" min="0"
 									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
 								<span class="text-text-secondary text-xs min-w-[30px]">px</span>
 							</div>
 							<div class="flex items-center gap-1">
-								<label class="min-w-[50px] text-xs text-text-secondary">高度:</label>
-								<input v-model.number="minHeight" type="number" placeholder="最小" min="0" 
+								<label class="min-w-[50px] text-xs text-text-secondary">{{ t('search.height') }}:</label>
+								<input v-model.number="minHeight" type="number" :placeholder="t('search.min')" min="0"
 									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
 								<span class="text-text-secondary text-xs">-</span>
-								<input v-model.number="maxHeight" type="number" placeholder="最大" min="0" 
+								<input v-model.number="maxHeight" type="number" :placeholder="t('search.max')" min="0"
 									class="flex-1 h-8 py-1 px-2 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)] placeholder:text-text-secondary" />
 								<span class="text-text-secondary text-xs min-w-[30px]">px</span>
 							</div>
 						</div>
 					</div>
-					
+
 					<div class="mb-0">
 						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">
-							文件标签 ({{ selectedTags.length }})
+							{{ t('search.fileTags') }} ({{ selectedTags.length }})
 						</h4>
 						<div class="flex items-center gap-3 mb-2 flex-wrap">
 							<label class="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
 								<input type="checkbox" v-model="bReverseSltTag" class="cursor-pointer" />
-								反选
+								{{ t('search.reverseSelect') }}
 							</label>
 							<label class="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
-								无标签:
-								<select v-model="bNoTag" 
+								{{ t('search.noTagFilter') }}:
+								<select v-model="bNoTag"
 									class="h-6 py-0.5 px-1 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none cursor-pointer">
-									<option value="">全部</option>
-									<option value="false">有标签</option>
-									<option value="true">无标签</option>
+									<option value="">{{ t('common.all') }}</option>
+									<option value="false">{{ t('search.hasTagFilter') }}</option>
+									<option value="true">{{ t('search.noTagFilter') }}</option>
 								</select>
 							</label>
 						</div>
@@ -196,11 +196,13 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 
 const appStore = useAppStore();
+const { t } = useI18n();
 
 const showSearchPanel = ref(false);
 const searchKeyword = ref('');
@@ -229,18 +231,18 @@ const minHeight = ref<number | null>(null);
 const maxHeight = ref<number | null>(null);
 
 const fileTypes = [
-	{ value: 'image', label: '图片' },
-	{ value: 'video', label: '视频' },
-	{ value: 'audio', label: '音频' },
-	{ value: 'text', label: '文本' },
-	{ value: 'other', label: '其他' }
+	{ value: 'image', label: t('search.image') },
+	{ value: 'video', label: t('search.video') },
+	{ value: 'audio', label: t('search.audio') },
+	{ value: 'text', label: t('search.text') },
+	{ value: 'other', label: t('search.other') }
 ];
 
 const sortOptions = [
-	{ value: 'time', label: '时间' },
-	{ value: 'name', label: '名称' },
-	{ value: 'size', label: '大小' },
-	{ value: 'type', label: '类型' }
+	{ value: 'time', label: t('search.sortTime') },
+	{ value: 'name', label: t('search.sortName') },
+	{ value: 'size', label: t('search.sortSize') },
+	{ value: 'type', label: t('search.sortType') }
 ];
 
 const fileTags = computed(() => {
@@ -291,15 +293,15 @@ const activeFiltersCount = computed(() => {
 
 const searchSummary = computed(() => {
 	if (!hasActiveFilters.value) {
-		return '搜索文件...';
+		return t('search.placeholder');
 	}
-	
+
 	const parts: string[] = [];
-	
+
 	if (searchKeyword.value) {
 		parts.push(`"${searchKeyword.value}"`);
 	}
-	
+
 	if (selectedFileTypes.value.length > 0) {
 		const typeLabels = selectedFileTypes.value.map(type => {
 			const found = fileTypes.find(t => t.value === type);
@@ -307,24 +309,24 @@ const searchSummary = computed(() => {
 		});
 		parts.push(typeLabels.join(', '));
 	}
-	
+
 	if (selectedTags.value.length > 0) {
-		parts.push(`${selectedTags.value.length}个标签`);
+		parts.push(`${selectedTags.value.length}${t('search.tagsSelected')}`);
 	}
-	
+
 	if (bNoTag.value === 'true') {
-		parts.push('无标签');
+		parts.push(t('search.noTagFilter'));
 	} else if (bNoTag.value === 'false') {
-		parts.push('有标签');
+		parts.push(t('search.hasTagFilter'));
 	}
-	
+
 	if (sortBy.value !== 'time') {
 		const sortLabel = sortOptions.find(s => s.value === sortBy.value);
 		if (sortLabel) {
-			parts.push(`按${sortLabel.label}排序`);
+			parts.push(`${t('search.sortByLabel')}${sortLabel.label}${t('search.sortLabel')}`);
 		}
 	}
-	
+
 	if (minSizeMB.value !== null || maxSizeMB.value !== null) {
 		if (minSizeMB.value !== null && maxSizeMB.value !== null) {
 			parts.push(`${minSizeMB.value}-${maxSizeMB.value}MB`);
@@ -334,18 +336,18 @@ const searchSummary = computed(() => {
 			parts.push(`≤${maxSizeMB.value}MB`);
 		}
 	}
-	
+
 	if (minDurationMin.value !== null || maxDurationMin.value !== null) {
 		if (minDurationMin.value !== null && maxDurationMin.value !== null) {
-			parts.push(`${minDurationMin.value}-${maxDurationMin.value}分钟`);
+			parts.push(`${minDurationMin.value}-${maxDurationMin.value}${t('search.minutes')}`);
 		} else if (minDurationMin.value !== null) {
-			parts.push(`≥${minDurationMin.value}分钟`);
+			parts.push(`≥${minDurationMin.value}${t('search.minutes')}`);
 		} else {
-			parts.push(`≤${maxDurationMin.value}分钟`);
+			parts.push(`≤${maxDurationMin.value}${t('search.minutes')}`);
 		}
 	}
-	
-	return parts.length > 0 ? parts.join(' · ') : '搜索文件...';
+
+	return parts.length > 0 ? parts.join(' · ') : t('search.placeholder');
 });
 
 watch(() => appStore.searchCon, (newVal) => {

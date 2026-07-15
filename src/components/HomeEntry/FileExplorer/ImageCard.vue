@@ -32,10 +32,12 @@
 
 <script setup lang="ts">
 import { computed, defineProps, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
+const { t } = useI18n();
 
 const props = defineProps<{ item: DatType.File; }>();
 
@@ -75,7 +77,7 @@ const btnclk_handleClickImage = () => {
     if (appStore.envMode == DatType.EnvModeType.pro) {
         if (appStore.platform != DatType.PlatformType.electron) {
             if (props.item.type != DatType.FileType.image) {
-                Utils.message_notify({ content: ` 当前文件不是图片类型，无法查看`, type: 'success' })
+                Utils.message_notify({ content: t('card.notImageType'), type: 'success' })
                 return;
             }
         }

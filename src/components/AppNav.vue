@@ -13,7 +13,7 @@
                     :class="{ 'bg-primary text-white': isActive, 'hover:bg-bg-elevated': !isActive }"
                 >
                     <Home size="22" />
-                    <span>主页</span>
+                    <span>{{ t('nav.home') }}</span>
                 </div>
             </router-link>
 
@@ -23,8 +23,8 @@
                     :class="{ 'bg-primary text-white': appStore.sidebarOpen, 'hover:bg-bg-elevated': !appStore.sidebarOpen }"
                     @click="appStore.sidebarOpen = !appStore.sidebarOpen"
                 >
-                    <TagOne size="22" />
-                    <span>标签</span>
+                    <Tag size="22" />
+                    <span>{{ t('nav.tag') }}</span>
                 </div>
             </div>
             
@@ -34,7 +34,7 @@
                     :class="{ 'bg-primary text-white': isActive, 'hover:bg-bg-elevated': !isActive }"
                 >
                     <Dashboard size="22" />
-                    <span>管理</span>
+                    <span>{{ t('nav.admin') }}</span>
                 </div>
             </router-link>
             
@@ -44,7 +44,7 @@
                     :class="{ 'bg-primary text-white': isActive, 'hover:bg-bg-elevated': !isActive }"
                 >
                     <System size="22" />
-                    <span>设置</span>
+                    <span>{{ t('nav.settings') }}</span>
                 </div>
             </router-link>
         </div>
@@ -57,17 +57,19 @@
                 title="查看最近消息提醒"
             >
                 <Remind size="22" />
-                <span>消息</span>
+                <span>{{ t('nav.message') }}</span>
             </button>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { Home, System, Remind, Dashboard, TagOne } from '@icon-park/vue-next'
+import { Home, System, Remind, Dashboard, Tag } from '@icon-park/vue-next'
 import { useAppStore } from '@/stores/AppStore';
+import { useI18n } from 'vue-i18n';
 
 const appStore = useAppStore()
+const { t } = useI18n();
 
 function btn_show_resent_msg() {
     appStore.bPageResentMsg = true;

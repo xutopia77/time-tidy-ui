@@ -3,7 +3,7 @@
         <h4 class="flex items-center gap-1 m-0 mb-3 text-base text-text-primary font-medium cursor-pointer select-none" @click="$emit('update:collapsed', !collapsed)">
             <span class="text-base transition-transform duration-200" :class="{ 'rotate-[-90deg]': collapsed }">▾</span>
             <span class="text-base">📁</span>
-            文件夹列表
+            {{ t('sidebar.folderList') }}
             <span class="text-text-secondary font-normal text-sm">({{ totalFolderCount }})</span>
         </h4>
         <div class="flex flex-col gap-2" v-if="!collapsed">
@@ -11,7 +11,7 @@
                 <DirTreeItem :data="dirTrees" v-model="selectedItem" />
             </div>
             <div v-else class="text-center py-3">
-                <span class="text-text-secondary text-sm">暂无文件夹</span>
+                <span class="text-text-secondary text-sm">{{ t('sidebar.noFolders') }}</span>
             </div>
         </div>
     </div>
@@ -19,11 +19,13 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore'
 import Utils from '@/utils/utils'
 import DirTreeItem from '@/components/HomeEntry/WorkPanel/DirTreeItem.vue'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 
 defineProps<{
@@ -50,7 +52,7 @@ watch(selectedItem, (newValue: DatType.DirTreeItem | null) => {
     console.log('FolderListSection selected:', newValue)
     if (appStore.searchCon.pathType === 'allPath') {
         Utils.message_notify({ 
-            content: '当前为全部文件搜索模式，无法跳转文件夹', 
+            content: t('sidebar.allPathSearchWarning'), 
             type: 'warning' 
         });
         return;

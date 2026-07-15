@@ -3,7 +3,7 @@
         <h4 class="flex items-center gap-1 m-0 mb-3 text-base text-text-primary font-medium cursor-pointer select-none" @click="$emit('update:collapsed', !collapsed)">
             <span class="text-base transition-transform duration-200" :class="{ 'rotate-[-90deg]': collapsed }">▾</span>
             <span class="text-base">🏷️</span>
-            标签信息
+            {{ t('sidebar.tagInfo') }}
         </h4>
         <div class="flex flex-col gap-2" v-if="!collapsed && selectedFiles.length > 0 && selectedFiles[0].tags.length > 0">
             <div class="flex flex-wrap gap-1">
@@ -24,16 +24,18 @@
             </div>
         </div>
         <div class="flex flex-col gap-2" v-if="!collapsed && !(selectedFiles.length > 0 && selectedFiles[0].tags.length > 0)">
-            <div class="text-sm text-text-secondary text-center py-2">选择文件查看标签信息</div>
+            <div class="text-sm text-text-secondary text-center py-2">{{ t('sidebar.selectFileToView') }}</div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 
+const { t } = useI18n()
 const appStore = useAppStore();
 
 defineProps<{

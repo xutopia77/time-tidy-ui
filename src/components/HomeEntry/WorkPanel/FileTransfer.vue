@@ -4,7 +4,7 @@
             <div class="transfer-header">
                 <div class="header-title">
                     <span class="header-icon">📁</span>
-                    <h3>文件移动/复制</h3>
+                    <h3>{{ t('transfer.title') }}</h3>
                 </div>
                 <button class="close-button" @click="btn_page_close">
                     <span>×</span>
@@ -15,15 +15,15 @@
                 <div class="directory-section">
                     <div class="section-header">
                         <span class="section-icon">📂</span>
-                        <h4>选择目标位置</h4>
+                        <h4>{{ t('transfer.selectTarget') }}</h4>
                     </div>
-                    
+
                     <div class="directory-tree-wrapper xc-scrollbar">
                         <DirTreeItem :data="dirTrees" v-model="selectedItem" />
                     </div>
-                    
+
                     <div class="selected-path" v-if="selectedPathItem">
-                        <span class="path-label">✓ 已选择:</span>
+                        <span class="path-label">✓ {{ t('transfer.selected') }}:</span>
                         <span class="path-value">{{ selectedPathItem.path }}</span>
                     </div>
                 </div>
@@ -31,47 +31,47 @@
                 <div class="preview-section">
                     <div class="section-header">
                         <span class="section-icon">📊</span>
-                        <h4>操作预览</h4>
+                        <h4>{{ t('transfer.operationPreview') }}</h4>
                     </div>
-                    
+
                     <div class="preview-stats">
                         <div class="stat-item">
                             <span class="stat-icon">📄</span>
                             <div class="stat-info">
-                                <span class="stat-label">文件数量</span>
-                                <span class="stat-value">{{ selectedFileCount }} 个</span>
+                                <span class="stat-label">{{ t('transfer.fileCount') }}</span>
+                                <span class="stat-value">{{ selectedFileCount }} {{ t('transfer.count') }}</span>
                             </div>
                         </div>
                         <div class="stat-item">
                             <span class="stat-icon">📁</span>
                             <div class="stat-info">
-                                <span class="stat-label">文件夹数量</span>
-                                <span class="stat-value">{{ selectedDirCount }} 个</span>
+                                <span class="stat-label">{{ t('transfer.dirCount') }}</span>
+                                <span class="stat-value">{{ selectedDirCount }} {{ t('transfer.count') }}</span>
                             </div>
                         </div>
                         <div class="stat-item">
                             <span class="stat-icon">💾</span>
                             <div class="stat-info">
-                                <span class="stat-label">总大小</span>
+                                <span class="stat-label">{{ t('transfer.totalSize') }}</span>
                                 <span class="stat-value">{{ selectedTotalSize }}</span>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="operation-type">
-                        <span class="type-label">操作类型:</span>
+                        <span class="type-label">{{ t('transfer.operationType') }}:</span>
                         <div class="type-buttons">
-                            <button 
-                                class="type-btn move" 
+                            <button
+                                class="type-btn move"
                                 :class="{ active: setOperateType === 'move' }"
                                 @click="setOperateType = 'move'">
-                                📦 移动
+                                📦 {{ t('operation.move') }}
                             </button>
-                            <button 
-                                class="type-btn copy" 
+                            <button
+                                class="type-btn copy"
                                 :class="{ active: setOperateType === 'copy' }"
                                 @click="setOperateType = 'copy'">
-                                📋 复制
+                                📋 {{ t('operation.copy') }}
                             </button>
                         </div>
                     </div>
@@ -81,7 +81,7 @@
             <div class="progress-section" v-if="appStore.progressFileMove.isRunning">
                 <div class="section-header">
                     <span class="section-icon">⏳</span>
-                    <h4>操作进度</h4>
+                    <h4>{{ t('transfer.operationProgress') }}</h4>
                 </div>
                 <div class="progress-content">
                     <div class="progress-bar-container">
@@ -96,21 +96,21 @@
 
             <div class="transfer-footer">
                 <button class="btn-secondary" @click="btn_page_close">
-                    取消
+                    {{ t('common.cancel') }}
                 </button>
-                <button 
-                    class="btn-primary move" 
+                <button
+                    class="btn-primary move"
                     :disabled="!canOperate"
                     @click="btn_page_save('move')">
                     <span class="btn-icon">📦</span>
-                    <span>移动文件</span>
+                    <span>{{ t('transfer.moveFiles') }}</span>
                 </button>
-                <button 
-                    class="btn-primary copy" 
+                <button
+                    class="btn-primary copy"
                     :disabled="!canOperate"
                     @click="btn_page_save('copy')">
                     <span class="btn-icon">📋</span>
-                    <span>复制文件</span>
+                    <span>{{ t('transfer.copyFiles') }}</span>
                 </button>
             </div>
         </div>
@@ -119,25 +119,25 @@
             <div class="dialog-card" @click.stop>
                 <div class="dialog-header">
                     <span class="dialog-icon">⚠️</span>
-                    <h4>确认操作</h4>
+                    <h4>{{ t('transfer.confirmOperation') }}</h4>
                 </div>
-                
+
                 <div class="dialog-content">
-                    <p class="dialog-message">确定要执行此操作吗？</p>
+                    <p class="dialog-message">{{ t('transfer.confirmMessage') }}</p>
                     <div class="dialog-details">
                         <div class="detail-item">
-                            <span class="detail-label">文件:</span>
+                            <span class="detail-label">{{ t('transfer.files') }}:</span>
                             <span class="detail-value">{{ sureDialogContent }}</span>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="dialog-footer">
                     <button class="btn-cancel" @click="btnclk_sureDialog_confirm(false)">
-                        取消
+                        {{ t('common.cancel') }}
                     </button>
                     <button class="btn-confirm" @click="btnclk_sureDialog_confirm(true)">
-                        确认
+                        {{ t('common.confirm') }}
                     </button>
                 </div>
             </div>
@@ -147,22 +147,22 @@
             <div class="dialog-card warning" @click.stop>
                 <div class="dialog-header">
                     <span class="dialog-icon">⚠️</span>
-                    <h4>文件已存在</h4>
+                    <h4>{{ t('transfer.fileExist') }}</h4>
                 </div>
-                
+
                 <div class="dialog-content">
                     <p class="dialog-message">{{ sureDialogContentFileExist }}</p>
                     <div class="conflict-info">
-                        <p>目标位置已存在同名文件，请选择操作:</p>
+                        <p>{{ t('transfer.fileExistMessage') }}</p>
                     </div>
                 </div>
-                
+
                 <div class="dialog-footer">
                     <button class="btn-cancel" @click="btnclk_fileExistDialog_confirm(false)">
-                        跳过
+                        {{ t('transfer.skip') }}
                     </button>
                     <button class="btn-warning" @click="btnclk_fileExistDialog_confirm(true)">
-                        覆盖
+                        {{ t('transfer.overwrite') }}
                     </button>
                 </div>
             </div>
@@ -172,10 +172,12 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
+const { t } = useI18n()
 import '@/assets/common.css'
 import DirTreeItem from '@/components/HomeEntry/WorkPanel/DirTreeItem.vue'
 
@@ -230,12 +232,12 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
 
     const bNeedSure = fileMoveReq?.bNeedSure ?? true;
     if (selectedPathItem.value == null) {
-        Utils.message_notify({ content: '请选择目标路径', type: 'warning' })
+        Utils.message_notify({ content: t('transfer.selectTargetPath'), type: 'warning' })
         return { ...respOp, code: DatType.Code.Err };
     }
     const selectedPath = selectedPathItem.value?.path;
     if (!selectedPath) {
-        Utils.message_notify({ content: '请选择目标路径', type: 'warning' })
+        Utils.message_notify({ content: t('transfer.selectTargetPath'), type: 'warning' })
         return { ...respOp, code: DatType.Code.Err };
     }
     const req: DatType.FilePathChgReq = {
@@ -277,18 +279,18 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
             const srcDir = item.path;
             const distDir = selectedPathItem.value?.path;
             if (distDir.startsWith(srcDir)) {
-                Utils.message_notify({ content: '不能选择子目录', type: 'warning' })
+                Utils.message_notify({ content: t('transfer.cannotSelectSubDir'), type: 'warning' })
                 return { ...respOp, code: DatType.Code.Err };
             }
             req.dirIds.push(item.id)
         }
     }
     if (req.fileIds.length == 0 && req.dirIds.length == 0) {
-        Utils.message_notify({ content: '请选择要操作的文件', type: 'warning' })
+        Utils.message_notify({ content: t('operation.selectFiles'), type: 'warning' })
         return { ...respOp, code: DatType.Code.Err };
     }
     if (setOperateType.value == '') {
-        Utils.message_notify({ content: '请选择操作类型', type: 'warning' })
+        Utils.message_notify({ content: t('transfer.selectOperateType'), type: 'warning' })
         return { ...respOp, code: DatType.Code.Err };
     }
     else {
@@ -309,19 +311,19 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
                     respDirInfo.size += item.size;
                 }
                 const fileTotalSizeStr = Utils.gen_size_str(respDirInfo.size)
-                sureDialogContent.value = `文件: ${respDirInfo.count} 个, 文件夹: ${respDirInfo.dirCount} 个, 大小: ${fileTotalSizeStr}`
+                sureDialogContent.value = `${t('transfer.files')}: ${respDirInfo.count} ${t('transfer.count')}, ${t('transfer.folders')}: ${respDirInfo.dirCount} ${t('transfer.count')}, ${t('transfer.totalSize')}: ${fileTotalSizeStr}`
             }
             break;
         case DatType.Code.FileAlreadyExist: {
             isDialogVisibleFileExist.value = true;
-            sureDialogContentFileExist.value = `文件已存在: ${resp.status}`
+            sureDialogContentFileExist.value = `${t('transfer.fileExist')}: ${resp.status}`
             curResp = resp
             break;
         }
         default: {
             isDialogVisibleFileExist.value = false;
             sureDialogContentFileExist.value = ``
-            Utils.message_notify({ content: `文件操作失败: ${resp.status} `, type: 'error' })
+            Utils.message_notify({ content: `${t('transfer.operationFailed')}: ${resp.status} `, type: 'error' })
         }
     }
     return respOp;
@@ -338,7 +340,7 @@ async function btnclk_sureDialog_confirm(bSure: boolean) {
         console.log(resp)
     }
     else {
-        Utils.message_notify({ content: '操作已取消', type: 'info' })
+        Utils.message_notify({ content: t('transfer.operationCancelled'), type: 'info' })
     }
     isSureDialogVisible.value = false;
 }
@@ -352,7 +354,7 @@ async function btnclk_fileExistDialog_confirm(bSure: boolean) {
         await confirmMove({ bNeedSure: false, bAllFileCover: true })
     }
     else {
-        Utils.message_notify({ content: '操作已取消', type: 'info' })
+        Utils.message_notify({ content: t('transfer.operationCancelled'), type: 'info' })
         isDialogVisibleFileExist.value = false;
     }
 }

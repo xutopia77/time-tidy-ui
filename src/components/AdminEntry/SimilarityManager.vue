@@ -3,32 +3,32 @@
         <div class="manager-header">
             <div class="header-title">
                 <Files theme="outline" size="24" fill="currentColor" />
-                <h2>相似文件管理</h2>
+                <h2>{{ t('similarity.manage') }}</h2>
             </div>
             <div class="header-actions">
                 <button @click="startDetection" :disabled="isDetecting" class="action-btn primary">
                     <Refresh theme="outline" size="16" :strokeWidth="3" />
-                    <span>{{ isDetecting ? '检测中...' : '开始检测' }}</span>
+                    <span>{{ isDetecting ? t('similarity.detecting') : t('similarity.startDetection') }}</span>
                 </button>
                 <button @click="showSettings = true" class="action-btn">
                     <Setting theme="outline" size="16" :strokeWidth="3" />
-                    <span>设置</span>
+                    <span>{{ t('similarity.settings') }}</span>
                 </button>
             </div>
         </div>
 
         <div class="manager-status">
             <div class="status-item">
-                <span class="status-label">状态:</span>
+                <span class="status-label">{{ t('similarity.status') }}:</span>
                 <span class="status-value" :class="statusClass">{{ statusText }}</span>
             </div>
             <div class="status-item">
-                <span class="status-label">发现:</span>
-                <span class="status-value">{{ similarityGroups.length }}组相似文件</span>
+                <span class="status-label">{{ t('similarity.found') }}:</span>
+                <span class="status-value">{{ similarityGroups.length }}{{ t('similarity.similarityGroups') }}</span>
             </div>
             <div class="status-item">
-                <span class="status-label">总计:</span>
-                <span class="status-value">{{ totalFiles }}个文件</span>
+                <span class="status-label">{{ t('similarity.total') }}:</span>
+                <span class="status-value">{{ totalFiles }}{{ t('similarity.files') }}</span>
             </div>
         </div>
 
@@ -36,27 +36,27 @@
             <div class="progress-bar">
                 <div class="progress-fill" :style="{ width: progress + '%' }"></div>
             </div>
-            <span class="progress-text">正在检测相似文件... {{ progress }}%</span>
+            <span class="progress-text">{{ t('similarity.detectingProgress') }} {{ progress }}%</span>
         </div>
 
         <div class="similarity-content xc-scrollbar">
             <div v-if="similarityGroups.length === 0 && !isDetecting" class="empty-state">
                 <FileDoc theme="outline" size="64" fill="currentColor" class="empty-icon" />
-                <p class="empty-title">暂无相似文件</p>
-                <p class="empty-desc">点击"开始检测"按钮扫描相似文件</p>
+                <p class="empty-title">{{ t('similarity.noSimilarFiles') }}</p>
+                <p class="empty-desc">{{ t('similarity.clickStartDetection') }}</p>
             </div>
 
             <div v-for="(group, index) in similarityGroups" :key="index" class="similarity-group">
                 <div class="group-header">
                     <div class="group-title">
                         <input type="checkbox" v-model="group.selected" @change="toggleGroupSelection(group)" />
-                        <span class="group-name">相似文件组 #{{ index + 1 }}</span>
-                        <span class="file-count">({{ group.files.length }}个文件)</span>
+                        <span class="group-name">{{ t('similarity.similarityGroup') }} #{{ index + 1 }}</span>
+                        <span class="file-count">({{ group.files.length }}{{ t('similarity.files') }})</span>
                     </div>
                     <div class="group-actions">
-                        <button @click="selectAllInGroup(group)" class="group-action-btn">全选</button>
-                        <button @click="keepBestInGroup(group)" class="group-action-btn">保留最佳</button>
-                        <button @click="deleteGroup(group)" class="group-action-btn danger">删除选中</button>
+                        <button @click="selectAllInGroup(group)" class="group-action-btn">{{ t('similarity.selectAll') }}</button>
+                        <button @click="keepBestInGroup(group)" class="group-action-btn">{{ t('similarity.keepBest') }}</button>
+                        <button @click="deleteGroup(group)" class="group-action-btn danger">{{ t('similarity.deleteSelected') }}</button>
                     </div>
                 </div>
 
@@ -79,13 +79,13 @@
                             <div class="file-path" :title="file.path">{{ file.path }}</div>
                         </div>
                         <div class="file-actions">
-                            <button @click="previewFile(file)" class="file-action-btn" title="预览">
+                            <button @click="previewFile(file)" class="file-action-btn" :title="t('similarity.preview')">
                                 <ViewList theme="outline" size="16" />
                             </button>
-                            <button @click="locateFile(file)" class="file-action-btn" title="定位">
+                            <button @click="locateFile(file)" class="file-action-btn" :title="t('similarity.locate')">
                                 <Local theme="outline" size="16" />
                             </button>
-                            <button @click="deleteFile(file)" class="file-action-btn danger" title="删除">
+                            <button @click="deleteFile(file)" class="file-action-btn danger" :title="t('similarity.delete')">
                                 <Delete theme="outline" size="16" />
                             </button>
                         </div>
@@ -96,15 +96,15 @@
 
         <div v-if="totalGroups > 0" class="pagination-section">
             <div class="pagination-info">
-                共 {{ totalGroups }} 组，{{ totalFiles }} 个文件
+                {{ t('common.all') }} {{ totalGroups }} {{ t('similarity.page') }}，{{ totalFiles }} {{ t('similarity.files') }}
             </div>
             <div class="pagination-controls">
                 <button @click="prevPage" :disabled="currentPage === 1" class="pagination-btn">
-                    上一页
+                    {{ t('similarity.prevPage') }}
                 </button>
-                <span class="pagination-current">第 {{ currentPage }} 页</span>
+                <span class="pagination-current">{{ t('similarity.page') }} {{ currentPage }} {{ t('similarity.page') }}</span>
                 <button @click="nextPage" :disabled="currentPage * pageSize >= totalGroups" class="pagination-btn">
-                    下一页
+                    {{ t('similarity.nextPage') }}
                 </button>
             </div>
         </div>
@@ -112,59 +112,56 @@
         <div v-if="showSettings" class="settings-overlay" @click="showSettings = false">
             <div class="settings-panel" @click.stop>
                 <div class="settings-header">
-                    <h3>检测设置</h3>
+                    <h3>{{ t('similarity.detection') }}</h3>
                     <button @click="showSettings = false" class="close-btn">×</button>
                 </div>
                 <div class="settings-body">
                     <div class="setting-item">
-                        <label>启用AI检测</label>
+                        <label>{{ t('similarity.enableAIDetection') }}</label>
                         <div class="checkbox-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" v-model="settings.useAI" />
-                                <span>使用AI相似度检测（基于图像内容）</span>
+                                <span>{{ t('similarity.aiDetectionDesc') }}</span>
                             </label>
                         </div>
-                        <p class="setting-hint" v-if="settings.useAI">
-                            AI检测基于图像内容相似度，比Hash检测更智能，但需要AI引擎支持
-                        </p>
                     </div>
 
                     <div class="setting-item" v-if="settings.useAI">
-                        <label>AI相似度阈值</label>
+                        <label>{{ t('similarity.aiSimilarityThreshold') }}</label>
                         <div class="setting-control">
                             <input type="range" v-model="settings.minSimilarity" min="0" max="100" step="5" />
                             <span class="setting-value">{{ (settings.minSimilarity / 100).toFixed(2) }}</span>
                         </div>
                         <p class="setting-hint">
-                            相似度阈值越高，检测越严格（推荐0.85-0.95）
+                            {{ t('similarity.thresholdHint') }}
                         </p>
                     </div>
 
                     <div class="setting-item">
-                        <label>检测范围</label>
+                        <label>{{ t('similarity.detectionScope') }}</label>
                         <select v-model="settings.scope" class="setting-select">
-                            <option value="all">全部文件</option>
-                            <option value="current">当前目录</option>
+                            <option value="all">{{ t('similarity.allFiles') }}</option>
+                            <option value="current">{{ t('similarity.currentDir') }}</option>
                         </select>
                     </div>
 
                     <div class="setting-item">
-                        <label>文件类型</label>
+                        <label>{{ t('similarity.fileType') }}</label>
                         <div class="checkbox-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" v-model="settings.types.image" />
-                                <span>图片</span>
+                                <span>{{ t('similarity.image') }}</span>
                             </label>
                             <label class="checkbox-label">
                                 <input type="checkbox" v-model="settings.types.video" />
-                                <span>视频</span>
+                                <span>{{ t('similarity.video') }}</span>
                             </label>
                         </div>
                     </div>
                 </div>
                 <div class="settings-footer">
-                    <button @click="showSettings = false" class="btn btn-secondary">取消</button>
-                    <button @click="applySettings" class="btn btn-primary">应用</button>
+                    <button @click="showSettings = false" class="btn btn-secondary">{{ t('common.cancel') }}</button>
+                    <button @click="applySettings" class="btn btn-primary">{{ t('common.apply') }}</button>
                 </div>
             </div>
         </div>
@@ -173,12 +170,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 import '@/assets/common.css';
 import { FileDoc, Refresh, Setting, ViewList, Local, Delete } from '@icon-park/vue-next';
 
+const { t } = useI18n();
 const appStore = useAppStore();
 
 interface SimilarityFile {
@@ -250,9 +249,9 @@ const settings = ref({
 });
 
 const statusText = computed(() => {
-    if (isDetecting.value) return '检测中';
-    if (similarityGroups.value.length > 0) return '已完成';
-    return '未检测';
+    if (isDetecting.value) return t('similarity.detecting');
+    if (similarityGroups.value.length > 0) return t('similarity.detected');
+    return t('similarity.notDetected');
 });
 
 const statusClass = computed(() => {
@@ -269,7 +268,7 @@ const startDetection = async () => {
 
     const response = await Utils.file_similarity_detect(useAI, minSimilarity);
     if (response.code !== 0) {
-        Utils.addToast(response.status || '检测启动失败');
+        Utils.addToast(response.status || t('similarity.startDetectionFailed'));
     }
 };
 
@@ -320,7 +319,7 @@ const loadSimilarityGroups = async (page = 1) => {
         }
     } catch (error) {
         console.error('加载失败:', error);
-        Utils.addToast('加载相似文件失败');
+        Utils.addToast(t('similarity.loadFailed'));
     }
 };
 
@@ -350,11 +349,11 @@ const keepBestInGroup = (group: SimilarityGroup) => {
 const deleteGroup = async (group: SimilarityGroup) => {
     const selectedFiles = group.files.filter(f => f.selected);
     if (selectedFiles.length === 0) {
-        Utils.addToast('请选择要删除的文件');
+        Utils.addToast(t('similarity.selectFilesToDelete'));
         return;
     }
 
-    if (!confirm(`确定要删除选中的 ${selectedFiles.length} 个文件吗？`)) {
+    if (!confirm(`${t('similarity.confirmDelete')} ${selectedFiles.length} ${t('similarity.files')}?`)) {
         return;
     }
 
@@ -363,7 +362,7 @@ const deleteGroup = async (group: SimilarityGroup) => {
     req.bRemoveToDtrash = true;
 
     const response = await Utils.files_delete(req);
-    
+
     if (response.code === 0) {
         group.files = group.files.filter(f => !f.selected);
         if (group.files.length === 0) {
@@ -378,7 +377,7 @@ const deleteGroup = async (group: SimilarityGroup) => {
 };
 
 const deleteFile = async (file: SimilarityFile) => {
-    if (!confirm(`确定要删除文件 "${file.name}" 吗？`)) {
+    if (!confirm(`${t('similarity.confirmDeleteFile')} "${file.name}"?`)) {
         return;
     }
 
@@ -387,7 +386,7 @@ const deleteFile = async (file: SimilarityFile) => {
     req.bRemoveToDtrash = true;
 
     const response = await Utils.files_delete(req);
-    
+
     if (response.code === 0) {
         similarityGroups.value.forEach(group => {
             const index = group.files.findIndex(f => f.id === file.id);
@@ -416,12 +415,12 @@ const previewFile = (file: SimilarityFile) => {
 };
 
 const locateFile = (_file: SimilarityFile) => {
-    Utils.addToast('定位功能开发中');
+    Utils.addToast(t('similarity.locateFeatureWIP'));
 };
 
 const applySettings = () => {
     showSettings.value = false;
-    Utils.addToast('设置已保存');
+    Utils.addToast(t('similarity.settingsSaved'));
 };
 
 const prevPage = () => {

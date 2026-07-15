@@ -3,7 +3,7 @@
         <h4 class="flex items-center gap-1 m-0 mb-3 text-base text-text-primary font-medium cursor-pointer select-none" @click="$emit('update:collapsed', !collapsed)">
             <span class="text-base transition-transform duration-200" :class="{ 'rotate-[-90deg]': collapsed }">▾</span>
             <span class="text-base">🔖</span>
-            标签面板
+            {{ t('sidebar.tagPanel') }}
             <span class="text-text-secondary font-normal text-sm">({{ tags.length }})</span>
         </h4>
         <div class="flex flex-col gap-2" v-if="!collapsed">
@@ -18,15 +18,18 @@
                 </span>
             </div>
             <div v-else class="text-center py-3">
-                <span class="text-text-secondary text-sm">暂无标签</span>
+                <span class="text-text-secondary text-sm">{{ t('sidebar.noTags') }}</span>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import * as DatType from '@/utils/dataTypedef'
 import Utils from '@/utils/utils'
+
+const { t } = useI18n()
 
 defineProps<{
     tags: DatType.TagItem[];

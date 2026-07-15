@@ -3,48 +3,48 @@
         <div class="manager-header">
             <div class="header-title">
                 <DeleteThemes theme="outline" size="24" fill="currentColor" />
-                <h2>回收站管理</h2>
+                <h2>{{ t('trash.manage') }}</h2>
             </div>
             <div class="header-actions">
                 <button @click="loadTrashFiles()" class="action-btn">
                     <Refresh theme="outline" size="16" :strokeWidth="3" />
-                    <span>刷新</span>
+                    <span>{{ t('trash.refresh') }}</span>
                 </button>
                 <button @click="restoreSelected" :disabled="selectedFiles.length === 0" class="action-btn primary">
                     <Undo theme="outline" size="16" :strokeWidth="3" />
-                    <span>恢复选中 ({{ selectedFiles.length }})</span>
+                    <span>{{ t('trash.restoreSelected') }} ({{ selectedFiles.length }})</span>
                 </button>
                 <button @click="deleteSelectedPermanently" :disabled="selectedFiles.length === 0" class="action-btn danger">
                     <Delete theme="outline" size="16" :strokeWidth="3" />
-                    <span>永久删除 ({{ selectedFiles.length }})</span>
+                    <span>{{ t('trash.deletePermanently') }} ({{ selectedFiles.length }})</span>
                 </button>
                 <button @click="emptyTrash" :disabled="trashFiles.length === 0" class="action-btn danger">
                     <Clear theme="outline" size="16" :strokeWidth="3" />
-                    <span>清空回收站</span>
+                    <span>{{ t('trash.emptyTrash') }}</span>
                 </button>
             </div>
         </div>
 
         <div class="manager-status">
             <div class="status-item">
-                <span class="status-label">回收站文件:</span>
-                <span class="status-value">{{ totalFiles }} 个</span>
+                <span class="status-label">{{ t('trash.trashFiles') }}:</span>
+                <span class="status-value">{{ totalFiles }} {{ t('trash.totalFiles') }}</span>
             </div>
             <div class="status-item">
-                <span class="status-label">占用空间:</span>
+                <span class="status-label">{{ t('trash.occupiedSpace') }}:</span>
                 <span class="status-value">{{ Utils.gen_size_str(totalSize) }}</span>
             </div>
             <div class="status-item">
-                <span class="status-label">已选中:</span>
-                <span class="status-value">{{ selectedFiles.length }} 个</span>
+                <span class="status-label">{{ t('trash.selected') }}:</span>
+                <span class="status-value">{{ selectedFiles.length }} {{ t('trash.totalFiles') }}</span>
             </div>
         </div>
 
         <div class="trash-content xc-scrollbar">
             <div v-if="trashFiles.length === 0" class="empty-state">
                 <DeleteThemes theme="outline" size="64" fill="currentColor" class="empty-icon" />
-                <p class="empty-title">回收站为空</p>
-                <p class="empty-desc">删除的文件将显示在这里</p>
+                <p class="empty-title">{{ t('trash.empty') }}</p>
+                <p class="empty-desc">{{ t('trash.deletedFilesShow') }}</p>
             </div>
 
             <div v-else class="file-grid">
@@ -54,7 +54,7 @@
                         <input type="checkbox" v-model="file.checked" @change="updateSelection" />
                     </div>
                     <div class="file-thumbnail-container" @click="previewFile(file)">
-                        <img v-if="file.type === 'image' || file.type === 'video'" 
+                        <img v-if="file.type === 'image' || file.type === 'video'"
                             :src="Utils.get_thumbnail_url(file.id)" :alt="file.name" class="file-thumbnail" />
                         <div v-else class="file-icon-container">
                             <FileDoc theme="outline" size="48" fill="currentColor" />
@@ -69,13 +69,13 @@
                         <div class="file-path" :title="file.path">{{ file.path }}</div>
                     </div>
                     <div class="file-actions">
-                        <button @click="restoreFile(file)" class="file-action-btn" title="恢复">
+                        <button @click="restoreFile(file)" class="file-action-btn" :title="t('trash.restore')">
                             <Undo theme="outline" size="16" />
                         </button>
-                        <button @click="previewFile(file)" class="file-action-btn" title="预览">
+                        <button @click="previewFile(file)" class="file-action-btn" :title="t('similarity.preview')">
                             <ViewList theme="outline" size="16" />
                         </button>
-                        <button @click="deleteFilePermanently(file)" class="file-action-btn danger" title="永久删除">
+                        <button @click="deleteFilePermanently(file)" class="file-action-btn danger" :title="t('trash.deletePermanently')">
                             <Delete theme="outline" size="16" />
                         </button>
                     </div>
@@ -85,15 +85,15 @@
 
         <div v-if="totalFiles > 0" class="pagination-section">
             <div class="pagination-info">
-                共 {{ totalFiles }} 个文件
+                {{ t('common.all') }} {{ totalFiles }} {{ t('trash.totalFiles') }}
             </div>
             <div class="pagination-controls">
                 <button @click="prevPage" :disabled="currentPage === 1" class="pagination-btn">
-                    上一页
+                    {{ t('trash.prevPage') }}
                 </button>
-                <span class="pagination-current">第 {{ currentPage }} 页</span>
+                <span class="pagination-current">{{ t('trash.page') }} {{ currentPage }} {{ t('similarity.page') }}</span>
                 <button @click="nextPage" :disabled="currentPage * pageSize >= totalFiles" class="pagination-btn">
-                    下一页
+                    {{ t('trash.nextPage') }}
                 </button>
             </div>
         </div>
@@ -102,12 +102,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 import '@/assets/common.css';
 import { DeleteThemes, Refresh, Undo, Delete, Clear, ViewList, FileDoc } from '@icon-park/vue-next';
 
+const { t } = useI18n();
 const appStore = useAppStore();
 
 const trashFiles = ref<DatType.File[]>([]);
@@ -146,11 +148,11 @@ const loadTrashFiles = async (page = 1) => {
             calculateTotalSize();
             currentPage.value = page;
         } else {
-            Utils.addToast(response.status || '加载回收站失败');
+            Utils.addToast(response.status || t('trash.loadTrashFailed'));
         }
     } catch (error) {
         console.error('加载回收站失败:', error);
-        Utils.addToast('加载回收站失败');
+        Utils.addToast(t('trash.loadTrashFailed'));
     }
 };
 
@@ -169,39 +171,39 @@ const previewFile = (file: DatType.File) => {
 };
 
 const restoreFile = async (file: DatType.File) => {
-    if (!confirm(`确定要恢复文件 "${file.name}" 吗？`)) {
+    if (!confirm(`${t('trash.confirmRestore')} "${file.name}"?`)) {
         return;
     }
 
     const response = await Utils.files_restore([file.id]);
-    
+
     if (response.code === 0) {
         await loadTrashFiles(currentPage.value);
-        Utils.addToast('文件恢复成功');
+        Utils.addToast(t('trash.restoreSuccess'));
     }
 };
 
 const restoreSelected = async () => {
     const files = selectedFiles.value;
     if (files.length === 0) {
-        Utils.addToast('请选择要恢复的文件');
+        Utils.addToast(t('trash.selectFilesToRestore'));
         return;
     }
 
-    if (!confirm(`确定要恢复选中的 ${files.length} 个文件吗？`)) {
+    if (!confirm(`${t('trash.confirmRestoreSelected')} ${files.length} ${t('trash.totalFiles')}?`)) {
         return;
     }
 
     const response = await Utils.files_restore(files.map(f => f.id));
-    
+
     if (response.code === 0) {
         await loadTrashFiles(currentPage.value);
-        Utils.addToast(`成功恢复 ${files.length} 个文件`);
+        Utils.addToast(`${t('trash.restoreSuccessCount')} ${files.length} ${t('trash.totalFiles')}`);
     }
 };
 
 const deleteFilePermanently = async (file: DatType.File) => {
-    if (!confirm(`确定要永久删除文件 "${file.name}" 吗？此操作不可恢复！`)) {
+    if (!confirm(`${t('trash.confirmDeletePermanently')} "${file.name}"? ${t('trash.permanentDeleteWarning')}`)) {
         return;
     }
 
@@ -210,21 +212,21 @@ const deleteFilePermanently = async (file: DatType.File) => {
     req.bRemoveToDtrash = false;
 
     const response = await Utils.files_delete(req);
-    
+
     if (response.code === 0) {
         await loadTrashFiles(currentPage.value);
-        Utils.addToast('文件已永久删除');
+        Utils.addToast(t('trash.fileDeletedPermanently'));
     }
 };
 
 const deleteSelectedPermanently = async () => {
     const files = selectedFiles.value;
     if (files.length === 0) {
-        Utils.addToast('请选择要删除的文件');
+        Utils.addToast(t('trash.selectFilesToDelete'));
         return;
     }
 
-    if (!confirm(`确定要永久删除选中的 ${files.length} 个文件吗？此操作不可恢复！`)) {
+    if (!confirm(`${t('trash.confirmDeleteSelectedPermanently')} ${files.length} ${t('trash.totalFiles')}? ${t('trash.permanentDeleteWarning')}`)) {
         return;
     }
 
@@ -233,15 +235,15 @@ const deleteSelectedPermanently = async () => {
     req.bRemoveToDtrash = false;
 
     const response = await Utils.files_delete(req);
-    
+
     if (response.code === 0) {
         await loadTrashFiles(currentPage.value);
-        Utils.addToast(`成功删除 ${files.length} 个文件`);
+        Utils.addToast(`${t('trash.deleteSuccessCount')} ${files.length} ${t('trash.totalFiles')}`);
     }
 };
 
 const emptyTrash = async () => {
-    if (!confirm('确定要清空回收站吗？此操作将永久删除所有文件，不可恢复！')) {
+    if (!confirm(t('trash.confirmEmptyTrash'))) {
         return;
     }
 
@@ -252,13 +254,13 @@ const emptyTrash = async () => {
         req.statuss = [2];
 
         const response = await Utils.files_get(req, false);
-        
+
         if (response.code === 0 && response.data) {
             const data = response.data as { files?: { records?: DatType.File[] } };
             const allFileIds = data.files?.records?.map((f: DatType.File) => f.id) || [];
-            
+
             if (allFileIds.length === 0) {
-                Utils.addToast('回收站已为空');
+                Utils.addToast(t('trash.trashAlreadyEmpty'));
                 return;
             }
 
@@ -267,15 +269,15 @@ const emptyTrash = async () => {
             deleteReq.bRemoveToDtrash = false;
 
             const deleteResponse = await Utils.files_delete(deleteReq);
-            
+
             if (deleteResponse.code === 0) {
                 await loadTrashFiles(1);
-                Utils.addToast('回收站已清空');
+                Utils.addToast(t('trash.trashEmptied'));
             }
         }
     } catch (error) {
         console.error('清空回收站失败:', error);
-        Utils.addToast('清空回收站失败');
+        Utils.addToast(t('trash.emptyTrashFailed'));
     }
 };
 

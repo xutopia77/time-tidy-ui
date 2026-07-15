@@ -3,17 +3,17 @@
         <div v-if="showBar" class="operation-bar">
             <div class="operation-bar-content">
                 <div class="selection-info">
-                    <span class="selection-count">{{ checkedCount }} 选中</span>
-                    <button @click="clearSelection" class="xc-button clear-btn">取消</button>
+                    <span class="selection-count">{{ checkedCount }} {{ t('actionBar.selected') }}</span>
+                    <button @click="clearSelection" class="xc-button clear-btn">{{ t('actionBar.cancel') }}</button>
                 </div>
                 
                 <div class="operation-actions">
                     <div class="popup-wrapper">
-                        <button @click="toggleScorePanel" class="xc-button action-btn">评分</button>
+                        <button @click="toggleScorePanel" class="xc-button action-btn">{{ t('actionBar.score') }}</button>
                         <Transition name="fade-down">
                             <div v-if="showScorePanel" class="popup-panel score-panel">
-                                <button 
-                                    v-for="score in 5" 
+                                <button
+                                    v-for="score in 5"
                                     :key="score"
                                     @click="setFileScore(score)"
                                     class="xc-button score-btn"
@@ -24,16 +24,16 @@
                             </div>
                         </Transition>
                     </div>
-                    
+
                     <div class="popup-wrapper">
-                        <button @click="toggleTagPanel" class="xc-button action-btn">标签</button>
+                        <button @click="toggleTagPanel" class="xc-button action-btn">{{ t('actionBar.tag') }}</button>
                         <Transition name="fade-down">
                             <div v-if="showTagPanel" class="popup-panel tag-panel" @click.stop>
                                 <div class="tag-input-section">
-                                    <input 
-                                        v-model="newTag" 
+                                    <input
+                                        v-model="newTag"
                                         @keyup.enter="addTag"
-                                        placeholder="输入标签回车添加..."
+                                        :placeholder="t('actionBar.addTagPlaceholder')"
                                         class="xc-input-text tag-input"
                                         list="tagSuggestions"
                                     />
@@ -41,9 +41,9 @@
                                         <option v-for="tag in tagSuggestions" :key="tag" :value="tag"></option>
                                     </datalist>
                                 </div>
-                                
+
                                 <div v-if="fileTags.length > 0" class="tag-list-section">
-                                    <div class="tag-list-title">已有标签</div>
+                                    <div class="tag-list-title">{{ t('actionBar.existingTags') }}</div>
                                     <div class="tag-list">
                                         <div v-for="tag in fileTags" :key="tag.name" class="tag-item">
                                             <span class="tag-color" :style="{ backgroundColor: tag.color || '#999' }"></span>
@@ -52,33 +52,33 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div v-else class="no-tags-message">
-                                    暂无标签
+                                    {{ t('actionBar.noTags') }}
                                 </div>
                             </div>
                         </Transition>
                     </div>
-                    
-                    <button @click="btnclk_move_file" class="xc-button action-btn">移动</button>
-                    <button @click="btnclk_copy_file" class="xc-button action-btn">复制</button>
-                    <button @click="btnclk_delete_file" class="xc-button action-btn danger">删除</button>
+
+                    <button @click="btnclk_move_file" class="xc-button action-btn">{{ t('actionBar.move') }}</button>
+                    <button @click="btnclk_copy_file" class="xc-button action-btn">{{ t('actionBar.copy') }}</button>
+                    <button @click="btnclk_delete_file" class="xc-button action-btn danger">{{ t('actionBar.delete') }}</button>
 
                     <div class="popup-wrapper">
-                        <button @click="toggleImageSearchPanel" class="xc-button action-btn">图搜</button>
+                        <button @click="toggleImageSearchPanel" class="xc-button action-btn">{{ t('actionBar.imageSearch') }}</button>
                         <Transition name="fade-down">
                             <div v-if="showImageSearchPanel" class="popup-panel image-search-panel" @click.stop>
                                 <div class="image-search-settings">
                                     <label>
-                                        相似度阈值:
+                                        {{ t('actionBar.similarityThreshold') }}:
                                         <input v-model.number="imageSearchMinSimilar" type="number" min="0" max="1" step="0.1" class="range-input" />
                                     </label>
                                     <label>
-                                        返回数量:
+                                        {{ t('actionBar.returnCount') }}:
                                         <input v-model.number="imageSearchTopK" type="number" min="1" max="100" class="range-input" />
                                     </label>
                                 </div>
-                                <button @click="handleImageSearch" class="xc-button search-btn">开始查找</button>
+                                <button @click="handleImageSearch" class="xc-button search-btn">{{ t('actionBar.startSearch') }}</button>
                             </div>
                         </Transition>
                     </div>
@@ -90,11 +90,13 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 
 const appStore = useAppStore();
+const { t } = useI18n();
 
 const checkedCount = computed(() => {
     let count = 0;

@@ -1,14 +1,14 @@
 <template>
     <div class="py-3 px-4 bg-bg-secondary rounded-lg mb-4">
         <div class="flex items-center flex-wrap gap-1 text-base text-text-primary">
-            <span 
-                v-for="(part, index) in pathParts" 
-                :key="index" 
+            <span
+                v-for="(part, index) in pathParts"
+                :key="index"
                 class="flex items-center gap-1"
                 :class="{ 'is-current': index === pathParts.length - 1 }"
             >
-                <span 
-                    @click="navigateToPath(part.path)" 
+                <span
+                    @click="navigateToPath(part.path)"
                     class="flex items-center py-1.5 px-2.5 rounded-sm transition-all duration-200 cursor-default select-none"
                     :class="{
                         'cursor-pointer hover:bg-bg-tertiary hover:text-primary active:scale-[0.98]': index < pathParts.length - 1 && !isAllPathSearch,
@@ -25,7 +25,7 @@
                     </svg>
                 </span>
             </span>
-            <span class="ml-auto text-text-secondary text-sm">{{ appStore.curFileTotal }} Files</span>
+            <span class="ml-auto text-text-secondary text-sm">{{ appStore.curFileTotal }} {{ t('sidebar.files') }}</span>
         </div>
     </div>
 </template>
@@ -33,9 +33,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { ComputedRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Utils from '@/utils/utils';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
+const { t } = useI18n();
 import { HardDisk } from '@icon-park/vue-next'
 
 class PathPart {
@@ -70,9 +72,9 @@ const pathParts: ComputedRef<PathPart[]> = computed(() => {
 
 const navigateToPath = (path: string) => {
     if (isAllPathSearch.value) {
-        Utils.message_notify({ 
-            content: '当前为全部文件搜索模式，无法跳转文件夹', 
-            type: 'warning' 
+        Utils.message_notify({
+            content: t('sidebar.allPathSearchWarning'),
+            type: 'warning'
         });
         return;
     }
