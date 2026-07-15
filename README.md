@@ -1,11 +1,5 @@
 
-# 打包
-
-在本文件夹下的bin目录中，运行build.py 即可打包，有多种打包方式，详见`python.exe .\build.py -h`
-
-
-
-# time_capsule_ui_v2
+# time-tidy-ui
 
 This template should help get you started developing with Vue 3 in Vite.
 
