@@ -38,23 +38,23 @@
                     @click="openFileWithDefault"
                     :class="{ 'opacity-50 cursor-not-allowed': !canOpenFile }">
                     <span class="text-sm">📂</span>
-                    <span class="text-sm whitespace-nowrap">默认打开</span>
+                    <span class="text-sm whitespace-nowrap">{{ t('file.defaultOpen') }}</span>
                 </div>
                 <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
                     @click="aiTagDetect"
                     :class="{ 'opacity-50 cursor-not-allowed': !canAITag }">
                     <span class="text-sm">🤖</span>
-                    <span class="text-sm whitespace-nowrap">AI标签</span>
+                    <span class="text-sm whitespace-nowrap">{{ t('file.aiTag') }}</span>
                 </div>
                 <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
                     @click="toggleSidebar">
                     <span class="text-sm">{{ sidebarOpen ? '◀' : '▶' }}</span>
-                    <span class="text-sm whitespace-nowrap">{{ sidebarOpen ? '收起面板' : '展开面板' }}</span>
+                    <span class="text-sm whitespace-nowrap">{{ sidebarOpen ? t('file.collapsePanel') : t('file.expandPanel') }}</span>
                 </div>
                 <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
                     @click="openCreateFolderDialog">
                     <span class="text-sm">📁</span>
-                    <span class="text-sm whitespace-nowrap">创建文件夹</span>
+                    <span class="text-sm whitespace-nowrap">{{ t('file.createFolder') }}</span>
                 </div>
             </div>
             <button class="w-12 h-12 rounded-full bg-primary text-white border-none cursor-pointer shadow-lg transition-all duration-200 hover:bg-primary-hover"
@@ -69,18 +69,18 @@
             @click="closeCreateFolderDialog">
             <div class="bg-bg-secondary p-5 rounded-lg shadow-lg min-w-[300px] max-w-[500px]"
                 @click.stop>
-                <h3 class="m-0 mb-3 text-text-primary text-base">创建新文件夹</h3>
-                <p class="m-0 mb-3 text-text-secondary text-sm">当前位置: {{ currentPath }}</p>
-                <input v-model="newFolderName" @keyup.enter="createNewFolder" placeholder="输入文件夹名称"
+                <h3 class="m-0 mb-3 text-text-primary text-base">{{ t('file.createNewFolder') }}</h3>
+                <p class="m-0 mb-3 text-text-secondary text-sm">{{ t('file.currentLocation') }} {{ currentPath }}</p>
+                <input v-model="newFolderName" @keyup.enter="createNewFolder" :placeholder="t('file.enterFolderName')"
                     class="w-full py-2 mb-3 bg-bg-tertiary border border-border rounded text-text-primary text-sm outline-none transition-colors duration-200 focus:border-primary"
                     ref="folderInputRef" maxlength="100" />
                 <div class="flex justify-end gap-2">
                     <button @click="createNewFolder" 
                         class="py-1 px-3 rounded text-sm cursor-pointer transition-all duration-200 bg-primary text-white border-none hover:bg-primary-hover disabled:bg-bg-tertiary disabled:text-text-disabled disabled:cursor-not-allowed"
-                        :disabled="!newFolderName.trim()">确定</button>
+                        :disabled="!newFolderName.trim()">{{ t('common.confirm') }}</button>
                     <button @click="closeCreateFolderDialog" 
                         class="py-1 px-3 rounded text-sm cursor-pointer transition-all duration-200 bg-bg-elevated text-text-primary border border-border hover:bg-bg-tertiary">
-                        取消</button>
+                        {{ t('common.cancel') }}</button>
                 </div>
             </div>
         </div>
@@ -91,6 +91,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import FileNavHeader from '@/components/HomeEntry/FileExplorer/FileNavHeader.vue';
 import ImageCard from '@/components/HomeEntry/FileExplorer/ImageCard.vue';
 import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
@@ -103,6 +104,7 @@ import { useAppStore } from '@/stores/AppStore';
 import { ApiService } from '@/utils/apiService';
 import type { AIStatus } from '@/utils/dataTypedef';
 const appStore = useAppStore()
+const { t } = useI18n();
 import '@/assets/common.css'
 import Utils from '@/utils/utils';
 
@@ -186,9 +188,9 @@ const loadAIStatus = async () => {
 const aiTagDetect = async () => {
     if (!canAITag.value) {
         if (!aiStatus.value?.available) {
-            Utils.message_notify({ content: 'AI引擎不可用，请在设置中启用AI功能', type: 'warning' });
+            Utils.message_notify({ content: t('message.aiNotAvailable'), type: 'warning' });
         } else {
-            Utils.message_notify({ content: '请选择文件', type: 'warning' });
+            Utils.message_notify({ content: t('file.selectFile'), type: 'warning' });
         }
         return;
     }
@@ -200,16 +202,16 @@ const aiTagDetect = async () => {
         const resp = await ApiService.aiTagDetect({ fileIds, topK: 5 });
         if (resp.code === 0) {
             if (resp.doing) {
-                Utils.message_notify({ content: 'AI标签检测已开始', type: 'info' });
+                Utils.message_notify({ content: t('message.aiDetectionStarted'), type: 'info' });
             } else {
-                Utils.message_notify({ content: 'AI标签检测完成', type: 'success' });
+                Utils.message_notify({ content: t('message.aiDetectionCompleted'), type: 'success' });
             }
         } else {
-            Utils.message_notify({ content: 'AI标签检测失败: ' + (resp.status || '未知错误'), type: 'error' });
+            Utils.message_notify({ content: t('file.aiTagDetectFailed') + ': ' + (resp.status || ''), type: 'error' });
         }
     } catch (error) {
-        console.error('AI标签检测失败:', error);
-        Utils.message_notify({ content: 'AI标签检测失败', type: 'error' });
+        console.error('AI tag detection failed:', error);
+        Utils.message_notify({ content: t('message.aiDetectionFailed'), type: 'error' });
     }
 };
 
@@ -227,7 +229,7 @@ function enterFolder(dir: DatType.DirItem) {
 const openFileWithDefault = async () => {
     if (!canOpenFile.value) {
         Utils.message_notify({ 
-            content: '请选择单个文件', 
+            content: t('file.selectSingleFile'), 
             type: 'warning' 
         });
         return;
@@ -237,13 +239,13 @@ const openFileWithDefault = async () => {
     try {
         await Utils.fileOpenWithDefault(file.id);
         Utils.message_notify({ 
-            content: '已使用默认软件打开文件', 
+            content: t('file.fileOpened'), 
             type: 'success' 
         });
     } catch (error) {
-        console.error('打开文件失败:', error);
+        console.error('open file failed:', error);
         Utils.message_notify({ 
-            content: '打开文件失败', 
+            content: t('file.openFileFailed'), 
             type: 'error' 
         });
     }
@@ -344,12 +346,12 @@ const closeCreateFolderDialog = () => {
 
 const createNewFolder = async () => {
     if (!newFolderName.value.trim()) {
-        Utils.message_notify({ content: '文件夹名称不能为空', type: 'error' });
+        Utils.message_notify({ content: t('file.folderNameEmpty'), type: 'error' });
         return;
     }
 
     if (!appStore.curSltDirTreeItem) {
-        Utils.message_notify({ content: '请先选择一个目录', type: 'error' });
+        Utils.message_notify({ content: t('file.selectDirFirst'), type: 'error' });
         return;
     }
 
@@ -363,8 +365,8 @@ const createNewFolder = async () => {
         await Utils.dirCreate(req);
         closeCreateFolderDialog();
     } catch (error) {
-        console.error('创建文件夹失败:', error);
-        Utils.message_notify({ content: '创建文件夹失败', type: 'error' });
+        console.error('create folder failed:', error);
+        Utils.message_notify({ content: t('file.createFolderFailed'), type: 'error' });
     }
 };
 

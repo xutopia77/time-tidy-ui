@@ -3,18 +3,18 @@
         <div class="set-options xc-scrollbar">
             <div class="settings-group">
                 <div class="form-item">
-                    <label class="xc-label">项目路径:</label>
-                    <input type="text" v-model="prjPath" placeholder="输入项目路径" class="xc-input-text text-base-path" />
+                    <label class="xc-label">{{ t('setEntry.projectPath') }}</label>
+                    <input type="text" v-model="prjPath" :placeholder="t('setEntry.projectPathPlaceholder')" class="xc-input-text text-base-path" />
                 </div>
                 <div class="form-item">
-                    <label class="xc-label">仓库路径:</label>
-                    <input type="text" v-model="repoPath.path" placeholder="输入仓库路径"
+                    <label class="xc-label">{{ t('setEntry.repoPath') }}</label>
+                    <input type="text" v-model="repoPath.path" :placeholder="t('setEntry.repoPathPlaceholder')"
                         class="xc-input-text text-base-path" />
                 </div>
                 <div class="button-group">
-                    <button title="创建项目" @click="btnclk_set([DatType.PrjSetType.Create])"
-                        class="xc-button">创建项目</button>
-                    <button title="打开项目" @click="btnclk_set([DatType.PrjSetType.Open])" class="xc-button">打开项目</button>
+                    <button :title="t('setEntry.createProject')" @click="btnclk_set([DatType.PrjSetType.Create])"
+                        class="xc-button">{{ t('setEntry.createProject') }}</button>
+                    <button :title="t('setEntry.openProject')" @click="btnclk_set([DatType.PrjSetType.Open])" class="xc-button">{{ t('setEntry.openProject') }}</button>
                 </div>
             </div>
 
@@ -22,18 +22,18 @@
                 <div class="checkbox-group">
                     <div class="checkbox-item">
                         <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSave" id="save-option" />
-                        <label class="xc-label" for="save-option">保存项目信息</label>
+                        <label class="xc-label" for="save-option">{{ t('setEntry.saveProjectInfo') }}</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSync" id="sync-option" />
-                        <label class="xc-label" for="sync-option">同步仓库文件信息</label>
+                        <label class="xc-label" for="sync-option">{{ t('setEntry.syncRepoInfo') }}</label>
                     </div>
                     <div class="form-item select-item">
-                        <label class="xc-label">缩略图选项:</label>
+                        <label class="xc-label">{{ t('setEntry.thumbOption') }}</label>
                         <select v-model="selectedThumbOption" class="xc-select">
-                            <option value="none">不生成缩略图</option>
-                            <option value="full">生成缩略图(全量)</option>
-                            <option value="incremental">生成缩略图(增量)</option>
+                            <option value="none">{{ t('setEntry.thumbNone') }}</option>
+                            <option value="full">{{ t('setEntry.thumbFull') }}</option>
+                            <option value="incremental">{{ t('setEntry.thumbIncremental') }}</option>
                         </select>
                         <span v-if="showThumbProgress" class="progress-text"
                             :class="{ 'progress-complete': thumbProgress.percent === 100 }">
@@ -41,11 +41,11 @@
                         </span>
                     </div>
                     <div class="form-item select-item">
-                        <label class="xc-label">元信息选项:</label>
+                        <label class="xc-label">{{ t('setEntry.exifOption') }}</label>
                         <select v-model="selectedExifOption" class="xc-select">
-                            <option value="none">不提取元信息</option>
-                            <option value="full">提取元信息(全量)</option>
-                            <option value="incremental">提取元信息(增量)</option>
+                            <option value="none">{{ t('setEntry.exifNone') }}</option>
+                            <option value="full">{{ t('setEntry.exifFull') }}</option>
+                            <option value="incremental">{{ t('setEntry.exifIncremental') }}</option>
                         </select>
                         <span v-if="showExifProgress" class="progress-text"
                             :class="{ 'progress-complete': exifProgress.percent === 100 }">
@@ -53,11 +53,11 @@
                         </span>
                     </div>
                     <div class="form-item select-item">
-                        <label class="xc-label">指纹选项:</label>
+                        <label class="xc-label">{{ t('setEntry.hashOption') }}</label>
                         <select v-model="selectedHashOption" class="xc-select">
-                            <option value="none">不生成指纹</option>
-                            <option value="full">生成指纹(全量)</option>
-                            <option value="incremental">生成指纹(增量)</option>
+                            <option value="none">{{ t('setEntry.hashNone') }}</option>
+                            <option value="full">{{ t('setEntry.hashFull') }}</option>
+                            <option value="incremental">{{ t('setEntry.hashIncremental') }}</option>
                         </select>
                         <span v-if="showHashProgress" class="progress-text"
                             :class="{ 'progress-complete': hashProgress.percent === 100 }">
@@ -66,28 +66,28 @@
                     </div>
                 </div>
                 <div class="button-group">
-                    <button title="同步项目下的文件信息" @click="btnclk_set()" class="xc-button">同步项目</button>
+                    <button :title="t('setEntry.syncProject')" @click="btnclk_set()" class="xc-button">{{ t('setEntry.syncProject') }}</button>
                 </div>
             </div>
 
             <div class="settings-group">
                 <div class="button-group">
-                    <button title="数据检查" @click="btnclk_detect_health()" class="xc-button">数据检查</button>
+                    <button :title="t('setEntry.dataCheck')" @click="btnclk_detect_health()" class="xc-button">{{ t('setEntry.dataCheck') }}</button>
                 </div>
             </div>
 
             <div class="settings-group">
-                <h3 class="group-title">后台AI分析</h3>
+                <h3 class="group-title">{{ t('setEntry.aiBackgroundAnalyze') }}</h3>
                 <div class="form-item select-item">
-                    <label class="xc-label">分析模式:</label>
+                    <label class="xc-label">{{ t('setEntry.analyzeMode') }}</label>
                     <select v-model="aiAnalyzeMode" class="xc-select">
-                        <option value="incremental">增量分析(仅分析未打AI标签的图片)</option>
-                        <option value="full">全量分析(分析所有图片)</option>
+                        <option value="incremental">{{ t('setEntry.analyzeIncremental') }}</option>
+                        <option value="full">{{ t('setEntry.analyzeFull') }}</option>
                     </select>
                 </div>
                 <div v-if="aiAnalyzeStatus.isRunning" class="ai-status">
                     <div class="status-info">
-                        <span class="status-badge running">运行中</span>
+                        <span class="status-badge running">{{ t('setEntry.running') }}</span>
                         <span class="status-text">{{ aiAnalyzeStatus.status }}</span>
                     </div>
                     <div class="progress-bar">
@@ -96,27 +96,27 @@
                         </div>
                     </div>
                     <div class="progress-info">
-                        <span>进度: {{ aiAnalyzeStatus.processedFiles }} / {{ aiAnalyzeStatus.totalFiles }}</span>
-                        <span>成功: {{ aiAnalyzeStatus.successCount }}</span>
-                        <span>失败: {{ aiAnalyzeStatus.failCount }}</span>
+                        <span>{{ t('setEntry.progress') }} {{ aiAnalyzeStatus.processedFiles }} / {{ aiAnalyzeStatus.totalFiles }}</span>
+                        <span>{{ t('setEntry.success') }} {{ aiAnalyzeStatus.successCount }}</span>
+                        <span>{{ t('setEntry.fail') }} {{ aiAnalyzeStatus.failCount }}</span>
                     </div>
                 </div>
                 <div class="button-group">
                     <button v-if="!aiAnalyzeStatus.isRunning" 
-                        title="启动后台AI分析" @click="startAIBackgroundAnalyze" 
-                        class="xc-button">启动分析</button>
+                        :title="t('setEntry.startAnalyze')" @click="startAIBackgroundAnalyze" 
+                        class="xc-button">{{ t('setEntry.startAnalyze') }}</button>
                     <button v-else 
-                        title="停止后台AI分析" @click="stopAIBackgroundAnalyze" 
-                        class="xc-button" style="background-color: #ff4d4f;">停止分析</button>
+                        :title="t('setEntry.stopAnalyze')" @click="stopAIBackgroundAnalyze" 
+                        class="xc-button" style="background-color: #ff4d4f;">{{ t('setEntry.stopAnalyze') }}</button>
                 </div>
             </div>
 
             <div class="settings-group">
-                <h3 class="group-title">AI向量索引</h3>
-                <p class="setting-hint">创建FAISS向量索引，用于AI相似度检测和图像搜索</p>
+                <h3 class="group-title">{{ t('setEntry.aiVectorIndex') }}</h3>
+                <p class="setting-hint">{{ t('setEntry.aiVectorIndexDesc') }}</p>
                 <div v-if="aiIndexInitStatus.isRunning" class="ai-status">
                     <div class="status-info">
-                        <span class="status-badge running">运行中</span>
+                        <span class="status-badge running">{{ t('setEntry.running') }}</span>
                         <span class="status-text">{{ aiIndexInitStatus.status }}</span>
                     </div>
                     <div class="progress-bar">
@@ -125,12 +125,12 @@
                         </div>
                     </div>
                     <div class="progress-info">
-                        <span>进度: {{ aiIndexInitStatus.current }} / {{ aiIndexInitStatus.total }}</span>
+                        <span>{{ t('setEntry.progress') }} {{ aiIndexInitStatus.current }} / {{ aiIndexInitStatus.total }}</span>
                         <span v-if="aiIndexInitStatus.processedFiles > 0">
-                            已处理: {{ aiIndexInitStatus.processedFiles }}
+                            {{ t('setEntry.processed') }} {{ aiIndexInitStatus.processedFiles }}
                         </span>
                         <span v-if="aiIndexInitStatus.skippedFiles > 0">
-                            已跳过: {{ aiIndexInitStatus.skippedFiles }}
+                            {{ t('setEntry.skipped') }} {{ aiIndexInitStatus.skippedFiles }}
                         </span>
                     </div>
                 </div>
@@ -138,23 +138,23 @@
                     <div v-if="!aiIndexInitStatus.isRunning" class="ai-index-options">
                         <label class="option-label">
                             <input type="radio" v-model="aiIndexMode" value="incre" />
-                            增量更新
+                            {{ t('setEntry.incrementalUpdate') }}
                         </label>
                         <label class="option-label">
                             <input type="radio" v-model="aiIndexMode" value="full" />
-                            全量重建
+                            {{ t('setEntry.fullRebuild') }}
                         </label>
                     </div>
                     <button v-if="!aiIndexInitStatus.isRunning"
-                        title="创建AI向量索引" @click="startAIIndexInit"
-                        class="xc-button">创建索引</button>
+                        :title="t('setEntry.createIndex')" @click="startAIIndexInit"
+                        class="xc-button">{{ t('setEntry.createIndex') }}</button>
                 </div>
             </div>
         </div>
         <div class="set-log">
             <SetEntryLog />
             <div class="log-actions">
-                <button title="清理日志" @click="btnclk_clean_log" class="xc-button">清空日志</button>
+                <button :title="t('setEntry.clearLog')" @click="btnclk_clean_log" class="xc-button">{{ t('setEntry.clearLog') }}</button>
             </div>
         </div>
     </div>
@@ -162,8 +162,10 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
+const { t } = useI18n();
 // import axios from 'axios';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
@@ -189,7 +191,7 @@ function btnclk_detect_health() {
 
 function btnclk_clean_log() {
     appStore.logInfo = ''
-    Utils.message_notify({ content: "清理完成", type: "success" })
+    Utils.message_notify({ content: t('setEntry.logCleaned'), type: "success" })
 }
 
 // ------------------------------------
@@ -251,10 +253,10 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
                         if (file.type === 'application/json' || file.name.endsWith('.json')) {
                             resolve(file);
                         } else {
-                            reject(new Error('请选择有效的 JSON 文件'));
+                            reject(new Error(t('setEntry.validJsonOnly')));
                         }
                     } else {
-                        reject(new Error('未选择文件'));
+                        reject(new Error(t('setEntry.noFileSelected')));
                     }
                 });
 
@@ -274,7 +276,7 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
                     if (event.target?.result) {
                         resolve(event.target.result as string);
                     } else {
-                        reject(new Error('读取文件内容失败'));
+                        reject(new Error(t('setEntry.fileReadFailed')));
                     }
                 };
                 reader.onerror = (error) => {
@@ -301,12 +303,12 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
                     resp.code = 0
                 } catch (parseError) {
                     console.error('解析 JSON 文件出错:', parseError);
-                    Utils.message_notify({ content: "解析 JSON 文件出错，请检查文件格式", type: "error" });
+                    Utils.message_notify({ content: t('setEntry.invalidJsonFile'), type: "error" });
                     resp.code = 1;
                 }
             } catch (error) {
                 console.error('选择或读取文件出错:', error);
-                Utils.message_notify({ content: "选择或读取文件出错，请重试", type: "error" });
+                Utils.message_notify({ content: t('setEntry.fileReadError'), type: "error" });
                 resp.code = 1;
             }
             return resp
@@ -382,13 +384,13 @@ const startAIBackgroundAnalyze = async () => {
         
         const resp = await ApiService.aiBackgroundAnalyze(req)
         if (resp.code === 0) {
-            Utils.message_notify({ content: '后台AI分析已启动', type: 'success' })
+            Utils.message_notify({ content: t('setEntry.aiAnalyzeStarted'), type: 'success' })
         } else {
-            Utils.message_notify({ content: '启动失败: ' + (resp.status || '未知错误'), type: 'error' })
+            Utils.message_notify({ content: t('setEntry.aiAnalyzeStartFailed') + ': ' + (resp.status || ''), type: 'error' })
         }
     } catch (error) {
         console.error('启动后台AI分析失败:', error)
-        Utils.message_notify({ content: '启动后台AI分析失败', type: 'error' })
+        Utils.message_notify({ content: t('setEntry.aiAnalyzeStartError'), type: 'error' })
     }
 }
 
@@ -396,13 +398,13 @@ const stopAIBackgroundAnalyze = async () => {
     try {
         const resp = await ApiService.aiBackgroundAnalyzeStop()
         if (resp.code === 0) {
-            Utils.message_notify({ content: '已停止后台AI分析', type: 'info' })
+            Utils.message_notify({ content: t('setEntry.aiAnalyzeStopped'), type: 'info' })
         } else {
-            Utils.message_notify({ content: '停止失败: ' + (resp.status || '未知错误'), type: 'error' })
+            Utils.message_notify({ content: t('setEntry.aiAnalyzeStopFailed') + ': ' + (resp.status || ''), type: 'error' })
         }
     } catch (error) {
         console.error('停止后台AI分析失败:', error)
-        Utils.message_notify({ content: '停止后台AI分析失败', type: 'error' })
+        Utils.message_notify({ content: t('setEntry.aiAnalyzeStopError'), type: 'error' })
     }
 }
 
@@ -463,11 +465,11 @@ const startAIIndexInit = async () => {
         req.prj.path = Utils.convertToLinuxPath(prjPath.value)
 
         await Utils.project_set(req)
-        const modeText = aiIndexMode.value === 'full' ? '全量重建' : '增量更新'
-        Utils.message_notify({ content: `AI向量索引${modeText}已启动`, type: 'success' })
+        const modeText = aiIndexMode.value === 'full' ? t('setEntry.fullRebuild') : t('setEntry.incrementalUpdate')
+        Utils.message_notify({ content: t('setEntry.aiVectorIndex') + modeText, type: 'success' })
     } catch (error) {
         console.error('启动AI索引创建失败:', error)
-        Utils.message_notify({ content: '启动AI索引创建失败', type: 'error' })
+        Utils.message_notify({ content: t('setEntry.aiIndexStartFailed'), type: 'error' })
     }
 }
 
