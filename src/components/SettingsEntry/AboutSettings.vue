@@ -72,17 +72,17 @@
                 <div class="flex items-center gap-3 py-2 px-4 border-b border-border last:border-b-none">
                     <Globe size="16" />
                     <span class="text-base text-text-primary w-20">{{ t('about.website') }}</span>
-                    <a href="#" class="text-base text-primary no-underline flex-1 hover:underline">https://www.timetidy.com</a>
+                    <a href="https://xutopia.top/project/timetidy" target="_blank" class="text-base text-primary no-underline flex-1 hover:underline">xutopia.top/project/timetidy</a>
                 </div>
                 <div class="flex items-center gap-3 py-2 px-4 border-b border-border last:border-b-none">
                     <Mail size="16" />
                     <span class="text-base text-text-primary w-20">{{ t('about.email') }}</span>
-                    <a href="mailto:support@timetidy.com" class="text-base text-primary no-underline flex-1 hover:underline">support@timetidy.com</a>
+                    <a href="mailto:xutopiaf@gmail.com" class="text-base text-primary no-underline flex-1 hover:underline">xutopiaf@gmail.com</a>
                 </div>
                 <div class="flex items-center gap-3 py-2 px-4 border-b border-border last:border-b-none">
                     <Bug size="16" />
                     <span class="text-base text-text-primary w-20">{{ t('about.feedback') }}</span>
-                    <a href="#" class="text-base text-primary no-underline flex-1 hover:underline">{{ t('about.submitFeedback') }}</a>
+                    <a href="https://github.com/xutopia77/timetidy-prj/issues" target="_blank" class="text-base text-primary no-underline flex-1 hover:underline">GitHub Issues</a>
                 </div>
             </div>
         </div>
@@ -124,11 +124,15 @@
 import { useI18n } from 'vue-i18n';
 import { Info, Shield, Mail, Globe, Bug, Heart, Refresh } from '@icon-park/vue-next';
 
+declare const __APP_VERSION__: string;
+declare const __APP_UPDATE_DATE__: string;
+declare const __APP_BUILD_NUMBER__: string;
+
 const { t } = useI18n();
 
-const appVersion = '1.0.0';
-const updateDate = '2026-05-09';
-const buildNumber = '20260509001';
+const appVersion = __APP_VERSION__;
+const updateDate = __APP_UPDATE_DATE__;
+const buildNumber = __APP_BUILD_NUMBER__;
 
 function checkUpdate() {
     alert(t('about.checkingUpdate') + '\n' + t('about.latestVersion'));
