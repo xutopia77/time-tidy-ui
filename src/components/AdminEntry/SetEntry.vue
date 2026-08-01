@@ -33,7 +33,9 @@
             </div>
 
             <div class="settings-group">
-                <h3 class="group-title">{{ t('setEntry.aiBackgroundAnalyze') }}</h3>
+                <h3 class="group-title">{{ t('setEntry.aiSettings') }}</h3>
+
+                <h4 class="sub-group-title">{{ t('setEntry.aiBackgroundAnalyze') }}</h4>
                 <div class="form-item select-item">
                     <label class="xc-label">{{ t('setEntry.analyzeMode') }}</label>
                     <select v-model="aiAnalyzeMode" class="xc-select">
@@ -47,7 +49,7 @@
                         <span class="status-text">{{ aiAnalyzeStatus.status }}</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" 
+                        <div class="progress-fill"
                             :style="{ width: (aiAnalyzeStatus.processedFiles / aiAnalyzeStatus.totalFiles * 100) + '%' }">
                         </div>
                     </div>
@@ -58,17 +60,15 @@
                     </div>
                 </div>
                 <div class="button-group">
-                    <button v-if="!aiAnalyzeStatus.isRunning" 
-                        :title="t('setEntry.startAnalyze')" @click="startAIBackgroundAnalyze" 
+                    <button v-if="!aiAnalyzeStatus.isRunning"
+                        :title="t('setEntry.startAnalyze')" @click="startAIBackgroundAnalyze"
                         class="xc-button">{{ t('setEntry.startAnalyze') }}</button>
-                    <button v-else 
-                        :title="t('setEntry.stopAnalyze')" @click="stopAIBackgroundAnalyze" 
+                    <button v-else
+                        :title="t('setEntry.stopAnalyze')" @click="stopAIBackgroundAnalyze"
                         class="xc-button" style="background-color: #ff4d4f;">{{ t('setEntry.stopAnalyze') }}</button>
                 </div>
-            </div>
 
-            <div class="settings-group">
-                <h3 class="group-title">{{ t('setEntry.aiVectorIndex') }}</h3>
+                <h4 class="sub-group-title">{{ t('setEntry.aiVectorIndex') }}</h4>
                 <p class="setting-hint">{{ t('setEntry.aiVectorIndexDesc') }}</p>
                 <div v-if="aiIndexInitStatus.isRunning" class="ai-status">
                     <div class="status-info">
@@ -76,7 +76,7 @@
                         <span class="status-text">{{ aiIndexInitStatus.status }}</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" 
+                        <div class="progress-fill"
                             :style="{ width: aiIndexInitStatus.percent + '%' }">
                         </div>
                     </div>
@@ -508,6 +508,13 @@ const startAIIndexInit = async () => {
     color: var(--xc-text-color);
     border-bottom: 1px solid var(--xc-border-color);
     padding-bottom: 8px;
+}
+
+.sub-group-title {
+    margin: 20px 0 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--xc-text-color);
 }
 
 .hint-text {

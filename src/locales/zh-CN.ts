@@ -402,6 +402,7 @@ export default {
     buildIncremental: '增量构建',
     syncProject: '同步项目',
     dataCheck: '数据检查',
+    aiSettings: 'AI设置',
     aiBackgroundAnalyze: '后台AI分析',
     analyzeMode: '分析模式:',
     analyzeIncremental: '增量分析(仅分析未打AI标签的图片)',

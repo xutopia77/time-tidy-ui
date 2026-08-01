@@ -402,6 +402,7 @@ export default {
     buildIncremental: 'Incremental build',
     syncProject: 'Sync Project',
     dataCheck: 'Data Check',
+    aiSettings: 'AI Settings',
     aiBackgroundAnalyze: 'Background AI Analysis',
     analyzeMode: 'Mode:',
     analyzeIncremental: 'Incremental (untagged images only)',
