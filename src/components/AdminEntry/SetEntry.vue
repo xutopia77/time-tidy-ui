@@ -16,63 +16,19 @@
                         class="xc-button">{{ t('setEntry.createProject') }}</button>
                     <button :title="t('setEntry.openProject')" @click="btnclk_set([DatType.PrjSetType.Open])" class="xc-button">{{ t('setEntry.openProject') }}</button>
                 </div>
-            </div>
-
-            <div class="settings-group">
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSave" id="save-option" />
-                        <label class="xc-label" for="save-option">{{ t('setEntry.saveProjectInfo') }}</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" class="xc-checkbox" v-model="bPrjSetSync" id="sync-option" />
-                        <label class="xc-label" for="sync-option">{{ t('setEntry.syncRepoInfo') }}</label>
-                    </div>
-                    <div class="form-item select-item">
-                        <label class="xc-label">{{ t('setEntry.thumbOption') }}</label>
-                        <select v-model="selectedThumbOption" class="xc-select">
-                            <option value="none">{{ t('setEntry.thumbNone') }}</option>
-                            <option value="full">{{ t('setEntry.thumbFull') }}</option>
-                            <option value="incremental">{{ t('setEntry.thumbIncremental') }}</option>
-                        </select>
-                        <span v-if="showThumbProgress" class="progress-text"
-                            :class="{ 'progress-complete': thumbProgress.percent === 100 }">
-                            {{ thumbProgress.percent }}%
-                        </span>
-                    </div>
-                    <div class="form-item select-item">
-                        <label class="xc-label">{{ t('setEntry.exifOption') }}</label>
-                        <select v-model="selectedExifOption" class="xc-select">
-                            <option value="none">{{ t('setEntry.exifNone') }}</option>
-                            <option value="full">{{ t('setEntry.exifFull') }}</option>
-                            <option value="incremental">{{ t('setEntry.exifIncremental') }}</option>
-                        </select>
-                        <span v-if="showExifProgress" class="progress-text"
-                            :class="{ 'progress-complete': exifProgress.percent === 100 }">
-                            {{ exifProgress.percent }}%
-                        </span>
-                    </div>
-                    <div class="form-item select-item">
-                        <label class="xc-label">{{ t('setEntry.hashOption') }}</label>
-                        <select v-model="selectedHashOption" class="xc-select">
-                            <option value="none">{{ t('setEntry.hashNone') }}</option>
-                            <option value="full">{{ t('setEntry.hashFull') }}</option>
-                            <option value="incremental">{{ t('setEntry.hashIncremental') }}</option>
-                        </select>
-                        <span v-if="showHashProgress" class="progress-text"
-                            :class="{ 'progress-complete': hashProgress.percent === 100 }">
-                            {{ hashProgress.percent }}%
-                        </span>
-                    </div>
-                </div>
                 <div class="button-group">
-                    <button :title="t('setEntry.syncProject')" @click="btnclk_set()" class="xc-button">{{ t('setEntry.syncProject') }}</button>
-                </div>
-            </div>
-
-            <div class="settings-group">
-                <div class="button-group">
-                    <button :title="t('setEntry.dataCheck')" @click="btnclk_detect_health()" class="xc-button">{{ t('setEntry.dataCheck') }}</button>
+                    <button :title="t('setEntry.buildDatabase')" @click="btnclk_set()" class="xc-button">{{ t('setEntry.buildDatabase') }}</button>
+                    <div class="form-item select-item" style="margin-bottom: 0;">
+                        <label class="xc-label">{{ t('setEntry.buildMode') }}</label>
+                        <select v-model="selectedBuildMode" class="xc-select">
+                            <option value="incremental">{{ t('setEntry.buildIncremental') }}</option>
+                            <option value="full">{{ t('setEntry.buildFull') }}</option>
+                        </select>
+                        <span v-if="showBuildProgress" class="progress-text"
+                            :class="{ 'progress-complete': buildProgress.percent === 100 }">
+                            {{ buildProgress.percent }}%
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -151,12 +107,6 @@
                 </div>
             </div>
         </div>
-        <div class="set-log">
-            <SetEntryLog />
-            <div class="log-actions">
-                <button :title="t('setEntry.clearLog')" @click="btnclk_clean_log" class="xc-button">{{ t('setEntry.clearLog') }}</button>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -171,8 +121,6 @@ import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import { ApiService } from '@/utils/apiService';
 
-import SetEntryLog from '@/components/SetEntry/SetEntryLog.vue';
-
 // 使用 ref 创建响应式变量来存储输入框的值
 const prjPath = ref('');
 watch(() => appStore.prj.path, () => {
@@ -185,15 +133,6 @@ watch(() => appStore.prj.path, () => {
     }
 })
 
-function btnclk_detect_health() {
-    Utils.project_health()
-}
-
-function btnclk_clean_log() {
-    appStore.logInfo = ''
-    Utils.message_notify({ content: t('setEntry.logCleaned'), type: "success" })
-}
-
 // ------------------------------------
 const repoPath = ref<DatType.Repo>(new DatType.Repo())
 watch(() => appStore.prj.repo, () => {
@@ -201,32 +140,22 @@ watch(() => appStore.prj.repo, () => {
 })
 
 // ------------------------------------
-// 缩略图选项：'none' - 不生成, 'full' - 全量, 'incremental' - 增量
-const selectedThumbOption = ref('incremental')
-// 元信息选项：'none' - 不提取, 'full' - 全量, 'incremental' - 增量
-const selectedExifOption = ref('incremental')
-// 指纹选项：'none' - 不生成, 'full' - 全量, 'incremental' - 增量
-const selectedHashOption = ref('incremental')
-const bPrjSetSave = ref(true)
-const bPrjSetSync = ref(false)
+// Build mode: 'full' - full, 'incremental' - incremental
+const selectedBuildMode = ref('incremental')
 
-// 进度状态
-const thumbProgress = computed(() => appStore.progressThumbnail)
-const exifProgress = computed(() => appStore.progressExif)
-const hashProgress = computed(() => appStore.progressHash)
-
-// 是否显示进度（只有选择了对应选项且正在运行或刚完成时显示）
-const showThumbProgress = computed(() => {
-    return selectedThumbOption.value !== 'none' && thumbProgress.value.isRunning
-})
-const showExifProgress = computed(() => {
-    return selectedExifOption.value !== 'none' && exifProgress.value.isRunning
-})
-const showHashProgress = computed(() => {
-    return selectedHashOption.value !== 'none' && hashProgress.value.isRunning
+// Progress - show the running step's progress
+const buildProgress = computed(() => {
+    if (appStore.progressThumbnail.isRunning) return appStore.progressThumbnail
+    if (appStore.progressExif.isRunning) return appStore.progressExif
+    if (appStore.progressHash.isRunning) return appStore.progressHash
+    return appStore.progressThumbnail
 })
 
-// 重置进度
+const showBuildProgress = computed(() => {
+    return appStore.progressThumbnail.isRunning || appStore.progressExif.isRunning || appStore.progressHash.isRunning
+})
+
+// Reset progress
 function resetProgress() {
     appStore.progressThumbnail = { step: DatType.ProgressStep.Thumbnail, current: 0, total: 0, percent: 0, status: '', isRunning: false }
     appStore.progressExif = { step: DatType.ProgressStep.Exif, current: 0, total: 0, percent: 0, status: '', isRunning: false }
@@ -335,24 +264,16 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
         }
     }
     else {
-        if (bPrjSetSave.value) { req.type.push(DatType.PrjSetType.Save) }
-        if (bPrjSetSync.value) { req.type.push(DatType.PrjSetType.Sync) }
-        if (selectedThumbOption.value == 'full') {
+        req.type.push(DatType.PrjSetType.Save)
+        req.type.push(DatType.PrjSetType.Sync)
+        if (selectedBuildMode.value == 'full') {
             req.type.push(DatType.PrjSetType.GenThumbFull)
-        }
-        else if (selectedThumbOption.value == 'incremental') {
-            req.type.push(DatType.PrjSetType.GenThumbIncre)
-        }
-        if (selectedExifOption.value == 'full') {
             req.type.push(DatType.PrjSetType.ScanExifFull)
-        }
-        else if (selectedExifOption.value == 'incremental') {
-            req.type.push(DatType.PrjSetType.ScanExifIncre)
-        }
-        if (selectedHashOption.value == 'full') {
             req.type.push(DatType.PrjSetType.GenHashFull)
         }
-        else if (selectedHashOption.value == 'incremental') {
+        else if (selectedBuildMode.value == 'incremental') {
+            req.type.push(DatType.PrjSetType.GenThumbIncre)
+            req.type.push(DatType.PrjSetType.ScanExifIncre)
             req.type.push(DatType.PrjSetType.GenHashIncre)
         }
         req.prj.path = Utils.convertToLinuxPath(prjPath.value)
@@ -486,24 +407,10 @@ const startAIIndexInit = async () => {
 }
 
 .set-options {
-    width: 60%;
+    width: 100%;
     height: 100%;
     margin: 0;
     background-color: var(--xc-background-color);
-}
-
-.set-log {
-    width: 40%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.log-actions {
-    padding: 10px;
-    text-align: right;
 }
 
 .settings-group {

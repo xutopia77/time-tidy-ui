@@ -19,6 +19,7 @@ app.use(Viewer, {
         zIndex: 9999,
         title: false,
         transition: true,
+        navbar: false,
         toolbar: {
             zoomIn: true,
             zoomOut: true,
