@@ -2,6 +2,7 @@
     <div class="set-entry">
         <div class="set-options xc-scrollbar">
             <div class="settings-group">
+                <h3 class="group-title">{{ t('setEntry.projectSettings') }}</h3>
                 <div class="form-item">
                     <label class="xc-label">{{ t('setEntry.projectPath') }}</label>
                     <input type="text" v-model="prjPath" :placeholder="t('setEntry.projectPathPlaceholder')" class="xc-input-text text-base-path" />
@@ -13,27 +14,38 @@
                 </div>
                 <div class="button-group">
                     <button :title="t('setEntry.createProject')" @click="btnclk_set([DatType.PrjSetType.Create])"
-                        class="xc-button">{{ t('setEntry.createProject') }}</button>
-                    <button :title="t('setEntry.openProject')" @click="btnclk_set([DatType.PrjSetType.Open])" class="xc-button">{{ t('setEntry.openProject') }}</button>
+                        class="xc-button primary action-btn">{{ t('setEntry.createProject') }}</button>
+                    <button :title="t('setEntry.openProject')" @click="btnclk_set([DatType.PrjSetType.Open])" 
+                        class="xc-button primary action-btn">{{ t('setEntry.openProject') }}</button>
                 </div>
                 <div class="button-group">
-                    <button :title="t('setEntry.buildDatabase')" @click="btnclk_set()" class="xc-button">{{ t('setEntry.buildDatabase') }}</button>
-                    <div class="form-item select-item" style="margin-bottom: 0;">
-                        <label class="xc-label">{{ t('setEntry.buildMode') }}</label>
-                        <select v-model="selectedBuildMode" class="xc-select">
-                            <option value="incremental">{{ t('setEntry.buildIncremental') }}</option>
-                            <option value="full">{{ t('setEntry.buildFull') }}</option>
-                        </select>
-                        <span v-if="showBuildProgress" class="progress-text"
-                            :class="{ 'progress-complete': buildProgress.percent === 100 }">
-                            {{ buildProgress.percent }}%
-                        </span>
-                    </div>
+                    <button :title="t('setEntry.buildDatabase')" @click="btnclk_set()" class="xc-button primary action-btn">{{ t('setEntry.buildDatabase') }}</button>
+                    <select v-model="selectedBuildMode" class="xc-select action-btn">
+                        <option value="incremental">{{ t('setEntry.buildIncremental') }}</option>
+                        <option value="full">{{ t('setEntry.buildFull') }}</option>
+                    </select>
+                    <span v-if="showBuildProgress" class="progress-text"
+                        :class="{ 'progress-complete': buildProgress.percent === 100 }">
+                        {{ buildProgress.percent }}%
+                    </span>
                 </div>
             </div>
 
             <div class="settings-group">
                 <h3 class="group-title">{{ t('setEntry.aiSettings') }}</h3>
+
+                <!-- AI Status -->
+                <div class="ai-status-bar">
+                    <span class="status-badge" :class="{ 'available': aiAvailable, 'unavailable': !aiAvailable }">
+                        {{ aiAvailable ? t('setEntry.aiAvailable') : t('setEntry.aiUnavailable') }}
+                    </span>
+                    <template v-if="!aiAvailable">
+                        <span class="status-hint">{{ t('setEntry.aiDownloadHint') }}</span>
+                        <button @click="downloadAIComponent" class="xc-button primary action-btn">
+                            {{ t('setEntry.downloadAI') }}
+                        </button>
+                    </template>
+                </div>
 
                 <h4 class="sub-group-title">{{ t('setEntry.aiBackgroundAnalyze') }}</h4>
                 <div class="form-item select-item">
@@ -62,10 +74,10 @@
                 <div class="button-group">
                     <button v-if="!aiAnalyzeStatus.isRunning"
                         :title="t('setEntry.startAnalyze')" @click="startAIBackgroundAnalyze"
-                        class="xc-button">{{ t('setEntry.startAnalyze') }}</button>
+                        class="xc-button primary action-btn">{{ t('setEntry.startAnalyze') }}</button>
                     <button v-else
                         :title="t('setEntry.stopAnalyze')" @click="stopAIBackgroundAnalyze"
-                        class="xc-button" style="background-color: #ff4d4f;">{{ t('setEntry.stopAnalyze') }}</button>
+                        class="xc-button action-btn danger">{{ t('setEntry.stopAnalyze') }}</button>
                 </div>
 
                 <h4 class="sub-group-title">{{ t('setEntry.aiVectorIndex') }}</h4>
@@ -103,7 +115,7 @@
                     </div>
                     <button v-if="!aiIndexInitStatus.isRunning"
                         :title="t('setEntry.createIndex')" @click="startAIIndexInit"
-                        class="xc-button">{{ t('setEntry.createIndex') }}</button>
+                        class="xc-button primary action-btn">{{ t('setEntry.createIndex') }}</button>
                 </div>
             </div>
         </div>
@@ -120,6 +132,26 @@ const { t } = useI18n();
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import { ApiService } from '@/utils/apiService';
+
+// AI status
+const aiAvailable = ref(false)
+
+const checkAIStatus = async () => {
+    try {
+        const resp = await ApiService.aiStatus()
+        if (resp.code === 0 && resp.data) {
+            aiAvailable.value = (resp.data as DatType.AIStatus).available
+        }
+    } catch (error) {
+        console.error('Failed to check AI status:', error)
+    }
+}
+
+const downloadAIComponent = () => {
+    // Placeholder URL - will be replaced with actual download link
+    const downloadUrl = 'https://github.com/xutopia77/timetidy-prj/releases/download/latest/ai-component.zip'
+    window.open(downloadUrl, '_blank')
+}
 
 // 使用 ref 创建响应式变量来存储输入框的值
 const prjPath = ref('');
@@ -293,6 +325,7 @@ onMounted(() => {
         prjPath.value = ""
     }
     repoPath.value = appStore.prj.repo
+    checkAIStatus()
 })
 
 const aiAnalyzeMode = ref('incremental')
@@ -582,5 +615,53 @@ const startAIIndexInit = async () => {
     gap: 20px;
     font-size: 12px;
     color: var(--xc-text-color-secondary);
+}
+
+.ai-status-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 8px 0;
+}
+
+.ai-status-bar .status-badge {
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.ai-status-bar .status-badge.available {
+    background-color: var(--xc-success-color, #52c41a);
+    color: white;
+}
+
+.ai-status-bar .status-badge.unavailable {
+    background-color: var(--xc-border-color);
+    color: var(--xc-text-color-secondary);
+}
+
+.ai-status-bar .status-hint {
+    font-size: 13px;
+    color: var(--xc-text-color-secondary);
+}
+
+.action-btn {
+    padding: var(--xc-spacing-xs) var(--xc-spacing-md);
+    font-size: var(--xc-font-size-sm);
+    border-width: 1px;
+    border-style: solid;
+}
+
+.action-btn.danger {
+    background-color: var(--xc-error-color);
+    color: white;
+    border-color: var(--xc-error-color);
+}
+
+.action-btn.danger:hover {
+    background-color: #d41920;
+    border-color: #d41920;
 }
 </style>
