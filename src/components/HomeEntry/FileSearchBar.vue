@@ -18,7 +18,7 @@
 		<div v-if="showSearchPanel"
 			class="fixed inset-0 bg-black/50 flex items-start justify-center pt-[100px] z-[1000]"
 			@click="closeSearchPanel">
-			<div class="bg-bg-secondary rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto"
+			<div class="bg-bg-secondary rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto xc-scrollbar"
 				@click.stop>
 				<div class="flex gap-2 p-3 border-b border-border sticky top-0 bg-bg-secondary z-[1]">
 					<div class="flex-1 relative flex items-center">
@@ -178,7 +178,7 @@
 								</select>
 							</label>
 						</div>
-						<div class="flex flex-wrap gap-1 max-h-[200px] overflow-y-auto">
+						<div class="flex flex-wrap gap-1">
 							<button v-for="tag in fileTags" :key="tag.name"
 								@click="toggleTag(tag.name)"
 								class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"

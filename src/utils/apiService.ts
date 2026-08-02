@@ -43,8 +43,8 @@ export class ApiService {
     return getApiClient().post('/api/v1/files_tag_delete', req);
   }
 
-  static async tagsGet(): Promise<ApiResponse<DatTypes.TagItem[]>> {
-    return getApiClient().post('/api/v1/tags_get');
+  static async tagsGet(req?: DatTypes.TagsGetReq): Promise<ApiResponse<DatTypes.TagItem[]>> {
+    return getApiClient().post('/api/v1/tags_get', req || {});
   }
 
   static async tagsSet(req: DatTypes.TagsSetReq): Promise<ApiResponse<void>> {

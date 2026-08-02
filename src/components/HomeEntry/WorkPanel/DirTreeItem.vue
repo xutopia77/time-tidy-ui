@@ -8,7 +8,7 @@
                 <div v-if="!bShowDirIcon(item, 1) && !bShowDirIcon(item, 2)" class="w-[18px] align-middle"></div>
                 <Right size="18" v-if="bShowDirIcon(item, 1)" @click="btn_toggleExpand(item)" />
                 <Down size="18" v-if="bShowDirIcon(item, 2)" @click="btn_toggleExpand(item)" />
-                <div @click="btn_sltTreeItem(item)" class="whitespace-nowrap text-xs">
+                <div @click="btn_sltTreeItem(item)" class="whitespace-nowrap text-xs flex items-center gap-1">
                     <FolderClose :size="16" />
                     {{ item.name }}
                 </div>

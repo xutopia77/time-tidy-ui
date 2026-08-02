@@ -4,7 +4,6 @@
         <button @click="btnclk_file_transfer" class="py-1.5 px-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm cursor-pointer transition-all duration-200 hover:bg-bg-tertiary hover:border-border-dark">{{ t('operation.copy') }}</button>
         <button @click="btnclk_delete_file" class="py-1.5 px-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm cursor-pointer transition-all duration-200 hover:bg-bg-tertiary hover:border-border-dark">{{ t('operation.delete') }}</button>
         <button @click="btnclk_similarity_file" class="py-1.5 px-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm cursor-pointer transition-all duration-200 hover:bg-bg-tertiary hover:border-border-dark">{{ fileSimilarityBtnName }}</button>
-        <button @click="btnclk_search_setting" class="py-1.5 px-3 bg-bg-elevated border border-border rounded-sm text-text-primary text-sm cursor-pointer transition-all duration-200 hover:bg-bg-tertiary hover:border-border-dark">{{ t('operation.searchFilter') }}</button>
     </div>
 </template>
 
@@ -51,10 +50,6 @@ function btnclk_similarity_file() {
     else {
         Utils.file_similarity_get()
     }
-}
-
-function btnclk_search_setting() {
-    appStore.bPageSearchSetting = true
 }
 
 function btnclk_file_transfer() {

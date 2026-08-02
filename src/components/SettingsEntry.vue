@@ -26,7 +26,6 @@
         <div class="flex-1 xc-scrollbar bg-bg-secondary">
             <div class="p-5 max-w-[800px]">
                 <GeneralSettings v-if="activeSection === 'general'" />
-                <AISettings v-if="activeSection === 'ai'" />
                 <AboutSettings v-if="activeSection === 'about'" />
             </div>
         </div>
@@ -36,10 +35,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { User, Info, Brain } from '@icon-park/vue-next';
+import { User, Info } from '@icon-park/vue-next';
 import GeneralSettings from './SettingsEntry/GeneralSettings.vue';
 import AboutSettings from './SettingsEntry/AboutSettings.vue';
-import AISettings from './SettingsEntry/AISettings.vue';
 
 const { t } = useI18n();
 
@@ -47,7 +45,6 @@ const activeSection = ref('general');
 
 const menuItems = computed(() => [
     { id: 'general', label: t('settings.general'), icon: User },
-    { id: 'ai', label: t('settings.ai'), icon: Brain },
     { id: 'about', label: t('settings.about'), icon: Info },
 ]);
 </script>

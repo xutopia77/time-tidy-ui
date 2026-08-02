@@ -238,6 +238,10 @@ export class TagItem {
     fileCount: number = 0;
 }
 
+export class TagsGetReq {
+    withFileCount: boolean = false;
+}
+
 export class FileItemTag {
     id: number = 0;
     name: string = "";

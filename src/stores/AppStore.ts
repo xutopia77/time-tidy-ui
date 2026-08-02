@@ -33,7 +33,6 @@ export type AppStore = {
     // 
     pageCtrl: DataTypes.AppPageCtrl,
     pageCtrlInit: DataTypes.AppPageCtrl,
-    bPageSearchSetting: boolean,                // 打开界面 搜索设置
     bPageFileTransfer: boolean,                 // 打开界面 文件传输
     bPageSet: boolean,                          // 打开界面 设置
     bPageResentMsg: boolean,                    // 打开界面 最近消息
@@ -80,7 +79,6 @@ export const useAppStore = defineStore('app', {
         // 
         pageCtrl: pageCtrlInit,
         pageCtrlInit: pageCtrlInit,
-        bPageSearchSetting: false,
         bPageFileTransfer: false,
         bPageSet: false,
         bPageResentMsg: false,

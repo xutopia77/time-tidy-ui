@@ -317,17 +317,18 @@ function convert_to_file_item(_srcStr: string, convType: string = ""): DatTypes.
 
 
 
-async function tags_get() {
+async function tags_get(withFileCount: boolean = false) {
     if (isLoadingTags) {
         return;
     }
     isLoadingTags = true;
-    
+
     appStore.allTags = [];
     try {
-        const resp = await ApiService.tagsGet();
-        console.log('tag info:', resp);
-        
+        const req = new DatTypes.TagsGetReq();
+        req.withFileCount = withFileCount;
+        const resp = await ApiService.tagsGet(req);
+
         for (const item of resp.data) {
             if (!item.name || item.name == "") {
                 continue;
@@ -336,6 +337,8 @@ async function tags_get() {
             tagItem.name = item.name;
             tagItem.color = item.color == '' ? tagItem.color : item.color;
             tagItem.id = item.id;
+            tagItem.description = item.description || '';
+            tagItem.fileCount = item.fileCount || 0;
             appStore.allTags.push(tagItem);
         }
     } catch (error) {

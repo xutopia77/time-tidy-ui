@@ -8,10 +8,6 @@
             <FileViewer />
         </div>
 
-        <div v-if="bPageSearchSetting" class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex justify-center items-center p-5 box-border [&>div]:w-[90%] [&>div]:max-w-[800px] [&>div]:max-h-[90%] [&>div]:overflow-hidden">
-            <SearchSet>
-            </SearchSet>
-        </div>
         <div v-if="bPageFileTransfer" class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex justify-center items-center p-5 box-border [&>div]:w-[90%] [&>div]:max-w-[800px] [&>div]:max-h-[90%] [&>div]:overflow-hidden">
             <FileTransfer>
             </FileTransfer>
@@ -30,7 +26,6 @@ import HeaderPanel from '@/components/AppNav.vue';
 import MessageToast from '@/components/MessageNotify/MessageToast.vue'
 import RecentMessagesPanel from '@/components/MessageNotify/RecentMessagesPanel.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
-// import SearchSet from '@/components/HomeEntry/WorkPanel/SearchSet.vue'
 import FileTransfer from '@/components/HomeEntry/WorkPanel/FileTransfer.vue'
 import PageSet from '@/components/HomeEntry/WorkPanel/PageSet.vue'
 import Utils from '@/utils/utils'
@@ -39,7 +34,6 @@ import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore()
 
 
-const bPageSearchSetting = computed(() => { return appStore.bPageSearchSetting })
 const bPageFileTransfer = computed(() => { return appStore.bPageFileTransfer })
 const bPageSet = computed(() => { return appStore.bPageSet })
 

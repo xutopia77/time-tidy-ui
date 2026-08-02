@@ -14,7 +14,7 @@
 
         <div class="flex-1 flex flex-wrap gap-3 p-4 content-start overflow-y-auto">
             <div v-for="(item, index) in allTags" :key="index"
-                class="flex w-[calc(33.333%-12px)] min-w-[280px] bg-bg-secondary border border-border rounded-xl cursor-pointer transition-all duration-200 overflow-hidden relative hover:-translate-y-0.5 hover:shadow-lg hover:border-border-dark"
+                class="group flex w-[calc(33.333%-12px)] min-w-[280px] bg-bg-secondary border border-border rounded-xl cursor-pointer transition-all duration-200 overflow-hidden relative hover:-translate-y-0.5 hover:shadow-lg hover:border-border-dark"
                 :class="{ 'border-primary shadow-[0_0_0_2px_rgba(99,102,241,0.2)]': selectedTagItem?.name === item.name }"
                 @click="selectTag(item)">
                 <div class="w-1 flex-shrink-0" :style="{ backgroundColor: item.color }"></div>
@@ -158,7 +158,7 @@ function selectTag(item: DatType.TagItem) {
 }
 
 onBeforeMount(() => {
-    Utils.tags_get();
+    Utils.tags_get(true);
 });
 
 const isEditDialogVisible = ref(false);
