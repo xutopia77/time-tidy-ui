@@ -47,75 +47,42 @@
                     </template>
                 </div>
 
-                <h4 class="sub-group-title">{{ t('setEntry.aiBackgroundAnalyze') }}</h4>
-                <div class="form-item select-item">
-                    <label class="xc-label">{{ t('setEntry.analyzeMode') }}</label>
-                    <select v-model="aiAnalyzeMode" class="xc-select">
-                        <option value="incremental">{{ t('setEntry.analyzeIncremental') }}</option>
-                        <option value="full">{{ t('setEntry.analyzeFull') }}</option>
-                    </select>
-                </div>
-                <div v-if="aiAnalyzeStatus.isRunning" class="ai-status">
-                    <div class="status-info">
-                        <span class="status-badge running">{{ t('setEntry.running') }}</span>
-                        <span class="status-text">{{ aiAnalyzeStatus.status }}</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill"
-                            :style="{ width: (aiAnalyzeStatus.processedFiles / aiAnalyzeStatus.totalFiles * 100) + '%' }">
-                        </div>
-                    </div>
-                    <div class="progress-info">
-                        <span>{{ t('setEntry.progress') }} {{ aiAnalyzeStatus.processedFiles }} / {{ aiAnalyzeStatus.totalFiles }}</span>
-                        <span>{{ t('setEntry.success') }} {{ aiAnalyzeStatus.successCount }}</span>
-                        <span>{{ t('setEntry.fail') }} {{ aiAnalyzeStatus.failCount }}</span>
-                    </div>
-                </div>
-                <div class="button-group">
-                    <button v-if="!aiAnalyzeStatus.isRunning"
-                        :title="t('setEntry.startAnalyze')" @click="startAIBackgroundAnalyze"
-                        class="xc-button primary action-btn">{{ t('setEntry.startAnalyze') }}</button>
-                    <button v-else
-                        :title="t('setEntry.stopAnalyze')" @click="stopAIBackgroundAnalyze"
-                        class="xc-button action-btn danger">{{ t('setEntry.stopAnalyze') }}</button>
+                <!-- Mode selector -->
+                <div class="ai-index-options">
+                    <label class="option-label">
+                        <input type="radio" v-model="aiMode" value="incre" />
+                        {{ t('setEntry.incrementalUpdate') }}
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" v-model="aiMode" value="full" />
+                        {{ t('setEntry.fullRebuild') }}
+                    </label>
                 </div>
 
-                <h4 class="sub-group-title">{{ t('setEntry.aiVectorIndex') }}</h4>
-                <p class="setting-hint">{{ t('setEntry.aiVectorIndexDesc') }}</p>
-                <div v-if="aiIndexInitStatus.isRunning" class="ai-status">
+                <!-- Unified progress display -->
+                <div v-if="aiProcessing" class="ai-status">
                     <div class="status-info">
                         <span class="status-badge running">{{ t('setEntry.running') }}</span>
-                        <span class="status-text">{{ aiIndexInitStatus.status }}</span>
+                        <span class="status-text">{{ aiStepLabel }}</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill"
-                            :style="{ width: aiIndexInitStatus.percent + '%' }">
-                        </div>
+                        <div class="progress-fill" :style="{ width: aiProgressPercent + '%' }"></div>
                     </div>
                     <div class="progress-info">
-                        <span>{{ t('setEntry.progress') }} {{ aiIndexInitStatus.current }} / {{ aiIndexInitStatus.total }}</span>
-                        <span v-if="aiIndexInitStatus.processedFiles > 0">
-                            {{ t('setEntry.processed') }} {{ aiIndexInitStatus.processedFiles }}
-                        </span>
-                        <span v-if="aiIndexInitStatus.skippedFiles > 0">
-                            {{ t('setEntry.skipped') }} {{ aiIndexInitStatus.skippedFiles }}
-                        </span>
+                        <span>{{ t('setEntry.progress') }} {{ aiProgressCurrent }} / {{ aiProgressTotal }}</span>
+                        <span v-if="aiSuccessCount > 0">{{ t('setEntry.success') }} {{ aiSuccessCount }}</span>
+                        <span v-if="aiFailCount > 0">{{ t('setEntry.fail') }} {{ aiFailCount }}</span>
                     </div>
                 </div>
+
+                <!-- Start/Stop button -->
                 <div class="button-group">
-                    <div v-if="!aiIndexInitStatus.isRunning" class="ai-index-options">
-                        <label class="option-label">
-                            <input type="radio" v-model="aiIndexMode" value="incre" />
-                            {{ t('setEntry.incrementalUpdate') }}
-                        </label>
-                        <label class="option-label">
-                            <input type="radio" v-model="aiIndexMode" value="full" />
-                            {{ t('setEntry.fullRebuild') }}
-                        </label>
-                    </div>
-                    <button v-if="!aiIndexInitStatus.isRunning"
-                        :title="t('setEntry.createIndex')" @click="startAIIndexInit"
-                        class="xc-button primary action-btn">{{ t('setEntry.createIndex') }}</button>
+                    <button v-if="!aiProcessing"
+                        :title="t('setEntry.startAIProcess')" @click="startAIProcess"
+                        class="xc-button primary action-btn">{{ t('setEntry.startAIProcess') }}</button>
+                    <button v-else
+                        :title="t('setEntry.stopAIProcess')" @click="stopAIProcess"
+                        class="xc-button action-btn danger">{{ t('setEntry.stopAIProcess') }}</button>
                 </div>
             </div>
         </div>
@@ -328,104 +295,125 @@ onMounted(() => {
     checkAIStatus()
 })
 
-const aiAnalyzeMode = ref('incremental')
-const aiAnalyzeStatus = ref(new DatType.AIBackgroundAnalyzeStatus())
+// Unified AI processing state
+const aiMode = ref<'incre' | 'full'>('incre')
+const aiProcessing = ref(false)
+const aiCurrentStep = ref<'analyze' | 'index' | ''>('')
+const aiProgressPercent = ref(0)
+const aiProgressCurrent = ref(0)
+const aiProgressTotal = ref(0)
+const aiSuccessCount = ref(0)
+const aiFailCount = ref(0)
+const aiAnalyzeDone = ref(false) // Track if analyze step completed
+
+const aiStepLabel = computed(() => {
+    if (aiCurrentStep.value === 'analyze') return t('setEntry.aiStepAnalyze')
+    if (aiCurrentStep.value === 'index') return t('setEntry.aiStepIndex')
+    return ''
+})
+
+const startAIProcess = async () => {
+    aiProcessing.value = true
+    aiAnalyzeDone.value = false
+    aiCurrentStep.value = 'analyze'
+    aiSuccessCount.value = 0
+    aiFailCount.value = 0
+    await startAIBackgroundAnalyze()
+}
+
+const stopAIProcess = async () => {
+    if (aiCurrentStep.value === 'analyze') {
+        await stopAIBackgroundAnalyze()
+    }
+    aiProcessing.value = false
+    aiCurrentStep.value = ''
+}
 
 const startAIBackgroundAnalyze = async () => {
     try {
         const req = new DatType.AIBackgroundAnalyzeReq()
-        req.mode = aiAnalyzeMode.value
-        
+        req.mode = aiMode.value === 'full' ? 'full' : 'incremental'
+
         const resp = await ApiService.aiBackgroundAnalyze(req)
         if (resp.code === 0) {
             Utils.message_notify({ content: t('setEntry.aiAnalyzeStarted'), type: 'success' })
         } else {
             Utils.message_notify({ content: t('setEntry.aiAnalyzeStartFailed') + ': ' + (resp.status || ''), type: 'error' })
+            aiProcessing.value = false
+            aiCurrentStep.value = ''
         }
     } catch (error) {
-        console.error('启动后台AI分析失败:', error)
+        console.error('Failed to start AI analyze:', error)
         Utils.message_notify({ content: t('setEntry.aiAnalyzeStartError'), type: 'error' })
+        aiProcessing.value = false
+        aiCurrentStep.value = ''
     }
 }
 
 const stopAIBackgroundAnalyze = async () => {
     try {
         const resp = await ApiService.aiBackgroundAnalyzeStop()
-        if (resp.code === 0) {
-            Utils.message_notify({ content: t('setEntry.aiAnalyzeStopped'), type: 'info' })
-        } else {
+        if (resp.code !== 0) {
             Utils.message_notify({ content: t('setEntry.aiAnalyzeStopFailed') + ': ' + (resp.status || ''), type: 'error' })
         }
     } catch (error) {
-        console.error('停止后台AI分析失败:', error)
-        Utils.message_notify({ content: t('setEntry.aiAnalyzeStopError'), type: 'error' })
+        console.error('Failed to stop AI analyze:', error)
     }
 }
 
+const startAIIndexInit = async () => {
+    aiCurrentStep.value = 'index'
+    aiProgressPercent.value = 0
+    aiProgressCurrent.value = 0
+    aiProgressTotal.value = 0
+    try {
+        const req = new DatType.PrjSetReq()
+        req.type = [aiMode.value === 'full' ? DatType.PrjSetType.AiIndexInitFull : DatType.PrjSetType.AiIndexInitIncre]
+        req.prj.path = Utils.convertToLinuxPath(prjPath.value)
+        await Utils.project_set(req)
+    } catch (error) {
+        console.error('Failed to start AI index init:', error)
+        Utils.message_notify({ content: t('setEntry.aiIndexStartFailed'), type: 'error' })
+        aiProcessing.value = false
+        aiCurrentStep.value = ''
+    }
+}
+
+// Unified progress watcher
 watch(() => appStore.progressData, () => {
-    if (appStore.progressData.step === DatType.ProgressStep.AIBackgroundAnalyze) {
-        aiAnalyzeStatus.value.processedFiles = appStore.progressData.current
-        aiAnalyzeStatus.value.totalFiles = appStore.progressData.total
-        aiAnalyzeStatus.value.status = appStore.progressData.status
-        aiAnalyzeStatus.value.isRunning = appStore.progressData.isRunning
-        
-        const successMatch = appStore.progressData.status.match(/success:\s*(\d+)/)
-        const failMatch = appStore.progressData.status.match(/fail:\s*(\d+)/)
-        if (successMatch) {
-            aiAnalyzeStatus.value.successCount = parseInt(successMatch[1])
-        }
-        if (failMatch) {
-            aiAnalyzeStatus.value.failCount = parseInt(failMatch[1])
+    const step = appStore.progressData.step
+
+    if (step === DatType.ProgressStep.AIBackgroundAnalyze) {
+        if (appStore.progressData.isRunning) {
+            aiProgressCurrent.value = appStore.progressData.current
+            aiProgressTotal.value = appStore.progressData.total
+            aiProgressPercent.value = appStore.progressData.total > 0
+                ? (appStore.progressData.current / appStore.progressData.total * 100) : 0
+
+            const successMatch = appStore.progressData.status.match(/success:\s*(\d+)/)
+            const failMatch = appStore.progressData.status.match(/fail:\s*(\d+)/)
+            if (successMatch) aiSuccessCount.value = parseInt(successMatch[1])
+            if (failMatch) aiFailCount.value = parseInt(failMatch[1])
+        } else if (aiProcessing.value && !aiAnalyzeDone.value) {
+            // Analyze completed, auto-start index init
+            aiAnalyzeDone.value = true
+            startAIIndexInit()
         }
     }
-    
-    // AI index init progress
-    if (appStore.progressData.step === DatType.ProgressStep.AiIndexInit) {
-        aiIndexInitStatus.value.current = appStore.progressData.current
-        aiIndexInitStatus.value.total = appStore.progressData.total
-        aiIndexInitStatus.value.percent = appStore.progressData.percent
-        aiIndexInitStatus.value.status = appStore.progressData.status
-        aiIndexInitStatus.value.isRunning = appStore.progressData.isRunning
-        
-        // Parse processed and skipped from status
-        const processedMatch = appStore.progressData.status.match(/processed=(\d+)/)
-        const skippedMatch = appStore.progressData.status.match(/skipped=(\d+)/)
-        if (processedMatch) {
-            aiIndexInitStatus.value.processedFiles = parseInt(processedMatch[1])
-        }
-        if (skippedMatch) {
-            aiIndexInitStatus.value.skippedFiles = parseInt(skippedMatch[1])
+
+    if (step === DatType.ProgressStep.AiIndexInit) {
+        if (appStore.progressData.isRunning) {
+            aiProgressCurrent.value = appStore.progressData.current
+            aiProgressTotal.value = appStore.progressData.total
+            aiProgressPercent.value = appStore.progressData.percent
+        } else if (aiProcessing.value && aiAnalyzeDone.value) {
+            // Index init completed
+            aiProcessing.value = false
+            aiCurrentStep.value = ''
+            Utils.message_notify({ content: t('setEntry.aiProcessDone'), type: 'success' })
         }
     }
 }, { deep: true })
-
-// AI Index Init
-const aiIndexInitStatus = ref({
-    isRunning: false,
-    current: 0,
-    total: 0,
-    percent: 0,
-    status: '',
-    processedFiles: 0,
-    skippedFiles: 0
-})
-
-const aiIndexMode = ref<'incre' | 'full'>('incre') // 'incre'=incremental, 'full'=full rebuild
-
-const startAIIndexInit = async () => {
-    try {
-        const req = new DatType.PrjSetReq()
-        req.type = [aiIndexMode.value === 'full' ? DatType.PrjSetType.AiIndexInitFull : DatType.PrjSetType.AiIndexInitIncre]
-        req.prj.path = Utils.convertToLinuxPath(prjPath.value)
-
-        await Utils.project_set(req)
-        const modeText = aiIndexMode.value === 'full' ? t('setEntry.fullRebuild') : t('setEntry.incrementalUpdate')
-        Utils.message_notify({ content: t('setEntry.aiVectorIndex') + modeText, type: 'success' })
-    } catch (error) {
-        console.error('启动AI索引创建失败:', error)
-        Utils.message_notify({ content: t('setEntry.aiIndexStartFailed'), type: 'error' })
-    }
-}
 
 </script>
 
@@ -482,11 +470,6 @@ const startAIIndexInit = async () => {
     align-items: center;
 }
 
-.checkbox-item {
-    margin-left: 8px;
-    margin-bottom: 0;
-}
-
 .progress-text {
     margin-left: 10px;
     padding: 2px 8px;
@@ -508,12 +491,14 @@ const startAIIndexInit = async () => {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .ai-index-options {
     display: flex;
     gap: 15px;
     align-items: center;
+    margin-bottom: 10px;
 }
 
 .option-label {
@@ -541,13 +526,6 @@ const startAIIndexInit = async () => {
     color: var(--xc-text-color);
     border-bottom: 1px solid var(--xc-border-color);
     padding-bottom: 8px;
-}
-
-.sub-group-title {
-    margin: 20px 0 10px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--xc-text-color);
 }
 
 .hint-text {
