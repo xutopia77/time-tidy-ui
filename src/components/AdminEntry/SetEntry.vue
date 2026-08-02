@@ -47,42 +47,34 @@
                     </template>
                 </div>
 
-                <!-- Mode selector -->
-                <div class="ai-index-options">
-                    <label class="option-label">
-                        <input type="radio" v-model="aiMode" value="incre" />
-                        {{ t('setEntry.incrementalUpdate') }}
-                    </label>
-                    <label class="option-label">
-                        <input type="radio" v-model="aiMode" value="full" />
-                        {{ t('setEntry.fullRebuild') }}
-                    </label>
-                </div>
-
-                <!-- Unified progress display -->
-                <div v-if="aiProcessing" class="ai-status">
-                    <div class="status-info">
-                        <span class="status-badge running">{{ t('setEntry.running') }}</span>
-                        <span class="status-text">{{ aiStepLabel }}</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" :style="{ width: aiProgressPercent + '%' }"></div>
-                    </div>
-                    <div class="progress-info">
-                        <span>{{ t('setEntry.progress') }} {{ aiProgressCurrent }} / {{ aiProgressTotal }}</span>
-                        <span v-if="aiSuccessCount > 0">{{ t('setEntry.success') }} {{ aiSuccessCount }}</span>
-                        <span v-if="aiFailCount > 0">{{ t('setEntry.fail') }} {{ aiFailCount }}</span>
-                    </div>
-                </div>
-
-                <!-- Start/Stop button -->
+                <!-- Feature Index -->
                 <div class="button-group">
-                    <button v-if="!aiProcessing"
-                        :title="t('setEntry.startAIProcess')" @click="startAIProcess"
-                        class="xc-button primary action-btn">{{ t('setEntry.startAIProcess') }}</button>
+                    <button v-if="!indexProcessing"
+                        :title="t('setEntry.featureIndex')" @click="startIndexBuild"
+                        class="xc-button primary action-btn">{{ t('setEntry.featureIndex') }}</button>
                     <button v-else
-                        :title="t('setEntry.stopAIProcess')" @click="stopAIProcess"
-                        class="xc-button action-btn danger">{{ t('setEntry.stopAIProcess') }}</button>
+                        :title="t('setEntry.stopFeatureIndex')" @click="stopIndexBuild"
+                        class="xc-button action-btn danger">{{ t('setEntry.stopFeatureIndex') }}</button>
+                    <select v-model="indexMode" class="xc-select action-btn" :disabled="indexProcessing">
+                        <option value="incremental">{{ t('setEntry.buildIncremental') }}</option>
+                        <option value="full">{{ t('setEntry.buildFull') }}</option>
+                    </select>
+                    <span v-if="indexProcessing" class="progress-text">{{ indexProgressPercent }}%</span>
+                </div>
+
+                <!-- Image Tagging -->
+                <div class="button-group">
+                    <button v-if="!taggingProcessing"
+                        :title="t('setEntry.imageTagging')" @click="startImageTagging"
+                        class="xc-button primary action-btn">{{ t('setEntry.imageTagging') }}</button>
+                    <button v-else
+                        :title="t('setEntry.stopImageTagging')" @click="stopImageTagging"
+                        class="xc-button action-btn danger">{{ t('setEntry.stopImageTagging') }}</button>
+                    <select v-model="taggingMode" class="xc-select action-btn" :disabled="taggingProcessing">
+                        <option value="incremental">{{ t('setEntry.buildIncremental') }}</option>
+                        <option value="full">{{ t('setEntry.buildFull') }}</option>
+                    </select>
+                    <span v-if="taggingProcessing" class="progress-text">{{ taggingProgressPercent }}%</span>
                 </div>
             </div>
         </div>
@@ -295,122 +287,102 @@ onMounted(() => {
     checkAIStatus()
 })
 
-// Unified AI processing state
-const aiMode = ref<'incre' | 'full'>('incre')
-const aiProcessing = ref(false)
-const aiCurrentStep = ref<'analyze' | 'index' | ''>('')
-const aiProgressPercent = ref(0)
-const aiProgressCurrent = ref(0)
-const aiProgressTotal = ref(0)
-const aiSuccessCount = ref(0)
-const aiFailCount = ref(0)
-const aiAnalyzeDone = ref(false) // Track if analyze step completed
+// Feature index state
+const indexMode = ref<'incremental' | 'full'>('incremental')
+const indexProcessing = ref(false)
+const indexProgressPercent = ref(0)
 
-const aiStepLabel = computed(() => {
-    if (aiCurrentStep.value === 'analyze') return t('setEntry.aiStepAnalyze')
-    if (aiCurrentStep.value === 'index') return t('setEntry.aiStepIndex')
-    return ''
-})
+// Image tagging state
+const taggingMode = ref<'incremental' | 'full'>('incremental')
+const taggingProcessing = ref(false)
+const taggingProgressPercent = ref(0)
 
-const startAIProcess = async () => {
-    aiProcessing.value = true
-    aiAnalyzeDone.value = false
-    aiCurrentStep.value = 'analyze'
-    aiSuccessCount.value = 0
-    aiFailCount.value = 0
-    await startAIBackgroundAnalyze()
-}
-
-const stopAIProcess = async () => {
-    if (aiCurrentStep.value === 'analyze') {
-        await stopAIBackgroundAnalyze()
+const startIndexBuild = async () => {
+    indexProcessing.value = true
+    indexProgressPercent.value = 0
+    try {
+        const req = new DatType.PrjSetReq()
+        req.type = [indexMode.value === 'full' ? DatType.PrjSetType.AiIndexInitFull : DatType.PrjSetType.AiIndexInitIncre]
+        req.prj.path = Utils.convertToLinuxPath(prjPath.value)
+        await Utils.project_set(req)
+    } catch (error) {
+        console.error('Failed to start index build:', error)
+        Utils.message_notify({ content: t('setEntry.aiIndexStartFailed'), type: 'error' })
+        indexProcessing.value = false
     }
-    aiProcessing.value = false
-    aiCurrentStep.value = ''
 }
 
-const startAIBackgroundAnalyze = async () => {
+const stopIndexBuild = async () => {
+    try {
+        const resp = await ApiService.aiIndexInitStop()
+        if (resp.code !== 0) {
+            Utils.message_notify({ content: t('setEntry.aiIndexStopFailed') + ': ' + (resp.status || ''), type: 'error' })
+        }
+    } catch (error) {
+        console.error('Failed to stop index build:', error)
+    }
+    indexProcessing.value = false
+}
+
+const startImageTagging = async () => {
+    taggingProcessing.value = true
+    taggingProgressPercent.value = 0
     try {
         const req = new DatType.AIBackgroundAnalyzeReq()
-        req.mode = aiMode.value === 'full' ? 'full' : 'incremental'
-
+        req.mode = taggingMode.value === 'full' ? 'full' : 'incremental'
         const resp = await ApiService.aiBackgroundAnalyze(req)
         if (resp.code === 0) {
             Utils.message_notify({ content: t('setEntry.aiAnalyzeStarted'), type: 'success' })
         } else {
             Utils.message_notify({ content: t('setEntry.aiAnalyzeStartFailed') + ': ' + (resp.status || ''), type: 'error' })
-            aiProcessing.value = false
-            aiCurrentStep.value = ''
+            taggingProcessing.value = false
         }
     } catch (error) {
-        console.error('Failed to start AI analyze:', error)
+        console.error('Failed to start image tagging:', error)
         Utils.message_notify({ content: t('setEntry.aiAnalyzeStartError'), type: 'error' })
-        aiProcessing.value = false
-        aiCurrentStep.value = ''
+        taggingProcessing.value = false
     }
 }
 
-const stopAIBackgroundAnalyze = async () => {
+const stopImageTagging = async () => {
     try {
         const resp = await ApiService.aiBackgroundAnalyzeStop()
         if (resp.code !== 0) {
             Utils.message_notify({ content: t('setEntry.aiAnalyzeStopFailed') + ': ' + (resp.status || ''), type: 'error' })
         }
     } catch (error) {
-        console.error('Failed to stop AI analyze:', error)
+        console.error('Failed to stop image tagging:', error)
     }
+    taggingProcessing.value = false
 }
 
-const startAIIndexInit = async () => {
-    aiCurrentStep.value = 'index'
-    aiProgressPercent.value = 0
-    aiProgressCurrent.value = 0
-    aiProgressTotal.value = 0
-    try {
-        const req = new DatType.PrjSetReq()
-        req.type = [aiMode.value === 'full' ? DatType.PrjSetType.AiIndexInitFull : DatType.PrjSetType.AiIndexInitIncre]
-        req.prj.path = Utils.convertToLinuxPath(prjPath.value)
-        await Utils.project_set(req)
-    } catch (error) {
-        console.error('Failed to start AI index init:', error)
-        Utils.message_notify({ content: t('setEntry.aiIndexStartFailed'), type: 'error' })
-        aiProcessing.value = false
-        aiCurrentStep.value = ''
-    }
-}
-
-// Unified progress watcher
+// Progress watcher
 watch(() => appStore.progressData, () => {
     const step = appStore.progressData.step
 
-    if (step === DatType.ProgressStep.AIBackgroundAnalyze) {
+    if (step === DatType.ProgressStep.AiIndexInit) {
         if (appStore.progressData.isRunning) {
-            aiProgressCurrent.value = appStore.progressData.current
-            aiProgressTotal.value = appStore.progressData.total
-            aiProgressPercent.value = appStore.progressData.total > 0
-                ? (appStore.progressData.current / appStore.progressData.total * 100) : 0
-
-            const successMatch = appStore.progressData.status.match(/success:\s*(\d+)/)
-            const failMatch = appStore.progressData.status.match(/fail:\s*(\d+)/)
-            if (successMatch) aiSuccessCount.value = parseInt(successMatch[1])
-            if (failMatch) aiFailCount.value = parseInt(failMatch[1])
-        } else if (aiProcessing.value && !aiAnalyzeDone.value) {
-            // Analyze completed, auto-start index init
-            aiAnalyzeDone.value = true
-            startAIIndexInit()
+            indexProgressPercent.value = appStore.progressData.percent
+        } else if (indexProcessing.value) {
+            // Index init completed
+            indexProcessing.value = false
+            Utils.message_notify({ content: t('setEntry.indexDone'), type: 'success' })
         }
     }
 
-    if (step === DatType.ProgressStep.AiIndexInit) {
+    if (step === DatType.ProgressStep.AIBackgroundAnalyze) {
         if (appStore.progressData.isRunning) {
-            aiProgressCurrent.value = appStore.progressData.current
-            aiProgressTotal.value = appStore.progressData.total
-            aiProgressPercent.value = appStore.progressData.percent
-        } else if (aiProcessing.value && aiAnalyzeDone.value) {
-            // Index init completed
-            aiProcessing.value = false
-            aiCurrentStep.value = ''
-            Utils.message_notify({ content: t('setEntry.aiProcessDone'), type: 'success' })
+            taggingProgressPercent.value = appStore.progressData.total > 0
+                ? Math.round(appStore.progressData.current / appStore.progressData.total * 100) : 0
+        } else if (taggingProcessing.value) {
+            // Analyze completed
+            taggingProcessing.value = false
+            // Check if index not loaded
+            if (appStore.progressData.status === 'index_not_loaded') {
+                Utils.message_notify({ content: t('setEntry.taggingNoIndex'), type: 'warning' })
+            } else {
+                Utils.message_notify({ content: t('setEntry.taggingDone'), type: 'success' })
+            }
         }
     }
 }, { deep: true })
@@ -494,25 +466,6 @@ watch(() => appStore.progressData, () => {
     align-items: center;
 }
 
-.ai-index-options {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.option-label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.option-label input[type="radio"] {
-    cursor: pointer;
-}
-
 .select-item {
     display: flex;
     align-items: center;
@@ -539,60 +492,6 @@ watch(() => appStore.progressData, () => {
     font-size: 13px;
     color: var(--xc-text-color-secondary);
     line-height: 1.5;
-}
-
-.ai-status {
-    margin: 15px 0;
-    padding: 15px;
-    background-color: var(--xc-background-color);
-    border-radius: 6px;
-    border: 1px solid var(--xc-border-color);
-}
-
-.status-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.status-badge {
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.status-badge.running {
-    background-color: #52c41a;
-    color: white;
-}
-
-.status-text {
-    font-size: 14px;
-    color: var(--xc-text-color);
-}
-
-.progress-bar {
-    width: 100%;
-    height: 8px;
-    background-color: var(--xc-border-color);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 10px;
-}
-
-.progress-fill {
-    height: 100%;
-    background-color: var(--xc-primary-color);
-    transition: width 0.3s ease;
-}
-
-.progress-info {
-    display: flex;
-    gap: 20px;
-    font-size: 12px;
-    color: var(--xc-text-color-secondary);
 }
 
 .ai-status-bar {

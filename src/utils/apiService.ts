@@ -90,4 +90,8 @@ export class ApiService {
   static async aiBackgroundAnalyzeStop(): Promise<ApiResponse<void>> {
     return getApiClient().post('/api/v1/ai_background_analyze_stop');
   }
+
+  static async aiIndexInitStop(): Promise<ApiResponse<void>> {
+    return getApiClient().post('/api/v1/ai_index_init_stop');
+  }
 }
