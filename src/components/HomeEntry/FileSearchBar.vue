@@ -410,6 +410,11 @@ const handleSearch = async () => {
 	// Build request with new search conditions
 	const req = new DatType.FilesGetReq();
 	req.keyword = searchKeyword.value || null;
+	// Tag filters apply to both AI and traditional search
+	req.tags = [...selectedTags.value];
+	req.noTag = bNoTag.value;
+	req.bReverseTag = bReverseSltTag.value;
+	console.log('handleSearch selectedTags:', selectedTags.value, 'req.tags:', req.tags);
 
 	// AI Search
 	if (aiSearchEnabled.value && searchKeyword.value) {
@@ -420,7 +425,7 @@ const handleSearch = async () => {
 	} else {
 		// Traditional search - only apply filters when not in AI mode
 		req.keyword = searchKeyword.value || null;
-		
+
 		// Convert MB to bytes
 		if (minSizeMB.value !== null) {
 			req.minSize = minSizeMB.value * 1024 * 1024;
@@ -428,7 +433,7 @@ const handleSearch = async () => {
 		if (maxSizeMB.value !== null) {
 			req.maxSize = maxSizeMB.value * 1024 * 1024;
 		}
-		
+
 		// Convert minutes to milliseconds
 		if (minDurationMin.value !== null) {
 			req.minDuration = minDurationMin.value * 60 * 1000;
@@ -436,7 +441,7 @@ const handleSearch = async () => {
 		if (maxDurationMin.value !== null) {
 			req.maxDuration = maxDurationMin.value * 60 * 1000;
 		}
-		
+
 		// Dimensions
 		req.minWidth = minWidth.value;
 		req.maxWidth = maxWidth.value;

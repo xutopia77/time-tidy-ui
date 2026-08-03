@@ -776,8 +776,9 @@ class Utils {
 		}
 
 		try {
-			const response = await ApiService.filesGet(req);
-			console.log('file info:', response);
+		console.log('files_get request tags:', req.tags, 'noTag:', req.noTag, 'bReverseTag:', req.bReverseTag);
+		const response = await ApiService.filesGet(req);
+		console.log('file info:', response);
 			if (bUpdateStore) {
 				const result: DatTypes.Resp = convert_to_file_item(JSON.stringify(response))
 				if (result.code === 0) {

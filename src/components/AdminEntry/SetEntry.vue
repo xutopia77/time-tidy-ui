@@ -44,6 +44,11 @@
                         <button @click="downloadAIComponent" class="xc-button primary action-btn">
                             {{ t('setEntry.downloadAI') }}
                         </button>
+                        <select v-model="aiModelTier" class="xc-select action-btn">
+                            <option value="H">{{ t('setEntry.aiModelTierHigh') }}</option>
+                            <option value="M">{{ t('setEntry.aiModelTierMedium') }}</option>
+                            <option value="L">{{ t('setEntry.aiModelTierLow') }}</option>
+                        </select>
                     </template>
                 </div>
 
@@ -94,6 +99,7 @@ import { ApiService } from '@/utils/apiService';
 
 // AI status
 const aiAvailable = ref(false)
+const aiModelTier = ref('M')
 
 const checkAIStatus = async () => {
     try {
@@ -107,8 +113,7 @@ const checkAIStatus = async () => {
 }
 
 const downloadAIComponent = () => {
-    // Placeholder URL - will be replaced with actual download link
-    const downloadUrl = 'https://github.com/xutopia77/timetidy-prj/releases/download/latest/ai-component.zip'
+    const downloadUrl = `https://github.com/xutopia77/timetidy-ai-engine/releases/latest/download/timetidy-ai-extension-${aiModelTier.value}.zip`
     window.open(downloadUrl, '_blank')
 }
 
