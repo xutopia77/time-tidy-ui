@@ -24,6 +24,7 @@ const routes: RouteRecordRaw[] = [
             { path: 'SimilarityManager', component: () => import('@/components/AdminEntry/SimilarityManager.vue') },
             { path: 'TrashManager', component: () => import('@/components/AdminEntry/TrashManager.vue') },
             { path: 'PrjSet', component: () => import('@/components/AdminEntry/SetEntry.vue') },
+            { path: 'AiTagConfig', component: () => import('@/components/AdminEntry/AiTagConfig.vue') },
         ]
     }
 ]

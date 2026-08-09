@@ -652,3 +652,43 @@ export class AIBackgroundAnalyzeStatus {
     status: string = '';
 }
 
+// ==================== AI Tag Config Types ====================
+
+export interface Level1Category {
+    id: string;
+    name: string;
+    description?: string;
+    prompts: string[];
+    negative_prompts: string[];
+}
+
+export interface Level2Category {
+    id: string;
+    name: string;
+    prompts: string[];
+    negative_prompts: string[];
+}
+
+export interface AttributeTag {
+    id: string;
+    name: string;
+    prompts: string[];
+}
+
+export interface HierarchicalTagsConfig {
+    version: string;
+    description: string;
+    update_time: string;
+    level1_categories: Level1Category[];
+    level2_categories: { [key: string]: Level2Category[] };
+    attribute_categories: { [key: string]: AttributeTag[] };
+    settings: {
+        level1_threshold: number;
+        level2_threshold: number;
+        attribute_threshold: number;
+        top_k_level1: number;
+        top_k_level2: number;
+        top_k_attributes: number;
+    };
+}
+

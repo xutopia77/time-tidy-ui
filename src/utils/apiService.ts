@@ -94,4 +94,16 @@ export class ApiService {
   static async aiIndexInitStop(): Promise<ApiResponse<void>> {
     return getApiClient().post('/api/v1/ai_index_init_stop');
   }
+
+  static async aiTagConfigGet(): Promise<ApiResponse<DatTypes.HierarchicalTagsConfig>> {
+    return getApiClient().post('/api/v1/ai_tag_config_get');
+  }
+
+  static async aiTagConfigSave(config: DatTypes.HierarchicalTagsConfig): Promise<ApiResponse<void>> {
+    return getApiClient().post('/api/v1/ai_tag_config_save', config);
+  }
+
+  static async aiTagConfigReset(): Promise<ApiResponse<DatTypes.HierarchicalTagsConfig>> {
+    return getApiClient().post('/api/v1/ai_tag_config_reset');
+  }
 }
