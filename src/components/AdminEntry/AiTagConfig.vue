@@ -327,17 +327,17 @@
                 <div class="flex flex-col gap-1">
                     <label class="text-xs text-text-secondary">{{ t('aiTagConfig.level1Threshold') }}</label>
                     <input class="bg-bg-tertiary text-text-primary border border-border rounded-md px-3 h-9 text-sm outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)]"
-                        type="number" step="0.01" v-model.number="config.settings.level1_threshold" @change="onDataChange">
+                        type="number" step="0.01" min="0" max="1" v-model.number="config.settings.level1_threshold" @change="onDataChange">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs text-text-secondary">{{ t('aiTagConfig.level2Threshold') }}</label>
                     <input class="bg-bg-tertiary text-text-primary border border-border rounded-md px-3 h-9 text-sm outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)]"
-                        type="number" step="0.01" v-model.number="config.settings.level2_threshold" @change="onDataChange">
+                        type="number" step="0.01" min="0" max="1" v-model.number="config.settings.level2_threshold" @change="onDataChange">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs text-text-secondary">{{ t('aiTagConfig.attributeThreshold') }}</label>
                     <input class="bg-bg-tertiary text-text-primary border border-border rounded-md px-3 h-9 text-sm outline-none transition-all duration-150 focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.1)]"
-                        type="number" step="0.01" v-model.number="config.settings.attribute_threshold" @change="onDataChange">
+                        type="number" step="0.01" min="0" max="1" v-model.number="config.settings.attribute_threshold" @change="onDataChange">
                 </div>
                 <div class="flex flex-col gap-1">
                     <label class="text-xs text-text-secondary">{{ t('aiTagConfig.level1TopK') }}</label>
@@ -355,6 +355,7 @@
                         type="number" v-model.number="config.settings.top_k_attributes" @change="onDataChange">
                 </div>
             </div>
+            <div class="text-xs text-text-tertiary mt-2">{{ t('aiTagConfig.thresholdHint') }}</div>
         </div>
 
         <!-- Status Bar -->

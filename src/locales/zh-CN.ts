@@ -466,6 +466,7 @@ export default {
     level1Threshold: '一级分类阈值',
     level2Threshold: '二级分类阈值',
     attributeThreshold: '属性标签阈值',
+    thresholdHint: '阈值范围为 0 到 1，值越高筛选越严格',
     level1TopK: '一级分类Top-K',
     level2TopK: '二级分类Top-K',
     attributeTopK: '属性标签Top-K',

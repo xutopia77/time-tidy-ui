@@ -466,6 +466,7 @@ export default {
     level1Threshold: 'Level 1 Threshold',
     level2Threshold: 'Level 2 Threshold',
     attributeThreshold: 'Attribute Threshold',
+    thresholdHint: 'Threshold range is 0 to 1. Higher values are more restrictive',
     level1TopK: 'Level 1 Top-K',
     level2TopK: 'Level 2 Top-K',
     attributeTopK: 'Attribute Top-K',
