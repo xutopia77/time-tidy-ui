@@ -245,7 +245,6 @@ export default {
     fileTags: 'File Tags',
     reverseSelect: 'Reverse',
     noTagFilter: 'No Tag',
-    hasTagFilter: 'Has Tag',
     tagsSelected: 'tags',
     sortByLabel: 'By',
     sortLabel: 'sort',

@@ -161,32 +161,28 @@
 
 					<div class="mb-0">
 						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">
-							{{ t('search.fileTags') }} ({{ selectedTags.length }})
+							{{ t('search.fileTags') }} ({{ selectedTags.length + (bNoTag === 'true' ? 1 : 0) }})
 						</h4>
 						<div class="flex items-center gap-3 mb-2 flex-wrap">
-							<label class="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
-								<input type="checkbox" v-model="bReverseSltTag" class="cursor-pointer" />
-								{{ t('search.reverseSelect') }}
-							</label>
-							<label class="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
-								{{ t('search.noTagFilter') }}:
-								<select v-model="bNoTag"
-									class="h-6 py-0.5 px-1 bg-bg-tertiary border border-border rounded text-text-primary text-xs outline-none cursor-pointer">
-									<option value="">{{ t('common.all') }}</option>
-									<option value="false">{{ t('search.hasTagFilter') }}</option>
-									<option value="true">{{ t('search.noTagFilter') }}</option>
-								</select>
-							</label>
-						</div>
-						<div class="flex flex-wrap gap-1">
-							<button v-for="tag in fileTags" :key="tag.name"
-								@click="toggleTag(tag.name)"
-								class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
-								:class="{ 'text-white': isTagSelected(tag.name) }"
-								:style="isTagSelected(tag.name) ? { backgroundColor: tag.color, borderColor: tag.color } : {}">
-								{{ Utils.tagName2Display(tag.name) }}
-							</button>
-						</div>
+						<label class="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
+							<input type="checkbox" v-model="bReverseSltTag" class="cursor-pointer" />
+							{{ t('search.reverseSelect') }}
+						</label>
+					</div>
+					<div class="flex flex-wrap gap-1">
+						<button v-for="tag in fileTags" :key="tag.name"
+							@click="toggleTag(tag.name)"
+							class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
+							:class="{ 'text-white': isTagSelected(tag.name) }"
+							:style="isTagSelected(tag.name) ? { backgroundColor: tag.color, borderColor: tag.color } : {}">
+							{{ Utils.tagName2Display(tag.name) }}
+						</button>
+						<button @click="toggleNoTag"
+							class="py-1 px-3 bg-bg-elevated border border-border rounded-lg text-text-primary text-xs cursor-pointer transition-all duration-150 hover:bg-bg-tertiary hover:border-border-dark"
+							:class="{ 'text-white bg-accent border-accent': bNoTag === 'true' }">
+							{{ t('search.noTagFilter') }}
+						</button>
+					</div>
 					</div>
 				</div>
 			</div>
@@ -392,6 +388,10 @@ const toggleTag = (tagName: string) => {
 	} else {
 		selectedTags.value.splice(index, 1);
 	}
+};
+
+const toggleNoTag = () => {
+	bNoTag.value = bNoTag.value === 'true' ? '' : 'true';
 };
 
 const isTagSelected = (tagName: string) => {

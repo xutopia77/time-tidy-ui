@@ -245,7 +245,6 @@ export default {
     fileTags: '文件标签',
     reverseSelect: '反选',
     noTagFilter: '无标签',
-    hasTagFilter: '有标签',
     tagsSelected: '个标签',
     sortByLabel: '按',
     sortLabel: '排序',
