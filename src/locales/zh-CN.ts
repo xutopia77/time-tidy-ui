@@ -222,6 +222,7 @@ export default {
     search: '搜索',
     clearConditions: '清除条件',
     searchMode: '搜索模式',
+    title: '搜索',
     enableAI: '启用AI智能搜索',
     aiSettings: 'AI搜索设置',
     similarityThreshold: '相似度阈值',

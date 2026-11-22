@@ -19,38 +19,35 @@
 			{{ appStore.curFileTotal }} {{ t('sidebar.files') }}
 		</span>
 
-		<div v-if="showSearchPanel"
-			class="fixed inset-0 bg-black/50 flex items-start justify-center pt-[100px] z-[1000]"
-			@click="closeSearchPanel">
-			<div class="bg-bg-secondary rounded-xl shadow-lg w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto xc-scrollbar"
-				@click.stop>
-				<div class="flex gap-2 p-3 border-b border-border sticky top-0 bg-bg-secondary z-[1]">
-					<div class="flex-1 relative flex items-center">
-						<span class="absolute left-3 text-base text-text-secondary pointer-events-none">🔍</span>
-						<input v-model="searchKeyword" @keyup.enter="handleSearch"
-							:placeholder="aiSearchEnabled ? t('search.aiPlaceholder') : t('search.normalPlaceholder')"
-							class="w-full h-10 py-2 px-5 pl-10 bg-bg-tertiary border-2 border-border rounded-lg text-text-primary text-sm outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.2)] placeholder:text-text-secondary"
-							type="text" ref="searchInputRef" />
-						<button v-if="searchKeyword" @click="clearSearch"
-							class="absolute right-2 bg-none border-none text-text-secondary cursor-pointer p-1 flex items-center justify-center transition-colors duration-150 text-sm hover:text-text-primary">
-							✕
-						</button>
-					</div>
-					<button @click="handleSearch"
-						class="h-10 py-2 px-4 bg-primary text-white border-none rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 whitespace-nowrap hover:bg-primary-hover">
-						{{ t('search.search') }}
-					</button>
-					<button @click="handleCancel"
-						class="h-10 py-2 px-4 bg-transparent text-text-secondary border border-border rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 whitespace-nowrap hover:bg-bg-elevated hover:text-text-primary hover:border-border-dark">
-						{{ t('common.cancel') }}
-					</button>
-					<button v-if="hasActiveFilters" @click="clearAllFilters"
-						class="h-10 py-2 px-3 bg-transparent text-text-secondary border border-border rounded-lg cursor-pointer text-xs transition-all duration-200 whitespace-nowrap hover:bg-bg-elevated hover:text-text-primary hover:border-border-dark">
-						{{ t('search.clearConditions') }}
+		<n-modal v-model:show="showSearchPanel" preset="card" :bordered="false"
+			:style="{ width: '92%', maxWidth: '640px' }" :title="t('search.title')">
+			<div class="flex gap-2 pb-3 border-b border-border">
+				<div class="flex-1 relative flex items-center">
+					<span class="absolute left-3 text-base text-text-secondary pointer-events-none">🔍</span>
+					<input v-model="searchKeyword" @keyup.enter="handleSearch"
+						:placeholder="aiSearchEnabled ? t('search.aiPlaceholder') : t('search.normalPlaceholder')"
+						class="w-full h-10 py-2 px-5 pl-10 bg-bg-tertiary border-2 border-border rounded-lg text-text-primary text-sm outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.2)] placeholder:text-text-secondary"
+						type="text" ref="searchInputRef" />
+					<button v-if="searchKeyword" @click="clearSearch"
+						class="absolute right-2 bg-none border-none text-text-secondary cursor-pointer p-1 flex items-center justify-center transition-colors duration-150 text-sm hover:text-text-primary">
+						✕
 					</button>
 				</div>
+				<button @click="handleSearch"
+					class="h-10 py-2 px-4 bg-primary text-white border-none rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 whitespace-nowrap hover:bg-primary-hover">
+					{{ t('search.search') }}
+				</button>
+				<button @click="handleCancel"
+					class="h-10 py-2 px-4 bg-transparent text-text-secondary border border-border rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 whitespace-nowrap hover:bg-bg-elevated hover:text-text-primary hover:border-border-dark">
+					{{ t('common.cancel') }}
+				</button>
+				<button v-if="hasActiveFilters" @click="clearAllFilters"
+					class="h-10 py-2 px-3 bg-transparent text-text-secondary border border-border rounded-lg cursor-pointer text-xs transition-all duration-200 whitespace-nowrap hover:bg-bg-elevated hover:text-text-primary hover:border-border-dark">
+					{{ t('search.clearConditions') }}
+				</button>
+			</div>
 
-				<div class="p-3">
+			<div class="p-3 overflow-y-auto xc-scrollbar" style="max-height: calc(85vh - 140px)">
 					<div class="mb-4">
 						<h4 class="text-xs font-semibold text-text-primary m-0 mb-2">{{ t('search.searchMode') }}</h4>
 						<div class="flex flex-wrap gap-1">
@@ -191,16 +188,16 @@
 							{{ t('search.noTagFilter') }}
 						</button>
 					</div>
-					</div>
 				</div>
 			</div>
-		</div>
+		</n-modal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, nextTick, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { NModal } from 'naive-ui';
 import { useAppStore } from '@/stores/AppStore';
 import { logger } from '@/common/logger';
 import Utils from '@/utils/utils';

@@ -222,6 +222,7 @@ export default {
     search: 'Search',
     clearConditions: 'Clear All',
     searchMode: 'Search Mode',
+    title: 'Search',
     enableAI: 'Enable AI Smart Search',
     aiSettings: 'AI Search Settings',
     similarityThreshold: 'Similarity Threshold',
