@@ -1,5 +1,5 @@
 <template>
-    <div ref="scrollerRef" class="w-full h-full overflow-auto relative" @scroll.passive="onScroll">
+    <div ref="scrollerRef" class="xc-scrollbar w-full h-full overflow-auto relative" @scroll.passive="onScroll">
         <!-- ghost container to keep total scroll height -->
         <div :style="{ height: totalHeight + 'px', position: 'relative' }">
             <div v-for="cell in visibleCells" :key="cell.key" class="absolute" :style="{

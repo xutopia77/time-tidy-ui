@@ -166,15 +166,23 @@ const handleMouseLeave = () => {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
+/* fixed desc height must match FileExplorer's rowHeight estimate
+   (cardHeight + 74) exactly, otherwise absolute-positioned virtual
+   scroll rows overlap */
 .xc-card-desc {
-    height: auto;
+    height: 74px;
     padding: 6px;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .xc-card-filename {
     font-weight: 500;
     margin-bottom: 4px;
     color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .xc-card-meta {
@@ -182,6 +190,8 @@ const handleMouseLeave = () => {
     gap: 6px;
     margin-bottom: 4px;
     font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .xc-card-size {
@@ -207,7 +217,7 @@ const handleMouseLeave = () => {
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 4px;
-    max-height: 60px;
+    max-height: 26px;
     overflow: hidden;
 }
 
