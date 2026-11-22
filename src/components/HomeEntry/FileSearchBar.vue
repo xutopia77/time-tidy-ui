@@ -1,7 +1,7 @@
 <template>
-	<div class="w-full px-3 py-2 bg-bg-secondary border-b border-border">
+	<div class="flex items-center justify-between w-full px-3 py-2 bg-bg-secondary border-b border-border">
 		<div
-			class="flex items-center gap-2 px-1 py-1 bg-bg-tertiary border rounded-lg cursor-pointer transition-all duration-200 max-w-[300px]"
+			class="flex items-center gap-2 px-1 py-1 bg-bg-tertiary border rounded-lg cursor-pointer transition-all duration-200 max-w-[300px] flex-1"
 			:class="hasActiveFilters ? 'border-primary bg-primary/5' : 'border-border hover:bg-bg-elevated hover:border-border-dark'"
 			@click="openSearchPanel">
 			<span class="text-sm text-text-secondary">🔍</span>
@@ -14,6 +14,10 @@
 				{{ activeFiltersCount }}
 			</span>
 		</div>
+
+		<span class="ml-3 text-sm text-text-secondary whitespace-nowrap flex-shrink-0">
+			{{ appStore.curFileTotal }} {{ t('sidebar.files') }}
+		</span>
 
 		<div v-if="showSearchPanel"
 			class="fixed inset-0 bg-black/50 flex items-start justify-center pt-[100px] z-[1000]"

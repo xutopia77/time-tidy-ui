@@ -1,7 +1,5 @@
 <template>
     <div class="p-0 m-0 w-full h-full relative flex flex-col">
-        <FileNavHeader class="p-0 m-0 w-full h-[50px] flex-shrink-0 border-b border-border" />
-
         <div class="flex-1 flex min-h-0 relative">
             <div class="flex-1 min-w-0 h-full">
                 <VirtualScroll
@@ -114,7 +112,6 @@ import { useI18n } from 'vue-i18n';
 import { NDropdown, NButton, NModal, NInput, NInputNumber, NIcon } from 'naive-ui';
 import type { DropdownOption } from 'naive-ui';
 import { FileDoc, Robot, Left, Right, Folder } from '@icon-park/vue-next';
-import FileNavHeader from '@/components/HomeEntry/FileExplorer/FileNavHeader.vue';
 import ImageCard from '@/components/HomeEntry/FileExplorer/ImageCard.vue';
 import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
 import FileSidebar from '@/components/HomeEntry/FileExplorer/FileSidebar/FileSidebar.vue';
