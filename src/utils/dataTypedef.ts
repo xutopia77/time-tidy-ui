@@ -329,7 +329,6 @@ export class AppPageCtrlReq {
 export class FileSearchCondition {
     sortBy: string = "time";// name, size, time, type
     sortOrder: string = "asc";// asc, desc
-    pathType: string = "allPath";// curPath, allPath
     tags: string[] = [];// tags
     noTag: 'true' | 'false' | '' = '';
     bReverseSltTag: boolean = false; // reverse select tag

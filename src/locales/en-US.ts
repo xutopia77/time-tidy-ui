@@ -24,7 +24,6 @@ export default {
     selected: 'Selected',
     totalSize: 'Total Size',
     files: 'files',
-    allPathSearchWarning: 'Cannot navigate to folder in all-files search mode',
   },
   settings: {
     title: 'Settings',
@@ -259,9 +258,6 @@ export default {
   page: {
     settings: 'Settings',
     cardSize: 'Card Size',
-    browseMode: 'Browse Mode',
-    folder: 'Folder',
-    allFiles: 'All Files',
     groupBy: 'Group By',
     noGroup: 'None',
     groupByTime: 'Group by Time',

@@ -24,7 +24,6 @@ export default {
     selected: '已选中',
     totalSize: '总大小',
     files: '个文件',
-    allPathSearchWarning: '当前为全部文件搜索模式，无法跳转文件夹',
   },
   settings: {
     title: '设置',
@@ -259,9 +258,6 @@ export default {
   page: {
     settings: '设置界面',
     cardSize: '卡片大小',
-    browseMode: '浏览模式',
-    folder: '文件夹',
-    allFiles: '全部文件',
     groupBy: '分组依据',
     noGroup: '无',
     groupByTime: '按时间分组',

@@ -6,9 +6,10 @@
 import type { FileSearchCondition, FilesGetReq } from '@/utils/dataTypedef';
 
 // Build the request for the files list endpoint.
-// - when browsing the root ('/') the dirs filter is an empty array,
-//   otherwise it is [curPath without the leading slash]
-// - when the path type is 'allPath' the dirs filter is cleared
+// - no folder selected (curPath '' or '/') means "show all files",
+//   so the dirs filter is an empty array
+// - otherwise it is [curPath without the leading slash]; the backend
+//   matches the directory itself and any sub-directory recursively
 // - any non-null field of _req overrides the assembled value
 export function buildFilesGetReq(
     searchCon: FileSearchCondition,
@@ -23,7 +24,7 @@ export function buildFilesGetReq(
         bReverseTag: searchCon.bReverseSltTag,
         bAndTag: searchCon.bAndSltTag,
         types: searchCon.types,
-        dirs: curPath == '/' ? [] : [curPath.substring(1)],
+        dirs: (curPath === '' || curPath === '/') ? [] : [curPath.substring(1)],
         statuss: [],
         origins: [],
         startTime: '',
@@ -57,10 +58,6 @@ export function buildFilesGetReq(
         aiImageSearchMinSimilar: 0.5,
         aiImageSearchTopK: 20,
     }
-    if (searchCon.pathType == "allPath") {
-        req.dirs = [];
-    }
-
     if (_req != null) {
         if (_req.tags != null) { req.tags = _req.tags; }
         if (_req.noTag != null) { req.noTag = _req.noTag; }

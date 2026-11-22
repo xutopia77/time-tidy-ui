@@ -11,8 +11,7 @@
                     @click="navigateToPath(part.path)"
                     class="flex items-center py-1.5 px-2.5 rounded-sm transition-all duration-200 cursor-default select-none"
                     :class="{
-                        'cursor-pointer hover:bg-bg-tertiary hover:text-primary active:scale-[0.98]': index < pathParts.length - 1 && !isAllPathSearch,
-                        'opacity-60 cursor-not-allowed': isAllPathSearch,
+                        'cursor-pointer hover:bg-bg-tertiary hover:text-primary active:scale-[0.98]': index < pathParts.length - 1,
                         'font-medium text-text-primary': index === pathParts.length - 1
                     }"
                 >
@@ -49,10 +48,6 @@ const currentPath = computed(() => {
     return appStore.curPath
 });
 
-const isAllPathSearch = computed(() => {
-    return appStore.searchCon.pathType === 'allPath';
-});
-
 const pathParts: ComputedRef<PathPart[]> = computed(() => {
     const parts = currentPath.value.split('/').filter(part => part !== '');
     const re = parts.map((part, index) => {
@@ -70,15 +65,8 @@ const pathParts: ComputedRef<PathPart[]> = computed(() => {
     return re;
 });
 
+// navigate via breadcrumb; root ('/') means show all files
 const navigateToPath = (path: string) => {
-    if (isAllPathSearch.value) {
-        Utils.message_notify({
-            content: t('sidebar.allPathSearchWarning'),
-            type: 'warning'
-        });
-        return;
-    }
-    appStore.searchCon.pathType = 'curPath';
     Utils.dir_slt_update(path);
 };
 </script>

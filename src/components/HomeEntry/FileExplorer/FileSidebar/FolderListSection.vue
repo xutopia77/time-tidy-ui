@@ -31,7 +31,6 @@ const appStore = useAppStore()
 
 defineProps<{
     dirs: DatType.DirItem[];
-    isAllPathSearch: boolean;
     collapsed: boolean;
 }>()
 
@@ -46,19 +45,53 @@ const dirTrees = computed(() => {
 
 const selectedItem = ref<DatType.DirTreeItem | null>(null)
 
-watch(selectedItem, (newValue: DatType.DirTreeItem | null) => {
-    if (newValue == null) {
-        return
+const isNoFolder = (path: string) => {
+    return !path || path === '/';
+};
+
+function findNodeByPath(nodes: DatType.DirTreeItem[], path: string): DatType.DirTreeItem | undefined {
+    for (const node of nodes) {
+        if (node.dirInfo.path === path) {
+            return node;
+        }
+        if (node.children && node.children.length > 0) {
+            const found = findNodeByPath(node.children, path);
+            if (found) {
+                return found;
+            }
+        }
     }
-    logger.debug('FolderListSection selected:', newValue)
-    if (appStore.searchCon.pathType === 'allPath') {
-        Utils.message_notify({ 
-            content: t('sidebar.allPathSearchWarning'), 
-            type: 'warning' 
-        });
+    return undefined;
+}
+
+// keep the tree selection in sync with the app state: the folder may be
+// entered via folder card click or breadcrumb navigation as well
+watch(() => appStore.curPath, (path) => {
+    if (isNoFolder(path)) {
+        selectedItem.value = null;
         return;
     }
-    Utils.dir_slt_update(newValue)
+    selectedItem.value = findNodeByPath(dirTrees.value, path) ?? null;
+});
+
+// selection/deselection from the tree itself:
+// - select a folder -> browse files under it
+// - deselect (click again / null) -> show all files
+watch(selectedItem, (item) => {
+    if (item == null) {
+        if (!isNoFolder(appStore.curPath)) {
+            logger.debug('FolderListSection deselected, show all files');
+            appStore.curPath = '';
+            appStore.curSltDirTreeItem = null;
+            Utils.files_get(null);
+        }
+        return;
+    }
+    if (appStore.curPath === item.dirInfo.path) {
+        return; // already in sync (e.g. set by the curPath watcher)
+    }
+    logger.debug('FolderListSection selected:', item)
+    Utils.dir_slt_update(item)
 })
 
 function countFolders(items: DatType.DirTreeItem[]): number {

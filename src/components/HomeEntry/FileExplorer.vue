@@ -22,11 +22,10 @@
 
             <TimelineBar :items="virtualScrollItems" :scroll-ratio="scrollRatio" @scroll-to-index="onScrollToIndex" />
 
-            <FileSidebar 
+            <FileSidebar
                 :visible="sidebarOpen"
                 :selected-files="selectedFiles"
                 :dirs="dirs"
-                :is-all-path-search="isAllPathSearch"
                 @close="appStore.sidebarOpen = false"
                 @enter-folder="enterFolder"
             />
@@ -135,16 +134,15 @@ import { logger } from '@/common/logger';
 const items = computed(() => appStore.curFiles);
 const dirs = computed(() => appStore.curDirs);
 const currentPath = computed(() => appStore.curPath);
-const isAllPathSearch = computed(() => appStore.searchCon.pathType === 'allPath');
+// no folder selected: show all files (dirs filter is empty)
+const noFolderSelected = computed(() => !appStore.curPath || appStore.curPath === '/');
 const cardViewMode = computed(() => appStore.cardViewMode);
 
-// virtual scroll items: dirs first, then files
+// virtual scroll items: dirs first (navigation), then files
 const virtualScrollItems = computed(() => {
     const result: Array<DatType.DirItem | DatType.File> = [];
-    if (!isAllPathSearch.value) {
-        for (const dir of dirs.value) {
-            result.push(dir);
-        }
+    for (const dir of dirs.value) {
+        result.push(dir);
     }
     for (const file of items.value) {
         result.push(file);
@@ -164,7 +162,7 @@ const cardItemWidth = computed(() => {
 // fixed desc-area height for card mode; must match ImageCard's desc CSS
 // exactly: padding 12 + filename 24 + meta 22 + tags 48 (+ path 22 when shown)
 const cardDescHeight = computed(() => {
-    return isAllPathSearch.value ? 128 : 106;
+    return noFolderSelected.value ? 128 : 106;
 });
 
 const cardRowHeight = computed(() => {

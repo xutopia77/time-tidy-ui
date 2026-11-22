@@ -211,7 +211,6 @@ const selectedFileTypes = ref<string[]>([]);
 const selectedTags = ref<string[]>([]);
 const sortBy = ref('time');
 const sortOrder = ref('asc');
-const pathType = ref('curPath');
 const bReverseSltTag = ref(false);
 const bAndSltTag = ref(false); // multiple tags use AND logic; default OR
 const bNoTag = ref<'true' | 'false' | ''>('');
@@ -355,7 +354,6 @@ const searchSummary = computed(() => {
 watch(() => appStore.searchCon, (newVal) => {
 	sortBy.value = newVal.sortBy;
 	sortOrder.value = newVal.sortOrder;
-	pathType.value = newVal.pathType;
 	selectedFileTypes.value = newVal.types ? [...newVal.types] : [];
 	selectedTags.value = newVal.tags ? [...newVal.tags] : [];
 	bReverseSltTag.value = newVal.bReverseSltTag;
@@ -408,7 +406,6 @@ const isTagSelected = (tagName: string) => {
 const handleSearch = async () => {
 	appStore.searchCon.sortBy = sortBy.value;
 	appStore.searchCon.sortOrder = sortOrder.value;
-	appStore.searchCon.pathType = pathType.value;
 	appStore.searchCon.types = selectedFileTypes.value as DatType.FileType[];
 	appStore.searchCon.tags = [...selectedTags.value];
 	appStore.searchCon.bReverseSltTag = bReverseSltTag.value;

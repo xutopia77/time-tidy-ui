@@ -6,28 +6,24 @@ import { FileSearchCondition, FilesGetReq } from '../../src/utils/dataTypedef.ts
 
 test('根目录时 dirs 为空数组', () => {
     const sc = new FileSearchCondition();
-    sc.pathType = 'curPath';
     const req = buildFilesGetReq(sc, '/', null);
     assert.deepEqual(req.dirs, []);
 });
 
 test('非根目录时 dirs 为 [curPath.substring(1)]', () => {
     const sc = new FileSearchCondition();
-    sc.pathType = 'curPath';
     const req = buildFilesGetReq(sc, '/photos/2024', null);
     assert.deepEqual(req.dirs, ['photos/2024']);
 });
 
-test('allPath 模式强制清空 dirs', () => {
+test('未选择文件夹（空路径）时 dirs 为空数组，即显示全部文件', () => {
     const sc = new FileSearchCondition();
-    sc.pathType = 'allPath';
-    const req = buildFilesGetReq(sc, '/photos', null);
+    const req = buildFilesGetReq(sc, '', null);
     assert.deepEqual(req.dirs, []);
 });
 
 test('bAndTag 从搜索条件透传', () => {
     const sc = new FileSearchCondition();
-    sc.pathType = 'curPath';
     sc.bAndSltTag = true;
     sc.bReverseSltTag = true;
     const req = buildFilesGetReq(sc, '/x', null);

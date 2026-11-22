@@ -192,8 +192,9 @@ const cardHeight = computed(() => {
     return appStore.cardHeight;
 });
 
+// file paths matter when no folder is selected (files come from everywhere)
 const showFilePath = computed(() => {
-    return appStore.searchCon.pathType === 'allPath';
+    return !appStore.curPath || appStore.curPath === '/';
 });
 
 const showCardInfo = computed(() => {

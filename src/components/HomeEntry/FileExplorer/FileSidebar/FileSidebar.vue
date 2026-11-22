@@ -11,9 +11,8 @@
                 
                 <FileTagSection :selected-files="displayFiles" v-model:collapsed="sectionCollapsed.fileTag" />
                 
-                <FolderListSection 
+                <FolderListSection
                     :dirs="dirs"
-                    :is-all-path-search="isAllPathSearch"
                     v-model:collapsed="sectionCollapsed.folderList"
                     @enter-folder="$emit('enter-folder', $event)"
                 />
@@ -46,7 +45,6 @@ const props = defineProps<{
     visible: boolean;
     selectedFiles: DatType.File[];
     dirs: DatType.DirItem[];
-    isAllPathSearch: boolean;
 }>();
 
 defineEmits<{

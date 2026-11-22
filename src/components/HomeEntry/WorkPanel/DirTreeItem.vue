@@ -65,7 +65,16 @@ const selectedKeys = computed<Array<string | number>>(() => {
 });
 
 const onSelectKeys = (keys: Array<string | number>) => {
-    if (keys.length === 0) return;
+    // empty selection or re-click on the selected node toggles it off
+    // (deselect means "show all files")
+    if (keys.length === 0) {
+        emit('update:modelValue', null);
+        return;
+    }
+    if (props.modelValue && props.modelValue.dirInfo.id === keys[0]) {
+        emit('update:modelValue', null);
+        return;
+    }
     const node = findNodeRecursively(props.data, keys[0]);
     if (node) {
         emit('update:modelValue', node);
