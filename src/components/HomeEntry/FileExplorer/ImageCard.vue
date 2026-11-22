@@ -10,6 +10,11 @@
                 height: `${cardHeight}px`
             }" @click="btnclk_handleClickImage">
                 <img :src="item.icon" alt="icon" />
+                <n-dropdown trigger="click" placement="bottom-end" :options="menuOptions"
+                    @select="onMenuSelect" @update:show="(v: boolean) => menuOpen = v">
+                    <button class="xc-card-kebab" data-testid="file-card-menu" aria-label="file actions"
+                        :class="{ 'menu-open': menuOpen }" @click.stop>⋮</button>
+                </n-dropdown>
             </div>
             <div v-if="showCardInfo" class="xc-card-desc" @click="btnclk_handleClickItemMsg">
                 <p class="xc-card-name xc-card-filename">{{ item.name }}</p>
@@ -34,6 +39,8 @@
 <script setup lang="ts">
 import { computed, defineProps, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { NDropdown } from 'naive-ui';
+import type { DropdownOption } from 'naive-ui';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils'
 import { formatUtcToLocal, tag_text_color as tagTextColor } from '@/common/format';
@@ -43,6 +50,107 @@ const appStore = useAppStore()
 const { t } = useI18n();
 
 const props = defineProps<{ item: DatType.File; }>();
+
+const emit = defineEmits<{
+    (e: 'cardAction', action: DatType.CardMenuAction): void;
+}>();
+
+// ==================== kebab menu ====================
+const menuOpen = ref(false);
+
+const menuOptions = computed<DropdownOption[]>(() => [
+    {
+        key: 'score',
+        label: t('actionBar.score'),
+        children: [1, 2, 3, 4, 5].map(score => ({
+            key: `score-${score}`,
+            label: `${score}☆`,
+        })),
+    },
+    { key: 'tag', label: t('actionBar.tag') },
+    { key: 'move', label: t('actionBar.move') },
+    { key: 'copy', label: t('actionBar.copy') },
+    { key: 'delete', label: t('actionBar.delete') },
+    { key: 'imageSearch', label: t('actionBar.imageSearch') },
+]);
+
+const fileScore = computed(() => {
+    const scoreTag = props.item.tags.find(tag => /^\d☆$/.test(tag.name));
+    return scoreTag ? parseInt(scoreTag.name.replace('☆', '')) : 0;
+});
+
+// Make the current card's file the only checked file, so that APIs
+// operating on the checked set (files_tag_set/delete, file transfer)
+// apply to this card. files_tag_set/delete derive fileIds from the
+// checked set and ignore the ids passed in the request.
+const selectOnlyThisFile = () => {
+    appStore.curFiles.forEach((file) => {
+        file.checked = file.id === props.item.id;
+    });
+    if (appStore.curDirs) {
+        appStore.curDirs.forEach((dir) => {
+            dir.checked = false;
+        });
+    }
+};
+
+const setFileScore = (score: number) => {
+    selectOnlyThisFile();
+    const req: DatType.FilesTagSetReq = {
+        fileIds: [props.item.id],
+        tagName: `${score}☆`
+    };
+    if (fileScore.value === score) {
+        Utils.files_tag_delete(req);
+        Utils.message_notify({ content: '已删除评分', type: 'success' });
+    } else {
+        Utils.files_tag_set(req);
+        Utils.message_notify({ content: `已设置评分 ${score}☆`, type: 'success' });
+    }
+};
+
+const deleteThisFile = () => {
+    const req: DatType.FileDeleteReq = {
+        fileIds: [props.item.id],
+        dirIds: [],
+        bRemoveToDtrash: true,
+    };
+    Utils.files_delete(req);
+};
+
+const openFileTransfer = () => {
+    selectOnlyThisFile();
+    appStore.bPageFileTransfer = true;
+};
+
+const onMenuSelect = (key: string | number) => {
+    const keyStr = String(key);
+    if (keyStr.startsWith('score-')) {
+        setFileScore(parseInt(keyStr.slice('score-'.length), 10));
+        return;
+    }
+    switch (keyStr) {
+        case 'tag':
+            emit('cardAction', { type: 'tag', file: props.item });
+            break;
+        case 'move':
+        case 'copy':
+            openFileTransfer();
+            break;
+        case 'delete':
+            deleteThisFile();
+            break;
+        case 'imageSearch':
+            emit('cardAction', { type: 'imageSearch', file: props.item });
+            break;
+        default:
+            logger.warn('unknown card menu key:', keyStr);
+            break;
+    }
+};
+
+// ==================== checkbox ====================
+const isChecked = ref(false);
 
 const cardWidth = computed(() => {
     return appStore.cardWidth;
@@ -63,7 +171,6 @@ const isTileMode = computed(() => {
     return appStore.cardViewMode === 'tile' || appStore.cardViewMode === 'adaptive';
 });
 
-const isChecked = ref(false);
 const handleCheckboxChange = () => {
     appStore.curFiles.forEach((file) => {
         if (file.id == props.item.id) {
@@ -123,6 +230,36 @@ const handleMouseLeave = () => {
 
 .xc-card-icon {
     position: relative;
+}
+
+/* kebab (three-dot) menu trigger at top-right of card image */
+.xc-card-kebab {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 10;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.35);
+    color: white;
+    font-size: 16px;
+    line-height: 26px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 150ms;
+}
+
+.xc-card:hover .xc-card-kebab,
+.xc-card-kebab.menu-open {
+    opacity: 1;
+}
+
+.xc-card-kebab:hover {
+    background: rgba(0, 0, 0, 0.55);
 }
 
 .xc-card-icon.tile-mode {

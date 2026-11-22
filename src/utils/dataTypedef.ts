@@ -289,6 +289,13 @@ export class FileCatalog {
     files: File[] = [];
 }
 
+// Action emitted by the image card kebab menu that needs handling
+// in the parent (FileExplorer) which owns the shared dialogs
+export interface CardMenuAction {
+    type: 'tag' | 'imageSearch';
+    file: File;
+}
+
 export class DirItem {
     id: number = 0;
     rootPathId: number = 0;

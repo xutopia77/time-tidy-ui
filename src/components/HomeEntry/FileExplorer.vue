@@ -14,7 +14,7 @@
                     @scroll="onVirtualScroll">
                     <template #item="{ item }">
                         <FolderCard v-if="isDirItem(item)" :item="(item as DatType.DirItem)" />
-                        <ImageCard v-else :item="(item as DatType.File)" />
+                        <ImageCard v-else :item="(item as DatType.File)" @card-action="onCardAction" />
                     </template>
                 </VirtualScroll>
             </div>
@@ -56,20 +56,67 @@
             </template>
         </n-modal>
 
-        <FileOperationBar />
+        <n-modal v-model:show="showTagModal" preset="card" :title="t('actionBar.tag')"
+            class="w-[420px] max-w-[90vw]">
+            <div v-if="tagModalFile">
+                <input v-model="newTagName" class="xc-input-text card-tag-input" list="cardTagSuggestions"
+                    :placeholder="t('actionBar.addTagPlaceholder')" @keyup.enter="addTagToFile" />
+                <datalist id="cardTagSuggestions">
+                    <option v-for="tag in tagSuggestions" :key="tag" :value="tag"></option>
+                </datalist>
+
+                <div v-if="tagModalFile.tags.length > 0" class="card-tag-list-section">
+                    <div class="card-tag-list-title">{{ t('actionBar.existingTags') }}</div>
+                    <div class="card-tag-list">
+                        <span v-for="tag in tagModalFile.tags" :key="tag.name" class="card-tag-item">
+                            <span class="card-tag-color" :style="{ backgroundColor: tag.color || '#999' }"></span>
+                            <span class="card-tag-name">{{ Utils.tagName2Display(tag.name) }}</span>
+                            <button class="card-tag-delete-btn" @click="deleteTagFromFile(tag.name)">×</button>
+                        </span>
+                    </div>
+                </div>
+                <div v-else class="card-tag-no-tags">{{ t('actionBar.noTags') }}</div>
+            </div>
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <n-button @click="showTagModal = false">{{ t('common.cancel') }}</n-button>
+                    <n-button type="primary" :disabled="!newTagName.trim()" @click="addTagToFile">
+                        {{ t('common.confirm') }}</n-button>
+                </div>
+            </template>
+        </n-modal>
+
+        <n-modal v-model:show="showImageSearchModal" preset="card" :title="t('actionBar.imageSearch')"
+            class="w-[420px] max-w-[90vw]">
+            <div class="card-image-search-settings">
+                <label>
+                    {{ t('actionBar.similarityThreshold') }}:
+                    <n-input-number v-model:value="imageSearchMinSimilar" :min="0" :max="1" :step="0.1" />
+                </label>
+                <label>
+                    {{ t('actionBar.returnCount') }}:
+                    <n-input-number v-model:value="imageSearchTopK" :min="1" :max="100" :step="1" />
+                </label>
+            </div>
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <n-button @click="showImageSearchModal = false">{{ t('common.cancel') }}</n-button>
+                    <n-button type="primary" @click="startImageSearch">{{ t('actionBar.startSearch') }}</n-button>
+                </div>
+            </template>
+        </n-modal>
     </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, watch, nextTick, h } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { NDropdown, NButton, NModal, NInput, NIcon } from 'naive-ui';
+import { NDropdown, NButton, NModal, NInput, NInputNumber, NIcon } from 'naive-ui';
 import type { DropdownOption } from 'naive-ui';
 import { FileDoc, Robot, Left, Right, Folder } from '@icon-park/vue-next';
 import FileNavHeader from '@/components/HomeEntry/FileExplorer/FileNavHeader.vue';
 import ImageCard from '@/components/HomeEntry/FileExplorer/ImageCard.vue';
 import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
-import FileOperationBar from '@/components/HomeEntry/FileExplorer/FileOperationBar.vue';
 import FileSidebar from '@/components/HomeEntry/FileExplorer/FileSidebar/FileSidebar.vue';
 import VirtualScroll from '@/components/HomeEntry/FileExplorer/VirtualScroll.vue';
 import TimelineBar from '@/components/HomeEntry/FileExplorer/TimelineBar.vue';
@@ -384,4 +431,182 @@ const handleEscKey = (event: KeyboardEvent) => {
 };
 
 document.addEventListener('keydown', handleEscKey);
+
+// ==================== card menu actions ====================
+// Tag editing modal for a single file (opened from card kebab menu)
+const showTagModal = ref(false);
+const tagModalFile = ref<DatType.File | null>(null);
+const newTagName = ref('');
+
+const tagSuggestions = computed(() => {
+    return appStore.allTags.map(tag => Utils.tagName2Display(tag.name));
+});
+
+// AI image search modal for a single file (opened from card kebab menu)
+const showImageSearchModal = ref(false);
+const imageSearchFile = ref<DatType.File | null>(null);
+const imageSearchMinSimilar = ref(0.5);
+const imageSearchTopK = ref(20);
+
+const onCardAction = (action: DatType.CardMenuAction) => {
+    if (action.type === 'tag') {
+        tagModalFile.value = action.file;
+        newTagName.value = '';
+        showTagModal.value = true;
+    } else if (action.type === 'imageSearch') {
+        imageSearchFile.value = action.file;
+        showImageSearchModal.value = true;
+    }
+};
+
+const closeTagModal = () => {
+    showTagModal.value = false;
+    tagModalFile.value = null;
+    newTagName.value = '';
+};
+
+// files_tag_set/delete derive fileIds from the checked set, so the
+// card menu already made this file the only checked one. After a
+// successful call the file list is refreshed, so close the modal.
+const addTagToFile = () => {
+    if (!tagModalFile.value) {
+        return;
+    }
+    const tagName = newTagName.value.trim();
+    if (!tagName) {
+        return;
+    }
+    const req: DatType.FilesTagSetReq = {
+        fileIds: [tagModalFile.value.id],
+        tagName: tagName
+    };
+    Utils.files_tag_set(req);
+    closeTagModal();
+};
+
+const deleteTagFromFile = (tagName: string) => {
+    if (!tagModalFile.value) {
+        return;
+    }
+    const req: DatType.FilesTagSetReq = {
+        fileIds: [tagModalFile.value.id],
+        tagName: tagName
+    };
+    Utils.files_tag_delete(req);
+    Utils.message_notify({ content: `已删除标签 ${Utils.tagName2Display(tagName)}`, type: 'success' });
+    closeTagModal();
+};
+
+const startImageSearch = async () => {
+    if (!imageSearchFile.value) {
+        return;
+    }
+    const req = new DatType.FilesGetReq();
+    req.aiImageSearchEnabled = true;
+    req.aiImageSearchRecordIds = [imageSearchFile.value.id];
+    req.aiImageSearchMinSimilar = imageSearchMinSimilar.value;
+    req.aiImageSearchTopK = imageSearchTopK.value;
+    await Utils.files_get(req);
+    Utils.message_notify({
+        content: `已查找相似图片，共1张参考图片`,
+        type: 'success'
+    });
+    showImageSearchModal.value = false;
+    imageSearchFile.value = null;
+};
 </script>
+
+<style scoped>
+.card-tag-input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.card-tag-list-section {
+    margin-top: var(--xc-spacing-md);
+}
+
+.card-tag-list-title {
+    font-size: var(--xc-font-size-sm);
+    color: var(--xc-text-color-secondary);
+    margin-bottom: var(--xc-spacing-sm);
+}
+
+.card-tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--xc-spacing-xs);
+}
+
+.card-tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--xc-spacing-xs);
+    padding: var(--xc-spacing-xs) var(--xc-spacing-sm);
+    background-color: var(--xc-group-color);
+    border-radius: var(--xc-border-radius-sm);
+    transition: all var(--xc-transition-fast);
+}
+
+.card-tag-item:hover {
+    background-color: var(--xc-background-color-hover);
+}
+
+.card-tag-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.card-tag-name {
+    font-size: var(--xc-font-size-sm);
+    color: var(--xc-text-color);
+}
+
+.card-tag-delete-btn {
+    background: none;
+    border: none;
+    color: var(--xc-text-color-secondary);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all var(--xc-transition-fast);
+}
+
+.card-tag-delete-btn:hover {
+    background-color: var(--xc-error-color);
+    color: white;
+}
+
+.card-tag-no-tags {
+    padding: var(--xc-spacing-md);
+    text-align: center;
+    color: var(--xc-text-color-secondary);
+    font-size: var(--xc-font-size-sm);
+}
+
+.card-image-search-settings {
+    display: flex;
+    flex-direction: column;
+    gap: var(--xc-spacing-md);
+}
+
+.card-image-search-settings label {
+    display: flex;
+    align-items: center;
+    gap: var(--xc-spacing-sm);
+    font-size: var(--xc-font-size-sm);
+    color: var(--xc-text-color);
+}
+
+.card-image-search-settings .n-input-number {
+    flex: 1;
+}
+</style>

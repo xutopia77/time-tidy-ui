@@ -94,11 +94,11 @@ export class HomePage {
   readonly folderCards: Locator
   
   /**
-   * 操作栏
-   * 选择文件后显示的操作栏
+   * 卡片右上角三个点菜单（NDropdown 弹出层）
+   * 点击卡片菜单按钮后显示的操作选项
    */
-  readonly operationBar: Locator
-  
+  readonly cardMenu: Locator
+
   /**
    * 标签输入框
    * 用于添加标签
@@ -219,9 +219,9 @@ export class HomePage {
     // 文件夹卡片列表：所有文件夹卡片
     this.folderCards = page.locator('.xc-card').filter({ has: page.locator('.xc-card-foldername') })
     
-    // 操作栏：选择文件后显示的操作栏
-    this.operationBar = page.locator('.operation-bar')
-    
+    // 卡片三个点菜单（NDropdown 弹出层，仅可见时存在）
+    this.cardMenu = page.locator('.n-dropdown-menu:visible')
+
     // 标签输入框：添加标签的输入框
     this.tagInput = page.locator('.tag-input')
 
@@ -358,38 +358,37 @@ export class HomePage {
   
   /**
    * 选择文件
-   * 
+   *
    * 通过索引选择文件卡片，勾选复选框
-   * 
+   *
    * @param index - 文件索引，从0开始
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.selectFile(0)  // 选择第一个文件
-   * 
+   *
    * @remarks
-   * - 选择后会显示操作栏
-   * - 文件卡片会显示选中状态
+   * - 文件卡片会显示选中状态（checked 样式）
    */
   async selectFile(index: number = 0) {
     const fileCard = this.fileCards.nth(index)
-    
+
     await fileCard.scrollIntoViewIfNeeded()
-    
+
     const checkbox = fileCard.locator('.xc-checkbox')
     await checkbox.check()
-    
-    await expect(this.operationBar).toBeVisible()
+
+    await expect(fileCard).toHaveClass(/checked/)
   }
 
   /**
    * 选择多个文件
-   * 
+   *
    * 通过索引数组选择多个文件卡片
-   * 
+   *
    * @param indices - 文件索引数组
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.selectMultipleFiles([0, 1, 2])  // 选择前三个文件
    */
@@ -401,150 +400,147 @@ export class HomePage {
 
   /**
    * 取消选择文件
-   * 
+   *
    * 取消所有已选择的文件
-   * 
+   *
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.clearSelection()
    */
   async clearSelection() {
-    // Check if operation bar is visible
-    const isVisible = await this.operationBar.isVisible()
-    if (!isVisible) {
-      // Operation bar is not visible, no files are selected
-      return
+    const checkedBoxes = this.page.locator('.xc-card .xc-checkbox:checked')
+    const count = await checkedBoxes.count()
+    for (let i = 0; i < count; i++) {
+      // locator 重新求值，每次取消第一个仍处于勾选状态的复选框
+      await checkedBoxes.first().uncheck()
     }
-    
-    // Click the "取消" button in the operation bar
-    const cancelBtn = this.operationBar.locator('button:has-text("取消")')
-    await cancelBtn.click()
-    
-    // Verify operation bar is hidden
-    await expect(this.operationBar).not.toBeVisible()
+  }
+
+  // ==================== 卡片菜单（kebab）操作方法 ====================
+
+  /**
+   * 打开第一个选中卡片的三个点菜单
+   *
+   * @returns Promise<void>
+   */
+  async openSelectedCardMenu() {
+    const card = this.page.locator('.xc-card.checked').first()
+    await expect(card).toBeVisible()
+    await card.scrollIntoViewIfNeeded()
+    await card.hover()
+    await card.locator('[data-testid="file-card-menu"]').click()
+    await expect(this.cardMenu).toBeVisible()
+  }
+
+  /**
+   * 点击卡片菜单中的选项
+   *
+   * @param label - 选项文本
+   * @returns Promise<void>
+   */
+  async clickCardMenuItem(label: string) {
+    const option = this.cardMenu.locator('.n-dropdown-option').filter({ hasText: label }).first()
+    await expect(option).toBeVisible()
+    await option.click()
   }
 
   /**
    * 添加标签到选中的文件
-   * 
-   * 在操作栏的标签输入框中输入标签名称并提交
-   * 
+   *
+   * 通过卡片菜单打开标签编辑弹窗，输入标签名称并提交
+   *
    * @param tagName - 标签名称
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.selectFile(0)
    * await homePage.addTagToSelectedFiles('important')
-   * 
-   * @remarks
-   * - 必须先选择文件，否则操作栏不会显示
-   * - 标签名称会自动添加到选中的文件
    */
   async addTagToSelectedFiles(tagName: string) {
-    // 确保操作栏可见
-    await expect(this.operationBar).toBeVisible()
-    
-    // 在标签输入框中输入标签名称
-    await this.tagInput.fill(tagName)
-    
-    // 按Enter键提交
-    await this.page.keyboard.press('Enter')
-    
-    // 等待标签添加完成（等待输入框清空）
-    await expect(this.tagInput).toHaveValue('')
+    await this.openSelectedCardMenu()
+    await this.clickCardMenuItem('标签')
+
+    const tagInput = this.page.locator('.n-modal .card-tag-input')
+    await expect(tagInput).toBeVisible()
+    await tagInput.fill(tagName)
+    await tagInput.press('Enter')
+
+    // 提交后标签弹窗自动关闭
+    await expect(tagInput).not.toBeVisible()
   }
 
   /**
    * 打开删除标签对话框
-   * 
-   * 点击操作栏中的"删除标签"按钮，打开标签选择对话框
-   * 
+   *
+   * 通过卡片菜单打开标签编辑弹窗（其中包含已有标签删除列表）
+   *
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.selectFile(0)
    * await homePage.openDeleteTagDialog()
    */
   async openDeleteTagDialog() {
-    // 确保操作栏可见
-    await expect(this.operationBar).toBeVisible()
-    
-    // 点击删除标签按钮
-    const deleteTagBtn = this.operationBar.locator('.action-btn:has-text("删除标签")')
-    await deleteTagBtn.click()
-    
-    // 等待对话框出现
-    await expect(this.page.locator('.dialog-content')).toBeVisible()
+    await this.openSelectedCardMenu()
+    await this.clickCardMenuItem('标签')
+
+    const tagInput = this.page.locator('.n-modal .card-tag-input')
+    await expect(tagInput).toBeVisible()
   }
 
   /**
-   * 在删除标签对话框中选择标签
-   * 
-   * 在对话框中勾选要删除的标签
-   * 
+   * 在标签编辑弹窗中删除指定标签
+   *
+   * 点击标签条目上的删除按钮（立即生效）
+   *
    * @param tagNames - 要删除的标签名称数组
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.openDeleteTagDialog()
    * await homePage.selectTagsInDialog(['tag1', 'tag2'])
    */
   async selectTagsInDialog(tagNames: string[]) {
-    const dialog = this.page.locator('.dialog-content')
-    await expect(dialog).toBeVisible()
-    
+    const modal = this.page.locator('.n-modal')
+    await expect(modal.locator('.card-tag-input')).toBeVisible()
+
     for (const tagName of tagNames) {
-      const checkbox = dialog.locator(`.tag-item:has-text("${tagName}") input[type="checkbox"]`)
-      await checkbox.check()
+      const deleteBtn = modal.locator('.card-tag-item', { hasText: tagName }).locator('.card-tag-delete-btn')
+      await expect(deleteBtn).toBeVisible()
+      await deleteBtn.click()
     }
   }
 
   /**
-   * 确认删除标签
-   * 
-   * 在删除标签对话框中点击"确定删除"按钮
-   * 
+   * 关闭标签编辑弹窗
+   *
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.openDeleteTagDialog()
    * await homePage.selectTagsInDialog(['tag1'])
    * await homePage.confirmDeleteTags()
    */
   async confirmDeleteTags() {
-    const dialog = this.page.locator('.dialog-content')
-    await expect(dialog).toBeVisible()
-    
-    // 点击确定删除按钮
-    const confirmBtn = dialog.locator('.confirm-btn')
-    await confirmBtn.click()
-    
-    // 等待对话框关闭
-    await expect(dialog).not.toBeVisible()
+    const modal = this.page.locator('.n-modal')
+    await expect(modal.locator('.card-tag-input')).toBeVisible()
+
+    await modal.locator('button:has-text("取消")').click()
+    await expect(modal.locator('.card-tag-input')).not.toBeVisible()
   }
 
   /**
    * 取消删除标签对话框
-   * 
-   * 在删除标签对话框中点击"取消"按钮
-   * 
+   *
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.openDeleteTagDialog()
    * await homePage.cancelDeleteTagDialog()
    */
   async cancelDeleteTagDialog() {
-    const dialog = this.page.locator('.dialog-content')
-    await expect(dialog).toBeVisible()
-    
-    // 点击取消按钮
-    const cancelBtn = dialog.locator('.cancel-btn')
-    await cancelBtn.click()
-    
-    // 等待对话框关闭
-    await expect(dialog).not.toBeVisible()
+    await this.confirmDeleteTags()
   }
 
   /**
@@ -569,7 +565,7 @@ export class HomePage {
   /**
    * Delete tag from selected files
    *
-   * Opens the delete tag dialog and removes the specified tag from all selected files
+   * Opens the tag edit modal via card menu and removes the specified tag
    *
    * @param tagName - Tag name to delete (supports partial match)
    * @returns Promise<void>
@@ -577,40 +573,20 @@ export class HomePage {
    * @example
    * await homePage.selectMultipleFiles([0, 1, 2])
    * await homePage.deleteTagFromSelectedFiles('test-tag-')
-   *
-   * @remarks
-   * - Must select files first, otherwise the operation bar won't show
-   * - The dialog will be opened, tag will be selected, and delete confirmed
    */
   async deleteTagFromSelectedFiles(tagName: string) {
-    // Ensure operation bar is visible
-    await expect(this.operationBar).toBeVisible()
+    await this.openSelectedCardMenu()
+    await this.clickCardMenuItem('标签')
 
-    // Click delete tag button to open dialog
-    const deleteTagBtn = this.operationBar.locator('.action-btn:has-text("删除标签")')
-    await deleteTagBtn.click()
+    const modal = this.page.locator('.n-modal')
+    await expect(modal.locator('.card-tag-input')).toBeVisible({ timeout: 5000 })
 
-    // Wait for dialog to appear
-    const dialogOverlay = this.page.locator('.dialog-overlay')
-    await expect(dialogOverlay).toBeVisible({ timeout: 5000 })
-    await this.page.waitForTimeout(300)
+    const deleteBtn = modal.locator('.card-tag-item', { hasText: tagName }).locator('.card-tag-delete-btn')
+    await expect(deleteBtn).toBeVisible({ timeout: 5000 })
+    await deleteBtn.click({ timeout: 5000 })
 
-    // Find and check the tag checkbox using partial text match
-    // The checkbox is inside a label with class "tag-checkbox" that contains the tag name
-    const tagCheckbox = dialogOverlay.locator('.tag-checkbox', {
-      hasText: tagName
-    }).locator('input[type="checkbox"]')
-
-    // Wait for checkbox to be visible and check it
-    await expect(tagCheckbox).toBeVisible({ timeout: 5000 })
-    await tagCheckbox.check({ timeout: 5000 })
-
-    // Click confirm button
-    const confirmBtn = dialogOverlay.locator('button:has-text("确定删除")')
-    await confirmBtn.click()
-
-    // Wait for operation to complete and dialog to close
-    await expect(dialogOverlay).not.toBeVisible({ timeout: 5000 })
+    await modal.locator('button:has-text("取消")').click()
+    await expect(modal.locator('.card-tag-input')).not.toBeVisible({ timeout: 5000 })
     await this.page.waitForTimeout(500)
   }
 
@@ -659,55 +635,55 @@ export class HomePage {
 
   /**
    * 删除选中的文件
-   * 
-   * 点击操作栏中的"删除"按钮，将文件移入回收站
-   * 
+   *
+   * 通过卡片菜单中的"删除"选项，将文件移入回收站
+   *
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.selectFile(0)
    * await homePage.deleteSelectedFiles()
-   * 
+   *
    * @remarks
-   * - 必须先选择文件，否则操作栏不会显示
+   * - 必须先选择文件（通过复选框勾选）
    * - 文件会被移入回收站，可以恢复
    */
   async deleteSelectedFiles() {
-    await expect(this.operationBar).toBeVisible()
-    
-    const deleteBtn = this.operationBar.locator('.action-btn.danger:has-text("删除")')
-    await deleteBtn.click()
-    
+    await this.openSelectedCardMenu()
+    await this.clickCardMenuItem('删除')
+
     await this.page.waitForTimeout(500)
   }
 
   /**
-   * 设置文件等级
-   * 
-   * 为选中的文件设置等级（1-5星）
-   * 
+   * 设置文件评分
+   *
+   * 通过卡片菜单的评分子菜单为文件设置等级（1-5星）
+   *
    * @param level - 等级（1-5）
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.selectFile(0)
    * await homePage.setFileLevel(3)
-   * 
+   *
    * @remarks
-   * - 必须先选择文件，否则操作栏不会显示
+   * - 必须先选择文件（通过复选框勾选）
    * - 等级会覆盖之前的等级
    */
   async setFileLevel(level: number) {
-    await expect(this.operationBar).toBeVisible()
-    
-    // Step 1: Select level from dropdown
-    const levelSelect = this.operationBar.locator('.level-select')
-    await levelSelect.selectOption(`sys_score${level}`)
-    
-    // Step 2: Click set level button to confirm
-    const setLevelBtn = this.operationBar.locator('.action-btn:has-text("设置等级")')
-    await setLevelBtn.click()
-    
+    await this.openSelectedCardMenu()
+
+    // Step 1: hover 评分 option to open the score submenu
+    const scoreOption = this.cardMenu.locator('.n-dropdown-option').filter({ hasText: '评分' }).first()
+    await expect(scoreOption).toBeVisible()
+    await scoreOption.hover()
+
+    // Step 2: click the target score item in the submenu
+    const scoreItem = this.cardMenu.locator('.n-dropdown-option').filter({ hasText: `${level}☆` }).first()
+    await expect(scoreItem).toBeVisible()
+    await scoreItem.click()
+
     await this.page.waitForTimeout(500)
   }
 
@@ -1273,10 +1249,8 @@ export class HomePage {
    * - 文件会从当前文件夹移动到目标文件夹
    */
   async moveSelectedFiles(targetFolderPath: string) {
-    await expect(this.operationBar).toBeVisible()
-    
-    const moveBtn = this.operationBar.locator('.action-btn:has-text("移动")')
-    await moveBtn.click()
+    await this.openSelectedCardMenu()
+    await this.clickCardMenuItem('移动')
     
     const fileTransferOverlay = this.page.locator('.file-transfer-overlay')
     await expect(fileTransferOverlay).toBeVisible({ timeout: 5000 })
@@ -1338,10 +1312,8 @@ export class HomePage {
    * - 文件会复制到目标文件夹，原文件保留
    */
   async copySelectedFiles(targetFolderPath: string) {
-    await expect(this.operationBar).toBeVisible()
-    
-    const copyBtn = this.operationBar.locator('.action-btn:has-text("复制")')
-    await copyBtn.click()
+    await this.openSelectedCardMenu()
+    await this.clickCardMenuItem('复制')
     
     const fileTransferOverlay = this.page.locator('.file-transfer-overlay')
     await expect(fileTransferOverlay).toBeVisible({ timeout: 5000 })
@@ -1405,8 +1377,6 @@ export class HomePage {
       await this.page.waitForTimeout(100)
     }
     await this.page.keyboard.up('Control')
-    
-    await expect(this.operationBar).toBeVisible()
   }
 
   /**

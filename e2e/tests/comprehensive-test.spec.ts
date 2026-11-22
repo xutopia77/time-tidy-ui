@@ -148,17 +148,16 @@ test.describe('Comprehensive Test', () => {
       await expect(pathItems.nth(1)).toContainText('test-basic-navigation')
       await expect(pathItems.nth(1)).toHaveClass(/is-current/)
       
-      // Step 7: select folder and verify operation bar
+      // Step 7: select folder and verify checked state
       await homePage.folderCards.nth(0).locator('.xc-checkbox').check()
-      await expect(homePage.operationBar).toBeVisible()
-      await expect(homePage.operationBar).toContainText('已选中')
+      await expect(homePage.folderCards.nth(0)).toHaveClass(/checked/)
       
       // Step 8: take screenshot
-      await takeScreenshot(page, '2-level1-folders-with-operation-bar')
+      await takeScreenshot(page, '2-level1-folders-with-selection')
       
-      // Step 9: click cancel button to hide operation bar
+      // Step 9: clear selection
       await homePage.clearSelection()
-      await expect(homePage.operationBar).not.toBeVisible()
+      await expect(homePage.folderCards.nth(0)).not.toHaveClass(/checked/)
       
       // Step 10: enter 2024-01-旅游 folder
       await homePage.enterFolder(0)
@@ -204,13 +203,11 @@ test.describe('Comprehensive Test', () => {
       await expect(pathItemsLevel3.nth(3)).toContainText('day1')
       await expect(pathItemsLevel3.nth(3)).toHaveClass(/is-current/)
       
-      // Step 18: select first file and verify operation bar is visible
+      // Step 18: select first file and verify checked state
       await homePage.selectFile(0)
-      await expect(homePage.operationBar).toBeVisible()
-      await expect(homePage.operationBar).toContainText('已选中')
       
       // Step 19: take screenshot
-      await takeScreenshot(page, '4-file-selected-with-operation-bar')
+      await takeScreenshot(page, '4-file-selected')
     }
     
     // ==================== Part 2: FAB and Info Sidebar ====================
@@ -430,7 +427,6 @@ test.describe('Comprehensive Test', () => {
       
       // Step 3: Select first file and set level to 1
       await homePage.selectFile(0)
-      await expect(homePage.operationBar).toBeVisible()
       await homePage.setFileLevel(1)
       await page.waitForTimeout(500)
       await takeScreenshot(page, '2-file1-level1-set')
