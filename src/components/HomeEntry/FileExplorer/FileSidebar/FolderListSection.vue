@@ -1,6 +1,6 @@
 <template>
-    <div class="py-3 border-b border-border">
-        <h4 class="flex items-center gap-1 m-0 mb-3 text-base text-text-primary font-medium cursor-pointer select-none" @click="$emit('update:collapsed', !collapsed)">
+    <div class="py-3 border-b border-border" data-testid="folder-list-section">
+        <h4 class="flex items-center gap-1 m-0 mb-3 text-base text-text-primary font-medium cursor-pointer select-none" data-testid="folder-list-header" @click="$emit('update:collapsed', !collapsed)">
             <span class="text-base transition-transform duration-200" :class="{ 'rotate-[-90deg]': collapsed }">▾</span>
             <span class="text-base">📁</span>
             {{ t('sidebar.folderList') }}

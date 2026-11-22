@@ -119,9 +119,9 @@ test.describe('Comprehensive Test', () => {
       // Step 1: check file explorer is visible
       await expect(homePage.fileExplorer).toBeVisible()
       
-      // Step 2: check root folder count equals 18
+      // Step 2: check folder tree is loaded (sidebar tree shows all folders)
       const rootFolderCount = await homePage.getFolderCount()
-      expect(rootFolderCount).toBe(18)
+      expect(rootFolderCount).toBeGreaterThan(0)
       
       // Step 3: take screenshot
       await takeScreenshot(page, '1-root-folders-displayed')
@@ -130,61 +130,40 @@ test.describe('Comprehensive Test', () => {
       await homePage.enterFolder('test-basic-navigation')
       await page.waitForTimeout(1000)
       
-      // Step 5: check subfolder count equals 2 (2024-01-旅游, 2024-02-聚会)
-      const level1FolderCount = await homePage.getFolderCount()
-      expect(level1FolderCount).toBe(2)
+      // Step 5: verify subfolder nodes are visible in the tree (2024-01-旅游, 2024-02-聚会)
+      await expect(homePage.folderTreeNodes.filter({ hasText: '2024-01' }).first()).toBeVisible()
+      await expect(homePage.folderTreeNodes.filter({ hasText: '2024-02' }).first()).toBeVisible()
       
-      // Verify folder names
-      const folder1Name = await homePage.folderCards.nth(0).locator('.xc-card-foldername').textContent()
-      const folder2Name = await homePage.folderCards.nth(1).locator('.xc-card-foldername').textContent()
-      expect(folder1Name).toContain('2024-01')
-      expect(folder2Name).toContain('2024-02')
+      // Step 6: verify tree selection follows navigation
+      await homePage.verifyCurrentPath('test-basic-navigation')
       
-      // Step 6: verify navigation bar shows correct path
-      const pathDisplay = page.locator('.path-display')
-      await expect(pathDisplay).toBeVisible()
-      const pathItems = pathDisplay.locator('.path-item')
-      await expect(pathItems).toHaveCount(2) // root + test-basic-navigation
-      await expect(pathItems.nth(1)).toContainText('test-basic-navigation')
-      await expect(pathItems.nth(1)).toHaveClass(/is-current/)
-      
-      // Step 7: select folder and verify checked state
-      await homePage.folderCards.nth(0).locator('.xc-checkbox').check()
-      await expect(homePage.folderCards.nth(0)).toHaveClass(/checked/)
+      // Step 7: select 2024-01 folder in the tree and verify selected state
+      await homePage.enterFolder('2024-01')
+      await expect(homePage.selectedTreeNode).toContainText('2024-01')
       
       // Step 8: take screenshot
       await takeScreenshot(page, '2-level1-folders-with-selection')
       
-      // Step 9: clear selection
-      await homePage.clearSelection()
-      await expect(homePage.folderCards.nth(0)).not.toHaveClass(/checked/)
+      // Step 9: click the selected folder again to deselect -> show all files
+      await homePage.navigateToRoot()
+      await expect(homePage.selectedTreeNode).toHaveCount(0)
       
-      // Step 10: enter 2024-01-旅游 folder
-      await homePage.enterFolder(0)
+      // Step 10: enter 2024-01-旅游 folder again
+      await homePage.enterFolder('2024-01')
       await page.waitForTimeout(1000)
       
-      // Step 11: check subfolder count equals 2 (day1, day2)
-      const level2FolderCount = await homePage.getFolderCount()
-      expect(level2FolderCount).toBe(2)
+      // Step 11: verify day1/day2 subfolder nodes are visible in the tree
+      await expect(homePage.folderTreeNodes.filter({ hasText: 'day1' }).first()).toBeVisible()
+      await expect(homePage.folderTreeNodes.filter({ hasText: 'day2' }).first()).toBeVisible()
       
-      // Verify folder names
-      const day1Name = await homePage.folderCards.nth(0).locator('.xc-card-foldername').textContent()
-      const day2Name = await homePage.folderCards.nth(1).locator('.xc-card-foldername').textContent()
-      expect(day1Name).toContain('day1')
-      expect(day2Name).toContain('day2')
-      
-      // Step 12: verify navigation bar shows correct path
-      const pathItemsLevel2 = pathDisplay.locator('.path-item')
-      await expect(pathItemsLevel2).toHaveCount(3) // root + test-basic-navigation + 2024-01-旅游
-      await expect(pathItemsLevel2.nth(1)).toContainText('test-basic-navigation')
-      await expect(pathItemsLevel2.nth(2)).toContainText('2024-01')
-      await expect(pathItemsLevel2.nth(2)).toHaveClass(/is-current/)
+      // Step 12: verify tree selection follows navigation
+      await homePage.verifyCurrentPath('2024-01')
       
       // Step 13: take screenshot
       await takeScreenshot(page, '3-level2-folders')
       
       // Step 14: enter day1 folder
-      await homePage.enterFolder(0)
+      await homePage.enterFolder('day1')
       await homePage.waitForFilesToLoad()
       
       // Step 15: check file count equals 10
@@ -195,13 +174,8 @@ test.describe('Comprehensive Test', () => {
       const firstFileName = await homePage.getFileName(0)
       expect(firstFileName).toMatch(/^IMG_\d{8}_\d{6}\.jpg$/)
       
-      // Step 17: verify navigation bar shows correct path
-      const pathItemsLevel3 = pathDisplay.locator('.path-item')
-      await expect(pathItemsLevel3).toHaveCount(4) // root + test-basic-navigation + 2024-01-旅游 + day1
-      await expect(pathItemsLevel3.nth(1)).toContainText('test-basic-navigation')
-      await expect(pathItemsLevel3.nth(2)).toContainText('2024-01')
-      await expect(pathItemsLevel3.nth(3)).toContainText('day1')
-      await expect(pathItemsLevel3.nth(3)).toHaveClass(/is-current/)
+      // Step 17: verify tree selection follows navigation
+      await homePage.verifyCurrentPath('day1')
       
       // Step 18: select first file and verify checked state
       await homePage.selectFile(0)
@@ -617,13 +591,8 @@ test.describe('Comprehensive Test', () => {
       await page.waitForTimeout(500)
       await takeScreenshot(page, '31-back-to-home')
       
-      // Step 6: Navigate to root directory by clicking the home icon in breadcrumb
-      // Click the first path-part (root directory) in path-display
-      const rootPathItem = page.locator('.path-display .path-item:first-child .path-part').first()
-      if (await rootPathItem.isVisible()) {
-        await rootPathItem.click()
-        await page.waitForTimeout(500)
-      }
+      // Step 6: Navigate to root directory (deselect the current folder in the sidebar tree)
+      await homePage.navigateToRoot()
       
       // Step 7: Navigate to test-tags/工作/ folder
       await homePage.enterFolder('test-tags')

@@ -11,8 +11,7 @@
                     :buffer-rows="3"
                     @scroll="onVirtualScroll">
                     <template #item="{ item }">
-                        <FolderCard v-if="isDirItem(item)" :item="(item as DatType.DirItem)" />
-                        <ImageCard v-else :item="(item as DatType.File)" :desc-height="cardDescHeight"
+                        <ImageCard :item="(item as DatType.File)" :desc-height="cardDescHeight"
                             @card-action="onCardAction" />
                     </template>
                 </VirtualScroll>
@@ -33,7 +32,7 @@
             :class="{ 'right-[340px]': sidebarOpen }">
             <n-dropdown trigger="click" placement="top-end" :options="fabOptions"
                 @select="onFabSelect" @update:show="(v: boolean) => fabMenuOpen = v">
-                <n-button circle type="primary" size="large" class="w-12 h-12">
+                <n-button circle type="primary" size="large" class="w-12 h-12" data-testid="fab-button">
                     <span class="inline-block transition-transform duration-200"
                         :class="{ 'rotate-45': fabMenuOpen }">+</span>
                 </n-button>
@@ -113,7 +112,6 @@ import { NDropdown, NButton, NModal, NInput, NInputNumber, NIcon } from 'naive-u
 import type { DropdownOption } from 'naive-ui';
 import { FileDoc, Robot, Left, Right, Folder } from '@icon-park/vue-next';
 import ImageCard from '@/components/HomeEntry/FileExplorer/ImageCard.vue';
-import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
 import FileSidebar from '@/components/HomeEntry/FileExplorer/FileSidebar/FileSidebar.vue';
 import VirtualScroll from '@/components/HomeEntry/FileExplorer/VirtualScroll.vue';
 import TimelineBar from '@/components/HomeEntry/FileExplorer/TimelineBar.vue';
@@ -135,21 +133,11 @@ const currentPath = computed(() => appStore.curPath);
 const noFolderSelected = computed(() => !appStore.curPath || appStore.curPath === '/');
 const cardViewMode = computed(() => appStore.cardViewMode);
 
-// virtual scroll items: dirs first (navigation), then files
+// virtual scroll items: files only; folder navigation lives in the
+// sidebar tree (no folder cards in the main area)
 const virtualScrollItems = computed(() => {
-    const result: Array<DatType.DirItem | DatType.File> = [];
-    for (const dir of dirs.value) {
-        result.push(dir);
-    }
-    for (const file of items.value) {
-        result.push(file);
-    }
-    return result;
+    return items.value;
 });
-
-function isDirItem(item: unknown): boolean {
-    return typeof item === 'object' && item !== null && 'dir' in item;
-}
 
 // card dimensions for virtual scroll
 const cardItemWidth = computed(() => {

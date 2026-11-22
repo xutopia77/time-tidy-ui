@@ -1,6 +1,6 @@
 <template>
     <transition name="sidebar-slide">
-        <div v-if="visible" class="w-[280px] bg-bg-secondary border-l border-border overflow-y-auto flex-shrink-0 xc-scrollbar">
+        <div v-if="visible" data-testid="file-sidebar" class="w-[280px] bg-bg-secondary border-l border-border overflow-y-auto flex-shrink-0 xc-scrollbar">
             <div class="flex justify-between items-center py-3 px-3 border-b border-border sticky top-0 bg-bg-secondary z-10">
                 <h3 class="m-0 text-lg text-text-primary">{{ t('sidebar.infoPanel') }}</h3>
                 <button class="w-7 h-7 border-none bg-transparent text-text-secondary text-xl cursor-pointer rounded-sm flex items-center justify-center transition-all duration-200 hover:bg-bg-tertiary hover:text-text-primary" @click="$emit('close')">×</button>

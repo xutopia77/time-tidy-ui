@@ -88,10 +88,15 @@ export class HomePage {
   readonly fileCards: Locator
   
   /**
-   * 文件夹卡片列表
-   * 所有文件夹卡片的容器
+   * 文件夹树节点列表（侧边栏文件夹树）
+   * 主区不再显示文件夹卡片，文件夹导航通过侧边栏树完成
    */
-  readonly folderCards: Locator
+  readonly folderTreeNodes: Locator
+
+  /**
+   * 当前选中的文件夹树节点（侧边栏）
+   */
+  readonly selectedTreeNode: Locator
   
   /**
    * 卡片右上角三个点菜单（NDropdown 弹出层）
@@ -154,6 +159,16 @@ export class HomePage {
   readonly folderListSection: Locator
 
   /**
+   * 文件夹列表 section 头部（点击展开/折叠）
+   */
+  readonly folderListHeader: Locator
+
+  /**
+   * 侧边栏文件夹树（NTree）
+   */
+  readonly folderTree: Locator
+
+  /**
    * 搜索面板
    * 搜索功能面板
    */
@@ -214,10 +229,7 @@ export class HomePage {
     this.searchInput = page.locator('.search-input-large')
     
     // 文件卡片列表：所有文件卡片
-    this.fileCards = page.locator('.xc-card').filter({ hasNot: page.locator('.xc-card-foldername') })
-    
-    // 文件夹卡片列表：所有文件夹卡片
-    this.folderCards = page.locator('.xc-card').filter({ has: page.locator('.xc-card-foldername') })
+    this.fileCards = page.locator('.xc-card')
     
     // 卡片三个点菜单（NDropdown 弹出层，仅可见时存在）
     this.cardMenu = page.locator('.n-dropdown-menu:visible')
@@ -226,19 +238,19 @@ export class HomePage {
     this.tagInput = page.locator('.tag-input')
 
     // 浮动操作按钮（FAB）
-    this.fab = page.locator('.fab-button')
+    this.fab = page.locator('[data-testid="fab-button"]')
 
-    // 浮动操作栏
-    this.fabMenu = page.locator('.fab-menu')
+    // 浮动操作栏（NDropdown 弹出层，仅可见时存在）
+    this.fabMenu = page.locator('.n-dropdown-menu:visible')
 
     // 新建文件夹按钮
-    this.newFolderButton = this.fabMenu.locator('.fab-menu-item:has-text("创建文件夹")')
+    this.newFolderButton = this.fabMenu.locator('.n-dropdown-option:has-text("创建文件夹")')
 
     // 展开面板按钮
-    this.expandPanelButton = this.fabMenu.locator('.fab-menu-item:has-text("展开面板")')
+    this.expandPanelButton = this.fabMenu.locator('.n-dropdown-option:has-text("展开面板")')
 
     // 信息面板（Info Sidebar）
-    this.infoSidebar = page.locator('.info-sidebar')
+    this.infoSidebar = page.locator('[data-testid="file-sidebar"]')
 
     // 文件信息区域
     this.fileInfoSection = this.infoSidebar.locator('.sidebar-section').filter({ hasText: '文件信息' })
@@ -247,7 +259,19 @@ export class HomePage {
     this.tagInfoSection = this.infoSidebar.locator('.sidebar-section').filter({ hasText: '标签信息' })
 
     // 文件夹列表区域
-    this.folderListSection = this.infoSidebar.locator('.folder-tree-section')
+    this.folderListSection = this.infoSidebar.locator('[data-testid="folder-list-section"]')
+
+    // 文件夹列表 section 头部（点击展开/折叠）
+    this.folderListHeader = this.infoSidebar.locator('[data-testid="folder-list-header"]')
+
+    // 侧边栏文件夹树（NTree）
+    this.folderTree = this.folderListSection.locator('.n-tree')
+
+    // 文件夹树节点（NTree 节点内容区）
+    this.folderTreeNodes = this.folderTree.locator('.n-tree-node-content')
+
+    // 当前选中的文件夹树节点（内容区域，可直接点击触发选择/取消）
+    this.selectedTreeNode = this.folderTree.locator('.n-tree-node--selected .n-tree-node-content')
 
     // 搜索面板
     this.searchPanel = page.locator('.search-panel')
@@ -777,40 +801,56 @@ export class HomePage {
   }
 
   // ==================== 文件夹导航方法 ====================
-  
+
   /**
-   * 进入文件夹
-   * 
-   * 通过文件夹名称或索引点击进入文件夹
-   * 
-   * @param folderNameOrIndex - 文件夹名称或索引（从0开始）
+   * 确保侧边栏文件夹树可见
+   *
+   * 侧边栏未打开时通过 FAB 菜单打开，文件夹列表 section 处于折叠状态时展开它
+   */
+  private async ensureFolderTreeVisible() {
+    if (!(await this.infoSidebar.isVisible())) {
+      await this.clickFab()
+      await this.expandPanelButton.click()
+      await this.page.waitForTimeout(300)
+    }
+    if (!(await this.folderTree.isVisible())) {
+      await this.folderListHeader.click()
+      await this.page.waitForTimeout(200)
+    }
+  }
+
+  /**
+   * 进入文件夹（通过侧边栏文件夹树）
+   *
+   * 主区不再显示文件夹卡片，导航入口是侧边栏文件夹树。
+   * 点击树节点后该文件夹被选中，主区显示该文件夹下的文件
+   *
+   * @param folderNameOrIndex - 文件夹名称（或树节点索引）
    * @returns Promise<void>
-   * 
+   *
    * @example
    * // 通过名称进入文件夹
-   * await homePage.enterFolder('Photos')
-   * 
-   * // 通过索引进入第一个文件夹
-   * await homePage.enterFolder(0)
-   * 
+   * await homePage.enterFolder('test-basic-navigation')
+   *
    * @remarks
    * - 进入文件夹后会显示该文件夹内的文件
    * - 如果文件夹不存在，测试会失败
    */
   async enterFolder(folderNameOrIndex: string | number) {
-    let folderCard: Locator
-    
+    await this.ensureFolderTreeVisible()
+
+    let node: Locator
     if (typeof folderNameOrIndex === 'string') {
-      // 通过名称查找文件夹
-      folderCard = this.folderCards.filter({ hasText: folderNameOrIndex }).first()
+      // 通过名称查找文件夹树节点
+      node = this.folderTreeNodes.filter({ hasText: folderNameOrIndex }).first()
     } else {
-      // 通过索引查找文件夹
-      folderCard = this.folderCards.nth(folderNameOrIndex)
+      // 通过索引查找文件夹树节点
+      node = this.folderTreeNodes.nth(folderNameOrIndex)
     }
-    
-    await folderCard.waitFor({ state: 'visible', timeout: 10000 })
-    await folderCard.click({ force: true })
-    
+
+    await node.waitFor({ state: 'visible', timeout: 10000 })
+    await node.click()
+
     await this.page.waitForTimeout(500)
   }
 
@@ -834,49 +874,51 @@ export class HomePage {
 
   /**
    * 获取文件夹数量
-   * 
-   * 获取当前页面显示的文件夹卡片数量
-   * 
+   *
+   * 获取侧边栏文件夹树的节点总数（全量目录树）
+   *
    * @returns Promise<number> - 文件夹数量
-   * 
+   *
    * @example
    * const count = await homePage.getFolderCount()
    * expect(count).toBeGreaterThan(0)
    */
   async getFolderCount(): Promise<number> {
-    return await this.folderCards.count()
+    await this.ensureFolderTreeVisible()
+    return await this.folderTreeNodes.count()
   }
 
   /**
-   * 验证当前路径
-   * 
-   * 验证当前所在的路径是否正确
-   * 
-   * @param expectedPath - 预期的路径名称
+   * 验证当前选中的文件夹
+   *
+   * 验证侧边栏文件夹树中当前选中的节点名称
+   *
+   * @param expectedPath - 预期的文件夹名称
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.enterFolder('Photos')
    * await homePage.verifyCurrentPath('Photos')
    */
   async verifyCurrentPath(expectedPath: string) {
-    const pathDisplay = this.page.locator('.path-display')
-    await expect(pathDisplay).toContainText(expectedPath)
+    await this.ensureFolderTreeVisible()
+    await expect(this.selectedTreeNode).toContainText(expectedPath)
   }
 
   /**
-   * 等待文件夹加载完成
-   * 
-   * 等待文件夹列表加载完成，至少有一个文件夹显示
-   * 
+   * 等待文件夹树加载完成
+   *
+   * 等待侧边栏文件夹树至少显示一个节点
+   *
    * @param timeout - 超时时间，默认10秒
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.waitForFoldersToLoad()
    */
   async waitForFoldersToLoad(timeout: number = 10000) {
-    await expect(this.folderCards.first()).toBeVisible({ timeout })
+    await this.ensureFolderTreeVisible()
+    await expect(this.folderTreeNodes.first()).toBeVisible({ timeout })
   }
 
   // ==================== FAB操作方法 ====================
@@ -1380,19 +1422,21 @@ export class HomePage {
   }
 
   /**
-   * 导航到根目录
-   * 
-   * 点击导航栏的第一个路径项返回根目录
-   * 
+   * 导航到根目录（显示全部文件）
+   *
+   * 面包屑已移除：点击侧边栏树中当前选中的文件夹取消选中，
+   * 即回到"全部文件"状态
+   *
    * @returns Promise<void>
-   * 
+   *
    * @example
    * await homePage.navigateToRoot()
    */
   async navigateToRoot() {
-    const rootPathItem = this.page.locator('.path-display .path-item:first-child .path-part').first()
-    if (await rootPathItem.isVisible()) {
-      await rootPathItem.click()
+    await this.ensureFolderTreeVisible()
+    const selected = this.selectedTreeNode
+    if (await selected.count() > 0) {
+      await selected.first().click()
       await this.page.waitForTimeout(500)
     }
   }
