@@ -84,11 +84,17 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const local = ref<SimilaritySettings>(structuredClone(props.settings));
+// settings arrives as a Vue reactive proxy which structuredClone cannot
+// handle (DataCloneError); the shape is plain data so JSON round-trip is safe
+const cloneSettings = (s: SimilaritySettings): SimilaritySettings => {
+    return JSON.parse(JSON.stringify(s)) as SimilaritySettings;
+};
+
+const local = ref<SimilaritySettings>(cloneSettings(props.settings));
 
 watch(() => props.show, (show) => {
     if (show) {
-        local.value = structuredClone(props.settings);
+        local.value = cloneSettings(props.settings);
     }
 });
 
