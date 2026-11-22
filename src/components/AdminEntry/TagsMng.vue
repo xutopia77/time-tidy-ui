@@ -45,11 +45,16 @@
                                 :title="t('common.edit')">
                                 <Edit theme="outline" size="16" :strokeWidth="3" />
                             </button>
-                            <button @click.stop="btn_deletetag(item)"
-                                class="flex items-center justify-center w-7 h-7 p-0 bg-bg-elevated border border-border rounded text-text-primary cursor-pointer transition-all duration-150 hover:bg-error/10 hover:text-error hover:border-error"
-                                :title="t('common.delete')">
-                                <Close theme="outline" size="16" :strokeWidth="3" />
-                            </button>
+                            <n-popconfirm @positive-click="btn_deletetag(item)">
+                                <template #trigger>
+                                    <button @click.stop
+                                        class="flex items-center justify-center w-7 h-7 p-0 bg-bg-elevated border border-border rounded text-text-primary cursor-pointer transition-all duration-150 hover:bg-error/10 hover:text-error hover:border-error"
+                                        :title="t('common.delete')">
+                                        <Close theme="outline" size="16" :strokeWidth="3" />
+                                    </button>
+                                </template>
+                                {{ t('tag.confirmDeleteTag') }} "{{ Utils.tagName2Display(item.name) }}"?
+                            </n-popconfirm>
                         </div>
                     </div>
                 </div>
@@ -63,76 +68,44 @@
             </div>
         </div>
 
-        <div v-if="isEditDialogVisible"
-            class="fixed inset-0 bg-black/60 flex items-center justify-center z-[1000] backdrop-blur-sm"
-            @click="closeDialog">
-            <div class="bg-bg-secondary rounded-xl shadow-lg w-[90%] max-w-[500px] max-h-[90vh] flex flex-col overflow-hidden"
-                @click.stop>
-                <div class="flex justify-between items-center px-4 py-4 border-b border-border">
-                    <h3 class="m-0 text-base font-semibold text-text-primary">{{ isNewTag ? t('tag.create') : t('tag.edit') }}</h3>
-                    <button @click="closeDialog"
-                        class="w-8 h-8 p-0 bg-none border-none text-text-secondary text-2xl leading-none cursor-pointer rounded transition-all duration-150 hover:bg-bg-elevated hover:text-text-primary">
-                        ×
-                    </button>
-                </div>
+        <n-modal v-model:show="isEditDialogVisible" preset="card" class="w-[500px] max-w-[90vw]"
+            :title="isNewTag ? t('tag.create') : t('tag.edit')">
+            <div class="mb-4">
+                <label for="tagName" class="flex items-center gap-1 mb-2 text-sm font-medium text-text-primary">
+                    <span>{{ t('file.tagName') }}</span>
+                    <span class="text-error">*</span>
+                </label>
+                <n-input id="tagName" v-model:value="editingTag.name" :placeholder="t('tag.enterName')" />
+            </div>
 
-                <div class="flex-1 p-4 overflow-y-auto">
-                    <div class="mb-4">
-                        <label for="tagName" class="flex items-center gap-1 mb-2 text-sm font-medium text-text-primary">
-                            <span>{{ t('file.tagName') }}</span>
-                            <span class="text-error">*</span>
-                        </label>
-                        <input id="tagName" v-model="editingTag.name" :placeholder="t('tag.enterName')"
-                            class="w-full py-2 px-3 bg-bg-tertiary border border-border rounded-lg text-text-primary text-sm outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]" />
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="tagColor" class="flex items-center gap-1 mb-2 text-sm font-medium text-text-primary">
-                            <span>{{ t('file.tagColor') }}</span>
-                            <span class="text-error">*</span>
-                        </label>
-                        <div class="flex items-center gap-2 mb-2">
-                            <div class="w-10 h-10 rounded-lg border-2 border-border flex-shrink-0"
-                                :style="{ backgroundColor: editingTag.color }"></div>
-                            <input type="color" v-model="editingTag.color"
-                                class="w-10 h-10 p-0.5 border border-border rounded-lg cursor-pointer bg-none" />
-                            <input type="text" v-model="editingTag.color" placeholder="#000000"
-                                maxlength="7"
-                                class="flex-1 py-2 px-3 bg-bg-tertiary border border-border rounded-lg text-text-primary text-sm font-mono outline-none transition-all duration-200 focus:border-primary" />
-                        </div>
-                        <div class="flex flex-wrap gap-1">
-                            <button v-for="color in colorPresets" :key="color"
-                                @click="editingTag.color = color"
-                                class="w-8 h-8 p-0 border-2 border-transparent rounded cursor-pointer transition-all duration-150 hover:scale-110"
-                                :class="{ 'border-text-primary shadow-[0_0_0_2px_rgba(0,0,0,0.1)]': editingTag.color === color }"
-                                :style="{ backgroundColor: color }">
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="mb-0">
-                        <label for="tagDescription" class="flex items-center gap-1 mb-2 text-sm font-medium text-text-primary">
-                            <span>{{ t('file.tagDesc') }}</span>
-                            <span class="text-text-secondary font-normal">{{ t('tag.optional') }}</span>
-                        </label>
-                        <textarea id="tagDescription" v-model="editingTag.description"
-                            :placeholder="t('tag.enterDesc')" rows="3"
-                            class="w-full py-2 px-3 bg-bg-tertiary border border-border rounded-lg text-text-primary text-sm outline-none transition-all duration-200 focus:border-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] resize-y min-h-[80px]"></textarea>
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-2 px-4 py-4 border-t border-border">
-                    <button @click="closeDialog"
-                        class="py-2 px-4 border border-border rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 bg-bg-elevated text-text-primary hover:bg-bg-tertiary">
-                        {{ t('common.cancel') }}
-                    </button>
-                    <button @click="submitEdit"
-                        class="py-2 px-4 border-none rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 bg-primary text-white hover:bg-primary-hover">
-                        {{ isNewTag ? t('common.create') : t('common.save') }}
-                    </button>
+            <div class="mb-4">
+                <label for="tagColor" class="flex items-center gap-1 mb-2 text-sm font-medium text-text-primary">
+                    <span>{{ t('file.tagColor') }}</span>
+                    <span class="text-error">*</span>
+                </label>
+                <div class="flex items-center gap-2 mb-2">
+                    <n-color-picker id="tagColor" v-model:value="editingTag.color" :show-alpha="false"
+                        :modes="['hex']" :swatches="colorPresets" class="w-full" />
                 </div>
             </div>
-        </div>
+
+            <div class="mb-0">
+                <label for="tagDescription" class="flex items-center gap-1 mb-2 text-sm font-medium text-text-primary">
+                    <span>{{ t('file.tagDesc') }}</span>
+                    <span class="text-text-secondary font-normal">{{ t('tag.optional') }}</span>
+                </label>
+                <n-input id="tagDescription" v-model:value="editingTag.description" :placeholder="t('tag.enterDesc')"
+                    type="textarea" rows="3" />
+            </div>
+
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <n-button @click="closeDialog">{{ t('common.cancel') }}</n-button>
+                    <n-button type="primary" @click="submitEdit">
+                        {{ isNewTag ? t('common.create') : t('common.save') }}</n-button>
+                </div>
+            </template>
+        </n-modal>
     </div>
 </template>
 
@@ -144,6 +117,7 @@ import * as DatType from '@/utils/dataTypedef';
 import { useAppStore } from '@/stores/AppStore';
 const appStore = useAppStore();
 import '@/assets/common.css';
+import { NInput, NModal, NButton, NColorPicker, NPopconfirm } from 'naive-ui';
 import { TagOne, Edit, Close, Plus, FileDoc } from '@icon-park/vue-next';
 
 const { t } = useI18n();
@@ -187,9 +161,7 @@ function closeDialog() {
 }
 
 function btn_deletetag(item: DatType.TagItem) {
-    if (confirm(`${t('tag.confirmDeleteTag')} "${Utils.tagName2Display(item.name)}"?`)) {
-        Utils.tag_delete(item);
-    }
+    Utils.tag_delete(item);
 }
 
 function submitEdit() {

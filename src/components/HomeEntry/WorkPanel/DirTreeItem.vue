@@ -1,28 +1,16 @@
 <template>
-    <ul class="w-full list-none pl-2.5">
-        <li v-for="(item, index) in dirTrees" :key="index" class="border-none rounded w-full text-text-primary">
-            <div 
-                class="border-none rounded w-full text-text-primary flex hover:border-border-dark"
-                :class="{ 'bg-bg-tertiary': curSltDirTreeItem?.dirInfo.id == item.dirInfo.id }"
-            >
-                <div v-if="!bShowDirIcon(item, 1) && !bShowDirIcon(item, 2)" class="w-[18px] align-middle"></div>
-                <Right size="18" v-if="bShowDirIcon(item, 1)" @click="btn_toggleExpand(item)" />
-                <Down size="18" v-if="bShowDirIcon(item, 2)" @click="btn_toggleExpand(item)" />
-                <div @click="btn_sltTreeItem(item)" class="whitespace-nowrap text-xs flex items-center gap-1">
-                    <FolderClose :size="16" />
-                    {{ item.name }}
-                </div>
-            </div>
-            <ul v-if="item.children && item.children.length > 0 && item.expanded" class="w-full list-none pl-2.5">
-                <DirTreeItem :data="item.children" v-model="curSltDirTreeItem" />
-            </ul>
-        </li>
-    </ul>
+    <n-tree block-line :data="treeData" :selected-keys="selectedKeys"
+        :expanded-keys="expandedKeys" :render-prefix="renderPrefix"
+        @update:selected-keys="onSelectKeys" @update:expanded-keys="onExpandedKeys" />
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, watch, computed, ref } from 'vue'
-import { FolderClose, Right, Down } from '@icon-park/vue-next'
+// Dir tree rendered by NTree. External API is unchanged (data + v-model of
+// DirTreeItem), so WorkTree / FileTransfer / FolderListSection need no edits.
+import { h, computed, ref, watch } from 'vue'
+import { NTree } from 'naive-ui'
+import type { TreeOption } from 'naive-ui'
+import { FolderClose } from '@icon-park/vue-next'
 import * as DatType from '@/utils/dataTypedef'
 
 const props = defineProps<{
@@ -32,45 +20,63 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue']);
 
-const dirTrees = ref<DatType.DirTreeItem[]>(props.data)
-watch(props, (newVal) => {
-    dirTrees.value = newVal.data;
-}, { deep: true })
-
-const curSltDirTreeItem = computed({
-    get() {
-        return props.modelValue;
-    },
-    set(value: DatType.DirTreeItem) {
-        emit('update:modelValue', value);
+function toTreeOption(item: DatType.DirTreeItem): TreeOption {
+    const option: TreeOption = {
+        key: item.dirInfo.id,
+        label: item.name,
+    };
+    if (item.children && item.children.length > 0) {
+        option.children = item.children.map(toTreeOption);
     }
-})
-
-function bShowDirIcon(iteam: DatType.DirTreeItem, type: number): boolean {
-    if (!(iteam.children && iteam.children.length > 0)) {
-        return false
-    }
-    if (type == 1) {
-        return !iteam.expanded
-    }
-    if (type == 2) {
-        return iteam.expanded
-    }
-    return false
+    return option;
 }
 
-function btn_sltTreeItem(iteam: DatType.DirTreeItem) {
-    curSltDirTreeItem.value = iteam;
-    console.log("curSltDirTreeItem: ", iteam);
+const treeData = computed<TreeOption[]>(() => props.data.map(toTreeOption));
+
+function collectKeys(items: DatType.DirTreeItem[], keys: Array<string | number>): Array<string | number> {
+    for (const item of items) {
+        keys.push(item.dirInfo.id);
+        if (item.children && item.children.length > 0) {
+            collectKeys(item.children, keys);
+        }
+    }
+    return keys;
 }
 
-const btn_toggleExpand = (item: DatType.DirTreeItem) => {
-    item.expanded = !item.expanded;
+// nodes start expanded (DirTreeItem.expanded defaults to true)
+const expandedKeys = ref<Array<string | number>>(collectKeys(props.data, []));
+watch(() => props.data, (newData) => {
+    expandedKeys.value = collectKeys(newData, []);
+});
+
+function findNodeRecursively(nodes: DatType.DirTreeItem[], id: string | number): DatType.DirTreeItem | undefined {
+    for (const node of nodes) {
+        if (node.dirInfo.id === id) return node;
+        if (node.children && node.children.length > 0) {
+            const found = findNodeRecursively(node.children, id);
+            if (found) return found;
+        }
+    }
+    return undefined;
+}
+
+const selectedKeys = computed<Array<string | number>>(() => {
+    return props.modelValue ? [props.modelValue.dirInfo.id] : [];
+});
+
+const onSelectKeys = (keys: Array<string | number>) => {
+    if (keys.length === 0) return;
+    const node = findNodeRecursively(props.data, keys[0]);
+    if (node) {
+        emit('update:modelValue', node);
+    }
+};
+
+const onExpandedKeys = (keys: Array<string | number>) => {
+    expandedKeys.value = keys;
+};
+
+const renderPrefix = () => {
+    return h(FolderClose as Parameters<typeof h>[0], { size: 16, style: 'vertical-align: middle' });
 };
 </script>
-
-<style scoped>
-svg {
-    vertical-align: middle;
-}
-</style>

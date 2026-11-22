@@ -151,6 +151,11 @@ export default {
     trashEmptied: '回收站已清空',
     loadTrashFailed: '加载回收站失败',
     emptyTrashFailed: '清空回收站失败',
+    colName: '文件名',
+    colSize: '大小',
+    colTime: '删除时间',
+    colPath: '路径',
+    colActions: '操作',
   },
   similarity: {
     manage: '相似文件管理',

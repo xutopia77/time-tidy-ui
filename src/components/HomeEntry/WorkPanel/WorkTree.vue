@@ -9,6 +9,7 @@ import { computed, ref, watch } from 'vue';
 import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
+import { logger } from '@/common/logger';
 const appStore = useAppStore()
 
 import DirTreeItem from '@/components/HomeEntry/WorkPanel/DirTreeItem.vue'
@@ -18,7 +19,7 @@ watch(selectedItem, (newValue: DatType.DirTreeItem | null) => {
     if (null == newValue) {
         return;
     }
-    console.log('选中项已更新:', newValue);
+    logger.debug('选中项已更新:', newValue);
     Utils.dir_slt_update(newValue)
 });
 

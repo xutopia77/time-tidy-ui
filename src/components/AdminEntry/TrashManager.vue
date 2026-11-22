@@ -10,18 +10,34 @@
                     <Refresh theme="outline" size="16" :strokeWidth="3" />
                     <span>{{ t('trash.refresh') }}</span>
                 </button>
-                <button @click="restoreSelected" :disabled="selectedFiles.length === 0" class="action-btn primary">
-                    <Undo theme="outline" size="16" :strokeWidth="3" />
-                    <span>{{ t('trash.restoreSelected') }} ({{ selectedFiles.length }})</span>
-                </button>
-                <button @click="deleteSelectedPermanently" :disabled="selectedFiles.length === 0" class="action-btn danger">
-                    <Delete theme="outline" size="16" :strokeWidth="3" />
-                    <span>{{ t('trash.deletePermanently') }} ({{ selectedFiles.length }})</span>
-                </button>
-                <button @click="emptyTrash" :disabled="trashFiles.length === 0" class="action-btn danger">
-                    <Clear theme="outline" size="16" :strokeWidth="3" />
-                    <span>{{ t('trash.emptyTrash') }}</span>
-                </button>
+                <n-popconfirm @positive-click="restoreSelected">
+                    <template #trigger>
+                        <button :disabled="selectedFiles.length === 0" class="action-btn primary">
+                            <Undo theme="outline" size="16" :strokeWidth="3" />
+                            <span>{{ t('trash.restoreSelected') }} ({{ selectedFiles.length }})</span>
+                        </button>
+                    </template>
+                    {{ t('trash.confirmRestoreSelected') }} {{ selectedFiles.length }} {{ t('trash.totalFiles') }}?
+                </n-popconfirm>
+                <n-popconfirm @positive-click="deleteSelectedPermanently">
+                    <template #trigger>
+                        <button :disabled="selectedFiles.length === 0" class="action-btn danger">
+                            <Delete theme="outline" size="16" :strokeWidth="3" />
+                            <span>{{ t('trash.deletePermanently') }} ({{ selectedFiles.length }})</span>
+                        </button>
+                    </template>
+                    {{ t('trash.confirmDeleteSelectedPermanently') }} {{ selectedFiles.length }} {{ t('trash.totalFiles') }}?
+                    {{ t('trash.permanentDeleteWarning') }}
+                </n-popconfirm>
+                <n-popconfirm @positive-click="emptyTrash">
+                    <template #trigger>
+                        <button :disabled="trashFiles.length === 0" class="action-btn danger">
+                            <Clear theme="outline" size="16" :strokeWidth="3" />
+                            <span>{{ t('trash.emptyTrash') }}</span>
+                        </button>
+                    </template>
+                    {{ t('trash.confirmEmptyTrash') }}
+                </n-popconfirm>
             </div>
         </div>
 
@@ -40,128 +56,80 @@
             </div>
         </div>
 
-        <div class="trash-content xc-scrollbar">
-            <div v-if="trashFiles.length === 0" class="empty-state">
-                <DeleteThemes theme="outline" size="64" fill="currentColor" class="empty-icon" />
-                <p class="empty-title">{{ t('trash.empty') }}</p>
-                <p class="empty-desc">{{ t('trash.deletedFilesShow') }}</p>
-            </div>
-
-            <div v-else class="file-grid">
-                <div v-for="file in trashFiles" :key="file.id" class="file-card"
-                    :class="{ 'selected': file.checked }">
-                    <div class="file-checkbox">
-                        <input type="checkbox" v-model="file.checked" @change="updateSelection" />
-                    </div>
-                    <div class="file-thumbnail-container" @click="previewFile(file)">
-                        <img v-if="file.type === 'image' || file.type === 'video'"
-                            :src="Utils.get_thumbnail_url(file.id)" :alt="file.name" class="file-thumbnail" />
-                        <div v-else class="file-icon-container">
-                            <FileDoc theme="outline" size="48" fill="currentColor" />
-                        </div>
-                    </div>
-                    <div class="file-info">
-                        <div class="file-name" :title="file.name">{{ file.name }}</div>
-                        <div class="file-meta">
-                            <span>{{ Utils.gen_size_str(file.size) }}</span>
-                            <span>{{ file.create_time }}</span>
-                        </div>
-                        <div class="file-path" :title="file.path">{{ file.path }}</div>
-                    </div>
-                    <div class="file-actions">
-                        <button @click="restoreFile(file)" class="file-action-btn" :title="t('trash.restore')">
-                            <Undo theme="outline" size="16" />
-                        </button>
-                        <button @click="previewFile(file)" class="file-action-btn" :title="t('similarity.preview')">
-                            <ViewList theme="outline" size="16" />
-                        </button>
-                        <button @click="deleteFilePermanently(file)" class="file-action-btn danger" :title="t('trash.deletePermanently')">
-                            <Delete theme="outline" size="16" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div v-if="totalFiles > 0" class="pagination-section">
-            <div class="pagination-info">
-                {{ t('common.all') }} {{ totalFiles }} {{ t('trash.totalFiles') }}
-            </div>
-            <div class="pagination-controls">
-                <button @click="prevPage" :disabled="currentPage === 1" class="pagination-btn">
-                    {{ t('trash.prevPage') }}
-                </button>
-                <span class="pagination-current">{{ t('trash.page') }} {{ currentPage }} {{ t('similarity.page') }}</span>
-                <button @click="nextPage" :disabled="currentPage * pageSize >= totalFiles" class="pagination-btn">
-                    {{ t('trash.nextPage') }}
-                </button>
-            </div>
+        <div class="trash-content">
+            <n-data-table :columns="columns" :data="trashFiles" :row-key="rowKey"
+                :checked-row-keys="checkedRowKeys" @update:checked-row-keys="onCheckedRowKeys"
+                :loading="loading" :scroll-x="720" flex-height remote
+                :pagination="pagination"
+                :row-props="rowProps" class="trash-table" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { h, ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/AppStore';
+import { logger } from '@/common/logger';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 import '@/assets/common.css';
+import { NDataTable, NPopconfirm, NButton, NIcon } from 'naive-ui';
+import type { DataTableColumns, PaginationProps } from 'naive-ui';
 import { DeleteThemes, Refresh, Undo, Delete, Clear, ViewList, FileDoc } from '@icon-park/vue-next';
 
 const { t } = useI18n();
 const appStore = useAppStore();
 
 const trashFiles = ref<DatType.File[]>([]);
+const loading = ref(false);
 const currentPage = ref(1);
 const pageSize = ref(50);
 const totalFiles = ref(0);
 const totalSize = ref(0);
+const checkedRowKeys = ref<Array<string | number>>([]);
 
 const selectedFiles = computed(() => {
-    return trashFiles.value.filter(f => f.checked);
+    return trashFiles.value.filter(f => checkedRowKeys.value.includes(f.id));
 });
 
 const loadTrashFiles = async (page = 1) => {
     try {
+        loading.value = true;
         const req = new DatType.FilesGetReq();
         req.page = page - 1;
         req.pageSize = pageSize.value;
         req.statuss = [2]; // FileStatus_Trash = 2
 
         const response = await Utils.files_get(req, false);
-        
+
         if (response.code === 0 && response.data) {
             const data = response.data as { files?: { records?: DatType.File[]; total?: number } };
-            
+
             if (data.files && data.files.records) {
-                trashFiles.value = data.files.records.map((file: DatType.File) => ({
-                    ...file,
-                    checked: false
-                }));
+                trashFiles.value = data.files.records;
                 totalFiles.value = data.files.total || 0;
             } else {
                 trashFiles.value = [];
                 totalFiles.value = 0;
             }
-            
+
             calculateTotalSize();
             currentPage.value = page;
+            checkedRowKeys.value = [];
         } else {
             Utils.addToast(response.status || t('trash.loadTrashFailed'));
         }
     } catch (error) {
-        console.error('加载回收站失败:', error);
+        logger.error('加载回收站失败:', error);
         Utils.addToast(t('trash.loadTrashFailed'));
+    } finally {
+        loading.value = false;
     }
 };
 
 const calculateTotalSize = () => {
     totalSize.value = trashFiles.value.reduce((sum, file) => sum + file.size, 0);
-};
-
-const updateSelection = () => {
-    // Selection is automatically updated through computed property
 };
 
 const previewFile = (file: DatType.File) => {
@@ -171,10 +139,6 @@ const previewFile = (file: DatType.File) => {
 };
 
 const restoreFile = async (file: DatType.File) => {
-    if (!confirm(`${t('trash.confirmRestore')} "${file.name}"?`)) {
-        return;
-    }
-
     const response = await Utils.files_restore([file.id]);
 
     if (response.code === 0) {
@@ -190,10 +154,6 @@ const restoreSelected = async () => {
         return;
     }
 
-    if (!confirm(`${t('trash.confirmRestoreSelected')} ${files.length} ${t('trash.totalFiles')}?`)) {
-        return;
-    }
-
     const response = await Utils.files_restore(files.map(f => f.id));
 
     if (response.code === 0) {
@@ -203,10 +163,6 @@ const restoreSelected = async () => {
 };
 
 const deleteFilePermanently = async (file: DatType.File) => {
-    if (!confirm(`${t('trash.confirmDeletePermanently')} "${file.name}"? ${t('trash.permanentDeleteWarning')}`)) {
-        return;
-    }
-
     const req = new DatType.FileDeleteReq();
     req.fileIds = [file.id];
     req.bRemoveToDtrash = false;
@@ -226,10 +182,6 @@ const deleteSelectedPermanently = async () => {
         return;
     }
 
-    if (!confirm(`${t('trash.confirmDeleteSelectedPermanently')} ${files.length} ${t('trash.totalFiles')}? ${t('trash.permanentDeleteWarning')}`)) {
-        return;
-    }
-
     const req = new DatType.FileDeleteReq();
     req.fileIds = files.map(f => f.id);
     req.bRemoveToDtrash = false;
@@ -243,10 +195,6 @@ const deleteSelectedPermanently = async () => {
 };
 
 const emptyTrash = async () => {
-    if (!confirm(t('trash.confirmEmptyTrash'))) {
-        return;
-    }
-
     try {
         const req = new DatType.FilesGetReq();
         req.page = 0;
@@ -276,22 +224,132 @@ const emptyTrash = async () => {
             }
         }
     } catch (error) {
-        console.error('清空回收站失败:', error);
+        logger.error('清空回收站失败:', error);
         Utils.addToast(t('trash.emptyTrashFailed'));
     }
 };
 
-const prevPage = () => {
-    if (currentPage.value > 1) {
-        loadTrashFiles(currentPage.value - 1);
-    }
+// ---- table ----
+const rowKey = (row: DatType.File): string | number => row.id;
+
+// server-side pagination: data is fetched per page from the backend
+const pagination = computed<PaginationProps>(() => ({
+    page: currentPage.value,
+    pageSize: pageSize.value,
+    itemCount: totalFiles.value,
+    pageSizes: [50, 100, 200],
+    showSizePicker: true,
+    onChange: (page: number) => {
+        loadTrashFiles(page);
+    },
+    onUpdatePageSize: (size: number) => {
+        pageSize.value = size;
+        loadTrashFiles(1);
+    },
+}));
+
+const onCheckedRowKeys = (keys: Array<string | number>) => {
+    checkedRowKeys.value = keys;
 };
 
-const nextPage = () => {
-    if (currentPage.value * pageSize.value < totalFiles.value) {
-        loadTrashFiles(currentPage.value + 1);
-    }
-};
+// keep the legacy e2e hooks: each row carries data-testid="trash-file-card",
+// action buttons keep .file-action-btn classes and title attributes
+const rowProps = (row: DatType.File): Record<string, unknown> => ({
+    'data-testid': 'trash-file-card',
+    'data-file-id': row.id,
+    title: row.name,
+});
+
+function renderActionIcon(icon: unknown) {
+    return () => h(NIcon, null, { default: () => h(icon as Parameters<typeof h>[0], { theme: 'outline', size: 16 }) });
+}
+
+const columns = computed<DataTableColumns<DatType.File>>(() => [
+    { type: 'selection' },
+    {
+        title: t('trash.colName'),
+        key: 'name',
+        minWidth: 200,
+        render(row) {
+            const isMedia = row.type === DatType.FileType.image || row.type === DatType.FileType.video;
+            const thumb = h('img', {
+                src: Utils.get_thumbnail_url(row.id),
+                alt: row.name,
+                class: 'trash-thumb',
+            });
+            const icon = h(NIcon, { size: 32 }, { default: () => h(FileDoc as Parameters<typeof h>[0], { theme: 'outline' }) });
+            return h('div', { class: 'trash-name-cell' }, [
+                h('div', { class: 'trash-thumb-box' }, [isMedia ? thumb : icon]),
+                h('span', { class: 'trash-name-text', title: row.name }, row.name),
+            ]);
+        },
+    },
+    {
+        title: t('trash.colSize'),
+        key: 'size',
+        width: 100,
+        render(row) {
+            return Utils.gen_size_str(row.size);
+        },
+    },
+    {
+        title: t('trash.colTime'),
+        key: 'create_time',
+        width: 160,
+        render(row) {
+            return row.create_time;
+        },
+    },
+    {
+        title: t('trash.colPath'),
+        key: 'path',
+        minWidth: 180,
+        ellipsis: { tooltip: true },
+        render(row) {
+            return row.path;
+        },
+    },
+    {
+        title: t('trash.colActions'),
+        key: 'actions',
+        width: 130,
+        render(row) {
+            return h('div', { class: 'trash-actions-cell' }, [
+                h(
+                    NPopconfirm,
+                    { onPositiveClick: () => restoreFile(row) },
+                    {
+                        trigger: () => h(NButton, {
+                            size: 'tiny', quaternary: true, class: 'file-action-btn',
+                            title: t('trash.restore'), 'aria-label': t('trash.restore'),
+                        }, { icon: renderActionIcon(Undo) }),
+                        default: () => `${t('trash.confirmRestore')} "${row.name}"?`,
+                    },
+                ),
+                h(
+                    NButton,
+                    {
+                        size: 'tiny', quaternary: true, class: 'file-action-btn',
+                        title: t('similarity.preview'), 'aria-label': t('similarity.preview'),
+                        onClick: () => previewFile(row),
+                    },
+                    { icon: renderActionIcon(ViewList) },
+                ),
+                h(
+                    NPopconfirm,
+                    { onPositiveClick: () => deleteFilePermanently(row) },
+                    {
+                        trigger: () => h(NButton, {
+                            size: 'tiny', quaternary: true, class: 'file-action-btn danger',
+                            title: t('trash.deletePermanently'), 'aria-label': t('trash.deletePermanently'),
+                        }, { icon: renderActionIcon(Delete) }),
+                        default: () => `${t('trash.confirmDeletePermanently')} "${row.name}"? ${t('trash.permanentDeleteWarning')}`,
+                    },
+                ),
+            ]);
+        },
+    },
+]);
 
 onMounted(() => {
     loadTrashFiles();
@@ -396,212 +454,66 @@ onMounted(() => {
 }
 
 .status-label {
+    color: var(--xc-text-color-muted, var(--xc-text-color));
     font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color-secondary);
 }
 
 .status-value {
+    color: var(--xc-text-color);
     font-size: var(--xc-font-size-sm);
     font-weight: 500;
-    color: var(--xc-text-color);
 }
 
 .trash-content {
     flex: 1;
-    padding: var(--xc-spacing-lg);
-    overflow-y: auto;
-}
-
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--xc-text-color-secondary);
-}
-
-.empty-icon {
-    opacity: 0.3;
-    margin-bottom: var(--xc-spacing-md);
-}
-
-.empty-title {
-    font-size: var(--xc-font-size-lg);
-    font-weight: 500;
-    margin: 0 0 var(--xc-spacing-xs) 0;
-}
-
-.empty-desc {
-    font-size: var(--xc-font-size-sm);
-    margin: 0;
-    opacity: 0.7;
-}
-
-.file-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--xc-spacing-md);
-}
-
-.file-card {
-    background-color: var(--xc-background-color);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-md);
-    overflow: hidden;
-    transition: all var(--xc-transition-normal);
-    position: relative;
-}
-
-.file-card:hover {
-    border-color: var(--xc-primary-color);
-    box-shadow: var(--xc-shadow-sm);
-}
-
-.file-card.selected {
-    border-color: var(--xc-primary-color);
-    background-color: var(--xc-primary-color-light);
-}
-
-.file-checkbox {
-    position: absolute;
-    top: var(--xc-spacing-xs);
-    left: var(--xc-spacing-xs);
-    z-index: 10;
-}
-
-.file-checkbox input {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-.file-thumbnail-container {
-    width: 100%;
-    height: 160px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--xc-background-color-hover);
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-
-.file-thumbnail {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-
-.file-icon-container {
-    color: var(--xc-text-color-secondary);
-}
-
-.file-info {
-    padding: var(--xc-spacing-sm);
-}
-
-.file-name {
-    font-size: var(--xc-font-size-sm);
-    font-weight: 500;
-    color: var(--xc-text-color);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: var(--xc-spacing-xs);
-}
-
-.file-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: var(--xc-font-size-xs);
-    color: var(--xc-text-color-secondary);
-    margin-bottom: var(--xc-spacing-xs);
-}
-
-.file-path {
-    font-size: var(--xc-font-size-xs);
-    color: var(--xc-text-color-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.file-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--xc-spacing-xs);
-    padding: var(--xc-spacing-xs) var(--xc-spacing-sm) var(--xc-spacing-sm);
-    border-top: 1px solid var(--xc-border-color);
-}
-
-.file-action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background-color: var(--xc-button-bg-color);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    color: var(--xc-text-color);
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
-}
-
-.file-action-btn:hover {
-    background-color: var(--xc-button-bg-color-hover);
-}
-
-.file-action-btn.danger:hover {
-    background-color: var(--xc-danger-color);
-    border-color: var(--xc-danger-color);
-    color: white;
-}
-
-.pagination-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    min-height: 0;
     padding: var(--xc-spacing-md) var(--xc-spacing-xl);
-    border-top: var(--xc-border);
-    background-color: var(--xc-background-color);
 }
 
-.pagination-info {
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color-secondary);
+.trash-table {
+    height: 100%;
 }
 
-.pagination-controls {
+:deep(.trash-name-cell) {
     display: flex;
     align-items: center;
-    gap: var(--xc-spacing-sm);
+    gap: 10px;
+    min-width: 0;
 }
 
-.pagination-btn {
-    padding: var(--xc-spacing-xs) var(--xc-spacing-md);
-    background-color: var(--xc-button-bg-color);
-    border: 1px solid var(--xc-border-color);
-    border-radius: var(--xc-border-radius-sm);
-    color: var(--xc-text-color);
-    font-size: var(--xc-font-size-sm);
-    cursor: pointer;
-    transition: all var(--xc-transition-normal);
+:deep(.trash-thumb-box) {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: var(--xc-background-color-hover, #1f1f1f);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.pagination-btn:hover:not(:disabled) {
-    background-color: var(--xc-button-bg-color-hover);
+:deep(.trash-thumb) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
-.pagination-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+:deep(.trash-name-text) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
 }
 
-.pagination-current {
-    font-size: var(--xc-font-size-sm);
-    color: var(--xc-text-color);
+:deep(.trash-actions-cell) {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+:deep(.file-action-btn) {
+    padding: 4px;
 }
 </style>

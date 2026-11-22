@@ -16,7 +16,8 @@ app.use(createPinia())
 app.use(i18n)
 app.use(Viewer, {
     defaultOptions: {
-        zIndex: 9999,
+        // keep the viewer below Naive UI layers (modals/popups start ~2000)
+        zIndex: 1000,
         title: false,
         transition: true,
         navbar: false,

@@ -1,29 +1,41 @@
 <template>
-    <div class="p-0 m-0 h-full w-full relative">
-        <HeaderPanel class="fixed left-0 top-0 h-full z-[100]" />
-        <div class="ml-16 h-full w-[calc(100%-64px)] z-[10]">
-            <router-view class="m-0 p-0 h-full w-full bg-bg-secondary overflow-y-auto overflow-x-hidden" />
-        </div>
-        <div class='fixed top-0 left-0 w-full h-full p-0 m-0 z-[100]' v-if="appStore.bPageImgView">
-            <FileViewer />
-        </div>
+    <n-config-provider :theme="darkTheme" :theme-overrides="themeOverrides" :locale="naiveLocale"
+        :date-locale="naiveDateLocale" class="h-full">
+        <n-message-provider>
+            <n-dialog-provider>
+                <AppShellBridge />
+                <div class="p-0 m-0 h-full w-full relative">
+                    <HeaderPanel class="fixed left-0 top-0 h-full z-[100]" />
+                    <div class="ml-16 h-full w-[calc(100%-64px)] z-[10]">
+                        <router-view class="m-0 p-0 h-full w-full bg-bg-secondary overflow-y-auto overflow-x-hidden" />
+                    </div>
+                    <div class='fixed top-0 left-0 w-full h-full p-0 m-0 z-[100]' v-if="appStore.bPageImgView">
+                        <FileViewer />
+                    </div>
 
-        <div v-if="bPageFileTransfer" class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex justify-center items-center p-5 box-border [&>div]:w-[90%] [&>div]:max-w-[800px] [&>div]:max-h-[90%] [&>div]:overflow-hidden">
-            <FileTransfer>
-            </FileTransfer>
-        </div>
-        <div v-if="bPageSet" class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex justify-center items-center p-5 box-border [&>div]:w-[90%] [&>div]:max-w-[800px] [&>div]:max-h-[90%] [&>div]:overflow-hidden">
-            <PageSet />
-        </div>
-        <MessageToast />
-        <RecentMessagesPanel />
-    </div>
+                    <div v-if="bPageFileTransfer"
+                        class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex justify-center items-center p-5 box-border [&>div]:w-[90%] [&>div]:max-w-[800px] [&>div]:max-h-[90%] [&>div]:overflow-hidden">
+                        <FileTransfer>
+                        </FileTransfer>
+                    </div>
+                    <div v-if="bPageSet"
+                        class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex justify-center items-center p-5 box-border [&>div]:w-[90%] [&>div]:max-w-[800px] [&>div]:max-h-[90%] [&>div]:overflow-hidden">
+                        <PageSet />
+                    </div>
+                    <RecentMessagesPanel />
+                </div>
+            </n-dialog-provider>
+        </n-message-provider>
+    </n-config-provider>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeMount, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme, zhCN, dateZhCN, enUS, dateEnUS } from 'naive-ui';
+import { themeOverrides } from '@/theme/naive-theme';
 import HeaderPanel from '@/components/AppNav.vue';
-import MessageToast from '@/components/MessageNotify/MessageToast.vue'
+import AppShellBridge from '@/components/AppShellBridge.vue';
 import RecentMessagesPanel from '@/components/MessageNotify/RecentMessagesPanel.vue'
 import FileViewer from '@/components/HomeEntry/FileExplorer/FileViewer.vue'
 import FileTransfer from '@/components/HomeEntry/WorkPanel/FileTransfer.vue'
@@ -31,7 +43,13 @@ import PageSet from '@/components/HomeEntry/WorkPanel/PageSet.vue'
 import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
+import { logger } from '@/common/logger';
 const appStore = useAppStore()
+
+// keep Naive UI locale in sync with vue-i18n
+const { locale } = useI18n();
+const naiveLocale = computed(() => locale.value === 'en-US' ? enUS : zhCN);
+const naiveDateLocale = computed(() => locale.value === 'en-US' ? dateEnUS : dateZhCN);
 
 
 const bPageFileTransfer = computed(() => { return appStore.bPageFileTransfer })
@@ -43,13 +61,13 @@ onBeforeMount(() => {
     // 判断当前是否为生产环境
     // const isProd = import.meta.env.MODE === 'production';
     appStore.envMode = isDev ? DatType.EnvModeType.dev : DatType.EnvModeType.pro
-    console.log(`env: navigator.userAgent: ${navigator.userAgent}; MODE : ${import.meta.env.MODE}; `);
+    logger.debug(`env: navigator.userAgent: ${navigator.userAgent}; MODE : ${import.meta.env.MODE}; `);
     if (navigator.userAgent.includes('time-tidy')) {
-        console.log('当前在Electron中运行');
+        logger.debug('当前在Electron中运行');
         appStore.platform = DatType.PlatformType.electron;
     }
     else {
-        console.log('当前在浏览器中运行');
+        logger.debug('当前在浏览器中运行');
         appStore.platform = DatType.PlatformType.browser;
     }
     if (appStore.platform == DatType.PlatformType.electron) {
@@ -85,7 +103,7 @@ function connectSSE() {
     eventSource = new EventSource(url)
     
     eventSource.onopen = () => {
-        console.log('SSE connected')
+        logger.debug('SSE connected')
     }
     
     eventSource.onmessage = (event) => {
@@ -93,12 +111,12 @@ function connectSSE() {
             const message: DatType.SseMsg = JSON.parse(event.data)
             handleSSEMessage(message)
         } catch (error) {
-            console.error('Failed to parse SSE message:', error)
+            logger.error('Failed to parse SSE message:', error)
         }
     }
     
     eventSource.onerror = (error) => {
-        console.error('SSE error:', error)
+        logger.error('SSE error:', error)
         if (eventSource) {
             eventSource.close()
         }
@@ -131,17 +149,17 @@ function handleSSEMessage(message: DatType.SseMsg) {
             handleProgressUpdate(message.data as DatType.Resp<DatType.ProgressUpdateData>)
             break
         default:
-            console.log('Unknown SSE message type:', message.type)
+            logger.debug('Unknown SSE message type:', message.type)
     }
 }
 
 function handleSysStatus(data: DatType.Resp<DatType.RespSysStatus>) {
-    console.log('handleSysStatus:', data)
+    logger.debug('handleSysStatus:', data)
     
     if (data.data && data.data.taskInfo && data.data.taskInfo.status === DatType.TaskStatus.Completed) {
         if (data.data.taskInfo.cmd === DatType.TaskCmd.PrjSet) {
             const taskResult = data.data.taskInfo.result as DatType.Resp<DatType.PrjSetResp>
-            console.log('taskResult:', taskResult)
+            logger.debug('taskResult:', taskResult)
             
             if (taskResult && taskResult.code === 0) {
                 Utils.message_notify({ 

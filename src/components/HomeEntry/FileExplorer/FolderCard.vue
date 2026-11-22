@@ -24,6 +24,7 @@
 import { defineProps, ref, computed } from 'vue';
 import * as DatType from '@/utils/dataTypedef';
 import { useAppStore } from '@/stores/AppStore';
+import { logger } from '@/common/logger';
 const appStore = useAppStore()
 import Utils from '@/utils/utils';
 import { FolderClose } from '@icon-park/vue-next'
@@ -38,7 +39,7 @@ const cardWidth = computed(() => {
 });
 
 const cardHeight = computed(() => {
-    return appStore.cardWidth;
+    return appStore.cardHeight;
 });
 
 const showCardInfo = computed(() => {
@@ -67,7 +68,7 @@ function btnclk_dir() {
         });
         return;
     }
-    console.log('click', props.item);
+    logger.debug('click', props.item);
     appStore.searchCon.pathType = 'curPath';
     Utils.dir_slt_update(props.item.path)
 };

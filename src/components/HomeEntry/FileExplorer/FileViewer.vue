@@ -22,7 +22,7 @@ const isImageViewer = computed(() => {
 
 // onBeforeMount(() => {
 //     isImageViewer.value = appStore.curSltFile?.type == DatTypes.FileType.image;
-//     console.log('isImageViewer', isImageViewer.value);
+//     logger.debug('isImageViewer', isImageViewer.value);
 // })
 
 </script>

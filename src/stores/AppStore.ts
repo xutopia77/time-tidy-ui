@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 
 import * as DataTypes from '@/utils/dataTypedef'
+import { logger } from '@/common/logger'
+import { srvPrefix } from '@/config/env'
 
 const pageCtrlInit: DataTypes.AppPageCtrl = {
     set: { idx: 49, bShow: false },
@@ -27,8 +29,7 @@ export type AppStore = {
     srvPrefix: string,                          // 服务器前缀
     logInfo: string,                            // 日志信息
 
-    // 当前显示的消息数组（用于自动消失的消息）
-    toasts: ToastMessage[],
+    // toast history (rendered by RecentMessagesPanel; the toast itself comes from Naive UI)
     historyToasts: ToastMessage[],
     // 
     pageCtrl: DataTypes.AppPageCtrl,
@@ -70,11 +71,9 @@ export const useAppStore = defineStore('app', {
         cardHeight: 216, // 卡片高度
         cardViewMode: "card", // 卡片视图模式
         // 
-        srvPrefix: 'http://127.0.0.1:38080', // debug，electron
-        // srvPrefix: '', // release
+        srvPrefix: srvPrefix,
         logInfo: '', // 日志信息
         prj: new DataTypes.Prj(),
-        toasts: [],
         historyToasts: [],
         // 
         pageCtrl: pageCtrlInit,
@@ -110,7 +109,7 @@ export const useAppStore = defineStore('app', {
     }),
     actions: {
         setData(key: string, value: string): void {
-            console.log(`setData: ${key} = ${value}`)
+            logger.debug(`setData: ${key} = ${value}`)
             // this[key] = value
         },
     }

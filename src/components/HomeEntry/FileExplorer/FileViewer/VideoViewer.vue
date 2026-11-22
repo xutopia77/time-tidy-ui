@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useAppStore } from '@/stores/AppStore'
+import { logger } from '@/common/logger';
 import * as DatType from '@/utils/dataTypedef';
 
 declare global {
@@ -246,7 +247,7 @@ watch(currentImage, (newVideo) => {
             
             // Show warning if video might be H.265 and browser doesn't support it
             if (mightBeHEVC && !hevcSupported) {
-                console.warn('This video might be H.265 encoded and may not play in this browser')
+                logger.warn('This video might be H.265 encoded and may not play in this browser')
             }
         }
     }

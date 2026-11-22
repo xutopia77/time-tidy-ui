@@ -15,14 +15,15 @@
                 <p class="xc-card-name xc-card-filename">{{ item.name }}</p>
                 <div class="xc-card-meta">
                     <span class="xc-card-size">{{ Utils.gen_size_str(item.size) }}</span>
-                    <span class="xc-card-time">{{ formatTime(item.time) }}</span>
+                    <span class="xc-card-time">{{ formatUtcToLocal(item.time) }}</span>
                 </div>
                 <div v-if="showFilePath" class="xc-card-path" :title="item.path">
                     {{ item.path }}
                 </div>
                 <div class="xc-card-tags" v-if="item.tags && item.tags.length > 0">
                     <span v-for="(tag, index) in item.tags" :key="index" class="xc-tag" :style="{
-                        backgroundColor: tag.color
+                        backgroundColor: tag.color,
+                        color: tagTextColor(tag.color)
                     }">{{ Utils.tagName2Display(tag.name) }}</span>
                 </div>
             </div>
@@ -35,7 +36,9 @@ import { computed, defineProps, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils'
+import { formatUtcToLocal, tag_text_color as tagTextColor } from '@/common/format';
 import { useAppStore } from '@/stores/AppStore';
+import { logger } from '@/common/logger';
 const appStore = useAppStore()
 const { t } = useI18n();
 
@@ -45,7 +48,7 @@ const cardWidth = computed(() => {
     return appStore.cardWidth;
 });
 const cardHeight = computed(() => {
-    return appStore.cardWidth;
+    return appStore.cardHeight;
 });
 
 const showFilePath = computed(() => {
@@ -82,7 +85,7 @@ const btnclk_handleClickImage = () => {
             }
         }
     }
-    console.log('click image', props.item);
+    logger.debug('click image', props.item);
     appStore.curSltFile = props.item;
     appStore.bPageImgView = true
 };
@@ -98,11 +101,6 @@ const handleMouseEnter = () => {
 const handleMouseLeave = () => {
     appStore.hoverFile = null;
 };
-
-function formatTime(time: string | undefined): string {
-    if (!time) return '';
-    return time.replace('T', ' ').replace('Z', '').slice(0, 19);
-}
 </script>
 
 <style scoped>

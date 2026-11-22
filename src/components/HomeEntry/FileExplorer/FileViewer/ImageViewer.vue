@@ -65,7 +65,7 @@ onMounted(() => {
         alt: img.name,
     }))
 
-    const viewer = viewerApi({
+    viewerApi({
         images,
         options: {
             initialViewIndex: currentIndex.value - start,

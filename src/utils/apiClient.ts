@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import type { AppStore } from '@/stores/AppStore';
+import { logger } from '@/common/logger';
 import Utils from '@/utils/utils';
 
 export interface ApiResponse<T = unknown> {
@@ -51,11 +52,11 @@ export class ApiClient {
         if (axiosErr.response) {
           const status = axiosErr.response.status;
           const message = (axiosErr.response.data as { message?: string })?.message || 'Request failed';
-          console.error(`API Error [${status}]: ${message}`);
+          logger.error(`API Error [${status}]: ${message}`);
         } else if (axiosErr.request) {
-          console.error('Network Error: No response received');
+          logger.error('Network Error: No response received');
         } else {
-          console.error('Request Error:', (error as Error).message);
+          logger.error('Request Error:', (error as Error).message);
         }
         return Promise.reject(error);
       }

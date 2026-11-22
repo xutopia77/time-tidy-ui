@@ -374,6 +374,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ApiService } from '@/utils/apiService';
 import Utils from '@/utils/utils';
+import { logger } from '@/common/logger';
 
 const { t } = useI18n();
 
@@ -611,7 +612,7 @@ function exportConfig() {
         URL.revokeObjectURL(url);
         Utils.message_notify({ content: t('aiTagConfig.exportSuccess'), type: 'success' });
     } catch (error) {
-        console.error('Failed to export config:', error);
+        logger.error('Failed to export config:', error);
         Utils.message_notify({ content: t('aiTagConfig.saveError'), type: 'error' });
     }
 }
@@ -663,7 +664,7 @@ async function handleFileImport(event: Event) {
         statusMessage.value = t('aiTagConfig.importSuccess');
         Utils.message_notify({ content: t('aiTagConfig.importSuccess'), type: 'success' });
     } catch (error) {
-        console.error('Failed to import config:', error);
+        logger.error('Failed to import config:', error);
         Utils.message_notify({ content: t('aiTagConfig.importFileError'), type: 'error' });
     }
 
@@ -683,7 +684,7 @@ async function saveConfig() {
             Utils.message_notify({ content: t('aiTagConfig.saveFailed') + ': ' + (resp.status || ''), type: 'error' });
         }
     } catch (error) {
-        console.error('Failed to save config:', error);
+        logger.error('Failed to save config:', error);
         Utils.message_notify({ content: t('aiTagConfig.saveError'), type: 'error' });
     }
 }
@@ -704,7 +705,7 @@ async function resetConfig() {
             Utils.message_notify({ content: t('aiTagConfig.resetFailed') + ': ' + (resp.status || ''), type: 'error' });
         }
     } catch (error) {
-        console.error('Failed to reset config:', error);
+        logger.error('Failed to reset config:', error);
         Utils.message_notify({ content: t('aiTagConfig.resetError'), type: 'error' });
     }
 }
@@ -717,7 +718,7 @@ onMounted(async () => {
             config.value = resp.data as HierarchicalTagsConfig;
         }
     } catch (error) {
-        console.error('Failed to load config:', error);
+        logger.error('Failed to load config:', error);
         Utils.message_notify({ content: t('aiTagConfig.loadError'), type: 'error' });
     }
 });

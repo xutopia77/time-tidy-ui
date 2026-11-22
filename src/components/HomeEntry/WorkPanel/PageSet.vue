@@ -77,6 +77,7 @@ import { onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/AppStore';
 import Utils from '@/utils/utils';
+import { logger } from '@/common/logger';
 const appStore = useAppStore()
 const { t } = useI18n()
 
@@ -90,7 +91,7 @@ const cardWidth = computed({
 });
 
 function handleWidthChange() {
-    console.log(`卡片宽度已更新为 ${cardWidth.value}px`);
+    logger.debug(`卡片宽度已更新为 ${cardWidth.value}px`);
 }
 
 function btn_adjustWidth(step: number) {

@@ -14,7 +14,9 @@ export default defineConfigWithVueTs(
     files: ['**/*.{ts,mts,tsx,vue}'],
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/playwright-report/**', '**/e2e/**', '**/test-results/**']),
+  // tests/unit is run by node:test (not part of any tsconfig project), so it
+  // is excluded from linting the same way as the e2e specs
+  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/playwright-report/**', '**/e2e/**', '**/test-results/**', '**/tests/**']),
 
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,

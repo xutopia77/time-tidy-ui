@@ -151,6 +151,11 @@ export default {
     trashEmptied: 'Trash emptied',
     loadTrashFailed: 'Failed to load trash',
     emptyTrashFailed: 'Failed to empty trash',
+    colName: 'File Name',
+    colSize: 'Size',
+    colTime: 'Deleted At',
+    colPath: 'Path',
+    colActions: 'Actions',
   },
   similarity: {
     manage: 'Similar Files',

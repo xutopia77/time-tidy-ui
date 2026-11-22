@@ -198,6 +198,7 @@
 import { ref, watch, nextTick, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/AppStore';
+import { logger } from '@/common/logger';
 import Utils from '@/utils/utils';
 import * as DatType from '@/utils/dataTypedef';
 
@@ -422,7 +423,7 @@ const handleSearch = async () => {
 	req.noTag = bNoTag.value;
 	req.bReverseTag = bReverseSltTag.value;
 	req.bAndTag = bAndSltTag.value;
-	console.log('handleSearch selectedTags:', selectedTags.value, 'req.tags:', req.tags);
+	logger.debug('handleSearch selectedTags:', selectedTags.value, 'req.tags:', req.tags);
 
 	// AI Search
 	if (aiSearchEnabled.value && searchKeyword.value) {

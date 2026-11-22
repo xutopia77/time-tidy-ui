@@ -1,126 +1,167 @@
 <template>
-    <div ref="scrollContainer" class="xc-scrollbar w-full h-full" @scroll="onScroll">
-        <div :style="{ height: `${totalHeight}px`, position: 'relative' }">
-            <div :style="{ transform: `translateY(${offsetY}px)`, display: 'grid', gridTemplateColumns: `repeat(auto-fill, ${itemWidth}px)`, gap: `${gap}px` }"
-                 class="absolute left-0 right-0 top-0">
-                <slot v-for="(item, i) in visibleItems" :key="getItemKey(item, startIdx + i)"
-                      name="item" :item="item" :index="startIdx + i"></slot>
+    <div ref="scrollerRef" class="w-full h-full overflow-auto relative" @scroll.passive="onScroll">
+        <!-- ghost container to keep total scroll height -->
+        <div :style="{ height: totalHeight + 'px', position: 'relative' }">
+            <div v-for="cell in visibleCells" :key="cell.key" class="absolute" :style="{
+                top: cell.top + 'px',
+                left: cell.left + 'px',
+                width: itemWidth + 'px',
+                height: rowHeight + 'px',
+            }">
+                <slot name="item" :item="cell.item" :index="cell.index" />
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+// Lap-style virtual scrolling: no debounce (rAF coalescing instead),
+// ResizeObserver-driven reactive container size, absolute positioned cells.
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+
+const props = withDefaults(
+    defineProps<{
+        items: unknown[];
+        itemWidth: number;
+        rowHeight: number;
+        gap?: number;
+        bufferRows?: number;
+        keyField?: string;
+        resetOnChange?: boolean;
+    }>(),
+    {
+        gap: 0,
+        bufferRows: 3,
+        keyField: 'id',
+        resetOnChange: false,
+    },
+);
 
 const emit = defineEmits<{
     (e: 'scroll', payload: { ratio: number }): void;
 }>();
 
-const props = withDefaults(defineProps<{
-    items: unknown[];
-    itemWidth: number;
-    rowHeight: number;
-    bufferRows?: number;
-    gap?: number;
-}>(), {
-    bufferRows: 3,
-    gap: 0,
-});
+const scrollerRef = ref<HTMLDivElement | null>(null);
+const scrollOffset = ref(0);
+const containerWidth = ref(0);
+const containerHeight = ref(0);
 
-const scrollContainer = ref<HTMLDivElement | null>(null);
-const scrollTop = ref(0);
-let scrollDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+let resizeObserver: ResizeObserver | null = null;
+let rafId: number | null = null;
 
-// read container dimensions directly from DOM - always fresh, no caching issues
-function getContainerWidth(): number {
-    return scrollContainer.value?.clientWidth || 0;
-}
-
-function getContainerHeight(): number {
-    return scrollContainer.value?.clientHeight || 0;
-}
-
-function getColumns(): number {
-    const w = getContainerWidth();
-    if (w <= 0 || props.itemWidth <= 0) return 5;
+// ---- layout (all based on reactive size, no direct DOM reads in computed) ----
+const columns = computed(() => {
+    const w = containerWidth.value;
+    if (w <= 0 || props.itemWidth <= 0) return 1;
     return Math.max(1, Math.floor((w + props.gap) / (props.itemWidth + props.gap)));
-}
+});
 
-// reactive trigger: re-compute when scrollTop changes
-// getColumns/getContainerHeight read DOM directly so they're always accurate
+const totalRows = computed(() => Math.ceil(props.items.length / columns.value));
+
 const totalHeight = computed(() => {
-    const cols = getColumns();
-    const rows = Math.ceil(props.items.length / cols);
-    return rows * props.rowHeight + Math.max(0, rows - 1) * props.gap;
+    const rows = totalRows.value;
+    if (rows === 0) return 0;
+    return rows * props.rowHeight + (rows - 1) * props.gap;
 });
 
-const startIdx = computed(() => {
-    const cols = getColumns();
-    const row = Math.max(0, Math.floor(scrollTop.value / (props.rowHeight + props.gap)) - props.bufferRows);
-    return row * cols;
+const startRow = computed(() => {
+    const step = props.rowHeight + props.gap;
+    return Math.max(0, Math.floor(scrollOffset.value / step) - props.bufferRows);
 });
 
-const endIdx = computed(() => {
-    const cols = getColumns();
-    const h = getContainerHeight() || window.innerHeight;
-    const lastVisibleRow = Math.floor(scrollTop.value / (props.rowHeight + props.gap)) + Math.ceil(h / props.rowHeight) + props.bufferRows;
-    const totalRows = Math.ceil(props.items.length / cols);
-    return Math.min(props.items.length, Math.min(lastVisibleRow, totalRows) * cols);
+const endRow = computed(() => {
+    const step = props.rowHeight + props.gap;
+    const visibleCount = Math.ceil((containerHeight.value || 600) / step);
+    return Math.min(totalRows.value, startRow.value + visibleCount + props.bufferRows * 2);
 });
 
-const offsetY = computed(() => {
-    const row = Math.max(0, Math.floor(scrollTop.value / (props.rowHeight + props.gap)) - props.bufferRows);
-    return row * (props.rowHeight + props.gap);
+const visibleCells = computed(() => {
+    const step = props.rowHeight + props.gap;
+    const cols = columns.value;
+    const out: { key: string | number; item: unknown; index: number; top: number; left: number }[] = [];
+
+    for (let i = startRow.value * cols; i < Math.min(props.items.length, endRow.value * cols); i++) {
+        const item = props.items[i];
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+        out.push({
+            key: getKey(item, i),
+            item,
+            index: i,
+            top: row * step,
+            left: col * (props.itemWidth + props.gap),
+        });
+    }
+    return out;
 });
 
-const visibleItems = computed(() => {
-    return props.items.slice(startIdx.value, endIdx.value);
-});
-
-function getItemKey(item: unknown, index: number): string | number {
-    if (typeof item === 'object' && item !== null && 'id' in item && (item as { id: unknown }).id != null) return (item as { id: number }).id;
+function getKey(item: unknown, index: number): string | number {
+    if (item && typeof item === 'object' && props.keyField in item) {
+        const v = (item as Record<string, unknown>)[props.keyField];
+        if (v !== null && v !== undefined) return v as string | number;
+    }
     return index;
 }
 
+// ---- scroll: synchronous update, coalesced per frame with rAF ----
 function onScroll() {
-    if (!scrollContainer.value) return;
-    const currentScrollTop = scrollContainer.value.scrollTop;
-
-    // emit scroll ratio immediately for timeline sync
-    const containerH = scrollContainer.value.clientHeight;
-    const totalH = scrollContainer.value.scrollHeight;
-    const ratio = totalH > containerH ? currentScrollTop / (totalH - containerH) : 0;
-    emit('scroll', { ratio });
-
-    // debounce scrollTop update to avoid excessive re-rendering during fast scroll
-    if (scrollDebounceTimer) clearTimeout(scrollDebounceTimer);
-    scrollDebounceTimer = setTimeout(() => {
-        scrollTop.value = currentScrollTop;
-    }, 150);
+    if (rafId !== null) return; // merge multiple events in the same frame
+    rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const el = scrollerRef.value;
+        if (!el) return;
+        scrollOffset.value = el.scrollTop; // read inside the frame for the latest value
+        const ratio =
+            el.scrollHeight > el.clientHeight
+                ? el.scrollTop / (el.scrollHeight - el.clientHeight)
+                : 0;
+        emit('scroll', { ratio });
+    });
 }
 
-// reset scroll when items change
-watch(() => props.items, () => {
-    if (scrollContainer.value) {
-        scrollContainer.value.scrollTop = 0;
-        scrollTop.value = 0;
+function updateContainerSize() {
+    const el = scrollerRef.value;
+    if (!el) return;
+    containerWidth.value = el.clientWidth;
+    containerHeight.value = el.clientHeight;
+}
+
+onMounted(() => {
+    updateContainerSize();
+    if (scrollerRef.value) {
+        resizeObserver = new ResizeObserver(updateContainerSize);
+        resizeObserver.observe(scrollerRef.value);
     }
 });
 
-function scrollToTop() {
-    if (scrollContainer.value) {
-        scrollContainer.value.scrollTop = 0;
+onBeforeUnmount(() => {
+    if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
     }
+    resizeObserver?.disconnect();
+    resizeObserver = null;
+});
+
+// keep position on data change by default (opt-in reset)
+watch(() => props.items, () => {
+    if (!props.resetOnChange) return;
+    nextTick(() => {
+        scrollToTop();
+    });
+});
+
+// ---- public API (same as the old component) ----
+function scrollToTop() {
+    scrollOffset.value = 0;
+    if (scrollerRef.value) scrollerRef.value.scrollTop = 0;
 }
 
 function scrollToItem(index: number) {
-    if (!scrollContainer.value) return;
-    const cols = getColumns();
-    const row = Math.floor(index / cols);
+    const row = Math.floor(index / columns.value);
     const target = row * (props.rowHeight + props.gap);
-    scrollContainer.value.scrollTop = target;
-    scrollTop.value = target;
+    scrollOffset.value = target;
+    if (scrollerRef.value) scrollerRef.value.scrollTop = target;
 }
 
 defineExpose({ scrollToTop, scrollToItem });

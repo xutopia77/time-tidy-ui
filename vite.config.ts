@@ -7,11 +7,18 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 function getBuildInfo() {
-  const versionFile = resolve(__dirname, '../VERSION')
-  const version = readFileSync(versionFile, 'utf-8').trim()
   const now = new Date()
   const updateDate = now.toISOString().split('T')[0]
   const buildNumber = updateDate.replace(/-/g, '') + String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0')
+  // VERSION file lives at the repo root; fall back to package.json so a
+  // standalone frontend-ui clone can still build
+  let version = ''
+  try {
+    version = readFileSync(resolve(__dirname, '../VERSION'), 'utf-8').trim()
+  } catch {
+    const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8')) as { version?: string }
+    version = pkg.version || '0.0.0'
+  }
   return { version, updateDate, buildNumber }
 }
 

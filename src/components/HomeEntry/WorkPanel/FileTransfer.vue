@@ -176,6 +176,7 @@ import { useI18n } from 'vue-i18n'
 import Utils from '@/utils/utils'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore';
+import { logger } from '@/common/logger'
 const appStore = useAppStore()
 const { t } = useI18n()
 import '@/assets/common.css'
@@ -190,7 +191,7 @@ watch(selectedItem, (newValue: DatType.DirTreeItem | null) => {
     if (null == newValue) {
         return;
     }
-    console.log('选中项已更新:', newValue);
+    logger.debug('选中项已更新:', newValue);
     selectedPathItem.value = newValue.dirInfo
 });
 
@@ -297,7 +298,7 @@ const confirmMove = async (fileMoveReq: Partial<FileMoveReq> | null): Promise<Da
         req.type = setOperateType.value
     }
     const resp = await Utils.files_path_chg(req)
-    console.log("files path change result:", resp)
+    logger.debug("files path change result:", resp)
     switch (resp.code) {
         case DatType.Code.Success:
             isDialogVisibleFileExist.value = false;
@@ -334,10 +335,10 @@ const isSureDialogVisible = ref(false);
 const sureDialogContent = ref<string>('');
 
 async function btnclk_sureDialog_confirm(bSure: boolean) {
-    console.log(`sure: ${bSure} `, typeof (bSure))
+    logger.debug(`sure: ${bSure} `, typeof (bSure))
     if (bSure) {
         const resp = await confirmMove({ bNeedSure: true, bAllFileCover: false })
-        console.log(resp)
+        logger.debug(resp)
     }
     else {
         Utils.message_notify({ content: t('transfer.operationCancelled'), type: 'info' })
@@ -349,7 +350,7 @@ const isDialogVisibleFileExist = ref(false);
 const sureDialogContentFileExist = ref<string>('');
 let curResp: DatType.Resp<DatType.FilePathChgResp> | null = null;
 async function btnclk_fileExistDialog_confirm(bSure: boolean) {
-    console.log(`sure file cover: ${bSure} `, typeof (bSure))
+    logger.debug(`sure file cover: ${bSure} `, typeof (bSure))
     if (bSure) {
         await confirmMove({ bNeedSure: false, bAllFileCover: true })
     }

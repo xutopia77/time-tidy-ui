@@ -33,65 +33,39 @@
 
         <div class="fixed bottom-5 right-5 z-[100]"
             :class="{ 'right-[340px]': sidebarOpen }">
-            <div v-if="fabMenuOpen" class="absolute bottom-14 right-0 flex flex-col gap-2 p-2 bg-bg-secondary rounded-lg border border-border shadow-lg">
-                <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
-                    @click="openFileWithDefault"
-                    :class="{ 'opacity-50 cursor-not-allowed': !canOpenFile }">
-                    <span class="text-sm">📂</span>
-                    <span class="text-sm whitespace-nowrap">{{ t('file.defaultOpen') }}</span>
-                </div>
-                <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
-                    @click="aiTagDetect"
-                    :class="{ 'opacity-50 cursor-not-allowed': !canAITag }">
-                    <span class="text-sm">🤖</span>
-                    <span class="text-sm whitespace-nowrap">{{ t('file.aiTag') }}</span>
-                </div>
-                <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
-                    @click="toggleSidebar">
-                    <span class="text-sm">{{ sidebarOpen ? '◀' : '▶' }}</span>
-                    <span class="text-sm whitespace-nowrap">{{ sidebarOpen ? t('file.collapsePanel') : t('file.expandPanel') }}</span>
-                </div>
-                <div class="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all duration-150 hover:bg-bg-elevated"
-                    @click="openCreateFolderDialog">
-                    <span class="text-sm">📁</span>
-                    <span class="text-sm whitespace-nowrap">{{ t('file.createFolder') }}</span>
-                </div>
-            </div>
-            <button class="w-12 h-12 rounded-full bg-primary text-white border-none cursor-pointer shadow-lg transition-all duration-200 hover:bg-primary-hover"
-                @click="toggleFabMenu">
-                <span class="inline-block transition-transform duration-200"
-                    :class="{ 'rotate-45': fabMenuOpen }">+</span>
-            </button>
+            <n-dropdown trigger="click" placement="top-end" :options="fabOptions"
+                @select="onFabSelect" @update:show="(v: boolean) => fabMenuOpen = v">
+                <n-button circle type="primary" size="large" class="w-12 h-12">
+                    <span class="inline-block transition-transform duration-200"
+                        :class="{ 'rotate-45': fabMenuOpen }">+</span>
+                </n-button>
+            </n-dropdown>
         </div>
 
-        <div v-if="showCreateFolderDialog" 
-            class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
-            @click="closeCreateFolderDialog">
-            <div class="bg-bg-secondary p-5 rounded-lg shadow-lg min-w-[300px] max-w-[500px]"
-                @click.stop>
-                <h3 class="m-0 mb-3 text-text-primary text-base">{{ t('file.createNewFolder') }}</h3>
-                <p class="m-0 mb-3 text-text-secondary text-sm">{{ t('file.currentLocation') }} {{ currentPath }}</p>
-                <input v-model="newFolderName" @keyup.enter="createNewFolder" :placeholder="t('file.enterFolderName')"
-                    class="w-full py-2 mb-3 bg-bg-tertiary border border-border rounded text-text-primary text-sm outline-none transition-colors duration-200 focus:border-primary"
-                    ref="folderInputRef" maxlength="100" />
+        <n-modal v-model:show="showCreateFolderDialog" preset="card" :title="t('file.createNewFolder')"
+            class="w-[420px] max-w-[90vw]">
+            <p class="m-0 mb-3 text-text-secondary text-sm">{{ t('file.currentLocation') }} {{ currentPath }}</p>
+            <n-input v-model:value="newFolderName" ref="folderInputRef" :placeholder="t('file.enterFolderName')"
+                maxlength="100" @keyup.enter="createNewFolder" />
+            <template #footer>
                 <div class="flex justify-end gap-2">
-                    <button @click="createNewFolder" 
-                        class="py-1 px-3 rounded text-sm cursor-pointer transition-all duration-200 bg-primary text-white border-none hover:bg-primary-hover disabled:bg-bg-tertiary disabled:text-text-disabled disabled:cursor-not-allowed"
-                        :disabled="!newFolderName.trim()">{{ t('common.confirm') }}</button>
-                    <button @click="closeCreateFolderDialog" 
-                        class="py-1 px-3 rounded text-sm cursor-pointer transition-all duration-200 bg-bg-elevated text-text-primary border border-border hover:bg-bg-tertiary">
-                        {{ t('common.cancel') }}</button>
+                    <n-button @click="closeCreateFolderDialog">{{ t('common.cancel') }}</n-button>
+                    <n-button type="primary" :disabled="!newFolderName.trim()" @click="createNewFolder">
+                        {{ t('common.confirm') }}</n-button>
                 </div>
-            </div>
-        </div>
+            </template>
+        </n-modal>
 
         <FileOperationBar />
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch, nextTick, h } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { NDropdown, NButton, NModal, NInput, NIcon } from 'naive-ui';
+import type { DropdownOption } from 'naive-ui';
+import { FileDoc, Robot, Left, Right, Folder } from '@icon-park/vue-next';
 import FileNavHeader from '@/components/HomeEntry/FileExplorer/FileNavHeader.vue';
 import ImageCard from '@/components/HomeEntry/FileExplorer/ImageCard.vue';
 import FolderCard from '@/components/HomeEntry/FileExplorer/FolderCard.vue';
@@ -107,6 +81,8 @@ const appStore = useAppStore()
 const { t } = useI18n();
 import '@/assets/common.css'
 import Utils from '@/utils/utils';
+import { filterCheckedFiles } from '@/common/selection';
+import { logger } from '@/common/logger';
 
 const items = computed(() => appStore.curFiles);
 const dirs = computed(() => appStore.curDirs);
@@ -139,10 +115,10 @@ const cardItemWidth = computed(() => {
 
 const cardRowHeight = computed(() => {
     if (cardViewMode.value === 'tile') {
-        return appStore.cardWidth;
+        return appStore.cardHeight;
     }
-    // card mode: image area + desc area
-    return appStore.cardWidth + 60;
+    // card mode: image area + desc area (filename 1 line + meta 1 line + tags up to 2 lines + padding)
+    return appStore.cardHeight + 74;
 });
 
 const cardGap = computed(() => {
@@ -156,12 +132,17 @@ const onVirtualScroll = ({ ratio }: { ratio: number }) => {
     scrollRatio.value = ratio;
 };
 
+// back to top when navigating to a new folder or changing search conditions
+watch([() => appStore.curPath, () => appStore.searchCon], () => {
+    virtualScrollRef.value?.scrollToTop();
+}, { deep: true });
+
 const onScrollToIndex = (index: number) => {
     virtualScrollRef.value?.scrollToItem(index);
 };
 
 const selectedFiles = computed(() => {
-    return items.value.filter(item => item.checked);
+    return filterCheckedFiles(items.value);
 });
 
 const canOpenFile = computed(() => {
@@ -181,7 +162,7 @@ const loadAIStatus = async () => {
             aiStatus.value = resp.data as AIStatus;
         }
     } catch (e) {
-        console.error('Failed to load AI status:', e);
+        logger.error('Failed to load AI status:', e);
     }
 };
 
@@ -210,7 +191,7 @@ const aiTagDetect = async () => {
             Utils.message_notify({ content: t('file.aiTagDetectFailed') + ': ' + (resp.status || ''), type: 'error' });
         }
     } catch (error) {
-        console.error('AI tag detection failed:', error);
+        logger.error('AI tag detection failed:', error);
         Utils.message_notify({ content: t('message.aiDetectionFailed'), type: 'error' });
     }
 };
@@ -243,7 +224,7 @@ const openFileWithDefault = async () => {
             type: 'success' 
         });
     } catch (error) {
-        console.error('open file failed:', error);
+        logger.error('open file failed:', error);
         Utils.message_notify({ 
             content: t('file.openFileFailed'), 
             type: 'error' 
@@ -320,13 +301,33 @@ onUnmounted(() => {
 
 const fabMenuOpen = ref(false);
 
-function toggleFabMenu() {
-    fabMenuOpen.value = !fabMenuOpen.value;
+function renderFabIcon(icon: unknown) {
+    return () => h(NIcon, null, { default: () => h(icon as Parameters<typeof h>[0]) });
 }
+
+const fabOptions = computed<DropdownOption[]>(() => [
+    { key: 'open', label: t('file.defaultOpen'), icon: renderFabIcon(FileDoc), disabled: !canOpenFile.value },
+    { key: 'ai', label: t('file.aiTag'), icon: renderFabIcon(Robot), disabled: !canAITag.value },
+    {
+        key: 'sidebar',
+        label: sidebarOpen.value ? t('file.collapsePanel') : t('file.expandPanel'),
+        icon: renderFabIcon(sidebarOpen.value ? Left : Right),
+    },
+    { key: 'folder', label: t('file.createFolder'), icon: renderFabIcon(Folder) },
+]);
+
+const onFabSelect = (key: string | number) => {
+    switch (key) {
+        case 'open': openFileWithDefault(); break;
+        case 'ai': aiTagDetect(); break;
+        case 'sidebar': toggleSidebar(); break;
+        case 'folder': openCreateFolderDialog(); break;
+    }
+};
 
 const showCreateFolderDialog = ref(false);
 const newFolderName = ref('');
-const folderInputRef = ref<HTMLInputElement | null>(null);
+const folderInputRef = ref<{ focus: () => void } | null>(null);
 
 const openCreateFolderDialog = async () => {
     fabMenuOpen.value = false;
@@ -361,11 +362,11 @@ const createNewFolder = async () => {
         req.path = appStore.curSltDirTreeItem.dirInfo.dir.path + '/' + newFolderName.value.trim();
         req.type = 1;
         req.description = "";
-        console.log('createNewFolder req:', req)
+        logger.debug('createNewFolder req:', req)
         await Utils.dirCreate(req);
         closeCreateFolderDialog();
     } catch (error) {
-        console.error('create folder failed:', error);
+        logger.error('create folder failed:', error);
         Utils.message_notify({ content: t('file.createFolderFailed'), type: 'error' });
     }
 };

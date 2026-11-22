@@ -940,46 +940,43 @@ test.describe('Comprehensive Test', () => {
       await takeScreenshot(page, '18-trash-page-opened')
       
       // Step 2: Verify trash file count
-      const trashFileItems = page.locator('.file-card')
+      const trashFileItems = page.locator('[data-testid="trash-file-card"]')
       let trashCount = await trashFileItems.count()
       expect(trashCount).toBe(9)
       await takeScreenshot(page, '19-trash-files-verified')
-      
-      // Step 3: Restore first file
+
+      // Step 3: Restore first file (confirm inside NPopconfirm)
       const firstFile = trashFileItems.first()
       await firstFile.hover()
-      
-      page.once('dialog', async dialog => {
-        expect(dialog.message()).toContain('确定要恢复文件')
-        await dialog.accept()
-      })
+
       await firstFile.locator('.file-action-btn[title="恢复"]').click()
+      const restorePopconfirm = page.locator('.n-popconfirm:has-text("确定要恢复文件")')
+      await restorePopconfirm.waitFor({ state: 'visible', timeout: 5000 })
+      await restorePopconfirm.locator('button:has-text("确认")').click()
       await page.waitForTimeout(1000)
       await takeScreenshot(page, '20-first-file-restored')
-      
+
       // Step 4: Permanently delete second file
       const secondFile = trashFileItems.first()
       await secondFile.hover()
-      
-      page.once('dialog', async dialog => {
-        expect(dialog.message()).toContain('确定要永久删除文件')
-        await dialog.accept()
-      })
+
       await secondFile.locator('.file-action-btn.danger[title="永久删除"]').click()
+      const deletePopconfirm = page.locator('.n-popconfirm:has-text("确定要永久删除文件")')
+      await deletePopconfirm.waitFor({ state: 'visible', timeout: 5000 })
+      await deletePopconfirm.locator('button:has-text("确认")').click()
       await page.waitForTimeout(1000)
       await takeScreenshot(page, '21-second-file-permanently-deleted')
-      
+
       // Step 5: Empty trash
       const emptyTrashBtn = page.locator('button:has-text("清空回收站")')
-      
-      page.once('dialog', async dialog => {
-        expect(dialog.message()).toContain('确定要清空回收站吗')
-        await dialog.accept()
-      })
+
       await emptyTrashBtn.click()
+      const emptyPopconfirm = page.locator('.n-popconfirm:has-text("确定要清空回收站")')
+      await emptyPopconfirm.waitFor({ state: 'visible', timeout: 5000 })
+      await emptyPopconfirm.locator('button:has-text("确认")').click()
       await page.waitForTimeout(5000)
       await takeScreenshot(page, '22-trash-emptied')
-      
+
       // Step 6: Verify trash is empty
       trashCount = await trashFileItems.count()
       expect(trashCount).toBe(0)
@@ -1166,12 +1163,11 @@ test.describe('Comprehensive Test', () => {
       
       // Step 4: Click delete selected button
       const deleteSelectedBtn = firstGroup.locator('button:has-text("删除选中")')
-      
-      page.once('dialog', async dialog => {
-        expect(dialog.message()).toContain('确定要删除选中的')
-        await dialog.accept()
-      })
+
       await deleteSelectedBtn.click()
+      const deletePopconfirm = page.locator('.n-popconfirm:has-text("确定要删除选中的")')
+      await deletePopconfirm.waitFor({ state: 'visible', timeout: 5000 })
+      await deletePopconfirm.locator('button:has-text("确认")').click()
       await page.waitForTimeout(2000)
       await takeScreenshot(page, '20-files-deleted')
     }
@@ -1183,12 +1179,11 @@ test.describe('Comprehensive Test', () => {
       
       // Step 1: Click delete button on single file
       const deleteBtn = firstFileCard.locator('.file-action-btn.danger[title="删除"]')
-      
-      page.once('dialog', async dialog => {
-        expect(dialog.message()).toContain('确定要删除文件')
-        await dialog.accept()
-      })
+
       await deleteBtn.click()
+      const deleteFilePopconfirm = page.locator('.n-popconfirm:has-text("确定要删除文件")')
+      await deleteFilePopconfirm.waitFor({ state: 'visible', timeout: 5000 })
+      await deleteFilePopconfirm.locator('button:has-text("确认")').click()
       await page.waitForTimeout(2000)
       await takeScreenshot(page, '21-single-file-deleted')
     }

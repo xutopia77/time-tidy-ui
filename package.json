@@ -15,11 +15,13 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
-    "test:e2e:codegen": "playwright codegen http://localhost:5173"
+    "test:e2e:codegen": "playwright codegen http://localhost:5173",
+    "test:unit": "node --test --experimental-transform-types \"tests/unit/*.test.ts\""
   },
   "dependencies": {
     "@icon-park/vue-next": "^1.4.2",
     "axios": "^1.9.0",
+    "naive-ui": "^2.45.3",
     "pinia": "^3.0.1",
     "v-viewer": "^3.0.23",
     "vue": "^3.5.13",

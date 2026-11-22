@@ -96,6 +96,7 @@ const { t } = useI18n();
 import * as DatType from '@/utils/dataTypedef';
 import Utils from '@/utils/utils';
 import { ApiService } from '@/utils/apiService';
+import { logger } from '@/common/logger';
 
 // AI status
 const aiAvailable = ref(false)
@@ -108,7 +109,7 @@ const checkAIStatus = async () => {
             aiAvailable.value = (resp.data as DatType.AIStatus).available
         }
     } catch (error) {
-        console.error('Failed to check AI status:', error)
+        logger.error('Failed to check AI status:', error)
     }
 }
 
@@ -222,17 +223,17 @@ async function btnclk_set(types: DatType.PrjSetType[] = []) {
                     // 解析 JSON 内容
                     const jsonData = JSON.parse(content);
                     // 这里可以根据需求处理解析后的 JSON 数据
-                    console.log('解析后的 JSON 数据:', jsonData);
+                    logger.debug('解析后的 JSON 数据:', jsonData);
                     // 将文件名赋值给 prjPath
                     prjPath.value = jsonData['path'];
                     resp.code = 0
                 } catch (parseError) {
-                    console.error('解析 JSON 文件出错:', parseError);
+                    logger.error('解析 JSON 文件出错:', parseError);
                     Utils.message_notify({ content: t('setEntry.invalidJsonFile'), type: "error" });
                     resp.code = 1;
                 }
             } catch (error) {
-                console.error('选择或读取文件出错:', error);
+                logger.error('选择或读取文件出错:', error);
                 Utils.message_notify({ content: t('setEntry.fileReadError'), type: "error" });
                 resp.code = 1;
             }
@@ -311,7 +312,7 @@ const startIndexBuild = async () => {
         req.prj.path = Utils.convertToLinuxPath(prjPath.value)
         await Utils.project_set(req)
     } catch (error) {
-        console.error('Failed to start index build:', error)
+        logger.error('Failed to start index build:', error)
         Utils.message_notify({ content: t('setEntry.aiIndexStartFailed'), type: 'error' })
         indexProcessing.value = false
     }
@@ -324,7 +325,7 @@ const stopIndexBuild = async () => {
             Utils.message_notify({ content: t('setEntry.aiIndexStopFailed') + ': ' + (resp.status || ''), type: 'error' })
         }
     } catch (error) {
-        console.error('Failed to stop index build:', error)
+        logger.error('Failed to stop index build:', error)
     }
     indexProcessing.value = false
 }
@@ -343,7 +344,7 @@ const startImageTagging = async () => {
             taggingProcessing.value = false
         }
     } catch (error) {
-        console.error('Failed to start image tagging:', error)
+        logger.error('Failed to start image tagging:', error)
         Utils.message_notify({ content: t('setEntry.aiAnalyzeStartError'), type: 'error' })
         taggingProcessing.value = false
     }
@@ -356,7 +357,7 @@ const stopImageTagging = async () => {
             Utils.message_notify({ content: t('setEntry.aiAnalyzeStopFailed') + ': ' + (resp.status || ''), type: 'error' })
         }
     } catch (error) {
-        console.error('Failed to stop image tagging:', error)
+        logger.error('Failed to stop image tagging:', error)
     }
     taggingProcessing.value = false
 }

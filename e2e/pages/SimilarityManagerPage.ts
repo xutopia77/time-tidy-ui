@@ -125,10 +125,13 @@ export class SimilarityManagerPage {
   async deleteSimilarFiles(groupIndex: number = 0) {
     const group = this.similarityGroups.nth(groupIndex)
     await group.locator('button:has-text("全选")').click()
-    
-    this.page.once('dialog', dialog => dialog.accept())
-    
+
     await group.locator('button:has-text("删除选中")').click()
+
+    // confirm inside NPopconfirm
+    const popconfirm = this.page.locator('.n-popconfirm')
+    await popconfirm.waitFor({ state: 'visible', timeout: 5000 })
+    await popconfirm.locator('button:has-text("确认")').click()
   }
 
   /**

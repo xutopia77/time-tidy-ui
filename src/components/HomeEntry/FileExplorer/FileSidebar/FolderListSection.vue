@@ -22,6 +22,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import * as DatType from '@/utils/dataTypedef'
 import { useAppStore } from '@/stores/AppStore'
+import { logger } from '@/common/logger';
 import Utils from '@/utils/utils'
 import DirTreeItem from '@/components/HomeEntry/WorkPanel/DirTreeItem.vue'
 
@@ -49,7 +50,7 @@ watch(selectedItem, (newValue: DatType.DirTreeItem | null) => {
     if (newValue == null) {
         return
     }
-    console.log('FolderListSection selected:', newValue)
+    logger.debug('FolderListSection selected:', newValue)
     if (appStore.searchCon.pathType === 'allPath') {
         Utils.message_notify({ 
             content: t('sidebar.allPathSearchWarning'), 
