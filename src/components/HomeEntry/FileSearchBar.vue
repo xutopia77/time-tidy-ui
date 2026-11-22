@@ -168,6 +168,10 @@
 							<input type="checkbox" v-model="bReverseSltTag" class="cursor-pointer" />
 							{{ t('search.reverseSelect') }}
 						</label>
+						<label v-if="selectedTags.length > 1" class="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
+							<input type="checkbox" v-model="bAndSltTag" class="cursor-pointer" />
+							{{ t('search.andTags') }}
+						</label>
 					</div>
 					<div class="flex flex-wrap gap-1">
 						<button v-for="tag in fileTags" :key="tag.name"
@@ -208,6 +212,7 @@ const sortBy = ref('time');
 const sortOrder = ref('asc');
 const pathType = ref('curPath');
 const bReverseSltTag = ref(false);
+const bAndSltTag = ref(false); // multiple tags use AND logic; default OR
 const bNoTag = ref<'true' | 'false' | ''>('');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 
@@ -353,6 +358,7 @@ watch(() => appStore.searchCon, (newVal) => {
 	selectedFileTypes.value = newVal.types ? [...newVal.types] : [];
 	selectedTags.value = newVal.tags ? [...newVal.tags] : [];
 	bReverseSltTag.value = newVal.bReverseSltTag;
+	bAndSltTag.value = newVal.bAndSltTag;
 	bNoTag.value = newVal.noTag;
 }, { immediate: true, deep: true });
 
@@ -405,6 +411,7 @@ const handleSearch = async () => {
 	appStore.searchCon.types = selectedFileTypes.value as DatType.FileType[];
 	appStore.searchCon.tags = [...selectedTags.value];
 	appStore.searchCon.bReverseSltTag = bReverseSltTag.value;
+	appStore.searchCon.bAndSltTag = bAndSltTag.value;
 	appStore.searchCon.noTag = bNoTag.value;
 
 	// Build request with new search conditions
@@ -414,6 +421,7 @@ const handleSearch = async () => {
 	req.tags = [...selectedTags.value];
 	req.noTag = bNoTag.value;
 	req.bReverseTag = bReverseSltTag.value;
+	req.bAndTag = bAndSltTag.value;
 	console.log('handleSearch selectedTags:', selectedTags.value, 'req.tags:', req.tags);
 
 	// AI Search
@@ -465,6 +473,7 @@ const clearAllFilters = () => {
 	selectedFileTypes.value = [];
 	selectedTags.value = [];
 	bReverseSltTag.value = false;
+	bAndSltTag.value = false;
 	bNoTag.value = '';
 	sortBy.value = 'time';
 	sortOrder.value = 'asc';
@@ -482,6 +491,7 @@ const clearAllFilters = () => {
 	appStore.searchCon.types = [];
 	appStore.searchCon.tags = [];
 	appStore.searchCon.bReverseSltTag = false;
+	appStore.searchCon.bAndSltTag = false;
 	appStore.searchCon.noTag = '';
 	
 	Utils.files_get();

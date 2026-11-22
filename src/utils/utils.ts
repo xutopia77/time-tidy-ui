@@ -693,8 +693,9 @@ class Utils {
 			tags: appStore.searchCon.tags,
 			noTag: appStore.searchCon.noTag,
 			bReverseTag: appStore.searchCon.bReverseSltTag,
+			bAndTag: appStore.searchCon.bAndSltTag,
 			types: appStore.searchCon.types,
-			dirs: [appStore.curPath.substring(1)],
+			dirs: appStore.curPath == '/' ? [] : [appStore.curPath.substring(1)],
 			statuss: [],
 			origins: [],
 			startTime: '',
@@ -736,6 +737,7 @@ class Utils {
 			if (_req.tags != null) { req.tags = _req.tags; }
 			if (_req.noTag != null) { req.noTag = _req.noTag; }
 			if (_req.bReverseTag != null) { req.bReverseTag = _req.bReverseTag; }
+			if (_req.bAndTag != null) { req.bAndTag = _req.bAndTag; }
 			if (_req.types != null) { req.types = _req.types; }
 			if (_req.dirs != null) { req.dirs = _req.dirs; }
 			if (_req.statuss != null) { req.statuss = _req.statuss; }
@@ -776,7 +778,7 @@ class Utils {
 		}
 
 		try {
-		console.log('files_get request tags:', req.tags, 'noTag:', req.noTag, 'bReverseTag:', req.bReverseTag);
+		console.log('files_get request tags:', req.tags, 'noTag:', req.noTag, 'bReverseTag:', req.bReverseTag, 'bAndTag:', req.bAndTag);
 		const response = await ApiService.filesGet(req);
 		console.log('file info:', response);
 			if (bUpdateStore) {

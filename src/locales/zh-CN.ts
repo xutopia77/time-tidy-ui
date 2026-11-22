@@ -245,6 +245,7 @@ export default {
     height: '高度',
     fileTags: '文件标签',
     reverseSelect: '反选',
+    andTags: '满足全部标签(AND)',
     noTagFilter: '无标签',
     tagsSelected: '个标签',
     sortByLabel: '按',

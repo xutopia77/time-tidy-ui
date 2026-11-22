@@ -324,6 +324,7 @@ export class FileSearchCondition {
     tags: string[] = [];// tags
     noTag: 'true' | 'false' | '' = '';
     bReverseSltTag: boolean = false; // reverse select tag
+    bAndSltTag: boolean = false; // multiple tags use AND logic; default OR
     types: FileType[] = [];
 }
 
@@ -341,6 +342,7 @@ export class FilesGetReq {
 	tags: string[] | null = [];
 	noTag: 'true' | 'false' | '' = '';
 	bReverseTag: boolean = false; // 反向选择标签
+	bAndTag: boolean = false; // 多标签使用AND逻辑；默认OR
 	types: FileType[] | null = null;
 	dirs: string[] | null = [];
 	statuss: number[] | null = null;

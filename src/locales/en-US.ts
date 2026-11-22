@@ -245,6 +245,7 @@ export default {
     height: 'Height',
     fileTags: 'File Tags',
     reverseSelect: 'Reverse',
+    andTags: 'Match all tags (AND)',
     noTagFilter: 'No Tag',
     tagsSelected: 'tags',
     sortByLabel: 'By',
