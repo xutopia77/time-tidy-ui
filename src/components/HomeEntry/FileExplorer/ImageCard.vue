@@ -16,7 +16,8 @@
                         :class="{ 'menu-open': menuOpen }" @click.stop>⋮</button>
                 </n-dropdown>
             </div>
-            <div v-if="showCardInfo" class="xc-card-desc" @click="btnclk_handleClickItemMsg">
+            <div v-if="showCardInfo" class="xc-card-desc" @click="btnclk_handleClickItemMsg"
+                :style="{ height: `${descHeight}px` }">
                 <p class="xc-card-name xc-card-filename">{{ item.name }}</p>
                 <div class="xc-card-meta">
                     <span class="xc-card-size">{{ Utils.gen_size_str(item.size) }}</span>
@@ -49,7 +50,7 @@ import { logger } from '@/common/logger';
 const appStore = useAppStore()
 const { t } = useI18n();
 
-const props = defineProps<{ item: DatType.File; }>();
+const props = defineProps<{ item: DatType.File; descHeight: number; }>();
 
 const emit = defineEmits<{
     (e: 'cardAction', action: DatType.CardMenuAction): void;
@@ -74,33 +75,46 @@ const menuOptions = computed<DropdownOption[]>(() => [
     { key: 'imageSearch', label: t('actionBar.imageSearch') },
 ]);
 
-const fileScore = computed(() => {
-    const scoreTag = props.item.tags.find(tag => /^\d☆$/.test(tag.name));
-    return scoreTag ? parseInt(scoreTag.name.replace('☆', '')) : 0;
-});
-
-// Make the current card's file the only checked file, so that APIs
-// operating on the checked set (files_tag_set/delete, file transfer)
-// apply to this card. files_tag_set/delete derive fileIds from the
-// checked set and ignore the ids passed in the request.
-const selectOnlyThisFile = () => {
-    appStore.curFiles.forEach((file) => {
-        file.checked = file.id === props.item.id;
-    });
-    if (appStore.curDirs) {
-        appStore.curDirs.forEach((dir) => {
-            dir.checked = false;
-        });
+// Compute the target file set for a menu action: all checked files when
+// this card belongs to the current selection, otherwise just this card
+const targetFiles = (): DatType.File[] => {
+    const checked = appStore.curFiles.filter(f => f.checked);
+    if (checked.length > 0 && checked.some(f => f.id === props.item.id)) {
+        return checked;
     }
+    return [props.item];
+};
+
+// Make the given files the only checked ones, so that APIs deriving
+// fileIds from the checked set (files_tag_set/delete, file transfer)
+// apply to the target set
+const selectTargets = (files: DatType.File[]) => {
+    const ids = new Set(files.map(f => f.id));
+    appStore.curFiles.forEach((file) => {
+        file.checked = ids.has(file.id);
+    });
+};
+
+// Uniform score across the target set (0 when scores differ or absent)
+const uniformScore = (files: DatType.File[]): number => {
+    if (files.length === 0) {
+        return 0;
+    }
+    const scores = files.map(file => {
+        const tag = file.tags.find(t => /^\d☆$/.test(t.name));
+        return tag ? parseInt(tag.name.replace('☆', ''), 10) : 0;
+    });
+    return scores.every(s => s === scores[0]) ? scores[0] : 0;
 };
 
 const setFileScore = (score: number) => {
-    selectOnlyThisFile();
+    const targets = targetFiles();
+    selectTargets(targets);
     const req: DatType.FilesTagSetReq = {
-        fileIds: [props.item.id],
+        fileIds: targets.map(f => f.id),
         tagName: `${score}☆`
     };
-    if (fileScore.value === score) {
+    if (uniformScore(targets) === score) {
         Utils.files_tag_delete(req);
         Utils.message_notify({ content: '已删除评分', type: 'success' });
     } else {
@@ -109,17 +123,31 @@ const setFileScore = (score: number) => {
     }
 };
 
-const deleteThisFile = () => {
+const deleteTargets = () => {
     const req: DatType.FileDeleteReq = {
-        fileIds: [props.item.id],
+        fileIds: [],
         dirIds: [],
         bRemoveToDtrash: true,
     };
+    // When this card is part of the selection, also include checked dirs
+    // (same semantics as the old operation bar)
+    const targets = targetFiles();
+    req.fileIds = targets.map(f => f.id);
+    if (props.item.checked && appStore.curDirs) {
+        for (const dir of appStore.curDirs) {
+            if (dir.checked) {
+                req.dirIds.push(dir.id);
+            }
+        }
+    }
+    if (req.fileIds.length === 0 && req.dirIds.length === 0) {
+        return;
+    }
     Utils.files_delete(req);
 };
 
-const openFileTransfer = () => {
-    selectOnlyThisFile();
+const openFileTransfer = (targets: DatType.File[]) => {
+    selectTargets(targets);
     appStore.bPageFileTransfer = true;
 };
 
@@ -129,19 +157,24 @@ const onMenuSelect = (key: string | number) => {
         setFileScore(parseInt(keyStr.slice('score-'.length), 10));
         return;
     }
+    const targets = targetFiles();
     switch (keyStr) {
         case 'tag':
-            emit('cardAction', { type: 'tag', file: props.item });
+            // files_tag_set/delete derive fileIds from the checked set,
+            // so sync the checked state to the target set first
+            selectTargets(targets);
+            emit('cardAction', { type: 'tag', files: targets });
             break;
         case 'move':
         case 'copy':
-            openFileTransfer();
+            openFileTransfer(targets);
             break;
         case 'delete':
-            deleteThisFile();
+            deleteTargets();
             break;
         case 'imageSearch':
-            emit('cardAction', { type: 'imageSearch', file: props.item });
+            selectTargets(targets);
+            emit('cardAction', { type: 'imageSearch', files: targets });
             break;
         default:
             logger.warn('unknown card menu key:', keyStr);
@@ -303,19 +336,22 @@ const handleMouseLeave = () => {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-/* fixed desc height must match FileExplorer's rowHeight estimate
-   (cardHeight + 74) exactly, otherwise absolute-positioned virtual
-   scroll rows overlap */
+/* desc area has a fixed height passed from FileExplorer (descHeight prop)
+   which must match FileExplorer's rowHeight estimate exactly, otherwise
+   absolute-positioned virtual scroll rows overlap. Inner blocks use fixed
+   line heights so the layout is deterministic:
+   padding 12 + filename 24 + meta 22 + tags up to 48 (+ path 22 when shown) */
 .xc-card-desc {
-    height: 74px;
     padding: 6px;
     overflow: hidden;
     box-sizing: border-box;
 }
 
 .xc-card-filename {
+    height: 20px;
+    line-height: 20px;
     font-weight: 500;
-    margin-bottom: 4px;
+    margin: 0 0 4px;
     color: var(--color-text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -325,6 +361,8 @@ const handleMouseLeave = () => {
 .xc-card-meta {
     display: flex;
     gap: 6px;
+    height: 18px;
+    line-height: 18px;
     margin-bottom: 4px;
     font-size: 12px;
     white-space: nowrap;
@@ -340,6 +378,8 @@ const handleMouseLeave = () => {
 }
 
 .xc-card-path {
+    height: 18px;
+    line-height: 18px;
     font-size: 12px;
     color: var(--color-text-secondary);
     margin-bottom: 4px;
@@ -349,12 +389,14 @@ const handleMouseLeave = () => {
     opacity: 0.8;
 }
 
+/* tags area shows up to 2 rows (2 x 20px tag + 4px gap + 4px slack),
+   extra tags are clipped */
 .xc-card-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 4px;
-    max-height: 26px;
+    gap: 4px;
+    margin-top: 0;
+    max-height: 48px;
     overflow: hidden;
 }
 

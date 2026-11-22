@@ -290,10 +290,12 @@ export class FileCatalog {
 }
 
 // Action emitted by the image card kebab menu that needs handling
-// in the parent (FileExplorer) which owns the shared dialogs
+// in the parent (FileExplorer) which owns the shared dialogs.
+// files is the target set: all checked files when the card belongs
+// to the current selection, otherwise just the card's own file.
 export interface CardMenuAction {
     type: 'tag' | 'imageSearch';
-    file: File;
+    files: File[];
 }
 
 export class DirItem {
